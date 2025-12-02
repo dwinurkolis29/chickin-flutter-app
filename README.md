@@ -31,6 +31,7 @@ Smart broiler farm assistant for automated FCR calculation, daily monitoring, re
 - **Overview**
 - **Goals & Problem Solved**
 - **Key Features**
+- **User Stories**
 - **Tech Stack**
 - **Installation**
 - **Run the Project**
@@ -61,6 +62,71 @@ Broilerku App helps broiler farmers streamline daily operations: recording, auto
 - **Cage Management**: Manage cage meta (type, capacity, address).
 - **User Profile**: Store and retrieve farmer profile data.
 - **Offline-first**: Persist critical state with Hive boxes.
+
+## User Stories
+
+- **[Authentication - Login/Signup]**
+  - As a broiler farmer, I want to sign up and log in with email/password so that I can securely access my farm data.
+  - Acceptance:
+    - Sign up, login, logout flows work.
+    - Invalid credentials show error.
+    - Persist session until logout.
+
+- **[Recording - Daily Metrics Entry]**
+  - As a farmer, I want to record daily metrics (weight, feed intake, mortality) per period so that I can track flock performance.
+  - Acceptance:
+    - Create/read/update/delete daily entries.
+    - Validation on numeric fields and dates.
+    - Entries tied to selected period and user.
+
+- **[FCR - Automatic Calculation]**
+  - As a farmer, I want the app to automatically calculate FCR from my data so that I can quickly assess feed efficiency.
+  - Acceptance:
+    - FCR updates when feed/weight/mortality changes.
+    - Displays FCR per day and cumulative per period.
+    - Handles missing data with clear warnings.
+
+- **[Dashboard - Trends & Charts]**
+  - As a farmer, I want to see trend charts (weight growth, feed consumption, FCR) so that I can spot issues early.
+  - Acceptance:
+    - Charts render from recorded data using fl_chart.
+    - Range filter (period, last 7/14/30 days).
+    - Empty state when no data.
+
+- **[Reminders - Scheduled Tasks]**
+  - As a farmer, I want reminders for critical tasks (feeding, weighing, medication) so that I don’t miss schedules.
+  - Acceptance:
+    - Create/read/delete reminders.
+    - Local notifications fire at scheduled time with timezone support.
+    - Tapping notification opens the app.
+
+- **[Cage Management]**
+  - As a farmer, I want to manage cage metadata (type, capacity, address) so that records are tied to proper facilities.
+  - Acceptance:
+    - View/edit cage profile.
+    - Validation on capacity (positive integer).
+    - Data stored per user.
+
+- **[User Profile]**
+  - As a farmer, I want to manage my profile (username, phone, address) so that my account stays up to date.
+  - Acceptance:
+    - View/edit profile fields.
+    - Changes persist and reflect immediately.
+    - Basic validation on phone and address.
+
+- **[Offline-first - Local Persistence]**
+  - As a farmer, I want critical data to be available offline so that I can record in areas with poor connectivity.
+  - Acceptance:
+    - Entries saved locally (Hive) when offline.
+    - Auto-sync to Firestore when online.
+    - Conflict resolution favors latest change with clear rules.
+
+- **[Security & Data Integrity]**
+  - As a farmer, I want my data to be stored securely and scoped to my account so that only I can view and edit it.
+  - Acceptance:
+    - Firestore security rules restrict data to authenticated user email.
+    - No cross-user access.
+    - Sensitive operations require authenticated session.
 
 ## Tech Stack
 
