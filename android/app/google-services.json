@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "356333598974",
+    "project_id": "recording-app-877d8",
+    "storage_bucket": "recording-app-877d8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:356333598974:android:6a6f9af8e3744eaad00daf",
+        "android_client_info": {
+          "package_name": "com.example.uts_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcjw_0hsRhvQPRmlyKe7R4_cdCl9fJ3t0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
