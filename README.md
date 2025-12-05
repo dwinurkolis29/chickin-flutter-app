@@ -3,23 +3,20 @@ Notes
 - **Feature-first**: Each feature encapsulates its data/domain/presentation.
 - **Core services**: Cross-cutting services (Firebase, notifications) live under `lib/core/services`.
 
-## Screenshots
+### Screenshots
 
 ### Auth
-
-![Login](images/login.png)
-![Register](images/register.png)
+<img src="images/login.png" alt="Login" width="300">
+<img src="images/register.png" alt="Register" width="300">
 
 ### Main & Farmer
-
-![Dashboard](images/home.png)
-![Farmer](images/farmer.png)
+<img src="images/home.png" alt="Dashboard" width="300">
+<img src="images/farmer.png" alt="Farmer" width="300">
 
 ### Cage, Reminder & Settings
-
-![Cage](images/cage.png)
-![Reminder](images/reminder.png)
-![Settings](images/setting.png)
+<img src="images/cage.png" alt="Cage" width="300">
+<img src="images/reminder.png" alt="Reminder" width="300">
+<img src="images/setting.png" alt="Settings" width="300">
 
 ## License
 
