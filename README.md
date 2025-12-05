@@ -3,21 +3,6 @@ Notes
 - **Feature-first**: Each feature encapsulates its data/domain/presentation.
 - **Core services**: Cross-cutting services (Firebase, notifications) live under `lib/core/services`.
 
-### Screenshots
-
-### Auth
-<img src="images/login.png" alt="Login" width="300">
-<img src="images/register.png" alt="Register" width="300">
-
-### Main & Farmer
-<img src="images/home.png" alt="Dashboard" width="300">
-<img src="images/farmer.png" alt="Farmer" width="300">
-
-### Cage, Reminder & Settings
-<img src="images/cage.png" alt="Cage" width="300">
-<img src="images/reminder.png" alt="Reminder" width="300">
-<img src="images/setting.png" alt="Settings" width="300">
-
 ## License
 
 Specify your license here (e.g., MIT, Apache-2.0).
@@ -242,3 +227,19 @@ Top-level
 │  └─ main_app.dart
 ├─ pubspec.yaml
 └─ README.md
+```
+
+## Screenshots
+
+## Auth
+<img src="images/login.png" alt="Login" width="300">
+<img src="images/register.png" alt="Register" width="300">
+
+## Main & Farmer
+<img src="images/home.png" alt="Dashboard" width="300">
+<img src="images/farmer.png" alt="Farmer" width="300">
+
+## Cage, Reminder & Settings
+<img src="images/cage.png" alt="Cage" width="300">
+<img src="images/reminder.png" alt="Reminder" width="300">
+<img src="images/setting.png" alt="Settings" width="300">
