@@ -5,17 +5,21 @@ Notes
 
 ## Screenshots
 
-Place screenshots under `docs/screenshots` or `images/` and reference them here:
+### Auth
 
-```md
 ![Login](images/login.png)
 ![Register](images/register.png)
+
+### Main & Farmer
+
 ![Dashboard](images/home.png)
-![Cage](images/cage.png)
 ![Farmer](images/farmer.png)
+
+### Cage, Reminder & Settings
+
+![Cage](images/cage.png)
 ![Reminder](images/reminder.png)
 ![Settings](images/setting.png)
-```
 
 ## License
 
