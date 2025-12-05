@@ -9,7 +9,12 @@ Place screenshots under `docs/screenshots` or `images/` and reference them here:
 
 ```md
 ![Login](images/login.png)
-![Dashboard](images/dashboard.png)
+![Register](images/register.png)
+![Dashboard](images/home.png)
+![Cage](images/cage.png)
+![Farmer](images/farmer.png)
+![Reminder](images/reminder.png)
+![Settings](images/setting.png)
 ```
 
 ## License
