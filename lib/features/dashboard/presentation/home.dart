@@ -24,6 +24,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final Box _boxLogin = Hive.box("login");
+
   // selectedindex digunakan untuk menentukan halaman yang aktif
   int _selectedIndex = 0;
 
@@ -67,18 +68,19 @@ class _HomeState extends State<Home> {
             TextButton(
               child: const Text('Logout'),
               onPressed: () async {
-                // Menggunakan FirebaseAuth untuk logout
-                await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pop();
-                // Menghapus data login dari Hive
-                _boxLogin.clear();
+                try {
+                  await FirebaseAuth.instance.signOut();
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
+
+                _boxLogin.delete("Email");
                 _boxLogin.put("loginStatus", false);
+                Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
                   // Navigasi ke halaman login
-                  MaterialPageRoute(
-                    builder: (context) => const Login(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const Login()),
                 );
               },
             ),
@@ -117,16 +119,14 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: DecoratedBox(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(shape: BoxShape.circle),
               child: IconButton(
                 // memanggil fungsi untuk menampilkan dialog logout
                 onPressed: () => _showLogoutDialog(context),
                 icon: const Icon(Icons.login_outlined),
               ),
             ),
-          )
+          ),
         ],
       ),
       // mengatur elemen body sesuai dengan halaman yang aktif
@@ -136,54 +136,89 @@ class _HomeState extends State<Home> {
         showUnselectedLabels: true,
         items: const <BottomNavigationBarItem>[
           // menambahkan item untuk setiap halaman
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.home_max_outlined),
             label: 'Kandang',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Peternak',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Setting',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Peternak'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Setting'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         onTap: (index) => _onItemTapped(index),
       ),
       // menambahkan floating action tambah data
-      floatingActionButton: _selectedIndex == 0 
-          ? FloatingActionButton.extended(
-              onPressed: (){
-                _navigateToAddRecord();
-              },
-              icon: Icon(Icons.add),
-              label: Text("Tambah"),
-            )
-          : null,
+      floatingActionButton:
+          _selectedIndex == 0
+              ? FloatingActionButton.extended(
+                onPressed: () {
+                  _navigateToAddRecord();
+                },
+                icon: Icon(Icons.add),
+                label: Text("Tambah"),
+              )
+              : null,
     );
   }
 }
 
-class HomeContent extends StatelessWidget {
-
-  double _fcr = 0;
-  int _umur = 0;
-  int? _populationRemain;
-  bool _isLoading = true;
-
+class HomeContent extends StatefulWidget {
   HomeContent({super.key});
 
   @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  final Box _boxLogin = Hive.box("login");
+
+  double _fcr = 0;
+  int _umur = 0;
+  int _populationRemain = 0;
+
+  // bool _isLoading = true;
+
+  @override
   Widget build(BuildContext context) {
-    // mengambil data login dari Hive
-    final Box _boxLogin = Hive.box("login");
+    final email = _boxLogin.get("Email") as String?;
+
+    if (email == null || email.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 50,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Anda belum login",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Silahkan login terlebih dahulu",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
+              },
+              child: const Text("Login"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final recordingStream = FirebaseService().getRecordingsStream(1, email);
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -192,69 +227,59 @@ class HomeContent extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.person_outline_outlined,
-                ),
+                Icon(Icons.person_outline_outlined),
                 const SizedBox(width: 10),
-                Text(
-                  // menampilkan email yang disimpan di Hive
-                  _boxLogin.get("Email"),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(email, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
             const SizedBox(height: 10),
-            PopulationSection(
-              populationRemain: _populationRemain ?? 0,
-            ),
-            const SizedBox(height: 15),
-            // menampilkan komponen statistik dengan mengirim data fcr dan umur
-            StatisticsSection(
-              fcr: _fcr,
-              umur: _umur,
-            ),
-            const SizedBox(height: 10),
-            // menampilkan data recording ayam ke dalam tabel dari stream builder firestore
-            StreamBuilder<List<RecordingData>>(
-              stream: FirebaseService().getRecordingsStream(1, _boxLogin.get("Email")),
+            StreamBuilder(
+              stream: recordingStream,
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  print(snapshot.data);
-                  return ChickenDataTable(chickenDataList: snapshot.data!);
-                } else {
-                  return const CircularProgressIndicator();
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+
+                final recordings = snapshot.data ?? <RecordingData>[];
+                final chickenTable = ChickenDataTable(
+                  chickenDataList: recordings,
+                );
+
+                final fcrResults =
+                    recordings.isNotEmpty
+                        ? FCRCalculator.calculateWeeklyFCR(recordings, 3000)
+                        : <FCRData>[];
+
+                if (fcrResults.isNotEmpty) {
+                  final lastFCR = fcrResults.last;
+                  _fcr = lastFCR.fcr;
+                  _populationRemain = lastFCR.sisaAyam;
+                  _umur = recordings.last.umur;
+                } else {
+                  _fcr = 0;
+                  _populationRemain = 0;
+                  _umur = 0;
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PopulationSection(populationRemain: _populationRemain),
+                    const SizedBox(height: 15),
+                    StatisticsSection(fcr: _fcr, umur: _umur),
+                    const SizedBox(height: 10),
+                    chickenTable,
+                    const SizedBox(height: 10),
+                    FCRDataTable(fcrData: fcrResults),
+                    const SizedBox(height: 10),
+                  ],
+                );
               },
             ),
-            const SizedBox(height: 10),
-            // menampilkan data fcr ke dalam tabel dari stream builder
-            StreamBuilder<List<RecordingData>>(
-              stream: FirebaseService().getRecordingsStream(1, _boxLogin.get("Email")),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  // menghitung fcr dan memanggil fungsi calculateWeeklyFCR didalam model
-                  final fcrResults = FCRCalculator.calculateWeeklyFCR(
-                      snapshot.data!,
-                      3000
-                  );
-
-                  // mengambil data terakhir untuk ditampilkan di statistik section
-                  if (fcrResults.isNotEmpty) {
-                    final lastFCR = fcrResults.last;
-                    _fcr = lastFCR.fcr;
-                    _populationRemain = lastFCR.sisaAyam;
-                    final lastRecord = snapshot.data!.last;
-                    _umur = lastRecord.umur;
-                  }
-
-                  print(fcrResults.map((e) => e.toJson()).toList());
-                  return FCRDataTable(fcrData: fcrResults);
-                } else {
-                  return const CircularProgressIndicator();
-                }
-              },
-            ),
-            const SizedBox(height: 80),
           ],
         ),
       ),
