@@ -128,6 +128,18 @@ class FirebaseService {
     }
   }
 
+  Future<void> addCage(CageData cage, String email) async {
+    try {
+      await _firestore
+          .collection(_collectionName)
+          .doc('kandang')
+          .collection(email)
+          .add(cage.toJson());
+    } catch (e) {
+      throw Exception('Failed to add cage: $e');
+    }
+  }
+
   //Mengambil data user/peternak dari firestore
   Future<UserData> getUser(String email) async {
     try {

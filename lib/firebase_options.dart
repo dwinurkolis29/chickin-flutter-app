@@ -44,18 +44,38 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-
+    apiKey: 'AIzaSyDuhjalJBsbZzGA0WoRSMP4iTU68fSJw0M',
+    appId: '1:356333598974:web:f93c335bd6041852d00daf',
+    messagingSenderId: '356333598974',
+    projectId: 'recording-app-877d8',
+    authDomain: 'recording-app-877d8.firebaseapp.com',
+    storageBucket: 'recording-app-877d8.firebasestorage.app',
+    measurementId: 'G-07SXKLR3Z6',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-
+    apiKey: 'AIzaSyDcjw_0hsRhvQPRmlyKe7R4_cdCl9fJ3t0',
+    appId: '1:356333598974:android:6a6f9af8e3744eaad00daf',
+    messagingSenderId: '356333598974',
+    projectId: 'recording-app-877d8',
+    storageBucket: 'recording-app-877d8.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-
+    apiKey: 'AIzaSyAGK9q2YsdYMgBSFk7nX6mldvwV_gr_JZA',
+    appId: '1:356333598974:ios:6128e6fda62bafc2d00daf',
+    messagingSenderId: '356333598974',
+    projectId: 'recording-app-877d8',
+    storageBucket: 'recording-app-877d8.firebasestorage.app',
+    iosBundleId: 'com.example.utsProject',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-
+    apiKey: 'AIzaSyAGK9q2YsdYMgBSFk7nX6mldvwV_gr_JZA',
+    appId: '1:356333598974:ios:6128e6fda62bafc2d00daf',
+    messagingSenderId: '356333598974',
+    projectId: 'recording-app-877d8',
+    storageBucket: 'recording-app-877d8.firebasestorage.app',
+    iosBundleId: 'com.example.utsProject',
   );
 }

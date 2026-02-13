@@ -1,21 +1,35 @@
+// main_app.dart
 import 'package:flutter/material.dart';
-
-import 'features/auth/presentation/login.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
+import 'package:recording_app/features/auth/presentation/login.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-          /// The seed color is a dark blue color.
-          seedColor: const Color.fromRGBO(32, 63, 129, 1.0),
+    return MultiProvider(
+      providers: [
+        // Setup CageController
+        ChangeNotifierProvider(
+          create: (_) => CageController(
+            firebaseService: FirebaseService(),
+            auth: FirebaseAuth.instance,
+          ),
         ),
+        // Tambahkan provider lain di sini kalau ada
+      ],
+      child: MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromRGBO(32, 63, 129, 1.0),
+          ),
+        ),
+        home: const Login(),
       ),
-      /// The home of the application is the Login widget.
-      home: const Login(),
     );
   }
 }

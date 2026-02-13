@@ -6,7 +6,7 @@ import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/statistics_section.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/datatable.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/population_widget.dart';
-import 'package:recording_app/features/cage/presentation/cage.dart';
+import 'package:recording_app/features/cage/presentation/pages/cage_profile_page.dart';
 import 'package:recording_app/features/dashboard/presentation/form_record.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/setting/presentation/setting.dart';
@@ -37,7 +37,7 @@ class _HomeState extends State<Home> {
       // Menambahkan widget untuk setiap halaman
       // HomeContent() tidak menggunakan const karena ada perubahan di dalamnya
       HomeContent(),
-      const Cage(),
+      const CageProfilePage(),
       const User(),
       const Setting(),
     ];
@@ -266,7 +266,7 @@ class _HomeContentState extends State<HomeContent> {
                 }
 
                 return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     PopulationSection(populationRemain: _populationRemain),
                     const SizedBox(height: 15),
