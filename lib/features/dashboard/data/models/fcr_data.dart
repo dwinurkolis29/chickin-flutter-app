@@ -34,10 +34,10 @@ class FCRCalculator {
     if (recordings.isEmpty) return [];
 
     // Urutkan berdasarkan umur ayam
-    recordings.sort((a, b) => a.umur.compareTo(b.umur));
+    recordings.sort((a, b) => a.day.compareTo(b.day));
 
     // Temukan minggu maksimal berdasarkan umur ayam
-    final maxAge = recordings.last.umur;
+    final maxAge = recordings.last.day;
     final maxWeek = (maxAge / 7).ceil();
 
     List<FCRData> weeklyFCR = [];
@@ -51,7 +51,7 @@ class FCRCalculator {
       final weekRecordings = recordings.where((rec) {
         final weekStartAge = ((week - 1) * 7) + 1;
         final weekEndAge = week * 7;
-        return rec.umur >= weekStartAge && rec.umur <= weekEndAge;
+        return rec.day >= weekStartAge && rec.day <= weekEndAge;
       }).toList();
 
       if (weekRecordings.isEmpty) continue;
@@ -63,13 +63,13 @@ class FCRCalculator {
       // Dapatkan recording terakhir di minggu ini untuk berat ayam
       RecordingData? lastDayRecording;
       if (weekRecordings.isNotEmpty) {
-        weekRecordings.sort((a, b) => a.umur.compareTo(b.umur));
+        weekRecordings.sort((a, b) => a.day.compareTo(b.day));
         lastDayRecording = weekRecordings.last;
       }
 
       for (var rec in weekRecordings) {
-        weeklyFeedSack += rec.habisPakan;
-        weeklyDeaths += rec.matiAyam;
+        weeklyFeedSack += rec.feedSack;
+        weeklyDeaths += rec.mortality;
       }
 
       // Tambahkan pakan minggu ini ke total kumulatif
@@ -86,7 +86,7 @@ class FCRCalculator {
       if (lastDayRecording != null && remainingChickens > 0) {
         // Gunakan berat ayam dari hari terakhir di minggu tersebut
         // Konversi dari gram ke kg dan kalikan dengan jumlah ayam
-        beratAyamKg = (lastDayRecording.beratAyam * remainingChickens) / 1000;
+        beratAyamKg = (lastDayRecording.avgWeightGram * remainingChickens) / 1000;
 
         // Konversi pakan dari sak ke kg (1 sak = 50 kg)
         double weeklyFeedKg = weeklyFeedSack * 50;

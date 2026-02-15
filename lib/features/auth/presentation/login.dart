@@ -289,11 +289,11 @@ class _LoginState extends State<Login> {
                       TextButton(
                         onPressed: _isLoading
                             ? null
-                            : () {
+                            : () async {
                           _formKey.currentState?.reset();
 
-                          // Navigasi ke halaman signup jika tombol "Daftar" ditekan
-                          Navigator.push(
+                          // Navigasi ke halaman signup dan tunggu hasil
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) {
@@ -301,6 +301,12 @@ class _LoginState extends State<Login> {
                               },
                             ),
                           );
+
+                          // Jika ada hasil dari signup, isi email dan password
+                          if (result != null && result is Map<String, String>) {
+                            _controllerEmail.text = result['email'] ?? '';
+                            _controllerPassword.text = result['password'] ?? '';
+                          }
                         },
                         child: const Text("Daftar"),
                       ),

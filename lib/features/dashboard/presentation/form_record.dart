@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/features/dashboard/data/models/recording_data.dart';
+import 'package:recording_app/features/cage/presentation/pages/add_cage_page.dart';
 
 import '../../../core/services/firebase_service.dart';
 
@@ -39,6 +40,45 @@ class _AddRecord extends State<AddRecord> {
   //membuat instance auth
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadLastRecordingDay();
+  }
+
+  // Load umur terakhir dan auto-increment +1
+  Future<void> _loadLastRecordingDay() async {
+    try {
+      final activePeriod = await _firebaseService.getActivePeriod();
+      if (activePeriod != null) {
+        final recordings = await _firebaseService
+            .getRecordingsStream(activePeriod.id)
+            .first;
+        
+        if (recordings.isNotEmpty) {
+          // Urutkan berdasarkan day descending untuk dapat yang terbaru
+          recordings.sort((a, b) => b.day.compareTo(a.day));
+          final lastDay = recordings.first.day;
+          
+          // Set umur = last day + 1
+          if (mounted) {
+            _controllerUmur.text = (lastDay + 1).toString();
+          }
+        } else {
+          // Jika belum ada recording, set umur = 1
+          if (mounted) {
+            _controllerUmur.text = '1';
+          }
+        }
+      }
+    } catch (e) {
+      // Jika error, biarkan field kosong atau set default 1
+      if (mounted) {
+        _controllerUmur.text = '1';
+      }
+    }
+  }
+
   //membuat method untuk menambahkan data recording
   Future<void> addRecord() async {
 
@@ -52,7 +92,6 @@ class _AddRecord extends State<AddRecord> {
       final user = _auth.currentUser;
       if (user == null) {
         if (mounted) {
-          //menampilkan snackbar jika pengguna belum login
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Anda harus login terlebih dahulu')),
           );
@@ -60,24 +99,35 @@ class _AddRecord extends State<AddRecord> {
         return;
       }
 
-      //membuat objek recording dengan data yang diambil dari text field
+      // Get active period
+      final activePeriod = await _firebaseService.getActivePeriod();
+      
+      if (activePeriod == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tidak ada periode aktif. Buat periode terlebih dahulu.')),
+          );
+        }
+        return;
+      }
+
+      // Create recording with new structure
       final recording = RecordingData(
-        umur: int.tryParse(_controllerUmur.text) ?? 0,
-        terimaPakan: int.tryParse(_controllerTerimaPakan.text) ?? 0,
-        habisPakan: double.tryParse(_controllerHabisPakan.text) ?? 0,
-        matiAyam: int.tryParse(_controllerMatiAyam.text) ?? 0,
-        beratAyam: int.tryParse(_controllerBeratAyam.text) ?? 0,
-        id_periode: 1, // default periode adalah 1
+        day: int.tryParse(_controllerUmur.text) ?? 0,
+        avgWeightGram: int.tryParse(_controllerBeratAyam.text) ?? 0,
+        feedSack: int.tryParse(_controllerTerimaPakan.text) ?? 0,
+        mortality: int.tryParse(_controllerMatiAyam.text) ?? 0,
+        createdAt: DateTime.now(),
       );
 
-      await _firebaseService.addRecording(recording, user.email!);
+      // Add recording to active period
+      await _firebaseService.addRecording(activePeriod.id, recording);
       
       if (mounted) {
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        //menampilkan snackbar jika terjadi error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal menyimpan data: ${e.toString()}')),
         );
@@ -85,7 +135,6 @@ class _AddRecord extends State<AddRecord> {
     } finally {
       if (mounted) {
         setState(() {
-          //mengatur isLoading menjadi false jika selesai
           _isLoading = false;
         });
       }
@@ -142,7 +191,7 @@ class _AddRecord extends State<AddRecord> {
                 // menampilkan error jika umur kosong karena umur wajib diisi
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return "Umur tidak boleh kosong. Silahkan masukkan umur ayam.";
+                    return "Umur tidak boleh kosong.";
                   }
                   return null;
                 },
@@ -185,7 +234,7 @@ class _AddRecord extends State<AddRecord> {
                 // menampilkan error jika habis pakan kosong karena habis pakan wajib diisi
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return "Habis pakan tidak boleh kosong. Silahkan masukkan jumlah pakan ayam.";
+                    return "Habis pakan tidak boleh kosong.";
                   }
                   return null;
                 },

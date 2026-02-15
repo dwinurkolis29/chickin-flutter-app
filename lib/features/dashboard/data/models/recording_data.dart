@@ -1,62 +1,70 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/safe_convert.dart';
 
-// model untuk menyimpan data recording ayam
+// model untuk menyimpan data recording ayam (nested di periods/{periodId}/recordings)
 class RecordingData {
-  final int umur;
-  final int terimaPakan;
-  final double habisPakan;
-  final int matiAyam;
-  final int beratAyam;
-  final int id_periode;
+  final String id;
+  final int day;
+  final int avgWeightGram;
+  final int feedSack;
+  final int mortality;
+  final DateTime createdAt;
 
-  RecordingData({
-    this.umur = 0,
-    this.terimaPakan = 0,
-    this.habisPakan = 0.0,
-    this.matiAyam = 0,
-    this.beratAyam = 0,
-    this.id_periode = 0
+  const RecordingData({
+    this.id = '',
+    this.day = 0,
+    this.avgWeightGram = 0,
+    this.feedSack = 0,
+    this.mortality = 0,
+    required this.createdAt,
   });
 
-  factory RecordingData.fromJson(Map<String, dynamic>? json) => RecordingData(
-    umur: asInt(json, 'umur'),
-    terimaPakan: asInt(json, 'terimaPakan'),
-    habisPakan: asDouble(json, 'habisPakan'),
-    matiAyam: asInt(json, 'matiAyam'),
-    beratAyam: asInt(json, 'beratAyam'),
-    id_periode: asInt(json, 'id_periode'),
-  );
+  factory RecordingData.fromJson(Map<String, dynamic>? json, {String? docId}) {
+    if (json == null) {
+      return RecordingData(createdAt: DateTime.now());
+    }
+
+    return RecordingData(
+      id: docId ?? asString(json, 'id'),
+      day: asInt(json, 'day'),
+      avgWeightGram: asInt(json, 'avgWeightGram'),
+      feedSack: asInt(json, 'feedSack'),
+      mortality: asInt(json, 'mortality'),
+      createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-    'umur': umur,
-    'terimaPakan': terimaPakan,
-    'habisPakan': habisPakan,
-    'matiAyam': matiAyam,
-    'beratAyam': beratAyam,
-    'id_periode': id_periode
+    if (id.isNotEmpty) 'id': id,
+    'day': day,
+    'avgWeightGram': avgWeightGram,
+    'feedSack': feedSack,
+    'mortality': mortality,
+    'createdAt': Timestamp.fromDate(createdAt),
   };
 
   RecordingData copyWith({
-    int? umur,
-    int? terimaPakan,
-    double? habisPakan,
-    int? matiAyam,
-    int? beratAyam,
-    int? id_periode
+    String? id,
+    int? day,
+    int? avgWeightGram,
+    int? feedSack,
+    int? mortality,
+    DateTime? createdAt,
   }) {
     return RecordingData(
-      umur: umur ?? this.umur,
-      terimaPakan: terimaPakan ?? this.terimaPakan,
-      habisPakan: habisPakan ?? this.habisPakan,
-      matiAyam: matiAyam ?? this.matiAyam,
-      beratAyam: beratAyam ?? this.beratAyam,
-      id_periode: id_periode ?? this.id_periode
+      id: id ?? this.id,
+      day: day ?? this.day,
+      avgWeightGram: avgWeightGram ?? this.avgWeightGram,
+      feedSack: feedSack ?? this.feedSack,
+      mortality: mortality ?? this.mortality,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
   @override
-  toString() {
-    return 'RecordingData(umur: $umur, terimaPakan: $terimaPakan, habisPakan: $habisPakan, matiAyam: $matiAyam, beratAyam: $beratAyam)';
+  String toString() {
+    return 'RecordingData(id: $id, day: $day, avgWeightGram: $avgWeightGram, feedSack: $feedSack, mortality: $mortality)';
   }
 }
+
 

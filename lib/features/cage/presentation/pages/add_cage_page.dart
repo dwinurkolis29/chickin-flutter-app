@@ -16,16 +16,14 @@ class _AddCagePageState extends State<AddCagePage> {
   bool _isLoading = false;
 
   // Focus nodes
-  final FocusNode _focusNodeIdKandang = FocusNode();
   final FocusNode _focusNodeType = FocusNode();
   final FocusNode _focusNodeCapacity = FocusNode();
-  final FocusNode _focusNodeAddress = FocusNode();
+  final FocusNode _focusNodeLocation = FocusNode();
 
   // Controllers
-  final TextEditingController _controllerIdKandang = TextEditingController();
   final TextEditingController _controllerType = TextEditingController();
   final TextEditingController _controllerCapacity = TextEditingController();
-  final TextEditingController _controllerAddress = TextEditingController();
+  final TextEditingController _controllerLocation = TextEditingController();
 
   final FirebaseService _firebaseService = FirebaseService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -48,28 +46,17 @@ class _AddCagePageState extends State<AddCagePage> {
         return;
       }
 
-      final email = user.email;
-      if (email == null || email.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Email pengguna tidak ditemukan')),
-          );
-        }
-        return;
-      }
-
       final cage = CageData(
-        idKandang: int.tryParse(_controllerIdKandang.text) ?? 0,
         type: _controllerType.text.trim(),
         capacity: int.tryParse(_controllerCapacity.text) ?? 0,
-        address: _controllerAddress.text.trim(),
+        location: _controllerLocation.text.trim(),
       );
 
-      await _firebaseService.addCage(cage, email);
+      await _firebaseService.updateCage(cage);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data kandang berhasil ditambahkan')),
+          const SnackBar(content: Text('Data kandang berhasil disimpan')),
         );
         Navigator.pop(context, true);
       }
@@ -118,31 +105,6 @@ class _AddCagePageState extends State<AddCagePage> {
               ),
               const SizedBox(height: 35),
 
-              // ID Kandang field
-              TextFormField(
-                controller: _controllerIdKandang,
-                focusNode: _focusNodeIdKandang,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Kandang ke",
-                  prefixIcon: const Icon(Icons.other_houses_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return "ID Kandang tidak boleh kosong.";
-                  }
-                  return null;
-                },
-                onEditingComplete: () => _focusNodeType.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-
               // Jenis Kandang field
               TextFormField(
                 controller: _controllerType,
@@ -188,17 +150,17 @@ class _AddCagePageState extends State<AddCagePage> {
                   }
                   return null;
                 },
-                onEditingComplete: () => _focusNodeAddress.requestFocus(),
+                onEditingComplete: () => _focusNodeLocation.requestFocus(),
               ),
               const SizedBox(height: 10),
 
-              // Alamat field
+              // Lokasi field
               TextFormField(
-                controller: _controllerAddress,
-                focusNode: _focusNodeAddress,
+                controller: _controllerLocation,
+                focusNode: _focusNodeLocation,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: "Alamat Kandang",
+                  labelText: "Lokasi Kandang",
                   prefixIcon: const Icon(Icons.location_on_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -209,7 +171,7 @@ class _AddCagePageState extends State<AddCagePage> {
                 ),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return "Alamat kandang tidak boleh kosong.";
+                    return "Lokasi kandang tidak boleh kosong.";
                   }
                   return null;
                 },
@@ -253,15 +215,13 @@ class _AddCagePageState extends State<AddCagePage> {
 
   @override
   void dispose() {
-    _focusNodeIdKandang.dispose();
     _focusNodeType.dispose();
     _focusNodeCapacity.dispose();
-    _focusNodeAddress.dispose();
+    _focusNodeLocation.dispose();
 
-    _controllerIdKandang.dispose();
     _controllerType.dispose();
     _controllerCapacity.dispose();
-    _controllerAddress.dispose();
+    _controllerLocation.dispose();
 
     super.dispose();
   }

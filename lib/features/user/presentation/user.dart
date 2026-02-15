@@ -16,7 +16,7 @@ class _UserState extends State<User> {
   // Deklarasi objek FirebaseAuth
   final FirebaseAuth _auth = FirebaseAuth.instance;
   // Deklarasi variabel untuk menyimpan data pengguna
-  UserData? _userData;
+  UserProfile? _userProfile;
   bool _isLoading = true;
   String _errorMessage = '';
 
@@ -32,12 +32,12 @@ class _UserState extends State<User> {
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        // Memuat data pengguna/peternak
-        final userData = await _firebaseService.getUser(user.email!);
+        // Memuat data profil pengguna/peternak
+        final userProfile = await _firebaseService.getUserProfile();
         if (mounted) {
           // Memperbarui state dengan data pengguna
           setState(() {
-            _userData = userData;
+            _userProfile = userProfile;
             _isLoading = false;
           });
         }
@@ -91,14 +91,14 @@ class _UserState extends State<User> {
               ),
               const SizedBox(height: 35),
 
-              // Username Field
+              // Name Field
               TextFormField(
                 // set hanya bisa di baca untuk textfield
                 readOnly: true,
-                // menampilkan data username atau "tidak ada data"
-                initialValue: _userData?.username ?? 'Tidak ada data',
+                // menampilkan data name atau "tidak ada data"
+                initialValue: _userProfile?.name ?? 'Tidak ada data',
                 decoration: InputDecoration(
-                  labelText: "Username",
+                  labelText: "Nama",
                   prefixIcon: const Icon(Icons.person),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -107,12 +107,12 @@ class _UserState extends State<User> {
               ),
               const SizedBox(height: 10),
 
-              // Email Field
+              // Email Field (from Firebase Auth)
               TextFormField(
                 // set hanya bisa di baca untuk textfield
                 readOnly: true,
-                // menampilkan data email atau "tidak ada data"
-                initialValue: _userData?.email ?? 'Tidak ada data',
+                // menampilkan email dari Firebase Auth
+                initialValue: _auth.currentUser?.email ?? 'Tidak ada data',
                 decoration: InputDecoration(
                   labelText: "Email",
                   prefixIcon: const Icon(Icons.email_outlined),
@@ -128,7 +128,7 @@ class _UserState extends State<User> {
                 // set hanya bisa di baca untuk textfield
                 readOnly: true,
                 // menampilkan data phone atau "tidak ada data"
-                initialValue: _userData?.phone ?? 'Tidak ada data',
+                initialValue: _userProfile?.phone ?? 'Tidak ada data',
                 decoration: InputDecoration(
                   labelText: "Nomor Telepon",
                   prefixIcon: const Icon(Icons.phone),
@@ -144,7 +144,7 @@ class _UserState extends State<User> {
                 // set hanya bisa di baca untuk textfield
                 readOnly: true,
                 // menampilkan data address atau "tidak ada data"
-                initialValue: _userData?.address ?? 'Tidak ada data',
+                initialValue: _userProfile?.address ?? 'Tidak ada data',
                 maxLines: 2,
                 decoration: InputDecoration(
                   labelText: "Alamat",

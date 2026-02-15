@@ -7,6 +7,7 @@ import 'package:recording_app/features/dashboard/presentation/widgets/statistics
 import 'package:recording_app/features/dashboard/presentation/widgets/datatable.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/population_widget.dart';
 import 'package:recording_app/features/cage/presentation/pages/cage_profile_page.dart';
+import 'package:recording_app/features/cage/presentation/pages/add_cage_page.dart';
 import 'package:recording_app/features/dashboard/presentation/form_record.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/setting/presentation/setting.dart';
@@ -24,6 +25,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final Box _boxLogin = Hive.box("login");
+  final FirebaseService _firebaseService = FirebaseService();
 
   // selectedindex digunakan untuk menentukan halaman yang aktif
   int _selectedIndex = 0;
@@ -92,7 +94,44 @@ class _HomeState extends State<Home> {
 
   // fungsi ini digunakan untuk navigasi ke halaman tambah data
   Future<void> _navigateToAddRecord() async {
-    // Navigasi ke halaman tambah data
+    // VALIDASI: Cek apakah data kandang sudah diisi
+    final cageData = await _firebaseService.getCage();
+    
+    if (cageData.capacity == 0 || cageData.type.isEmpty) {
+      // Tampilkan dialog konfirmasi
+      final shouldNavigate = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Data Kandang Belum Diisi'),
+          content: const Text(
+            'Anda harus mengisi data kandang terlebih dahulu sebelum menambah recording.\n\nApakah Anda ingin mengisi data kandang sekarang?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Nanti'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Isi Sekarang'),
+            ),
+          ],
+        ),
+      );
+
+      // Jika user pilih "Isi Sekarang", navigasi ke halaman kandang
+      if (shouldNavigate == true && mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AddCagePage(),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Data kandang sudah ada, navigasi ke halaman tambah data
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AddRecord()),
@@ -172,12 +211,37 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   final Box _boxLogin = Hive.box("login");
+  final FirebaseService _firebaseService = FirebaseService();
 
   double _fcr = 0;
   int _umur = 0;
   int _populationRemain = 0;
+  String? _activePeriodId;
+  bool _isLoadingPeriod = true;
 
-  // bool _isLoading = true;
+  @override
+  void initState() {
+    super.initState();
+    _loadActivePeriod();
+  }
+
+  Future<void> _loadActivePeriod() async {
+    try {
+      final activePeriod = await _firebaseService.getActivePeriod();
+      if (mounted) {
+        setState(() {
+          _activePeriodId = activePeriod?.id;
+          _isLoadingPeriod = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingPeriod = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +282,33 @@ class _HomeContentState extends State<HomeContent> {
       );
     }
 
-    final recordingStream = FirebaseService().getRecordingsStream(1, email);
+    if (_isLoadingPeriod) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Jika tidak ada periode aktif, tampilkan empty state
+    if (_activePeriodId == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'Belum ada data recording',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Klik tombol + untuk menambah data',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final recordingStream = _firebaseService.getRecordingsStream(_activePeriodId!);
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -245,6 +335,28 @@ class _HomeContentState extends State<HomeContent> {
                 }
 
                 final recordings = snapshot.data ?? <RecordingData>[];
+
+                if (recordings.isEmpty) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'Belum ada data recording',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Klik tombol + untuk menambah data',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 final chickenTable = ChickenDataTable(
                   chickenDataList: recordings,
                 );
@@ -258,7 +370,7 @@ class _HomeContentState extends State<HomeContent> {
                   final lastFCR = fcrResults.last;
                   _fcr = lastFCR.fcr;
                   _populationRemain = lastFCR.sisaAyam;
-                  _umur = recordings.last.umur;
+                  _umur = recordings.last.day;
                 } else {
                   _fcr = 0;
                   _populationRemain = 0;

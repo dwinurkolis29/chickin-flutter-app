@@ -1,45 +1,50 @@
 import '../../../../core/models/safe_convert.dart';
 
-// model untuk menyimpan data kandang
+// model untuk menyimpan data kandang (nested map di users/{uid})
 class CageData {
-  final int idKandang;
   final String type;
   final int capacity;
-  final String address;
+  final String location;
 
-  CageData({
-    this.idKandang = 0,
-    this.type = "",
+  const CageData({
+    this.type = '',
     this.capacity = 0,
-    this.address = "",
+    this.location = '',
   });
 
-  factory CageData.fromJson(Map<String, dynamic>? json) => CageData(
-    idKandang: asInt(json, 'idKandang'),
-    type: asString(json, 'type'),
-    capacity: asInt(json, 'capacity'),
-    address: asString(json, 'address'),
-  );
+  factory CageData.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const CageData();
+    }
+
+    return CageData(
+      type: asString(json, 'type'),
+      capacity: asInt(json, 'capacity'),
+      location: asString(json, 'location'),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
-    'idKandang': idKandang,
     'type': type,
     'capacity': capacity,
-    'address': address,
+    'location': location,
   };
 
   CageData copyWith({
-    int? idKandang,
     String? type,
     int? capacity,
-    String? address,
+    String? location,
   }) {
     return CageData(
-      idKandang: idKandang ?? this.idKandang,
       type: type ?? this.type,
       capacity: capacity ?? this.capacity,
-      address: address ?? this.address,
+      location: location ?? this.location,
     );
+  }
+
+  @override
+  String toString() {
+    return 'CageData(type: $type, capacity: $capacity, location: $location)';
   }
 }
 

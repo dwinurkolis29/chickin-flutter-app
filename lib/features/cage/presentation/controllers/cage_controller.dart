@@ -26,8 +26,7 @@ class CageController extends ChangeNotifier {
   bool get hasValidCageData {
     if (_cageData == null) return false;
     // Cek apakah data benar-benar ada (bukan default value)
-    return _cageData!.idKandang > 0 &&
-        _cageData!.type.isNotEmpty &&
+    return _cageData!.type.isNotEmpty &&
         _cageData!.capacity > 0;
   }
 
@@ -54,7 +53,7 @@ class CageController extends ChangeNotifier {
         return;
       }
 
-      final cageData = await _firebaseService.getCage(email);
+      final cageData = await _firebaseService.getCage();
 
       _cageData = cageData;
       _isLoading = false;

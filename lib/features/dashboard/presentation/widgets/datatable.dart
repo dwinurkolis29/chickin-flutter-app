@@ -61,31 +61,25 @@ class ChickenDataTableState extends State<ChickenDataTable> {
             label: const Text('Umur (hari)'),
             numeric: true,
             onSort: (columnIndex, ascending) =>
-                _sort<num>((d) => d.umur, columnIndex, ascending),
+                _sort<num>((d) => d.day, columnIndex, ascending),
           ),
           DataColumn(
             label: const Text('Terima pakan (sak)'),
             numeric: true,
             onSort: (columnIndex, ascending) =>
-                _sort<num>((d) => d.terimaPakan, columnIndex, ascending),
-          ),
-          DataColumn(
-            label: const Text('Habis pakan (sak)'),
-            numeric: true,
-            onSort: (columnIndex, ascending) =>
-                _sort<num>((d) => d.habisPakan, columnIndex, ascending),
+                _sort<num>((d) => d.feedSack, columnIndex, ascending),
           ),
           DataColumn(
             label: const Text('Mati (ekor)'),
             numeric: true,
             onSort: (columnIndex, ascending) =>
-                _sort<num>((d) => d.matiAyam, columnIndex, ascending),
+                _sort<num>((d) => d.mortality, columnIndex, ascending),
           ),
           DataColumn(
             label: const Text('Bobot (gram)'),
             numeric: true,
             onSort: (columnIndex, ascending) =>
-                _sort<num>((d) => d.beratAyam, columnIndex, ascending),
+                _sort<num>((d) => d.avgWeightGram, columnIndex, ascending),
           ),
         ],
         source: _chickenDataSource,
@@ -121,11 +115,10 @@ class ChickenDataSource extends DataTableSource {
       index: index,
       cells: [
         // membuat cell pada baris data
-        DataCell(Text(chicken.umur.toString())),
-        DataCell(Text(chicken.terimaPakan.toStringAsFixed(2))),
-        DataCell(Text(chicken.habisPakan.toStringAsFixed(2))),
-        DataCell(Text(chicken.matiAyam.toString())),
-        DataCell(Text(chicken.beratAyam.toStringAsFixed(2))),
+        DataCell(Text(chicken.day.toString())),
+        DataCell(Text(chicken.feedSack.toString())),
+        DataCell(Text(chicken.mortality.toString())),
+        DataCell(Text(chicken.avgWeightGram.toStringAsFixed(2))),
       ],
     );
   }

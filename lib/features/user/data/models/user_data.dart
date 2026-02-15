@@ -1,47 +1,49 @@
 import 'package:recording_app/core/models/safe_convert.dart';
 
-// model untuk menyimpan data user/peternak
-class UserData {
-  final String? username;
-  final String? email;
-  final String? phone;
-  final String? address;
+// model untuk menyimpan data profil user/peternak (nested map di users/{uid})
+class UserProfile {
+  final String name;
+  final String phone;
+  final String address;
 
-  const UserData ({
-    this.email,
-    this.phone,
-    this.address,
-    this.username,
+  const UserProfile({
+    this.name = '',
+    this.phone = '',
+    this.address = '',
   });
 
-  factory UserData.fromJson(Map<String, dynamic> json) {
-    return UserData(
+  factory UserProfile.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const UserProfile();
+    }
 
-        username: asString(json, 'username'),
-        email: asString(json, 'email'),
-        phone: asString(json, 'phone'),
-        address: asString(json, 'address'),
+    return UserProfile(
+      name: asString(json, 'name'),
+      phone: asString(json, 'phone'),
+      address: asString(json, 'address'),
     );
   }
 
-  toJson() => {
-    'email': email,
+  Map<String, dynamic> toJson() => {
+    'name': name,
     'phone': phone,
     'address': address,
-    'username': username
   };
 
-  UserData copyWith({
-    String? email,
+  UserProfile copyWith({
+    String? name,
     String? phone,
     String? address,
-    String? username
   }) {
-    return UserData(
-      email: email ?? this.email,
+    return UserProfile(
+      name: name ?? this.name,
       phone: phone ?? this.phone,
       address: address ?? this.address,
-      username: username ?? this.username
     );
+  }
+
+  @override
+  String toString() {
+    return 'UserProfile(name: $name, phone: $phone, address: $address)';
   }
 }

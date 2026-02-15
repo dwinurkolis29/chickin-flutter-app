@@ -81,10 +81,31 @@ class _WeightChartCardState extends State<WeightChartCard> {
 
   bool _isLoading = true;
   String _errorMessage = '';
+  String? _activePeriodId;
 
   @override
   void initState() {
     super.initState();
+    _loadActivePeriod();
+  }
+
+  Future<void> _loadActivePeriod() async {
+    try {
+      final activePeriod = await _firebaseService.getActivePeriod();
+      if (mounted) {
+        setState(() {
+          _activePeriodId = activePeriod?.id;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Gagal memuat periode: $e';
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -103,90 +124,99 @@ class _WeightChartCardState extends State<WeightChartCard> {
           end: Alignment.bottomRight,
         ),
       ),
-      child: StreamBuilder<List<FlSpot>>(
-        // Stream data bobot ayam yang nantinya ditampilkan grafikk pertembangannya
-        stream: _firebaseService.getWeightStream(1, _auth.currentUser!.email!),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            print(snapshot.data);
-            final flSpot = snapshot.data ?? [];
-
-            // Cek apakah data bobot ayam kosong
-            if (flSpot.isEmpty) {
-              return const Center(
-                child: Text(
-                  'Data recording belum diisi',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              );
-            }
-
-            // Ambil data bobot terakhir untuk ditampilkan
-            final lastWeight = flSpot.isEmpty ? 0 : flSpot.last.y;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.show_chart,
-                        color: Colors.green,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Bobot Ayam',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 70,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: const FlGridData(show: false),
-                      titlesData: const FlTitlesData(show: false),
-                      borderData: FlBorderData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: flSpot,
-                          isCurved: true,
-                          color: Colors.green,
-                          barWidth: 4,
-                          isStrokeCapRound: true,
-                          dotData: const FlDotData(show: false),
-                          belowBarData: BarAreaData(show: false),
-                        ),
-                      ],
-                    ),
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _activePeriodId == null
+              ? const Center(
+                  child: Text(
+                    'Belum ada periode aktif',
+                    style: TextStyle(color: Colors.grey),
                   ),
+                )
+              : StreamBuilder<List<FlSpot>>(
+                  // Stream data bobot ayam yang nantinya ditampilkan grafik pertumbuhannya
+                  stream: _firebaseService.getWeightStream(_activePeriodId!),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      print(snapshot.data);
+                      final flSpot = snapshot.data ?? [];
+
+                      // Cek apakah data bobot ayam kosong
+                      if (flSpot.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Data recording belum diisi',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        );
+                      }
+
+                      // Ambil data bobot terakhir untuk ditampilkan
+                      final lastWeight = flSpot.isEmpty ? 0 : flSpot.last.y;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.show_chart,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Bobot Ayam',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            height: 70,
+                            child: LineChart(
+                              LineChartData(
+                                gridData: const FlGridData(show: false),
+                                titlesData: const FlTitlesData(show: false),
+                                borderData: FlBorderData(show: false),
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: flSpot,
+                                    isCurved: true,
+                                    color: Colors.green,
+                                    barWidth: 4,
+                                    isStrokeCapRound: true,
+                                    dotData: const FlDotData(show: false),
+                                    belowBarData: BarAreaData(show: false),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            // menampilkan bobot ayam terakhir
+                            '$lastWeight',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text('Gram', style: TextStyle(color: Colors.grey)),
+                        ],
+                      );
+                    } else {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  },
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  // menampilkan bobot ayam terakhir
-                  '$lastWeight',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text('Gram', style: TextStyle(color: Colors.grey)),
-              ],
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
     );
   }
 }

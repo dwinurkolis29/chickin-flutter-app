@@ -15,12 +15,6 @@ class CageInfoCard extends StatelessWidget {
     return Column(
       children: [
         _ReadOnlyField(
-          label: "Kandang ke",
-          value: cageData.idKandang.toString(),
-          icon: Icons.other_houses_outlined,
-        ),
-        const SizedBox(height: 10),
-        _ReadOnlyField(
           label: "Jenis Kandang",
           value: cageData.type,
           icon: Icons.bloodtype,
@@ -33,8 +27,8 @@ class CageInfoCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _ReadOnlyField(
-          label: "Alamat Kandang",
-          value: cageData.address,
+          label: "Lokasi Kandang",
+          value: cageData.location,
           icon: Icons.location_on_outlined,
           maxLines: 2,
         ),

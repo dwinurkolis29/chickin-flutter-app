@@ -34,7 +34,7 @@ class _PopulationSectionState extends State<PopulationSection> {
       final user = _auth.currentUser;
       if (user != null) {
         // Memuat data kandang
-        final cageData = await _firebaseService.getCage(user.email!);
+        final cageData = await _firebaseService.getCage();
         if (mounted) {
           setState(() {
             // Memperbarui state dengan data kandang

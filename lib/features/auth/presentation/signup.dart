@@ -1,7 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/cage/data/models/cage_data.dart';
+import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 
 class Signup extends StatefulWidget {
@@ -32,67 +34,114 @@ class _SignupState extends State<Signup> {
       TextEditingController();
 
   final Box _boxAccounts = Hive.box("accounts");
+  final FirebaseService _firebaseService = FirebaseService();
 
   // membuat variabel untuk menyimpan password visibility
   bool _obscurePassword = true;
-
-  // membuat db instance untuk firestore
-  final db = FirebaseFirestore.instance;
 
   // membuat method untuk signup
   void signup() async {
     try {
       if (_formKey.currentState?.validate() ?? false) {
-        // Menggunakan FirebaseAuth untuk signup hanya untuk email dan password
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        // Create Firebase Auth user
+        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _controllerEmail.text,
           password: _controllerPassword.text,
         );
+
+        // Get UID from created user
+        final uid = userCredential.user!.uid;
+
         // Menyimpan email dan password ke Hive box
         _boxAccounts.put(
           _controllerEmail.text,
           _controllerConFirmPassword.text,
         );
 
-        // Menyimpan data user ke firestore
-        final user = UserData.fromJson({
-          "username": _controllerUsername.text,
-          "email": _controllerEmail.text,
-          "phone": _controllerPhone.text,
-          "address": _controllerAddress.text,
-          "password": _controllerConFirmPassword.text,
-        });
+        // Create user profile
+        final profile = UserProfile(
+          name: _controllerUsername.text,
+          phone: _controllerPhone.text,
+          address: _controllerAddress.text,
+        );
 
-        db
-            .collection("recording")
-            .doc("user")
-            .collection(_controllerEmail.text)
-            .add(user.toJson());
+        // Create default cage data (empty for now)
+        const cage = CageData();
+
+        // Create user document in Firestore with new structure
+        await _firebaseService.createUserDocument(uid, profile, cage);
+
+        // AUTO-CREATE: Buat periode pertama otomatis
+        final firstPeriod = PeriodData(
+          name: 'Periode 1',
+          initialCapacity: cage.capacity > 0 ? cage.capacity : 1000, // Default 1000 jika cage belum diisi
+          initialWeight: 0.4, // Default DOC weight in kg
+          startDate: DateTime.now(),
+          status: 'active',
+          createdAt: DateTime.now(),
+        );
+        await _firebaseService.createPeriod(firstPeriod);
 
         // Menampilkan snackbar sukses
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              width: 200,
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              behavior: SnackBarBehavior.floating,
+              content: const Text("Registrasi Sukses"),
+            ),
+          );
+
+          _formKey.currentState?.reset();
+          // Return email dan password ke login page
+          Navigator.pop(context, {
+            'email': _controllerEmail.text,
+            'password': _controllerPassword.text,
+          });
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Terjadi kesalahan saat registrasi';
+      
+      if (e.code == 'weak-password') {
+        errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau login.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Format email tidak valid.';
+      }
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            width: 200,
-            backgroundColor: Theme.of(context).colorScheme.secondary,
+            backgroundColor: Theme.of(context).colorScheme.error,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             behavior: SnackBarBehavior.floating,
-            content: const Text("Registrasi Sukses"),
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 4),
           ),
         );
-
-        _formKey.currentState?.reset();
-        Navigator.pop(context);
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
       }
     } catch (e) {
-      print(e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            behavior: SnackBarBehavior.floating,
+            content: Text('Error: ${e.toString()}'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 
