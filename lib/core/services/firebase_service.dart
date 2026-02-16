@@ -124,7 +124,7 @@ class FirebaseService {
           .collection('users')
           .doc(userId)
           .collection('periods')
-          .where('status', isEqualTo: 'active')
+          .where('isActive', isEqualTo: true)
           .limit(1)
           .get();
 
@@ -183,7 +183,7 @@ class FirebaseService {
           .collection('periods')
           .doc(periodId)
           .update({
-        'status': 'closed',
+        'isActive': false,
         'endDate': FieldValue.serverTimestamp(),
         'summary': summary.toJson(),
       });

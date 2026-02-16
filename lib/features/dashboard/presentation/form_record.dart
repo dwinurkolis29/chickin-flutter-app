@@ -5,6 +5,7 @@ import 'package:recording_app/features/dashboard/data/models/recording_data.dart
 import 'package:recording_app/features/cage/presentation/pages/add_cage_page.dart';
 
 import '../../../core/services/firebase_service.dart';
+import '../../../core/components/snackbars/app_snackbar.dart';
 
 // class yang digunakan untuk menambahkan data recording
 class AddRecord extends StatefulWidget {
@@ -92,9 +93,7 @@ class _AddRecord extends State<AddRecord> {
       final user = _auth.currentUser;
       if (user == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Anda harus login terlebih dahulu')),
-          );
+          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
         }
         return;
       }
@@ -104,9 +103,7 @@ class _AddRecord extends State<AddRecord> {
       
       if (activePeriod == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tidak ada periode aktif. Buat periode terlebih dahulu.')),
-          );
+          AppSnackbar.showError(context, 'Tidak ada periode aktif. Buat periode terlebih dahulu');
         }
         return;
       }
@@ -128,9 +125,7 @@ class _AddRecord extends State<AddRecord> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan data: ${e.toString()}')),
-        );
+        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
       }
     } finally {
       if (mounted) {

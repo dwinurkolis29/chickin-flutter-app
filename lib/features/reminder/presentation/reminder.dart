@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Import your model and service
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/notification_service.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
 import 'package:recording_app/features/reminder/presentation/form_reminder.dart';
 
@@ -237,46 +239,30 @@ class _ReminderState extends State<Reminder> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
 
-    showDeleteDialog(ReminderData reminder) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Delete Reminder'),
-          content: const Text('Are you sure you want to delete this reminder?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  // Delete from Firebase
-                  await _firebaseService.deleteReminder(reminder.id, user!.email!);
-
-                  Navigator.pop(context);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Reminder deleted successfully'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } catch (e) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error deleting reminder: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
+    showDeleteDialog(ReminderData reminder) async {
+      final confirmed = await DialogHelper.showConfirm(
+        context,
+        'Delete Reminder',
+        'Are you sure you want to delete this reminder?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        isDestructive: true,
       );
+
+      if (confirmed == true) {
+        try {
+          // Delete from Firebase
+          await _firebaseService.deleteReminder(reminder.id, user!.email!);
+
+          if (mounted) {
+            AppSnackbar.showSuccess(context, 'Reminder deleted successfully');
+          }
+        } catch (e) {
+          if (mounted) {
+            AppSnackbar.showError(context, 'Error deleting reminder: $e');
+          }
+        }
+      }
     }
 
     return Scaffold(
@@ -295,22 +281,12 @@ class _ReminderState extends State<Reminder> {
             onPressed: () async {
               final pending = await _notificationService.getPendingNotifications();
               if (!mounted) return;
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Pending Notifications'),
-                  content: Text(
-                    pending.isEmpty
-                        ? 'No pending notifications'
-                        : pending.map((n) => '${n.id}: ${n.title}').join('\n'),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
+              DialogHelper.showInfo(
+                context,
+                'Pending Notifications',
+                pending.isEmpty
+                    ? 'No pending notifications'
+                    : pending.map((n) => '${n.id}: ${n.title}').join('\n'),
               );
             },
           ),

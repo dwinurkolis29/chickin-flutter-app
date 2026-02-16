@@ -9,7 +9,7 @@ class PeriodData {
   final double initialWeight; // default 0.4 kg
   final DateTime startDate;
   final DateTime? endDate;
-  final String status; // 'active' | 'closed'
+  final bool isActive;
   final DateTime createdAt;
   final PeriodSummary? summary;
 
@@ -20,7 +20,7 @@ class PeriodData {
     this.initialWeight = 0.4,
     required this.startDate,
     this.endDate,
-    this.status = 'active',
+    this.isActive = true,
     required this.createdAt,
     this.summary,
   });
@@ -40,7 +40,7 @@ class PeriodData {
       initialWeight: asDouble(json, 'initialWeight', defaultValue: 0.4),
       startDate: (json['startDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       endDate: (json['endDate'] as Timestamp?)?.toDate(),
-      status: asString(json, 'status', defaultValue: 'active'),
+      isActive: asBool(json, 'isActive', defaultValue: true),
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       summary: json['summary'] != null 
           ? PeriodSummary.fromJson(json['summary'] as Map<String, dynamic>)
@@ -55,7 +55,7 @@ class PeriodData {
     'initialWeight': initialWeight,
     'startDate': Timestamp.fromDate(startDate),
     if (endDate != null) 'endDate': Timestamp.fromDate(endDate!),
-    'status': status,
+    'isActive': isActive,
     'createdAt': Timestamp.fromDate(createdAt),
     if (summary != null) 'summary': summary!.toJson(),
   };
@@ -67,7 +67,7 @@ class PeriodData {
     double? initialWeight,
     DateTime? startDate,
     DateTime? endDate,
-    String? status,
+    bool? isActive,
     DateTime? createdAt,
     PeriodSummary? summary,
   }) {
@@ -78,7 +78,7 @@ class PeriodData {
       initialWeight: initialWeight ?? this.initialWeight,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
-      status: status ?? this.status,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       summary: summary ?? this.summary,
     );
@@ -86,7 +86,7 @@ class PeriodData {
 
   @override
   String toString() {
-    return 'PeriodData(id: $id, name: $name, status: $status, initialCapacity: $initialCapacity)';
+    return 'PeriodData(id: $id, name: $name, isActive: $isActive, initialCapacity: $initialCapacity)';
   }
 }
 

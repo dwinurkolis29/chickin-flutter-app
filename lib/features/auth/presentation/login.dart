@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../../core/components/dialogs/dialog_helper.dart';
+import '../controllers/auth_controller.dart';
 import '../../dashboard/presentation/home.dart';
 import 'signup.dart';
 
@@ -28,47 +29,14 @@ class _LoginState extends State<Login> {
   // variabel untuk loading state
   bool _isLoading = false;
 
-  // hive box untuk login
-  final Box _boxLogin = Hive.box("login");
+  // auth controller
+  final AuthController _authController = AuthController();
 
-  // hive box untuk accounts
-  final Box _boxAccounts = Hive.box("accounts");
 
-  // fungsi untuk menampilkan error dialog
-  void _showErrorDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // fungsi untuk menampilkan snackbar
-  void _showSnackBar(String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  // fungsi untuk login dengan validasi lengkap
+  // fungsi untuk login
   void login() async {
     // Validasi form terlebih dahulu
     if (!(_formKey.currentState?.validate() ?? false)) {
-      _showSnackBar('Mohon isi form dengan benar');
       return;
     }
 
@@ -78,67 +46,39 @@ class _LoginState extends State<Login> {
     });
 
     try {
-      // Menggunakan FirebaseAuth untuk login
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Menggunakan AuthController untuk login
+      final result = await _authController.signIn(
         email: _controllerEmail.text.trim(),
         password: _controllerPassword.text,
       );
 
-      // Cek apakah email sudah diverifikasi (opsional)
-      if (userCredential.user != null && !userCredential.user!.emailVerified) {
-        _showSnackBar('Email belum diverifikasi. Silakan cek email Anda.');
-        // Opsional: kirim ulang email verifikasi
-        // await userCredential.user!.sendEmailVerification();
-      }
+      if (!mounted) return;
 
-      // Login berhasil - simpan data ke Hive
-      _boxLogin.put("loginStatus", true);
-      _boxLogin.put("Email", _controllerEmail.text.trim());
-      _boxLogin.put("userId", userCredential.user?.uid);
-
-      // Navigasi ke halaman Home
-      if (mounted) {
+      if (result.success) {
+        // Navigasi ke halaman Home
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Home(),
+            builder: (context) => const Home(),
           ),
         );
+      } else {
+        // Show error dialog
+        DialogHelper.showError(
+          context,
+          'Login Gagal',
+          result.errorMessage ?? 'Terjadi kesalahan yang tidak terduga',
+        );
       }
-    } on FirebaseAuthException catch (e) {
-      // Handle berbagai error dari Firebase
-      String errorMessage;
-
-      switch (e.code) {
-        case 'user-not-found':
-          errorMessage = 'Email tidak terdaftar. Silakan daftar terlebih dahulu.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Password yang Anda masukkan salah.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'Format email tidak valid.';
-          break;
-        case 'user-disabled':
-          errorMessage = 'Akun ini telah dinonaktifkan.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Terlalu banyak percobaan login. Silakan coba lagi nanti.';
-          break;
-        case 'invalid-credential':
-          errorMessage = 'Email atau password yang Anda masukkan salah.';
-          break;
-        case 'network-request-failed':
-          errorMessage = 'Tidak ada koneksi internet. Periksa koneksi Anda.';
-          break;
-        default:
-          errorMessage = 'Terjadi kesalahan: ${e.message ?? 'Silakan coba lagi'}';
-      }
-
-      _showErrorDialog('Login Gagal', errorMessage);
     } catch (e) {
       // Handle error yang tidak terduga
-      _showErrorDialog('Error', 'Terjadi kesalahan yang tidak terduga: $e');
+      if (mounted) {
+        DialogHelper.showError(
+          context,
+          'Error',
+          'Terjadi kesalahan yang tidak terduga: $e',
+        );
+      }
     } finally {
       // Reset loading state
       if (mounted) {
@@ -151,11 +91,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    // cek apakah user sudah login
-    if (_boxLogin.get("loginStatus") ?? false) {
-      return Home();
-    }
-
     return Scaffold(
       // Membuat background warna biru
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -302,10 +237,9 @@ class _LoginState extends State<Login> {
                             ),
                           );
 
-                          // Jika ada hasil dari signup, isi email dan password
+                          // Jika ada hasil dari signup, isi email saja
                           if (result != null && result is Map<String, String>) {
                             _controllerEmail.text = result['email'] ?? '';
-                            _controllerPassword.text = result['password'] ?? '';
                           }
                         },
                         child: const Text("Daftar"),

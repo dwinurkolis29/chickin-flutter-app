@@ -1,6 +1,7 @@
 // lib/features/cage/presentation/pages/add_cage_page.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 
@@ -39,9 +40,7 @@ class _AddCagePageState extends State<AddCagePage> {
       final user = _auth.currentUser;
       if (user == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Anda harus login terlebih dahulu')),
-          );
+          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
         }
         return;
       }
@@ -55,16 +54,12 @@ class _AddCagePageState extends State<AddCagePage> {
       await _firebaseService.updateCage(cage);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data kandang berhasil disimpan')),
-        );
+        AppSnackbar.showSuccess(context, 'Data kandang berhasil disimpan');
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan data: ${e.toString()}')),
-        );
+        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
       }
     } finally {
       if (mounted) {

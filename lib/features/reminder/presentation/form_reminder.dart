@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Import your model, service, and notification service
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
@@ -129,9 +130,7 @@ class _FormReminderState extends State<FormReminder> {
       final user = _auth.currentUser;
       if (user == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Anda harus login terlebih dahulu')),
-          );
+          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
         }
         return;
       }
@@ -148,12 +147,7 @@ class _FormReminderState extends State<FormReminder> {
       // Check if scheduled time is in the past
       if (scheduledDateTime.isBefore(DateTime.now())) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Waktu reminder tidak boleh di masa lalu'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          AppSnackbar.showError(context, 'Waktu reminder tidak boleh di masa lalu');
         }
         setState(() {
           _isLoading = false;
@@ -188,14 +182,9 @@ class _FormReminderState extends State<FormReminder> {
 
       if (mounted) {
         // Tampilkan snackbar sukses
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'Reminder berhasil ditambahkan!\nNotifikasi dijadwalkan: ${DateFormat('dd MMM yyyy, HH:mm').format(scheduledDateTime)}'
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
+        AppSnackbar.showSuccess(
+          context,
+          'Reminder berhasil ditambahkan!\nNotifikasi dijadwalkan: ${DateFormat('dd MMM yyyy, HH:mm').format(scheduledDateTime)}',
         );
 
         // Kembali ke halaman sebelumnya dengan hasil true
@@ -204,9 +193,7 @@ class _FormReminderState extends State<FormReminder> {
     } catch (e) {
       if (mounted) {
         // menampilkan snackbar jika terjadi error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan data: ${e.toString()}')),
-        );
+        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
       }
     } finally {
       if (mounted) {
@@ -226,9 +213,7 @@ class _FormReminderState extends State<FormReminder> {
     );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Test notification sent!')),
-      );
+      AppSnackbar.showInfo(context, 'Test notification sent!');
     }
   }
 

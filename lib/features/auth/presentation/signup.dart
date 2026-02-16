@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:recording_app/core/services/firebase_service.dart';
-import 'package:recording_app/features/cage/data/models/cage_data.dart';
-import 'package:recording_app/features/period/data/models/period_data.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/features/auth/controllers/auth_controller.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 
 class Signup extends StatefulWidget {
@@ -33,114 +31,56 @@ class _SignupState extends State<Signup> {
   final TextEditingController _controllerConFirmPassword =
       TextEditingController();
 
-  final Box _boxAccounts = Hive.box("accounts");
-  final FirebaseService _firebaseService = FirebaseService();
+  final AuthController _authController = AuthController();
 
   // membuat variabel untuk menyimpan password visibility
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   // membuat method untuk signup
   void signup() async {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
     try {
-      if (_formKey.currentState?.validate() ?? false) {
-        // Create Firebase Auth user
-        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _controllerEmail.text,
-          password: _controllerPassword.text,
+      // Create user profile
+      final profile = UserProfile(
+        name: _controllerUsername.text.trim(),
+        phone: _controllerPhone.text.trim(),
+        address: _controllerAddress.text.trim(),
+      );
+
+      // Call AuthController
+      final result = await _authController.signUp(
+        email: _controllerEmail.text.trim(),
+        password: _controllerPassword.text,
+        profile: profile,
+      );
+
+      if (!mounted) return;
+
+      if (result.success) {
+        AppSnackbar.showSuccess(context, 'Registrasi Sukses');
+
+        _formKey.currentState?.reset();
+        // Return email only (no password for security)
+        Navigator.pop(context, {
+          'email': _controllerEmail.text.trim(),
+        });
+      } else {
+        // Show error dialog
+        DialogHelper.showError(
+          context,
+          'Registrasi Gagal',
+          result.errorMessage ?? 'Terjadi kesalahan yang tidak terduga',
         );
-
-        // Get UID from created user
-        final uid = userCredential.user!.uid;
-
-        // Menyimpan email dan password ke Hive box
-        _boxAccounts.put(
-          _controllerEmail.text,
-          _controllerConFirmPassword.text,
-        );
-
-        // Create user profile
-        final profile = UserProfile(
-          name: _controllerUsername.text,
-          phone: _controllerPhone.text,
-          address: _controllerAddress.text,
-        );
-
-        // Create default cage data (empty for now)
-        const cage = CageData();
-
-        // Create user document in Firestore with new structure
-        await _firebaseService.createUserDocument(uid, profile, cage);
-
-        // AUTO-CREATE: Buat periode pertama otomatis
-        final firstPeriod = PeriodData(
-          name: 'Periode 1',
-          initialCapacity: cage.capacity > 0 ? cage.capacity : 1000, // Default 1000 jika cage belum diisi
-          initialWeight: 0.4, // Default DOC weight in kg
-          startDate: DateTime.now(),
-          status: 'active',
-          createdAt: DateTime.now(),
-        );
-        await _firebaseService.createPeriod(firstPeriod);
-
-        // Menampilkan snackbar sukses
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              width: 200,
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              behavior: SnackBarBehavior.floating,
-              content: const Text("Registrasi Sukses"),
-            ),
-          );
-
-          _formKey.currentState?.reset();
-          // Return email dan password ke login page
-          Navigator.pop(context, {
-            'email': _controllerEmail.text,
-            'password': _controllerPassword.text,
-          });
-        }
       }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Terjadi kesalahan saat registrasi';
-      
-      if (e.code == 'weak-password') {
-        errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
-      } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau login.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'Format email tidak valid.';
-      }
-
+    } finally {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            behavior: SnackBarBehavior.floating,
-            content: Text(errorMessage),
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            behavior: SnackBarBehavior.floating,
-            content: Text('Error: ${e.toString()}'),
-            duration: const Duration(seconds: 4),
-          ),
-        );
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -221,13 +161,15 @@ class _SignupState extends State<Signup> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                // melakukan validasi email tidak boleh kosong
+                // melakukan validasi email dengan regex
                 validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return "Masukkan email.";
-                    // melakukan validasi email harus valid
-                  } else if (!(value.contains('@') && value.contains('.'))) {
-                    return "Email tidak valid.";
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Email tidak boleh kosong';
+                  }
+                  // RFC 5322 simplified regex
+                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if (!emailRegex.hasMatch(value.trim())) {
+                    return 'Format email tidak valid';
                   }
                   return null;
                 },
@@ -368,15 +310,24 @@ class _SignupState extends State<Signup> {
                       ),
                     ),
                     // memanggil fungsi signup
-                    onPressed: signup,
-                    child: const Text("Register"),
+                    onPressed: _isLoading ? null : signup,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text("Register"),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Sudah punya akun?"),
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: _isLoading ? null : () => Navigator.pop(context),
                         child: const Text("Login"),
                       ),
                     ],

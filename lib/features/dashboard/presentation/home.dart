@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:recording_app/features/dashboard/data/models/fcr_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/statistics_section.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/datatable.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/population_widget.dart';
@@ -24,7 +25,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final Box _boxLogin = Hive.box("login");
   final FirebaseService _firebaseService = FirebaseService();
 
   // selectedindex digunakan untuk menentukan halaman yang aktif
@@ -54,43 +54,30 @@ class _HomeState extends State<Home> {
 
   // fungsi ini digunakan untuk menampilkan dialog logout
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Apakah kamu yakin ingin logout?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Logout'),
-              onPressed: () async {
-                try {
-                  await FirebaseAuth.instance.signOut();
-                } catch (e) {
-                  debugPrint(e.toString());
-                }
-
-                _boxLogin.delete("Email");
-                _boxLogin.put("loginStatus", false);
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  // Navigasi ke halaman login
-                  MaterialPageRoute(builder: (context) => const Login()),
-                );
-              },
-            ),
-          ],
-        );
+    DialogHelper.showConfirm(
+      context,
+      'Logout',
+      'Apakah kamu yakin ingin logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      isDestructive: true,
+      onConfirm: () async {
+        try {
+          await FirebaseAuth.instance.signOut();
+          
+          if (!mounted) return;
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Login()),
+          );
+        } catch (e) {
+          debugPrint('Logout error: $e');
+        }
       },
     );
   }
+
 
   // fungsi ini digunakan untuk navigasi ke halaman tambah data
   Future<void> _navigateToAddRecord() async {
@@ -99,24 +86,12 @@ class _HomeState extends State<Home> {
     
     if (cageData.capacity == 0 || cageData.type.isEmpty) {
       // Tampilkan dialog konfirmasi
-      final shouldNavigate = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Data Kandang Belum Diisi'),
-          content: const Text(
-            'Anda harus mengisi data kandang terlebih dahulu sebelum menambah recording.\n\nApakah Anda ingin mengisi data kandang sekarang?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Nanti'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Isi Sekarang'),
-            ),
-          ],
-        ),
+      final shouldNavigate = await DialogHelper.showConfirm(
+        context,
+        'Data Kandang Belum Diisi',
+        'Anda harus mengisi data kandang terlebih dahulu sebelum menambah recording.\n\nApakah Anda ingin mengisi data kandang sekarang?',
+        confirmText: 'Isi Sekarang',
+        cancelText: 'Nanti',
       );
 
       // Jika user pilih "Isi Sekarang", navigasi ke halaman kandang
@@ -140,9 +115,7 @@ class _HomeState extends State<Home> {
     // Jika result adalah true, StreamBuilder akan otomatis memperbarui
     if (result == true && mounted) {
       // StreamBuilder akan otomatis memperbarui karena data di Firestore sudah berubah
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data berhasil ditambahkan')),
-      );
+      AppSnackbar.showSuccess(context, 'Data berhasil ditambahkan');
     }
   }
 
@@ -210,7 +183,6 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  final Box _boxLogin = Hive.box("login");
   final FirebaseService _firebaseService = FirebaseService();
 
   double _fcr = 0;
@@ -245,9 +217,10 @@ class _HomeContentState extends State<HomeContent> {
 
   @override
   Widget build(BuildContext context) {
-    final email = _boxLogin.get("Email") as String?;
+    // Gunakan FirebaseAuth sebagai single source of truth
+    final currentUser = FirebaseAuth.instance.currentUser;
 
-    if (email == null || email.isEmpty) {
+    if (currentUser == null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -281,6 +254,8 @@ class _HomeContentState extends State<HomeContent> {
         ),
       );
     }
+
+    final email = currentUser.email ?? 'No Email';
 
     if (_isLoadingPeriod) {
       return const Center(child: CircularProgressIndicator());

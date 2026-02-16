@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
+import 'package:recording_app/features/dashboard/presentation/home.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -28,7 +29,10 @@ class MainApp extends StatelessWidget {
             seedColor: const Color.fromRGBO(32, 63, 129, 1.0),
           ),
         ),
-        home: const Login(),
+        // Gunakan FirebaseAuth untuk menentukan initial route
+        home: FirebaseAuth.instance.currentUser != null 
+            ? const Home() 
+            : const Login(),
       ),
     );
   }
