@@ -64,7 +64,7 @@ class ChickenDataTableState extends State<ChickenDataTable> {
                 _sort<num>((d) => d.day, columnIndex, ascending),
           ),
           DataColumn(
-            label: const Text('Terima pakan (sak)'),
+            label: const Text('Habis pakan (sak)'),
             numeric: true,
             onSort: (columnIndex, ascending) =>
                 _sort<num>((d) => d.feedSack, columnIndex, ascending),

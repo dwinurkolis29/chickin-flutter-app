@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:recording_app/features/dashboard/data/models/fcr_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
@@ -14,6 +15,7 @@ import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/setting/presentation/setting.dart';
 import 'package:recording_app/features/user/presentation/user.dart';
 import 'package:recording_app/features/dashboard/data/models/recording_data.dart';
+import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 
 import 'widgets/fcr_datatable.dart';
 
@@ -112,9 +114,10 @@ class _HomeState extends State<Home> {
       MaterialPageRoute(builder: (context) => AddRecord()),
     );
 
-    // Jika result adalah true, StreamBuilder akan otomatis memperbarui
+    // Jika result adalah true, refresh streams untuk dapat data terbaru
     if (result == true && mounted) {
-      // StreamBuilder akan otomatis memperbarui karena data di Firestore sudah berubah
+      final controller = Provider.of<HomeController>(context, listen: false);
+      controller.refreshStreams();
       AppSnackbar.showSuccess(context, 'Data berhasil ditambahkan');
     }
   }
@@ -176,200 +179,175 @@ class _HomeState extends State<Home> {
 }
 
 class HomeContent extends StatefulWidget {
-  HomeContent({super.key});
+  const HomeContent({super.key});
 
   @override
   State<HomeContent> createState() => _HomeContentState();
 }
 
 class _HomeContentState extends State<HomeContent> {
-  final FirebaseService _firebaseService = FirebaseService();
-
-  double _fcr = 0;
-  int _umur = 0;
-  int _populationRemain = 0;
-  String? _activePeriodId;
-  bool _isLoadingPeriod = true;
-
   @override
   void initState() {
     super.initState();
-    _loadActivePeriod();
-  }
-
-  Future<void> _loadActivePeriod() async {
-    try {
-      final activePeriod = await _firebaseService.getActivePeriod();
-      if (mounted) {
-        setState(() {
-          _activePeriodId = activePeriod?.id;
-          _isLoadingPeriod = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingPeriod = false;
-        });
-      }
-    }
+    // Load active period when widget initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeController>().loadActivePeriod();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Gunakan FirebaseAuth sebagai single source of truth
-    final currentUser = FirebaseAuth.instance.currentUser;
+    return Consumer<HomeController>(
+      builder: (context, controller, child) {
+        // Gunakan FirebaseAuth sebagai single source of truth
+        final currentUser = FirebaseAuth.instance.currentUser;
 
-    if (currentUser == null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 50,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Anda belum login",
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Silahkan login terlebih dahulu",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Login()),
-                );
-              },
-              child: const Text("Login"),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final email = currentUser.email ?? 'No Email';
-
-    if (_isLoadingPeriod) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Jika tidak ada periode aktif, tampilkan empty state
-    if (_activePeriodId == null) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Belum ada data recording',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Klik tombol + untuk menambah data',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final recordingStream = _firebaseService.getRecordingsStream(_activePeriodId!);
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Row(
+        if (currentUser == null) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.person_outline_outlined),
-                const SizedBox(width: 10),
-                Text(email, style: Theme.of(context).textTheme.titleMedium),
+                Icon(
+                  Icons.error_outline,
+                  size: 50,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Anda belum login",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Silahkan login terlebih dahulu",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Login()),
+                    );
+                  },
+                  child: const Text("Login"),
+                ),
               ],
             ),
-            const SizedBox(height: 10),
-            StreamBuilder(
-              stream: recordingStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          );
+        }
 
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
+        final email = currentUser.email ?? 'No Email';
 
-                final recordings = snapshot.data ?? <RecordingData>[];
+        if (controller.isLoadingPeriod) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                if (recordings.isEmpty) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'Belum ada data recording',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Klik tombol + untuk menambah data',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final chickenTable = ChickenDataTable(
-                  chickenDataList: recordings,
-                );
-
-                final fcrResults =
-                    recordings.isNotEmpty
-                        ? FCRCalculator.calculateWeeklyFCR(recordings, 3000)
-                        : <FCRData>[];
-
-                if (fcrResults.isNotEmpty) {
-                  final lastFCR = fcrResults.last;
-                  _fcr = lastFCR.fcr;
-                  _populationRemain = lastFCR.sisaAyam;
-                  _umur = recordings.last.day;
-                } else {
-                  _fcr = 0;
-                  _populationRemain = 0;
-                  _umur = 0;
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    PopulationSection(populationRemain: _populationRemain),
-                    const SizedBox(height: 15),
-                    StatisticsSection(fcr: _fcr, umur: _umur),
-                    const SizedBox(height: 10),
-                    chickenTable,
-                    const SizedBox(height: 10),
-                    FCRDataTable(fcrData: fcrResults),
-                    const SizedBox(height: 10),
-                  ],
-                );
-              },
+        // Jika tidak ada periode aktif, tampilkan empty state
+        if (controller.activePeriodId == null) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  'Belum ada data recording',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Klik tombol + untuk menambah data',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(10),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.person_outline_outlined),
+                    const SizedBox(width: 10),
+                    Text(email, style: Theme.of(context).textTheme.titleMedium),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (controller.recordingsStream != null)
+                  StreamBuilder<List<RecordingData>>(
+                    stream: controller.recordingsStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    }
+
+                    final recordings = snapshot.data ?? <RecordingData>[];
+
+                    if (recordings.isEmpty) {
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text(
+                              'Belum ada data recording',
+                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Klik tombol + untuk menambah data',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final chickenTable = ChickenDataTable(
+                      chickenDataList: recordings,
+                    );
+
+                    final fcrResults = controller.calculateWeeklyFCR(recordings);
+                    
+                    // Calculate metrics directly from data
+                    final fcr = fcrResults.isNotEmpty ? fcrResults.last.fcr : 0.0;
+                    final populationRemain = fcrResults.isNotEmpty ? fcrResults.last.sisaAyam : 0;
+                    final umur = recordings.isNotEmpty ? recordings.last.day : 0;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        PopulationSection(populationRemain: populationRemain),
+                        const SizedBox(height: 15),
+                        StatisticsSection(
+                          fcr: fcr,
+                          umur: umur,
+                          weightStream: controller.weightStream,
+                        ),
+                        const SizedBox(height: 10),
+                        chickenTable,
+                        const SizedBox(height: 10),
+                        FCRDataTable(fcrData: fcrResults),
+                        const SizedBox(height: 80),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

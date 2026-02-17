@@ -30,7 +30,6 @@ class _AddRecord extends State<AddRecord> {
   final FocusNode _focusNodeBeratAyam = FocusNode();
   //membuat controller untuk text field
   final TextEditingController _controllerUmur = TextEditingController();
-  final TextEditingController _controllerTerimaPakan = TextEditingController();
   final TextEditingController _controllerHabisPakan = TextEditingController();
   final TextEditingController _controllerMatiAyam = TextEditingController();
   final TextEditingController _controllerBeratAyam = TextEditingController();
@@ -112,7 +111,7 @@ class _AddRecord extends State<AddRecord> {
       final recording = RecordingData(
         day: int.tryParse(_controllerUmur.text) ?? 0,
         avgWeightGram: int.tryParse(_controllerBeratAyam.text) ?? 0,
-        feedSack: int.tryParse(_controllerTerimaPakan.text) ?? 0,
+        feedSack: int.tryParse(_controllerHabisPakan.text) ?? 0,
         mortality: int.tryParse(_controllerMatiAyam.text) ?? 0,
         createdAt: DateTime.now(),
       );
@@ -193,24 +192,6 @@ class _AddRecord extends State<AddRecord> {
                 onEditingComplete: () => _focusNodeTerimaPakan.requestFocus(),
               ),
               const SizedBox(height: 10),
-              // Terima pakan field
-              TextFormField(
-                controller: _controllerTerimaPakan,
-                focusNode: _focusNodeTerimaPakan,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Terima pakan (sak)",
-                  prefixIcon: const Icon(Icons.arrow_circle_down),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onEditingComplete: () => _focusNodeHabisPakan.requestFocus(),
-              ),
-              const SizedBox(height: 10),
               // Habis pakan field
               TextFormField(
                 controller: _controllerHabisPakan,
@@ -272,7 +253,7 @@ class _AddRecord extends State<AddRecord> {
                 // menampilkan error jika mati ayam kosong karena mati ayam wajib diisi
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
-                    return "Berat ayam tidak boleh kosong. Silahkan masukkan berat ayam.";
+                    return "Berat ayam tidak boleh kosong.";
                   }
                   return null;
                 },
@@ -326,7 +307,6 @@ class _AddRecord extends State<AddRecord> {
 
     // membuang controller agar tidak terjadi memory leak
     _controllerUmur.dispose();
-    _controllerTerimaPakan.dispose();
     _controllerHabisPakan.dispose();
     _controllerMatiAyam.dispose();
     _controllerBeratAyam.dispose();
