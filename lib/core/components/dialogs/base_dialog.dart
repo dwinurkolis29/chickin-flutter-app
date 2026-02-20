@@ -24,10 +24,7 @@ class BaseDialog extends StatelessWidget {
       title: title != null
           ? Text(
               title!,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium,
             )
           : null,
       content: content,

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
 
 /// Reusable snackbar helper for consistent app-wide notifications
 class AppSnackbar {
-  /// Show success snackbar with green background
+  /// Show success snackbar
   static void showSuccess(
     BuildContext context,
     String message, {
@@ -11,13 +12,13 @@ class AppSnackbar {
     _show(
       context,
       message,
-      backgroundColor: Colors.green,
+      backgroundColor: AppColors.success,
       icon: Icons.check_circle,
       duration: duration,
     );
   }
 
-  /// Show error snackbar with red background
+  /// Show error snackbar
   static void showError(
     BuildContext context,
     String message, {
@@ -26,13 +27,13 @@ class AppSnackbar {
     _show(
       context,
       message,
-      backgroundColor: Colors.red,
+      backgroundColor: AppColors.error,
       icon: Icons.error,
       duration: duration,
     );
   }
 
-  /// Show info snackbar with blue background
+  /// Show info snackbar
   static void showInfo(
     BuildContext context,
     String message, {
@@ -41,13 +42,27 @@ class AppSnackbar {
     _show(
       context,
       message,
-      backgroundColor: Colors.blue,
+      backgroundColor: AppColors.info,
       icon: Icons.info,
       duration: duration,
     );
   }
 
-  /// Internal method to show snackbar
+  /// Show warning snackbar
+  static void showWarning(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    _show(
+      context,
+      message,
+      backgroundColor: AppColors.warning,
+      icon: Icons.warning_amber_rounded,
+      duration: duration,
+    );
+  }
+
   static void _show(
     BuildContext context,
     String message, {

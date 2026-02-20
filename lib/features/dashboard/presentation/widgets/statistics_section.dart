@@ -18,12 +18,10 @@ class StatisticsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Statistics',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF333333),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 5),
@@ -83,17 +81,19 @@ class WeightChartCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Colors.green.withOpacity(0.1),
-            Colors.white.withOpacity(0.5),
+            Theme.of(context).colorScheme.surface.withOpacity(0.5),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
       child: weightStream == null
-          ? const Center(
+          ? Center(
               child: Text(
                 'Belum ada periode aktif',
-                style: TextStyle(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             )
           : StreamBuilder<List<FlSpot>>(
@@ -104,10 +104,12 @@ class WeightChartCard extends StatelessWidget {
 
                   // Cek apakah data bobot ayam kosong
                   if (flSpot.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'Data recording belum diisi',
-                        style: TextStyle(color: Colors.grey),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     );
                   }
@@ -133,9 +135,9 @@ class WeightChartCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'Bobot Ayam',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.labelMedium,
                           ),
                         ],
                       ),
@@ -169,8 +171,12 @@ class WeightChartCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text('Gram',
-                          style: TextStyle(color: Colors.grey)),
+                      Text(
+                        'Gram',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   );
                 } else {
@@ -202,11 +208,11 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
             spreadRadius: 1,
             blurRadius: 10,
           ),
@@ -218,7 +224,7 @@ class _InfoCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(label, style: Theme.of(context).textTheme.labelMedium),
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(

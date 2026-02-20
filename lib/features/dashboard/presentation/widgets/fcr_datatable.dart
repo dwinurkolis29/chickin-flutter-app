@@ -15,12 +15,14 @@ class FCRDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final NumberFormat numberFormat = NumberFormat.decimalPattern('id_ID');
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       // membungkus tabel dengan card
       child: Card.filled(
-        color: Colors.white,
+        color: colorScheme.surface,
         // membuat shadow pada card
         elevation: 1,
         child: Column(
@@ -28,12 +30,10 @@ class FCRDataTable extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(15),
-              child: const Text(
+              child: Text(
                 'FCR Data',
-                style: TextStyle(
-                  fontSize: 20,
-                  // fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onSurface,
                 ),
               ),
             ),
@@ -42,18 +42,18 @@ class FCRDataTable extends StatelessWidget {
               columnSpacing: 20,
               headingRowHeight: 50,
               dataRowHeight: 45,
-              columns: const [
+              columns: [
                 // membuat header tabel
                 DataColumn(
                   label: Text(
                     'Minggu',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: textTheme.labelMedium,
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     'Total Pakan (kg)',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: textTheme.labelMedium,
                     textAlign: TextAlign.end,
                   ),
                   numeric: true,
@@ -61,7 +61,7 @@ class FCRDataTable extends StatelessWidget {
                 DataColumn(
                   label: Text(
                     'Sisa Ayam (ekor)',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: textTheme.labelMedium,
                     textAlign: TextAlign.end,
                   ),
                   numeric: true,
@@ -69,7 +69,7 @@ class FCRDataTable extends StatelessWidget {
                 DataColumn(
                   label: Text(
                     'Berat Ayam (kg)',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: textTheme.labelMedium,
                     textAlign: TextAlign.end,
                   ),
                   numeric: true,
@@ -77,7 +77,7 @@ class FCRDataTable extends StatelessWidget {
                 DataColumn(
                   label: Text(
                     'FCR',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: textTheme.labelMedium,
                     textAlign: TextAlign.end,
                   ),
                   numeric: true,

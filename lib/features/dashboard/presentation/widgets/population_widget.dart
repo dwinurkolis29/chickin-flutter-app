@@ -135,7 +135,6 @@ class _PopulationSectionState extends State<PopulationSection>
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF333333),
                   ),
                 ),
                 AnimatedBuilder(
@@ -143,10 +142,10 @@ class _PopulationSectionState extends State<PopulationSection>
                   builder: (context, child) {
                     return Text(
                       _counterAnimation.value.toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 45,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF5A61B4),
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                     );
                   },
@@ -157,16 +156,16 @@ class _PopulationSectionState extends State<PopulationSection>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Text(
                     'Ekor ayam',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF5A61B4),
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ],
@@ -188,9 +187,9 @@ class _PopulationSectionState extends State<PopulationSection>
                       CircularProgressIndicator(
                         value: _progressAnimation.value,
                         strokeWidth: 10,
-                        backgroundColor: Colors.grey[200],
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF5A61B4),
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.secondary,
                         ),
                       ),
                       Center(
@@ -204,9 +203,11 @@ class _PopulationSectionState extends State<PopulationSection>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'dari 100%',
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),

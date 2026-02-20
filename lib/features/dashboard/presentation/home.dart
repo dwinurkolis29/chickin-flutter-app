@@ -245,20 +245,24 @@ class _HomeContentState extends State<HomeContent> {
 
         // Jika tidak ada periode aktif, tampilkan empty state
         if (controller.activePeriodId == null) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
+                Icon(Icons.inbox_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(height: 16),
                 Text(
                   'Belum ada data recording',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Klik tombol + untuk menambah data',
-                  style: TextStyle(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -293,20 +297,24 @@ class _HomeContentState extends State<HomeContent> {
                     final recordings = snapshot.data ?? <RecordingData>[];
 
                     if (recordings.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                            SizedBox(height: 16),
+                            Icon(Icons.inbox_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            const SizedBox(height: 16),
                             Text(
                               'Belum ada data recording',
-                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
                               'Klik tombol + untuk menambah data',
-                              style: TextStyle(color: Colors.grey),
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),

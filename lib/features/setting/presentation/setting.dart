@@ -6,36 +6,40 @@ class Setting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Settings & Support',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
           ),
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionHeader('Settings Hub'),
+          _buildSectionHeader(context, 'Settings Hub'),
           const SizedBox(height: 8),
           _buildMenuItem(
+            context,
             icon: Icons.person_outline,
             title: 'Account',
             onTap: () {},
           ),
           _buildMenuItem(
+            context,
             icon: Icons.home_max_outlined,
             title: 'Kandang',
             onTap: () {},
           ),
           _buildMenuItem(
+            context,
             icon: Icons.alarm,
             title: 'Reminder Recording',
             onTap: () {
@@ -46,14 +50,16 @@ class Setting extends StatelessWidget {
             },
           ),
           const SizedBox(height: 24),
-          _buildSectionHeader('Support & FAQs'),
+          _buildSectionHeader(context, 'Support & FAQs'),
           const SizedBox(height: 8),
           _buildMenuItem(
+            context,
             icon: Icons.headset_mic_outlined,
             title: 'Contact Support',
             onTap: () {},
           ),
           _buildMenuItem(
+            context,
             icon: Icons.logout,
             title: 'Logout',
             onTap: () {},
@@ -63,14 +69,16 @@ class Setting extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title, {String? badge}) {
+  Widget _buildSectionHeader(BuildContext context, String title, {String? badge}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Row(
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade600,
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -79,14 +87,13 @@ class Setting extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.red,
+              color: colorScheme.error,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               badge,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
+              style: textTheme.labelSmall?.copyWith(
+                color: colorScheme.onError,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -96,35 +103,38 @@ class Setting extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem({
+  Widget _buildMenuItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
     Widget? trailing,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Icon(
           icon,
-          color: Colors.grey.shade700,
+          color: colorScheme.onSurfaceVariant,
           size: 24,
         ),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
+          style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            color: Colors.black,
+            color: colorScheme.onSurface,
           ),
         ),
-        trailing: trailing ?? const Icon(Icons.chevron_right, color: Colors.grey),
+        trailing: trailing ?? Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
         onTap: onTap,
       ),
     );

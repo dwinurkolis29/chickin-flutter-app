@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/auth/auth_wrapper.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 
@@ -29,11 +30,9 @@ class MainApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromRGBO(32, 63, 129, 1.0),
-          ),
-        ),
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
+        themeMode: ThemeMode.system,
         // Use AuthWrapper at app root for centralized auth management
         home: const AuthWrapper(),
       ),
