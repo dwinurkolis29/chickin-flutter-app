@@ -1,71 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/features/reminder/presentation/reminder.dart';
+import 'package:recording_app/features/cage/presentation/pages/cage_profile_page.dart';
+import 'package:recording_app/features/user/presentation/user.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/features/auth/presentation/login.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 
 class Setting extends StatelessWidget {
   const Setting({Key? key}) : super(key: key);
 
+  void _showLogoutDialog(BuildContext context) {
+    DialogHelper.showConfirm(
+      context,
+      'Logout',
+      'Apakah kamu yakin ingin logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      isDestructive: true,
+      onConfirm: () async {
+        try {
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Login()),
+          );
+        } catch (e) {
+          debugPrint('Logout error: $e');
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        title: Text(
-          'Settings & Support',
-          style: textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurface,
-          ),
+    // Tidak pakai Scaffold — widget ini di-embed sebagai body di Home,
+    // yang sudah menyediakan Scaffold + AppBar-nya sendiri.
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildSectionHeader(context, 'Settings Hub'),
+        const SizedBox(height: 8),
+        _buildMenuItem(
+          context,
+          icon: Icons.person_outline,
+          title: 'Account',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const User()),
+            );
+          },
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSectionHeader(context, 'Settings Hub'),
-          const SizedBox(height: 8),
-          _buildMenuItem(
-            context,
-            icon: Icons.person_outline,
-            title: 'Account',
-            onTap: () {},
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.home_max_outlined,
-            title: 'Kandang',
-            onTap: () {},
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.alarm,
-            title: 'Reminder Recording',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Reminder()),
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-          _buildSectionHeader(context, 'Support & FAQs'),
-          const SizedBox(height: 8),
-          _buildMenuItem(
-            context,
-            icon: Icons.headset_mic_outlined,
-            title: 'Contact Support',
-            onTap: () {},
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.logout,
-            title: 'Logout',
-            onTap: () {},
-          ),
-        ],
-      ),
+        _buildMenuItem(
+          context,
+          icon: Icons.calendar_month,
+          title: 'Periode',
+          onTap: () {},
+        ),
+        _buildMenuItem(
+          context,
+          icon: Icons.home_max_outlined,
+          title: 'Kandang',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CageProfilePage()),
+            );
+          },
+        ),
+        _buildMenuItem(
+          context,
+          icon: Icons.alarm,
+          title: 'Reminder Recording',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Reminder()),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        _buildSectionHeader(context, 'Support & FAQs'),
+        const SizedBox(height: 8),
+        _buildMenuItem(
+          context,
+          icon: Icons.headset_mic_outlined,
+          title: 'Contact Support',
+          onTap: () {},
+        ),
+        _buildMenuItem(
+          context,
+          icon: Icons.logout,
+          title: 'Logout',
+          onTap: () => _showLogoutDialog(context),
+        ),
+      ],
     );
   }
 
@@ -104,12 +133,12 @@ class Setting extends StatelessWidget {
   }
 
   Widget _buildMenuItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Widget? trailing,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required VoidCallback onTap,
+        Widget? trailing,
+      }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -134,7 +163,8 @@ class Setting extends StatelessWidget {
             color: colorScheme.onSurface,
           ),
         ),
-        trailing: trailing ?? Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+        trailing: trailing ??
+            Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
         onTap: onTap,
       ),
     );
