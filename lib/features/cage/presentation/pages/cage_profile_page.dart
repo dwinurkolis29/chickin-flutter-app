@@ -26,7 +26,11 @@ class _CageProfilePageState extends State<CageProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+      ),
       body: Consumer<CageController>(
         builder: (context, controller, child) {
           if (controller.isLoading) {

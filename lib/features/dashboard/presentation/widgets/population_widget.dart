@@ -145,7 +145,7 @@ class _PopulationSectionState extends State<PopulationSection>
                       style: TextStyle(
                         fontSize: 45,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.secondary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     );
                   },
@@ -165,7 +165,7 @@ class _PopulationSectionState extends State<PopulationSection>
                     'Ekor ayam',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.secondary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
@@ -189,7 +189,7 @@ class _PopulationSectionState extends State<PopulationSection>
                         strokeWidth: 10,
                         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.secondary,
+                          Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       Center(

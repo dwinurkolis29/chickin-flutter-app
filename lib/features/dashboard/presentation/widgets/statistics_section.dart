@@ -39,7 +39,7 @@ class StatisticsSection extends StatelessWidget {
                 children: [
                   _InfoCard(
                     icon: Icons.edit_note_outlined,
-                    iconColor: Colors.orange,
+                    iconColor: Theme.of(context).colorScheme.primary,
                     label: 'FCR',
                     value: fcr.toStringAsFixed(2),
                     unit: '',
@@ -47,7 +47,7 @@ class StatisticsSection extends StatelessWidget {
                   const SizedBox(height: 5),
                   _InfoCard(
                     icon: Icons.calendar_month,
-                    iconColor: Colors.purple,
+                    iconColor: Theme.of(context).colorScheme.primary,
                     label: 'Umur',
                     value: umur.toString(),
                     unit: 'Hari',

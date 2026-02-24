@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/features/dashboard/data/models/recording_data.dart';
-import 'package:recording_app/features/cage/presentation/pages/add_cage_page.dart';
 
 import '../../../core/services/firebase_service.dart';
 import '../../../core/components/snackbars/app_snackbar.dart';
@@ -139,10 +138,10 @@ class _AddRecord extends State<AddRecord> {
   Widget build(BuildContext context) {
     return Scaffold(
       // mengatur warna latar belakang
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         // mengatur warna background appbar
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
       body: Form(

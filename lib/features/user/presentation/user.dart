@@ -60,6 +60,10 @@ class _UserState extends State<User> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+      ),
       body: _isLoading
       // Menampilkan indikator loading jika sedang memuat
           ? const Center(child: CircularProgressIndicator())

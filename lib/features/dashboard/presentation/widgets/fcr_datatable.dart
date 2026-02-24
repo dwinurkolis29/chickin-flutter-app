@@ -22,7 +22,7 @@ class FCRDataTable extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       // membungkus tabel dengan card
       child: Card.filled(
-        color: colorScheme.surface,
+        color: colorScheme.surfaceBright,
         // membuat shadow pada card
         elevation: 1,
         child: Column(
