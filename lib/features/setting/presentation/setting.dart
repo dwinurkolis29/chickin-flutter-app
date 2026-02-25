@@ -4,6 +4,7 @@ import 'package:recording_app/features/cage/presentation/pages/cage_profile_page
 import 'package:recording_app/features/user/presentation/user.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
+import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 
 class Setting extends StatelessWidget {
@@ -55,7 +56,12 @@ class Setting extends StatelessWidget {
           context,
           icon: Icons.calendar_month,
           title: 'Periode',
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PeriodListScreen()),
+            );
+          },
         ),
         _buildMenuItem(
           context,

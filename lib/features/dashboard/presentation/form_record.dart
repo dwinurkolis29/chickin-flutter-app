@@ -5,6 +5,8 @@ import 'package:recording_app/features/dashboard/data/models/recording_data.dart
 
 import '../../../core/services/firebase_service.dart';
 import '../../../core/components/snackbars/app_snackbar.dart';
+import '../../../core/components/dialogs/dialog_helper.dart';
+import '../../period/presentation/screens/form_period.dart';
 
 // class yang digunakan untuk menambahkan data recording
 class AddRecord extends StatefulWidget {
@@ -101,7 +103,21 @@ class _AddRecord extends State<AddRecord> {
       
       if (activePeriod == null) {
         if (mounted) {
-          AppSnackbar.showError(context, 'Tidak ada periode aktif. Buat periode terlebih dahulu');
+          setState(() {
+            _isLoading = false;
+          });
+          DialogHelper.showConfirm(
+            context,
+            'Periode Aktif Tidak Ditemukan',
+            'Tidak ada periode aktif. Buat periode terlebih dahulu sebelum menambahkan data recording.',
+            confirmText: 'Buat Periode',
+            onConfirm: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FormPeriod()),
+              );
+            },
+          );
         }
         return;
       }

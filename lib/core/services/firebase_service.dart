@@ -207,6 +207,21 @@ class FirebaseService {
     }
   }
 
+  /// Delete period
+  Future<void> deletePeriod(String periodId, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId)
+          .delete();
+    } catch (e) {
+      throw Exception('Failed to delete period: $e');
+    }
+  }
+
   // ============================================================================
   // RECORDING METHODS (nested in periods)
   // ============================================================================

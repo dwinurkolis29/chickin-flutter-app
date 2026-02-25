@@ -10,6 +10,7 @@ class PeriodData {
   final DateTime startDate;
   final DateTime? endDate;
   final bool isActive;
+  final bool isDeleted;
   final DateTime createdAt;
   final PeriodSummary? summary;
 
@@ -21,6 +22,7 @@ class PeriodData {
     required this.startDate,
     this.endDate,
     this.isActive = true,
+    this.isDeleted = false,
     required this.createdAt,
     this.summary,
   });
@@ -41,6 +43,7 @@ class PeriodData {
       startDate: (json['startDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       endDate: (json['endDate'] as Timestamp?)?.toDate(),
       isActive: asBool(json, 'isActive', defaultValue: true),
+      isDeleted: asBool(json, 'isDeleted', defaultValue: false),
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       summary: json['summary'] != null 
           ? PeriodSummary.fromJson(json['summary'] as Map<String, dynamic>)
@@ -56,6 +59,7 @@ class PeriodData {
     'startDate': Timestamp.fromDate(startDate),
     if (endDate != null) 'endDate': Timestamp.fromDate(endDate!),
     'isActive': isActive,
+    'isDeleted': isDeleted,
     'createdAt': Timestamp.fromDate(createdAt),
     if (summary != null) 'summary': summary!.toJson(),
   };
@@ -68,6 +72,7 @@ class PeriodData {
     DateTime? startDate,
     DateTime? endDate,
     bool? isActive,
+    bool? isDeleted,
     DateTime? createdAt,
     PeriodSummary? summary,
   }) {
@@ -79,6 +84,7 @@ class PeriodData {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       isActive: isActive ?? this.isActive,
+      isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       summary: summary ?? this.summary,
     );
@@ -86,7 +92,7 @@ class PeriodData {
 
   @override
   String toString() {
-    return 'PeriodData(id: $id, name: $name, isActive: $isActive, initialCapacity: $initialCapacity)';
+    return 'PeriodData(id: $id, name: $name, isActive: $isActive, isDeleted: $isDeleted, initialCapacity: $initialCapacity)';
   }
 }
 

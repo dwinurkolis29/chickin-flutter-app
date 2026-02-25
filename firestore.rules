@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // User can only read/write their own document
+      allow read, write: if isOwner(userId);
+      
+      // Periods subcollection
+      match /periods/{periodId} {
+        // User can read/write their own periods
+        allow read, write: if isOwner(userId);
+        
+        // Recordings subcollection within periods
+        match /recordings/{recordingId} {
+          // User can read/write their own recordings
+          allow read, write: if isOwner(userId);
+        }
+      }
+      
+      // Reminders subcollection (optional)
+      match /reminders/{reminderId} {
+        // User can read/write their own reminders
+        allow read, write: if isOwner(userId);
+      }
+    }
+  }
+}
