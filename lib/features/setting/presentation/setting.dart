@@ -39,7 +39,9 @@ class Setting extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildSectionHeader(context, 'Settings Hub'),
+        _buildSectionHeaderBold(context, "Setting"),
+        const SizedBox(height: 16),
+        _buildSectionHeader(context, 'Features'),
         const SizedBox(height: 8),
         _buildMenuItem(
           context,
@@ -100,6 +102,40 @@ class Setting extends StatelessWidget {
           title: 'Logout',
           onTap: () => _showLogoutDialog(context),
         ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeaderBold(BuildContext context, String title, {String? badge}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Text(
+          title,
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        if (badge != null) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: colorScheme.error,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              badge,
+              style: textTheme.titleMedium?.copyWith(
+                color: colorScheme.onError,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

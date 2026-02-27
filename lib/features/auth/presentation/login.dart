@@ -93,7 +93,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Membuat background warna biru
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Form(
         key: _formKey,
         // menggunakan scroll view agar form dapat di scroll

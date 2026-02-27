@@ -31,8 +31,7 @@ class PeriodController extends ChangeNotifier {
 
     try {
       _periodSubscription = _firebaseService.getPeriodsStream().listen(
-        (data) {
-          // Filter out isDeleted == true
+            (data) {
           _periods = data.where((p) => !p.isDeleted).toList();
           _isLoading = false;
           _errorMessage = null;
@@ -61,28 +60,27 @@ class PeriodController extends ChangeNotifier {
   // BUSINESS LOGIC
   // ============================================================================
 
-  /// Create Period: Check no active period exists.
+  /// Create Period: Defaults to draft (isActive = false, no endDate).
   Future<void> createPeriod(PeriodData period) async {
     final hasActive = _periods.any((p) => p.isActive);
     if (hasActive) {
       throw Exception('Cannot create: There is already an active period.');
     }
-    
-    // Default to inactive (draft) when created unless specified
+
     final newPeriod = period.copyWith(isActive: false, createdAt: DateTime.now());
     await _firebaseService.createPeriod(newPeriod);
   }
 
-  /// Activate Period: Only from draft -> active.
+  /// Activate Period: Works for both draft (no endDate) and closed (has endDate) periods.
+  /// Clears endDate on reactivation so period appears as running again.
   Future<void> activatePeriod(String periodId) async {
     final period = _periods.firstWhere(
-      (p) => p.id == periodId,
+          (p) => p.id == periodId,
       orElse: () => throw Exception('Period not found'),
     );
 
-    final isDraft = !period.isActive && period.endDate == null;
-    if (!isDraft) {
-      throw Exception('Cannot activate: Only draft periods can be activated.');
+    if (period.isActive) {
+      throw Exception('Cannot activate: Period is already active.');
     }
 
     final hasActive = _periods.any((p) => p.isActive);
@@ -90,56 +88,73 @@ class PeriodController extends ChangeNotifier {
       throw Exception('Cannot activate: Another period is already active.');
     }
 
-    final updatedPeriod = period.copyWith(isActive: true, startDate: DateTime.now(), endDate: null);
+    // Clear endDate so it no longer appears as closed
+    final updatedPeriod = period.copyWith(
+      isActive: true,
+      startDate: DateTime.now(),
+      endDate: null, // works correctly with the sentinel-based copyWith
+    );
     await _firebaseService.updatePeriod(periodId, updatedPeriod);
   }
 
-  /// Close Period: Set status = closed (isActive = false, endDate = now).
+  /// Close Period: Sets isActive = false, endDate = now, stores summary.
   Future<void> closePeriod(String periodId, PeriodSummary summary) async {
     final period = _periods.firstWhere(
-      (p) => p.id == periodId,
+          (p) => p.id == periodId,
       orElse: () => throw Exception('Period not found'),
     );
 
-    final isRunning = period.isActive;
-    if (!isRunning) {
-      throw Exception('Cannot close: Period is not active/running.');
+    if (!period.isActive) {
+      throw Exception('Cannot close: Period is not active.');
     }
 
     final updatedPeriod = period.copyWith(
-      isActive: false, 
-      endDate: DateTime.now(),
+      isActive: false,
+      endDate: DateTime.now(), // explicitly set close timestamp
       summary: summary,
     );
     await _firebaseService.updatePeriod(periodId, updatedPeriod);
   }
 
-  /// Delete Period: Only if draft or no recordings exist. Sets isDeleted = true (Hidden).
+  /// Delete Period: Soft delete (isDeleted = true). Only draft periods or periods
+  /// without recordings can be deleted.
   Future<void> deletePeriod(String periodId) async {
     final period = _periods.firstWhere(
-      (p) => p.id == periodId,
+          (p) => p.id == periodId,
       orElse: () => throw Exception('Period not found'),
     );
 
-    // Is it a draft? (isActive = false & endDate = null)
     final isDraft = !period.isActive && period.endDate == null;
 
     if (!isDraft) {
-      // Check if recordings exist if it's not a draft
       final recordingsStream = _firebaseService.getRecordingsStream(periodId);
       final hasRecordings = await recordingsStream.first.then((list) => list.isNotEmpty);
 
       if (hasRecordings) {
-        throw Exception('Cannot delete period: It is not a draft and contains recordings.');
+        throw Exception('Cannot delete period: It contains recordings.');
       }
     }
 
-    // Update document with isDeleted = true instead of deleting entirely
     try {
       final updatedPeriod = period.copyWith(isDeleted: true);
       await _firebaseService.updatePeriod(periodId, updatedPeriod);
     } catch (e) {
-      throw Exception('Failed to hide/delete period: $e');
+      throw Exception('Failed to delete period: $e');
     }
+  }
+
+  /// Update Period Details: Only allowed for draft periods (not active, no endDate).
+  Future<void> updatePeriodDetails(String periodId, PeriodData updatedData) async {
+    final period = _periods.firstWhere(
+          (p) => p.id == periodId,
+      orElse: () => throw Exception('Period not found'),
+    );
+
+    final isDraft = !period.isActive && period.endDate == null;
+    if (!isDraft) {
+      throw Exception('Cannot edit: Only draft periods can be modified.');
+    }
+
+    await _firebaseService.updatePeriod(periodId, updatedData);
   }
 }

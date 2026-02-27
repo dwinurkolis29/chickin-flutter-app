@@ -46,6 +46,15 @@ class PeriodListScreen extends StatelessWidget {
             final periods = controller.periods;
             final activePeriod = _getActivePeriod(periods);
 
+            void handlePeriodTap(PeriodData period) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FormPeriod(period: period),
+                ),
+              );
+            }
+
             return Column(
               children: [
                 _TopBar(onNotificationTap: onNotificationTap),
@@ -56,12 +65,15 @@ class PeriodListScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 12),
-                        ActivePeriodCard(period: activePeriod),
+                        GestureDetector(
+                          onTap: activePeriod != null ? () => handlePeriodTap(activePeriod) : null,
+                          child: ActivePeriodCard(period: activePeriod),
+                        ),
                         const SizedBox(height: 24),
                         _PeriodListSection(
                           periods: periods,
                           onSeeAllTap: onSeeAllTap,
-                          onPeriodTap: onPeriodTap,
+                          onPeriodTap: handlePeriodTap,
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -83,7 +95,7 @@ class _createPeriodButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      backgroundColor: Theme.of(context).colorScheme.secondary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       onPressed: () {
         Navigator.push(
           context,
@@ -93,6 +105,7 @@ class _createPeriodButton extends StatelessWidget {
         );
       },
       child: const Icon(Icons.add),
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 }

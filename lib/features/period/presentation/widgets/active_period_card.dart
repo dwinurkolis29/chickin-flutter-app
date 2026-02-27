@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/firebase_service.dart';
+import '../../../dashboard/data/models/recording_data.dart';
+import '../../../dashboard/domain/usecases/calculate_fcr_usecase.dart';
 import '../../data/models/period_data.dart';
 
 class ActivePeriodCard extends StatelessWidget {
@@ -107,31 +110,68 @@ class _ActivePeriodContent extends StatelessWidget {
         const SizedBox(height: 20),
         Divider(color: Colors.white.withOpacity(0.2)),
         const SizedBox(height: 12),
-        // Stats row 1
-        Row(
-          children: [
-            _StatItem(label: 'Kapasitas Awal', value: '${_fmt(period.initialCapacity)} ekor'),
-            const _CardDivider(),
-            _StatItem(label: 'Usia', value: '$dayAge hari'),
-            const _CardDivider(),
-            _StatItem(label: 'Bobot Awal', value: '${period.initialWeight} kg'),
-          ],
+        StreamBuilder<List<RecordingData>>(
+          stream: FirebaseService().getRecordingsStream(period.id),
+          builder: (context, snapshot) {
+            int liveUsia = dayAge;
+            int livePopulasi = period.initialCapacity;
+            double liveFcr = 0.0;
+            double liveTotalPakan = 0.0;
+
+            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              final recordings = snapshot.data!;
+              final sorted = List<RecordingData>.from(recordings)..sort((a, b) => a.day.compareTo(b.day));
+              final lastRec = sorted.last;
+
+              final fcrUseCase = CalculateFCRUseCase();
+              final weeklyFCRs = fcrUseCase.execute(recordings, period.initialCapacity);
+
+              if (weeklyFCRs.isNotEmpty) {
+                final lastWeekFcr = weeklyFCRs.last;
+                livePopulasi = lastWeekFcr.sisaAyam;
+                liveTotalPakan = lastWeekFcr.totalPakan;
+                liveFcr = lastWeekFcr.fcr;
+              } else {
+                livePopulasi = period.initialCapacity;
+                liveTotalPakan = 0.0;
+                liveFcr = 0.0;
+              }
+              liveUsia = lastRec.day;
+            } else if (period.summary != null) {
+              livePopulasi = period.summary!.finalPopulation;
+              liveFcr = period.summary!.finalFCR;
+              liveTotalPakan = period.summary!.totalFeedKg;
+            }
+
+            return Column(
+              children: [
+                // Stats row 1
+                Row(
+                  children: [
+                    _StatItem(label: 'Usia', value: '$liveUsia hari'),
+                    const _CardDivider(),
+                    _StatItem(label: 'Populasi', value: '${_fmt(livePopulasi)} ekor'),
+                    const _CardDivider(),
+                    _StatItem(label: 'FCR', value: liveFcr.toStringAsFixed(2)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Divider(color: Colors.white.withOpacity(0.2)),
+                const SizedBox(height: 12),
+                // Stats row 2
+                Row(
+                  children: [
+                    _StatItem(label: 'Bobot Awal', value: '${period.initialWeight} kg'),
+                    const _CardDivider(),
+                    _StatItem(label: 'Kapasitas Awal', value: '${_fmt(period.initialCapacity)} ekor'),
+                    const _CardDivider(),
+                    _StatItem(label: 'Total Pakan', value: '${liveTotalPakan.toStringAsFixed(0)} kg'),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
-        // Stats row 2 — only if summary exists
-        if (period.summary != null) ...[
-          const SizedBox(height: 12),
-          Divider(color: Colors.white.withOpacity(0.2)),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _StatItem(label: 'Populasi Akhir', value: '${_fmt(period.summary!.finalPopulation)} ekor'),
-              const _CardDivider(),
-              _StatItem(label: 'FCR', value: period.summary!.finalFCR.toStringAsFixed(2)),
-              const _CardDivider(),
-              _StatItem(label: 'Total Pakan', value: '${period.summary!.totalFeedKg.toStringAsFixed(0)} kg'),
-            ],
-          ),
-        ],
       ],
     );
   }

@@ -1,6 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/safe_convert.dart';
 
+/// Sentinel untuk membedakan "tidak dipass" vs "sengaja diset null"
+class _Undefined {
+  const _Undefined();
+}
+
+const _undefined = _Undefined();
+
 /// Model untuk menyimpan data periode pemeliharaan ayam
 class PeriodData {
   final String id;
@@ -45,7 +52,7 @@ class PeriodData {
       isActive: asBool(json, 'isActive', defaultValue: true),
       isDeleted: asBool(json, 'isDeleted', defaultValue: false),
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      summary: json['summary'] != null 
+      summary: json['summary'] != null
           ? PeriodSummary.fromJson(json['summary'] as Map<String, dynamic>)
           : null,
     );
@@ -57,24 +64,28 @@ class PeriodData {
     'initialCapacity': initialCapacity,
     'initialWeight': initialWeight,
     'startDate': Timestamp.fromDate(startDate),
-    if (endDate != null) 'endDate': Timestamp.fromDate(endDate!),
+    // Explicitly write null to Firestore so endDate is cleared on reactivation
+    'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
     'isActive': isActive,
     'isDeleted': isDeleted,
     'createdAt': Timestamp.fromDate(createdAt),
     if (summary != null) 'summary': summary!.toJson(),
   };
 
+  /// copyWith yang bisa set endDate dan summary ke null secara eksplisit.
+  /// Gunakan clearEndDate: true untuk menghapus endDate (misal saat reactivate).
+  /// Gunakan clearSummary: true untuk menghapus summary.
   PeriodData copyWith({
     String? id,
     String? name,
     int? initialCapacity,
     double? initialWeight,
     DateTime? startDate,
-    DateTime? endDate,
+    Object? endDate = _undefined,
     bool? isActive,
     bool? isDeleted,
     DateTime? createdAt,
-    PeriodSummary? summary,
+    Object? summary = _undefined,
   }) {
     return PeriodData(
       id: id ?? this.id,
@@ -82,17 +93,17 @@ class PeriodData {
       initialCapacity: initialCapacity ?? this.initialCapacity,
       initialWeight: initialWeight ?? this.initialWeight,
       startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
+      endDate: endDate is _Undefined ? this.endDate : endDate as DateTime?,
       isActive: isActive ?? this.isActive,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
-      summary: summary ?? this.summary,
+      summary: summary is _Undefined ? this.summary : summary as PeriodSummary?,
     );
   }
 
   @override
   String toString() {
-    return 'PeriodData(id: $id, name: $name, isActive: $isActive, isDeleted: $isDeleted, initialCapacity: $initialCapacity)';
+    return 'PeriodData(id: $id, name: $name, isActive: $isActive, isDeleted: $isDeleted, initialCapacity: $initialCapacity, endDate: $endDate)';
   }
 }
 
@@ -130,7 +141,8 @@ class PeriodSummary {
       avgDailyGain: asDouble(json, 'avgDailyGain'),
       weeklyFCR: (json['weeklyFCR'] as List<dynamic>?)
           ?.map((e) => WeeklyFCR.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [],
+          .toList() ??
+          [],
     );
   }
 
