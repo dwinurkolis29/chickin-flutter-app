@@ -26,8 +26,7 @@ class CageController extends ChangeNotifier {
   bool get hasValidCageData {
     if (_cageData == null) return false;
     // Cek apakah data benar-benar ada (bukan default value)
-    return _cageData!.type.isNotEmpty &&
-        _cageData!.capacity > 0;
+    return _cageData!.type.isNotEmpty && _cageData!.capacity > 0;
   }
 
   Future<void> loadCageData() async {
@@ -63,6 +62,33 @@ class CageController extends ChangeNotifier {
       _errorMessage = 'Gagal memuat data kandang. Silakan coba lagi.';
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> saveCageData(CageData cage) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        _errorMessage = 'Anda belum login';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
+      
+      await _firebaseService.updateCage(cage);
+      _cageData = cage;
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error saving cage data: $e');
+      _errorMessage = 'Gagal menyimpan data kandang: $e';
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
     }
   }
 }

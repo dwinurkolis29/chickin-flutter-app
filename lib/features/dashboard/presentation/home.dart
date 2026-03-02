@@ -8,13 +8,13 @@ import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/statistics_section.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/datatable.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/population_widget.dart';
-import 'package:recording_app/features/cage/presentation/pages/add_cage_page.dart';
+import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
 import 'package:recording_app/features/dashboard/presentation/form_record.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/setting/presentation/setting.dart';
 import 'package:recording_app/features/dashboard/data/models/recording_data.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
-import 'package:recording_app/core/theme/app_colors.dart'; // ← tambahkan import ini
+import 'package:recording_app/core/theme/app_colors.dart';
 
 import 'widgets/fcr_datatable.dart';
 
@@ -82,7 +82,7 @@ class _HomeState extends State<Home> {
       if (shouldNavigate == true && mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AddCagePage()),
+          MaterialPageRoute(builder: (context) => const FormCage()),
         );
       }
       return;

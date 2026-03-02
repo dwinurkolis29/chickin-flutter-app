@@ -205,7 +205,7 @@ class _FormPeriodState extends State<FormPeriod> {
         actions: [
           if (_isEditing)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
               onPressed: _isLoading ? null : _deletePeriod,
             ),
         ],

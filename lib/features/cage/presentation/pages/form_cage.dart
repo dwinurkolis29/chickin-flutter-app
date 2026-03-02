@@ -1,35 +1,43 @@
-// lib/features/cage/presentation/pages/add_cage_page.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
-import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 
-class AddCagePage extends StatefulWidget {
-  const AddCagePage({super.key});
+class FormCage extends StatefulWidget {
+  final CageData? cageData;
+
+  const FormCage({super.key, this.cageData});
 
   @override
-  State<AddCagePage> createState() => _AddCagePageState();
+  State<FormCage> createState() => _FormCageState();
 }
 
-class _AddCagePageState extends State<AddCagePage> {
+class _FormCageState extends State<FormCage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   bool _isLoading = false;
 
-  // Focus nodes
   final FocusNode _focusNodeType = FocusNode();
   final FocusNode _focusNodeCapacity = FocusNode();
   final FocusNode _focusNodeLocation = FocusNode();
 
-  // Controllers
   final TextEditingController _controllerType = TextEditingController();
   final TextEditingController _controllerCapacity = TextEditingController();
   final TextEditingController _controllerLocation = TextEditingController();
 
-  final FirebaseService _firebaseService = FirebaseService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool get isEditing => widget.cageData != null;
 
-  Future<void> addCage() async {
+  @override
+  void initState() {
+    super.initState();
+    if (isEditing) {
+      _controllerType.text = widget.cageData!.type;
+      _controllerCapacity.text = widget.cageData!.capacity.toString();
+      _controllerLocation.text = widget.cageData!.location;
+    }
+  }
+
+  Future<void> _submitData() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -37,29 +45,26 @@ class _AddCagePageState extends State<AddCagePage> {
     });
 
     try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        if (mounted) {
-          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
-        }
-        return;
-      }
-
       final cage = CageData(
         type: _controllerType.text.trim(),
         capacity: int.tryParse(_controllerCapacity.text) ?? 0,
         location: _controllerLocation.text.trim(),
       );
 
-      await _firebaseService.updateCage(cage);
+      await context.read<CageController>().saveCageData(cage);
 
       if (mounted) {
-        AppSnackbar.showSuccess(context, 'Data kandang berhasil disimpan');
+        AppSnackbar.showSuccess(
+            context,
+            isEditing
+                ? 'Data kandang berhasil diperbarui'
+                : 'Data kandang berhasil disimpan');
+        // Return true to indicate a refresh might be needed by the caller
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
+        AppSnackbar.showError(context, 'Gagal menyimpan data');
       }
     } finally {
       if (mounted) {
@@ -73,11 +78,11 @@ class _AddCagePageState extends State<AddCagePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const Text('Tambah Kandang'),
+        title: Text(isEditing ? 'Edit Kandang' : 'Tambah Kandang'),
       ),
       body: Form(
         key: _formKey,
@@ -89,42 +94,91 @@ class _AddCagePageState extends State<AddCagePage> {
               FittedBox(
                 fit: BoxFit.fitWidth,
                 child: Text(
-                  "Tambah Data Kandang",
+                  isEditing ? "Edit Data Kandang" : "Tambah Data Kandang",
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                "Menambahkan data kandang ayam broiler.",
+                isEditing
+                    ? "Memperbarui data kandang ayam broiler."
+                    : "Menambahkan data kandang ayam broiler.",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 35),
-
-              // Jenis Kandang field
-              TextFormField(
-                controller: _controllerType,
+              DropdownButtonFormField<String>(
+                value: _controllerType.text.isNotEmpty
+                    ? (_controllerType.text.toLowerCase() == 'close house' ? 'Close House' : (_controllerType.text.toLowerCase() == 'open house' ? 'Open House' : null))
+                    : null,
                 focusNode: _focusNodeType,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                dropdownColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 decoration: InputDecoration(
                   labelText: "Jenis Kandang",
-                  prefixIcon: const Icon(Icons.bloodtype),
+                  labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  prefixIcon: Icon(
+                    Icons.bloodtype,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
                   ),
                 ),
+                items: [
+                  DropdownMenuItem(
+                    value: "Close House",
+                    child: Text(
+                      "Close House",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: "Open House",
+                    child: Text(
+                      "Open House",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                ],
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _controllerType.text = newValue;
+                    });
+                  }
+                },
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Jenis kandang tidak boleh kosong.";
                   }
                   return null;
                 },
-                onEditingComplete: () => _focusNodeCapacity.requestFocus(),
               ),
               const SizedBox(height: 10),
-
-              // Kapasitas field
               TextFormField(
                 controller: _controllerCapacity,
                 focusNode: _focusNodeCapacity,
@@ -143,13 +197,14 @@ class _AddCagePageState extends State<AddCagePage> {
                   if (value == null || value.isEmpty) {
                     return "Kapasitas kandang tidak boleh kosong.";
                   }
+                  if (int.tryParse(value) == null) {
+                    return "Kapasitas harus berupa angka.";
+                  }
                   return null;
                 },
                 onEditingComplete: () => _focusNodeLocation.requestFocus(),
               ),
               const SizedBox(height: 10),
-
-              // Lokasi field
               TextFormField(
                 controller: _controllerLocation,
                 focusNode: _focusNodeLocation,
@@ -172,8 +227,6 @@ class _AddCagePageState extends State<AddCagePage> {
                 },
               ),
               const SizedBox(height: 50),
-
-              // Submit button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
@@ -181,24 +234,17 @@ class _AddCagePageState extends State<AddCagePage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: _isLoading
-                    ? null
-                    : () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    addCage();
-                  }
-                },
+                onPressed: _isLoading ? null : _submitData,
                 child: _isLoading
                     ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-                    : const Text("Tambah Kandang"),
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(isEditing ? "Simpan Perubahan" : "Tambah Kandang"),
               ),
               const SizedBox(height: 30),
             ],
@@ -213,11 +259,9 @@ class _AddCagePageState extends State<AddCagePage> {
     _focusNodeType.dispose();
     _focusNodeCapacity.dispose();
     _focusNodeLocation.dispose();
-
     _controllerType.dispose();
     _controllerCapacity.dispose();
     _controllerLocation.dispose();
-
     super.dispose();
   }
 }

@@ -34,8 +34,9 @@ class HomeController extends ChangeNotifier {
       
       // Load initial population from cage data
       if (_activePeriodId != null) {
-        final cageData = await _firebaseService.getCage();
-        _initialPopulation = cageData.capacity;
+        // Use period.initialCapacity as the source of truth for initial population
+        // This ensures FCR is consistent with active_period_card
+        _initialPopulation = activePeriod!.initialCapacity;
         // Cache streams so they don't get recreated on every rebuild
         _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
         _weightStream = _firebaseService.getWeightStream(_activePeriodId!);

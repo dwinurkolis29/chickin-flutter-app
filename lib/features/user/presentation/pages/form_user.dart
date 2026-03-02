@@ -2,23 +2,39 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 
-class User extends StatefulWidget {
-  const User({super.key});
+class FormUser extends StatefulWidget {
+  const FormUser({super.key});
 
   @override
-  State<User> createState() => _UserState();
+  State<FormUser> createState() => _FormUserState();
 }
 
-class _UserState extends State<User> {
+class _FormUserState extends State<FormUser> {
   // Deklarasi objek FirebaseService
   final FirebaseService _firebaseService = FirebaseService();
   // Deklarasi objek FirebaseAuth
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  bool _isSaving = false;
+
   // Deklarasi variabel untuk menyimpan data pengguna
   UserProfile? _userProfile;
   bool _isLoading = true;
   String _errorMessage = '';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -38,6 +54,9 @@ class _UserState extends State<User> {
           // Memperbarui state dengan data pengguna
           setState(() {
             _userProfile = userProfile;
+            _nameController.text = userProfile.name ?? '';
+            _phoneController.text = userProfile.phone ?? '';
+            _addressController.text = userProfile.address ?? '';
             _isLoading = false;
           });
         }
@@ -57,6 +76,39 @@ class _UserState extends State<User> {
     }
   }
 
+  Future<void> _handleUpdate() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final updatedProfile = UserProfile(
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+      );
+      
+      await _firebaseService.updateUserProfile(updatedProfile);
+      
+      if (mounted) {
+        AppSnackbar.showSuccess(context, 'Profil berhasil diperbarui');
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(context, 'Gagal memperbarui profil: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +125,7 @@ class _UserState extends State<User> {
           : SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 30.0),
         child: Form(
+          key: _formKey,
           child: Column(
             children: [
               const SizedBox(height: 30),
@@ -97,10 +150,13 @@ class _UserState extends State<User> {
 
               // Name Field
               TextFormField(
-                // set hanya bisa di baca untuk textfield
-                readOnly: true,
-                // menampilkan data name atau "tidak ada data"
-                initialValue: _userProfile?.name ?? 'Tidak ada data',
+                controller: _nameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nama tidak boleh kosong';
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
                   labelText: "Nama",
                   prefixIcon: const Icon(Icons.person),
@@ -129,10 +185,14 @@ class _UserState extends State<User> {
 
               // Phone Field
               TextFormField(
-                // set hanya bisa di baca untuk textfield
-                readOnly: true,
-                // menampilkan data phone atau "tidak ada data"
-                initialValue: _userProfile?.phone ?? 'Tidak ada data',
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nomor telepon tidak boleh kosong';
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
                   labelText: "Nomor Telepon",
                   prefixIcon: const Icon(Icons.phone),
@@ -145,11 +205,14 @@ class _UserState extends State<User> {
 
               // Address Field
               TextFormField(
-                // set hanya bisa di baca untuk textfield
-                readOnly: true,
-                // menampilkan data address atau "tidak ada data"
-                initialValue: _userProfile?.address ?? 'Tidak ada data',
+                controller: _addressController,
                 maxLines: 2,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Alamat tidak boleh kosong';
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
                   labelText: "Alamat",
                   prefixIcon: const Icon(Icons.location_on_outlined),
@@ -157,6 +220,30 @@ class _UserState extends State<User> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+              ),
+              const SizedBox(height: 30),
+              
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                onPressed: _isSaving ? null : _handleUpdate,
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        "Simpan",
+                        style: TextStyle(fontSize: 16),
+                      ),
               ),
               const SizedBox(height: 50),
             ],

@@ -240,6 +240,17 @@ class _ReminderState extends State<Reminder> {
     }
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FormReminder()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -467,19 +478,7 @@ class _ReminderState extends State<Reminder> {
                             },
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: FloatingActionButton.extended(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const FormReminder()),
-                              );
-                            },
-                            icon: const Icon(Icons.add),
-                            label: const Text('Tambah'),
-                          ),
-                        ),
+                        const SizedBox(height: 80),
                       ],
                     ),
                   ),

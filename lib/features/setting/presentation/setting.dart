@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/features/reminder/presentation/reminder.dart';
-import 'package:recording_app/features/cage/presentation/pages/cage_profile_page.dart';
-import 'package:recording_app/features/user/presentation/user.dart';
+import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart';
+import 'package:recording_app/features/user/presentation/pages/user_profile.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
@@ -46,7 +46,7 @@ class Setting extends StatelessWidget {
         _buildMenuItem(
           context,
           icon: Icons.person_outline,
-          title: 'Account',
+          title: 'Profil',
           onTap: () {
             Navigator.push(
               context,
@@ -72,7 +72,7 @@ class Setting extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CageProfilePage()),
+              MaterialPageRoute(builder: (context) => const CageProfile()),
             );
           },
         ),

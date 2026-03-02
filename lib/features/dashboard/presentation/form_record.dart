@@ -131,8 +131,57 @@ class _AddRecord extends State<AddRecord> {
         createdAt: DateTime.now(),
       );
 
-      // Add recording to active period
-      await _firebaseService.addRecording(activePeriod.id, recording);
+      // Validate abnormal weight
+      final weight = recording.avgWeightGram;
+      
+      if (weight > 0) {
+        final expectedMaxWeight = recording.day * 80.0;
+        final expectedMinWeight = _getExpectedMinWeight(recording.day);
+        
+        bool isAbnormal = false;
+        String warningMessage = '';
+
+        if (weight > expectedMaxWeight) {
+          isAbnormal = true;
+          warningMessage = 'Bobot ayam ($weight gram) terdeteksi terlalu tinggi (maks wajar ~${expectedMaxWeight.toInt()} gram) untuk umur ${recording.day} hari.';
+        } else if (weight < expectedMinWeight) {
+          isAbnormal = true;
+          warningMessage = 'Bobot ayam ($weight gram) terdeteksi di bawah standar minimal.';
+        }
+
+        if (isAbnormal && mounted) {
+          final isConfirmed = await DialogHelper.showConfirm(
+            context,
+            'Bobot Abnormal',
+            '$warningMessage\n\nApakah Anda yakin data ini sudah benar?',
+            confirmText: 'Lanjutkan',
+            cancelText: 'Periksa Kembali',
+            isDestructive: true,
+          );
+
+          if (isConfirmed != true) {
+            setState(() {
+              _isLoading = false;
+            });
+            return;
+          }
+        }
+      }
+
+      await _saveData(activePeriod.id, recording);
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveData(String periodId, RecordingData recording) async {
+    try {
+      await _firebaseService.addRecording(periodId, recording);
       
       if (mounted) {
         Navigator.pop(context, true);
@@ -148,6 +197,17 @@ class _AddRecord extends State<AddRecord> {
         });
       }
     }
+  }
+
+  double _getStandardWeight(int day) {
+    if (day <= 0) return 40.0;
+    // Aproksimasi eksponensial standar broiler (misal. Cobb 500)
+    // Formula dasar: DOC ~42g + kenaikan linear & eksponensial seiring hari.
+    return 42.0 + (day * 12.0) + (day * day * 1.1);
+  }
+
+  double _getExpectedMinWeight(int day) {
+    return _getStandardWeight(day) * 0.7;
   }
 
   @override
