@@ -1,21 +1,20 @@
-import 'package:recording_app/features/dashboard/data/models/fcr_data.dart';
-import 'package:recording_app/features/dashboard/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/data/models/fcr_data.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
 /// Use case for calculating weekly FCR (Feed Conversion Ratio)
-/// 
+///
 /// Formula: FCR = total pakan / total berat ayam hidup
 /// Where:
 ///   - total pakan = cumulative feed consumed (kg)
 ///   - total berat ayam hidup = remaining chickens × average weight (kg)
-/// 
+///
 /// Week logic: Day 1-7 = Week 1, Day 8-14 = Week 2, etc.
-class CalculateFCRUseCase {
-  
+class CalculateFCR {
   /// Calculate weekly FCR data from recordings
-  /// 
+  ///
   /// [recordings] - List of recording data (treated as immutable)
   /// [initialCapacity] - Initial chicken population from period data
-  /// 
+  ///
   /// Returns cumulative FCR data per week
   List<FCRData> execute(List<RecordingData> recordings, int initialCapacity) {
     if (recordings.isEmpty || initialCapacity == 0) return [];
@@ -29,7 +28,7 @@ class CalculateFCRUseCase {
     final maxWeek = ((maxDay - 1) / 7).floor() + 1;
 
     List<FCRData> weeklyFCR = [];
-    
+
     // Cumulative metrics
     int cumulativeDeaths = 0;
     double cumulativeFeedKg = 0.0;
@@ -66,7 +65,7 @@ class CalculateFCRUseCase {
       // Get last day recording for current average weight
       final lastDayRecording = weekRecordings.last;
       final currentAvgWeightKg = lastDayRecording.avgWeightGram / 1000;
-      
+
       // Calculate total weight / final biomass (kg)
       // Total berat ayam hidup = sisa ayam × berat rata-rata
       final finalBiomass = remainingChickens * currentAvgWeightKg;

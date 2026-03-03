@@ -4,7 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
-import '../../features/dashboard/data/models/recording_data.dart';
+import '../../features/recording/data/models/recording_data.dart';
 import '../../features/user/data/models/user_data.dart';
 
 class FirebaseService {
@@ -300,6 +300,23 @@ class FirebaseService {
           .delete();
     } catch (e) {
       throw Exception('Failed to delete recording: $e');
+    }
+  }
+
+  /// Update recording
+  Future<void> updateRecording(String periodId, String recordingId, RecordingData recording, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId)
+          .collection('recordings')
+          .doc(recordingId)
+          .update(recording.toJson());
+    } catch (e) {
+      throw Exception('Failed to update recording: $e');
     }
   }
 

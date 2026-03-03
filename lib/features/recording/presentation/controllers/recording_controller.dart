@@ -5,15 +5,15 @@ import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
 
-class HomeController extends ChangeNotifier {
+class RecordingController extends ChangeNotifier {
   final FirebaseService _firebaseService;
-  final CalculateFCR _calculateFCRUseCase;
-  
-  HomeController({
+  final CalculateFCR _calculateFCR;
+
+  RecordingController({
     required FirebaseService firebaseService,
-    CalculateFCR? calculateFCRUseCase,
+    CalculateFCR? calculateFCR,
   })  : _firebaseService = firebaseService,
-        _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR();
+        _calculateFCR = calculateFCR ?? CalculateFCR();
 
   String? _activePeriodId;
   bool _isLoadingPeriod = true;
@@ -31,17 +31,13 @@ class HomeController extends ChangeNotifier {
     try {
       final activePeriod = await _firebaseService.getActivePeriod();
       _activePeriodId = activePeriod?.id;
-      
-      // Load initial population from cage data
+
       if (_activePeriodId != null) {
-        // Use period.initialCapacity as the source of truth for initial population
-        // This ensures FCR is consistent with active_period_card
         _initialPopulation = activePeriod!.initialCapacity;
-        // Cache streams so they don't get recreated on every rebuild
         _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
         _weightStream = _firebaseService.getWeightStream(_activePeriodId!);
       }
-      
+
       _isLoadingPeriod = false;
       notifyListeners();
     } catch (e) {
@@ -50,7 +46,6 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  // Refresh streams to get latest data (e.g., after adding new recording)
   void refreshStreams() {
     if (_activePeriodId != null) {
       _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
@@ -60,9 +55,12 @@ class HomeController extends ChangeNotifier {
   }
 
   List<FCRData> calculateWeeklyFCR(List<RecordingData> recordings) {
-    if (recordings.isEmpty || _initialPopulation == 0) {
-      return <FCRData>[];
-    }
-    return _calculateFCRUseCase.execute(recordings, _initialPopulation);
+    if (recordings.isEmpty || _initialPopulation == 0) return <FCRData>[];
+    return _calculateFCR.execute(recordings, _initialPopulation);
+  }
+
+  Future<void> updateRecording(RecordingData recording) async {
+    if (_activePeriodId == null) return;
+    await _firebaseService.updateRecording(_activePeriodId!, recording.id, recording);
   }
 }

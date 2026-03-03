@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../data/models/fcr_data.dart';
+import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 
 class FCRDataTable extends StatelessWidget {
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
-import 'package:recording_app/features/dashboard/presentation/home.dart';
+import 'package:recording_app/features/dashboard/presentation/dashboard.dart';
 
 /// AuthWrapper handles authentication state at the app root level.
 /// It listens to Firebase Auth state changes and displays the appropriate screen.
@@ -24,7 +24,7 @@ class AuthWrapper extends StatelessWidget {
 
         // Show Home if user is logged in, otherwise show Login
         if (snapshot.hasData) {
-          return const Home();
+          return const Dashboard();
         } else {
           return const Login();
         }

@@ -8,6 +8,7 @@ import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
+import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -32,6 +33,12 @@ class MainApp extends StatelessWidget {
         // Setup PeriodController
         ChangeNotifierProvider(
           create: (_) => PeriodController(
+            firebaseService: FirebaseService(),
+          ),
+        ),
+        // Setup RecordingController
+        ChangeNotifierProvider(
+          create: (_) => RecordingController(
             firebaseService: FirebaseService(),
           ),
         ),

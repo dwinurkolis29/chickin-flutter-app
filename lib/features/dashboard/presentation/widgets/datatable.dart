@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../data/models/recording_data.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
 class ChickenDataTable extends StatefulWidget {
   final List<RecordingData> chickenDataList;
-  
-  const ChickenDataTable({super.key, required this.chickenDataList});
+  final VoidCallback? onViewAll;
+
+  const ChickenDataTable({super.key, required this.chickenDataList, this.onViewAll});
 
   @override
   ChickenDataTableState createState() => ChickenDataTableState();
@@ -46,6 +47,14 @@ class ChickenDataTableState extends State<ChickenDataTable> {
       child: PaginatedDataTable(
         // membuat header pada paginated data table
         header: const Text('Recording Data'),
+        actions: [
+          if (widget.onViewAll != null)
+            TextButton.icon(
+              onPressed: widget.onViewAll,
+              icon: const Icon(Icons.list_alt, size: 16),
+              label: const Text('Lihat Semua'),
+            ),
+        ],
         rowsPerPage: _rowsPerPage,
         onRowsPerPageChanged: (value) {
           setState(() {

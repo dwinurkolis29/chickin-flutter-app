@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/components/dialogs/dialog_helper.dart';
 import '../controllers/auth_controller.dart';
-import '../../dashboard/presentation/home.dart';
+import '../../dashboard/presentation/dashboard.dart';
 import 'signup.dart';
 
 class Login extends StatefulWidget {
@@ -59,7 +59,7 @@ class _LoginState extends State<Login> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const Home(),
+            builder: (context) => const Dashboard(),
           ),
         );
       } else {

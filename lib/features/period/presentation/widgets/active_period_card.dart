@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/firebase_service.dart';
-import '../../../dashboard/data/models/recording_data.dart';
-import '../../../dashboard/domain/usecases/calculate_fcr_usecase.dart';
+import '../../../recording/data/models/recording_data.dart';
+import '../../../recording/domain/usecases/calculate_fcr.dart';
 import '../../data/models/period_data.dart';
 
 class ActivePeriodCard extends StatelessWidget {
@@ -123,7 +123,7 @@ class _ActivePeriodContent extends StatelessWidget {
               final sorted = List<RecordingData>.from(recordings)..sort((a, b) => a.day.compareTo(b.day));
               final lastRec = sorted.last;
 
-              final fcrUseCase = CalculateFCRUseCase();
+              final fcrUseCase = CalculateFCR();
               final weeklyFCRs = fcrUseCase.execute(recordings, period.initialCapacity);
 
               if (weeklyFCRs.isNotEmpty) {

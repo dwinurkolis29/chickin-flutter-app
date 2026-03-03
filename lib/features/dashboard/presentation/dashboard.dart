@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recording_app/features/dashboard/data/models/fcr_data.dart';
+import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
@@ -9,23 +9,25 @@ import 'package:recording_app/features/dashboard/presentation/widgets/statistics
 import 'package:recording_app/features/dashboard/presentation/widgets/datatable.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/population_widget.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
-import 'package:recording_app/features/dashboard/presentation/form_record.dart';
+import 'package:recording_app/features/recording/presentation/pages/form_recording.dart';
+import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/setting/presentation/setting.dart';
-import 'package:recording_app/features/dashboard/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
+import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 
 import 'widgets/fcr_datatable.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _HomeState extends State<Home> {
+class _DashboardState extends State<Dashboard> {
   final FirebaseService _firebaseService = FirebaseService();
 
   // 0 = Home, 1 = Setting
@@ -37,7 +39,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _pages = <Widget>[
-      HomeContent(),
+      const DashboardContent(),
       const Setting(),
     ];
   }
@@ -90,7 +92,7 @@ class _HomeState extends State<Home> {
 
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddRecord()),
+      MaterialPageRoute(builder: (context) => const FormRecording()),
     );
 
     if (result == true && mounted) {
@@ -150,12 +152,8 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            _selectedIndex == 0
-                                ? Icons.home
-                                : Icons.home_outlined,
-                            color: _selectedIndex == 0
-                                ? AppColors.primary
-                                : AppColors.secondary,
+                            _selectedIndex == 0 ? Icons.home : Icons.home_outlined,
+                            color: _selectedIndex == 0 ? AppColors.primary : AppColors.secondary,
                             size: 24,
                           ),
                           const SizedBox(height: 3),
@@ -163,12 +161,8 @@ class _HomeState extends State<Home> {
                             'Home',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: _selectedIndex == 0
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: _selectedIndex == 0
-                                  ? AppColors.primary
-                                  : AppColors.secondary,
+                              fontWeight: _selectedIndex == 0 ? FontWeight.w600 : FontWeight.w400,
+                              color: _selectedIndex == 0 ? AppColors.primary : AppColors.secondary,
                             ),
                           ),
                         ],
@@ -197,12 +191,8 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            _selectedIndex == 1
-                                ? Icons.settings
-                                : Icons.settings_outlined,
-                            color: _selectedIndex == 1
-                                ? AppColors.primary
-                                : AppColors.secondary,
+                            _selectedIndex == 1 ? Icons.settings : Icons.settings_outlined,
+                            color: _selectedIndex == 1 ? AppColors.primary : AppColors.secondary,
                             size: 24,
                           ),
                           const SizedBox(height: 3),
@@ -210,12 +200,8 @@ class _HomeState extends State<Home> {
                             'Setting',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: _selectedIndex == 1
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: _selectedIndex == 1
-                                  ? AppColors.primary
-                                  : AppColors.secondary,
+                              fontWeight: _selectedIndex == 1 ? FontWeight.w600 : FontWeight.w400,
+                              color: _selectedIndex == 1 ? AppColors.primary : AppColors.secondary,
                             ),
                           ),
                         ],
@@ -232,16 +218,14 @@ class _HomeState extends State<Home> {
   }
 }
 
-// ── HomeContent tidak diubah sama sekali ────────────────────────────────────
-
-class HomeContent extends StatefulWidget {
-  const HomeContent({super.key});
+class DashboardContent extends StatefulWidget {
+  const DashboardContent({super.key});
 
   @override
-  State<HomeContent> createState() => _HomeContentState();
+  State<DashboardContent> createState() => _DashboardContentState();
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _DashboardContentState extends State<DashboardContent> {
   @override
   void initState() {
     super.initState();
@@ -261,30 +245,18 @@ class _HomeContentState extends State<HomeContent> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 50,
-                  color: Theme.of(context).colorScheme.error,
-                ),
+                Icon(Icons.error_outline, size: 50, color: Theme.of(context).colorScheme.error),
                 const SizedBox(height: 10),
-                Text(
-                  "Anda belum login",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text('Anda belum login', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 10),
-                Text(
-                  "Silahkan login terlebih dahulu",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text('Silahkan login terlebih dahulu', style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Login()),
-                    );
-                  },
-                  child: const Text("Login"),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login()),
+                  ),
+                  child: const Text('Login'),
                 ),
               ],
             ),
@@ -307,15 +279,15 @@ class _HomeContentState extends State<HomeContent> {
                 Text(
                   'Belum ada data recording',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Klik tombol + untuk menambah data',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -344,7 +316,7 @@ class _HomeContentState extends State<HomeContent> {
                       }
 
                       if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
+                        return Center(child: Text('Error: ${snapshot.error}'));
                       }
 
                       final recordings = snapshot.data ?? <RecordingData>[];
@@ -359,27 +331,22 @@ class _HomeContentState extends State<HomeContent> {
                               Text(
                                 'Belum ada data recording',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Klik tombol + untuk menambah data',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
                               ),
                             ],
                           ),
                         );
                       }
 
-                      final chickenTable = ChickenDataTable(
-                        chickenDataList: recordings,
-                      );
-
                       final fcrResults = controller.calculateWeeklyFCR(recordings);
-
                       final fcr = fcrResults.isNotEmpty ? fcrResults.last.fcr : 0.0;
                       final populationRemain = fcrResults.isNotEmpty ? fcrResults.last.sisaAyam : 0;
                       final umur = recordings.isNotEmpty ? recordings.last.day : 0;
@@ -395,7 +362,20 @@ class _HomeContentState extends State<HomeContent> {
                             weightStream: controller.weightStream,
                           ),
                           const SizedBox(height: 10),
-                          chickenTable,
+                          ChickenDataTable(
+                            chickenDataList: recordings,
+                            onViewAll: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChangeNotifierProvider<RecordingController>(
+                                  create: (_) => RecordingController(
+                                    firebaseService: FirebaseService(),
+                                  )..loadActivePeriod(),
+                                  child: const DetailRecording(),
+                                ),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 10),
                           FCRDataTable(fcrData: fcrResults),
                           const SizedBox(height: 80),

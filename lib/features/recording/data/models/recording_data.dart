@@ -66,5 +66,3 @@ class RecordingData {
     return 'RecordingData(id: $id, day: $day, avgWeightGram: $avgWeightGram, feedSack: $feedSack, mortality: $mortality)';
   }
 }
-
-
