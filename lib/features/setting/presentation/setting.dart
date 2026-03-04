@@ -87,6 +87,13 @@ class Setting extends StatelessWidget {
             );
           },
         ),
+        _buildMenuItem(
+          context,
+          icon: Icons.analytics,
+          title: 'Report',
+          onTap: () {
+          },
+        ),
         const SizedBox(height: 24),
         _buildSectionHeader(context, 'Support & FAQs'),
         const SizedBox(height: 8),

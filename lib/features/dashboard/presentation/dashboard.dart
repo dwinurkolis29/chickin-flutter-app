@@ -362,16 +362,21 @@ class _DashboardContentState extends State<DashboardContent> {
                             weightStream: controller.weightStream,
                           ),
                           const SizedBox(height: 10),
-                          ChickenDataTable(
-                            chickenDataList: recordings,
-                            onViewAll: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ChangeNotifierProvider<RecordingController>(
-                                  create: (_) => RecordingController(
-                                    firebaseService: FirebaseService(),
-                                  )..loadActivePeriod(),
-                                  child: const DetailRecording(),
+                          Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 720),
+                              child: ChickenDataTable(
+                                chickenDataList: recordings,
+                                onViewAll: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ChangeNotifierProvider<RecordingController>(
+                                      create: (_) => RecordingController(
+                                        firebaseService: FirebaseService(),
+                                      )..loadActivePeriod(),
+                                      child: const DetailRecording(),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
