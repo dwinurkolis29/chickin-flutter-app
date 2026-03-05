@@ -5,6 +5,7 @@ import 'package:recording_app/features/user/presentation/pages/user_profile.dart
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
+import 'package:recording_app/features/reporting/presentation/pages/period_report.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 
 class Setting extends StatelessWidget {
@@ -92,6 +93,10 @@ class Setting extends StatelessWidget {
           icon: Icons.analytics,
           title: 'Report',
           onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PeriodReportView()),
+            );
           },
         ),
         const SizedBox(height: 24),

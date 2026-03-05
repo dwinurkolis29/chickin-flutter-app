@@ -9,6 +9,7 @@ import 'package:recording_app/features/cage/presentation/controllers/cage_contro
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
+import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -39,6 +40,12 @@ class MainApp extends StatelessWidget {
         // Setup RecordingController
         ChangeNotifierProvider(
           create: (_) => RecordingController(
+            firebaseService: FirebaseService(),
+          ),
+        ),
+        // Setup ReportingController
+        ChangeNotifierProvider(
+          create: (_) => ReportingController(
             firebaseService: FirebaseService(),
           ),
         ),
