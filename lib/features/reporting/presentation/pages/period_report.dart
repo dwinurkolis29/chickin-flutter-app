@@ -10,6 +10,7 @@ import 'package:recording_app/features/reporting/presentation/widgets/population
 import 'package:recording_app/features/reporting/presentation/widgets/performance_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/analytics_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/recording_table.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 
 /// Navigate to this page using [Navigator.push] or push a named route.
 /// [ReportingController] must be available in the provider tree
@@ -42,7 +43,7 @@ class _PeriodReportView extends StatelessWidget {
         ),
         title: Text(
           'Laporan Periode',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: cs.onSurface,
               ),
         ),
@@ -144,7 +145,7 @@ class PeriodHeaderSection extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Periode',
-                  style: tt.labelLarge?.copyWith(color: cs.onSurface),
+                  style: tt.titleMedium?.copyWith(color: cs.onSurface),
                 ),
                 const Spacer(),
                 _PeriodDropdown(controller: controller),
@@ -205,13 +206,13 @@ class _PeriodDropdown extends StatelessWidget {
           value: controller.selectedPeriodId,
           isDense: true,
           icon: Icon(Icons.expand_more, size: 18, color: cs.primary),
-          style: tt.bodySmall?.copyWith(color: cs.onSurface),
+          style: tt.bodyMedium?.copyWith(color: cs.onSurface),
           items: periods
               .map((p) => DropdownMenuItem(
                     value: p.id,
                     child: Text(
                       p.name,
-                      style: tt.bodySmall?.copyWith(color: cs.onSurface),
+                      style: tt.bodyMedium?.copyWith(color: cs.onSurface),
                     ),
                   ))
               .toList(),
@@ -238,10 +239,10 @@ class _InfoRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(0.6))),
+            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(0.6))),
         Text(
           value,
-          style: tt.bodySmall
+          style: tt.bodyMedium
               ?.copyWith(fontWeight: FontWeight.w600, color: valueColor ?? cs.onSurface),
         ),
       ],
@@ -308,15 +309,11 @@ class _ExportButtons extends StatelessWidget {
   }
 
   void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PDF export: coming soon')),
-    );
+    AppSnackbar.showInfo(context, 'PDF export: coming soon');
   }
 
   void _showError(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-    );
+    AppSnackbar.showError(context, msg);
   }
 }
 
@@ -355,7 +352,7 @@ class _ExportChip extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: tt.labelSmall?.copyWith(
+              style: tt.labelMedium?.copyWith(
                 color: disabled
                     ? cs.onSurface.withOpacity(0.3)
                     : cs.onSurface,

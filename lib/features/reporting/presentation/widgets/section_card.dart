@@ -40,7 +40,10 @@ class SectionCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: tt.labelLarge?.copyWith(color: cs.onSurface),
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
                 ),
               ],
             ),
@@ -71,10 +74,17 @@ class MetricRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(0.65))),
-          Text(value,
-              style: tt.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          Text(
+            value,
+            style: tt.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
         ],
       ),
     );

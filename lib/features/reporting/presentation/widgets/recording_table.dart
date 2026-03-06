@@ -1,16 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 
-class RecordingTable extends StatelessWidget {
+import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
+
+class RecordingTable extends StatefulWidget {
   final PeriodReport report;
   const RecordingTable({super.key, required this.report});
+
+  @override
+  State<RecordingTable> createState() => _RecordingTableState();
+}
+
+class _RecordingTableState extends State<RecordingTable> {
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
+  void _onSort(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final recordings = report.recordings;
+
+    final recordings = List<RecordingData>.from(widget.report.recordings);
+
+    // sorting
+    recordings.sort((a, b) {
+      int cmp;
+      switch (_sortColumnIndex) {
+        case 0:
+          cmp = a.day.compareTo(b.day);
+          break;
+        case 1:
+          cmp = a.avgWeightGram.compareTo(b.avgWeightGram);
+          break;
+        case 2:
+          cmp = a.feedSack.compareTo(b.feedSack);
+          break;
+        case 3:
+          cmp = a.mortality.compareTo(b.mortality);
+          break;
+        default:
+          cmp = 0;
+      }
+      return _sortAscending ? cmp : -cmp;
+    });
 
     return Container(
       decoration: BoxDecoration(
@@ -35,7 +74,10 @@ class RecordingTable extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Rekap Harian',
-                  style: tt.labelLarge?.copyWith(color: cs.onSurface),
+                  style: tt.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
                 ),
               ],
             ),
@@ -47,46 +89,76 @@ class RecordingTable extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Tidak ada data recording',
-                  style: tt.bodySmall
-                      ?.copyWith(color: cs.onSurface.withOpacity(0.5)),
+                  style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             )
           else
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.all(
-                  cs.primary.withOpacity(0.08),
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Card(
+                    elevation: 8,
+                    child: DataTable(
+                      sortColumnIndex: _sortColumnIndex,
+                      sortAscending: _sortAscending,
+                      columnSpacing: 16,
+                      headingRowColor: WidgetStateProperty.all(
+                        cs.surface,
+                      ),
+                      columns: [
+                        DataColumn(
+                          label: const Text(
+                            'Hari',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          numeric: true,
+                          onSort: _onSort,
+                        ),
+                        DataColumn(
+                          label: const Text(
+                            'Berat (g)',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          numeric: true,
+                          onSort: _onSort,
+                        ),
+                        DataColumn(
+                          label: const Text(
+                            'Pakan (sak)',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          numeric: true,
+                          onSort: _onSort,
+                        ),
+                        DataColumn(
+                          label: const Text(
+                            'Mati',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          numeric: true,
+                          onSort: _onSort,
+                        ),
+                      ],
+                      rows:
+                          recordings.map((r) {
+                            return DataRow(
+                              cells: [
+                                DataCell(Text('${r.day}')),
+                                DataCell(Text('${r.avgWeightGram}')),
+                                DataCell(Text('${r.feedSack}')),
+                                DataCell(Text('${r.mortality}')),
+                              ],
+                            );
+                          }).toList(),
+                    ),
+                  ),
                 ),
-                headingTextStyle: tt.labelSmall?.copyWith(
-                  color: cs.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-                dataTextStyle: tt.bodySmall?.copyWith(color: cs.onSurface),
-                columnSpacing: 24,
-                horizontalMargin: 16,
-                dividerThickness: 0.5,
-                columns: const [
-                  DataColumn(label: Text('Hari')),
-                  DataColumn(label: Text('Mati'), numeric: true),
-                  DataColumn(label: Text('Sak Pakan'), numeric: true),
-                  DataColumn(label: Text('Bobot (g)'), numeric: true),
-                ],
-                rows: recordings
-                    .map(
-                      (r) => DataRow(cells: [
-                        DataCell(Text('Hari ${r.day}')),
-                        DataCell(Text('${r.mortality}')),
-                        DataCell(Text('${r.feedSack}')),
-                        DataCell(Text(
-                            NumberFormat('#,###').format(r.avgWeightGram))),
-                      ]),
-                    )
-                    .toList(),
               ),
             ),
-          const SizedBox(height: 8),
         ],
       ),
     );

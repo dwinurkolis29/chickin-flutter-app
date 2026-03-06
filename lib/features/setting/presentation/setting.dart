@@ -6,6 +6,7 @@ import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report.dart';
+import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 
 class Setting extends StatelessWidget {
@@ -63,6 +64,17 @@ class Setting extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PeriodListScreen()),
+            );
+          },
+        ),
+         _buildMenuItem(
+          context,
+          icon: Icons.document_scanner_outlined,
+          title: 'Detail Recording',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DetailRecording()),
             );
           },
         ),

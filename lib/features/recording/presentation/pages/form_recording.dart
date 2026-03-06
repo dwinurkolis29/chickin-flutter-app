@@ -44,9 +44,8 @@ class _FormRecordingState extends State<FormRecording> {
     try {
       final activePeriod = await _firebaseService.getActivePeriod();
       if (activePeriod != null) {
-        final recordings = await _firebaseService
-            .getRecordingsStream(activePeriod.id)
-            .first;
+        final recordings =
+            await _firebaseService.getRecordingsStream(activePeriod.id).first;
 
         if (recordings.isNotEmpty) {
           recordings.sort((a, b) => b.day.compareTo(a.day));
@@ -75,7 +74,8 @@ class _FormRecordingState extends State<FormRecording> {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        if (mounted) AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
+        if (mounted)
+          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
         return;
       }
 
@@ -123,7 +123,8 @@ class _FormRecordingState extends State<FormRecording> {
               'Bobot ayam ($weight gram) terdeteksi terlalu tinggi (maks wajar ~${expectedMaxWeight.toInt()} gram) untuk umur ${recording.day} hari.';
         } else if (weight < expectedMinWeight) {
           isAbnormal = true;
-          warningMessage = 'Bobot ayam ($weight gram) terdeteksi di bawah standar minimal.';
+          warningMessage =
+              'Bobot ayam ($weight gram) terdeteksi di bawah standar minimal.';
         }
 
         if (isAbnormal && mounted) {
@@ -207,10 +208,18 @@ class _FormRecordingState extends State<FormRecording> {
                 decoration: InputDecoration(
                   labelText: 'Umur Ayam (hari)',
                   prefixIcon: const Icon(Icons.data_saver_on_rounded),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Umur tidak boleh kosong.' : null,
+                validator:
+                    (v) =>
+                        (v == null || v.isEmpty)
+                            ? 'Umur tidak boleh kosong.'
+                            : null,
                 onEditingComplete: () => _focusNodeTerimaPakan.requestFocus(),
               ),
               const SizedBox(height: 10),
@@ -221,10 +230,18 @@ class _FormRecordingState extends State<FormRecording> {
                 decoration: InputDecoration(
                   labelText: 'Habis pakan (sak)',
                   prefixIcon: const Icon(Icons.arrow_circle_up),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Habis pakan tidak boleh kosong.' : null,
+                validator:
+                    (v) =>
+                        (v == null || v.isEmpty)
+                            ? 'Habis pakan tidak boleh kosong.'
+                            : null,
                 onEditingComplete: () => _focusNodeMatiAyam.requestFocus(),
               ),
               const SizedBox(height: 10),
@@ -235,8 +252,12 @@ class _FormRecordingState extends State<FormRecording> {
                 decoration: InputDecoration(
                   labelText: 'Mati ayam (Ekor)',
                   prefixIcon: const Icon(Icons.highlight_remove),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onEditingComplete: () => _focusNodeBeratAyam.requestFocus(),
               ),
@@ -248,28 +269,41 @@ class _FormRecordingState extends State<FormRecording> {
                 decoration: InputDecoration(
                   labelText: 'Berat Ayam (gram)',
                   prefixIcon: const Icon(Icons.scale),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Berat ayam tidak boleh kosong.' : null,
+                validator:
+                    (v) =>
+                        (v == null || v.isEmpty)
+                            ? 'Berat ayam tidak boleh kosong.'
+                            : null,
               ),
               const SizedBox(height: 50),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
                 onPressed: _isLoading ? null : _addRecord,
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text('Tambah Data'),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : const Text('Tambah Data'),
               ),
               const SizedBox(height: 30),
             ],

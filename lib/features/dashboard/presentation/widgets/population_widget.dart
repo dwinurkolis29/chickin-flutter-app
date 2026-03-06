@@ -1,13 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:recording_app/features/cage/data/models/cage_data.dart';
-import 'package:recording_app/core/services/firebase_service.dart';
 
 class PopulationSection extends StatefulWidget {
   final int populationRemain;
+  final int capacity;
 
-  const PopulationSection({Key? key, required this.populationRemain})
-      : super(key: key);
+  const PopulationSection({
+    Key? key,
+    required this.populationRemain,
+    required this.capacity,
+  }) : super(key: key);
 
   @override
   State<PopulationSection> createState() => _PopulationSectionState();
@@ -15,11 +16,7 @@ class PopulationSection extends StatefulWidget {
 
 class _PopulationSectionState extends State<PopulationSection>
     with SingleTickerProviderStateMixin {
-  final FirebaseService _firebaseService = FirebaseService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  CageData? _cageData;
-  bool _isLoading = true;
-  String _errorMessage = '';
+  bool _isLoading = false;
 
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
@@ -28,7 +25,7 @@ class _PopulationSectionState extends State<PopulationSection>
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize animation controller
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -46,8 +43,9 @@ class _PopulationSectionState extends State<PopulationSection>
       end: 0,
     ).animate(_animationController);
 
-    // Memuat data kandang ketika halaman pertama kali dibuka
-    _loadCageData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startAnimation();
+    });
   }
 
   @override
@@ -56,59 +54,22 @@ class _PopulationSectionState extends State<PopulationSection>
     super.dispose();
   }
 
-  // Memuat data kandang dari Firebase
-  Future<void> _loadCageData() async {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        // Memuat data kandang
-        final cageData = await _firebaseService.getCage();
-        if (mounted) {
-          setState(() {
-            // Memperbarui state dengan data kandang
-            _cageData = cageData;
-            _isLoading = false;
-          });
-
-          // Start animation after data is loaded
-          _startAnimation();
-        }
-      } else {
-        setState(() {
-          // Menampilkan pesan jika pengguna belum login
-          _errorMessage = 'Pengguna tidak login';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Gagal memuat data: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
   void _startAnimation() {
-    if (_cageData == null || _cageData!.capacity == 0) return;
+    if (widget.capacity == 0) return;
 
-    final targetProgress = widget.populationRemain / _cageData!.capacity;
+    final targetProgress = widget.populationRemain / widget.capacity;
 
     // Update animations with actual target values
-    _progressAnimation = Tween<double>(
-      begin: 0.0,
-      end: targetProgress,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _progressAnimation = Tween<double>(begin: 0.0, end: targetProgress).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
 
     _counterAnimation = IntTween(
       begin: 0,
       end: widget.populationRemain,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
 
     _animationController.forward();
   }
@@ -116,9 +77,8 @@ class _PopulationSectionState extends State<PopulationSection>
   @override
   Widget build(BuildContext context) {
     // Menghitung persentase ayam yang masih hidup dari jumlah populasi
-    double progress = _cageData == null || _cageData!.capacity == 0
-        ? 0
-        : widget.populationRemain / (_cageData?.capacity ?? 1);
+    double progress =
+        widget.capacity == 0 ? 0 : widget.populationRemain / widget.capacity;
     String percentage = (progress * 100).toStringAsFixed(1);
 
     return Column(
@@ -132,10 +92,7 @@ class _PopulationSectionState extends State<PopulationSection>
               children: [
                 const Text(
                   'Populasi',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 AnimatedBuilder(
                   animation: _counterAnimation,
@@ -178,8 +135,8 @@ class _PopulationSectionState extends State<PopulationSection>
               child: AnimatedBuilder(
                 animation: _progressAnimation,
                 builder: (context, child) {
-                  final animatedPercentage =
-                      (_progressAnimation.value * 100).toStringAsFixed(1);
+                  final animatedPercentage = (_progressAnimation.value * 100)
+                      .toStringAsFixed(1);
 
                   return Stack(
                     fit: StackFit.expand,
@@ -187,7 +144,10 @@ class _PopulationSectionState extends State<PopulationSection>
                       CircularProgressIndicator(
                         value: _progressAnimation.value,
                         strokeWidth: 10,
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        backgroundColor:
+                            Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           Theme.of(context).colorScheme.primary,
                         ),
@@ -205,8 +165,13 @@ class _PopulationSectionState extends State<PopulationSection>
                             ),
                             Text(
                               'dari 100%',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelSmall?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],

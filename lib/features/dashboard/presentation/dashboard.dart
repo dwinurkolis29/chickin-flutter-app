@@ -15,8 +15,6 @@ import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/setting/presentation/setting.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
-import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
-import 'package:recording_app/core/theme/app_colors.dart';
 
 import 'widgets/fcr_datatable.dart';
 
@@ -38,10 +36,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    _pages = <Widget>[
-      const DashboardContent(),
-      const Setting(),
-    ];
+    _pages = <Widget>[const DashboardContent(), const Setting()];
   }
 
   void _onNavTap(int index) => setState(() => _selectedIndex = index);
@@ -105,9 +100,7 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: _pages[_selectedIndex],
-      ),
+      body: SafeArea(child: _pages[_selectedIndex]),
 
       // ── FAB ────────────────────────────────────────────────────────────────
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -116,8 +109,8 @@ class _DashboardState extends State<Dashboard> {
         label: 'Tambah recording',
         child: FloatingActionButton(
           onPressed: _navigateToAddRecord,
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           elevation: 4,
           shape: const CircleBorder(),
           child: const Icon(Icons.add, size: 28),
@@ -126,7 +119,11 @@ class _DashboardState extends State<Dashboard> {
 
       // ── Bottom nav bar ─────────────────────────────────────────────────────
       bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
+        clipBehavior: Clip.antiAlias,
+        color:
+            Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.surfaceContainer
+                : Colors.white,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         elevation: 12,
@@ -146,14 +143,25 @@ class _DashboardState extends State<Dashboard> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => _onNavTap(0),
-                      splashColor: AppColors.primary.withOpacity(0.12),
-                      highlightColor: AppColors.primary.withOpacity(0.06),
+                      splashColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.12),
+                      highlightColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.06),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            _selectedIndex == 0 ? Icons.home : Icons.home_outlined,
-                            color: _selectedIndex == 0 ? AppColors.primary : AppColors.secondary,
+                            _selectedIndex == 0
+                                ? Icons.home
+                                : Icons.home_outlined,
+                            color:
+                                _selectedIndex == 0
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                             size: 24,
                           ),
                           const SizedBox(height: 3),
@@ -161,8 +169,16 @@ class _DashboardState extends State<Dashboard> {
                             'Home',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: _selectedIndex == 0 ? FontWeight.w600 : FontWeight.w400,
-                              color: _selectedIndex == 0 ? AppColors.primary : AppColors.secondary,
+                              fontWeight:
+                                  _selectedIndex == 0
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                              color:
+                                  _selectedIndex == 0
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -185,14 +201,25 @@ class _DashboardState extends State<Dashboard> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => _onNavTap(1),
-                      splashColor: AppColors.primary.withOpacity(0.12),
-                      highlightColor: AppColors.primary.withOpacity(0.06),
+                      splashColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.12),
+                      highlightColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.06),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            _selectedIndex == 1 ? Icons.settings : Icons.settings_outlined,
-                            color: _selectedIndex == 1 ? AppColors.primary : AppColors.secondary,
+                            _selectedIndex == 1
+                                ? Icons.settings
+                                : Icons.settings_outlined,
+                            color:
+                                _selectedIndex == 1
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                             size: 24,
                           ),
                           const SizedBox(height: 3),
@@ -200,8 +227,16 @@ class _DashboardState extends State<Dashboard> {
                             'Setting',
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: _selectedIndex == 1 ? FontWeight.w600 : FontWeight.w400,
-                              color: _selectedIndex == 1 ? AppColors.primary : AppColors.secondary,
+                              fontWeight:
+                                  _selectedIndex == 1
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                              color:
+                                  _selectedIndex == 1
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -245,17 +280,28 @@ class _DashboardContentState extends State<DashboardContent> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 50, color: Theme.of(context).colorScheme.error),
+                Icon(
+                  Icons.error_outline,
+                  size: 50,
+                  color: Theme.of(context).colorScheme.error,
+                ),
                 const SizedBox(height: 10),
-                Text('Anda belum login', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Anda belum login',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 10),
-                Text('Silahkan login terlebih dahulu', style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  'Silahkan login terlebih dahulu',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Login()),
-                  ),
+                  onPressed:
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Login()),
+                      ),
                   child: const Text('Login'),
                 ),
               ],
@@ -274,20 +320,24 @@ class _DashboardContentState extends State<DashboardContent> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.inbox_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                Icon(
+                  Icons.inbox_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Belum ada data recording',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Klik tombol + untuk menambah data',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -326,35 +376,60 @@ class _DashboardContentState extends State<DashboardContent> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.inbox_outlined, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              Icon(
+                                Icons.inbox_outlined,
+                                size: 64,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 'Belum ada data recording',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Klik tombol + untuk menambah data',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
                               ),
                             ],
                           ),
                         );
                       }
 
-                      final fcrResults = controller.calculateWeeklyFCR(recordings);
-                      final fcr = fcrResults.isNotEmpty ? fcrResults.last.fcr : 0.0;
-                      final populationRemain = fcrResults.isNotEmpty ? fcrResults.last.sisaAyam : 0;
-                      final umur = recordings.isNotEmpty ? recordings.last.day : 0;
+                      final fcrResults = controller.calculateWeeklyFCR(
+                        recordings,
+                      );
+                      final fcr =
+                          fcrResults.isNotEmpty ? fcrResults.last.fcr : 0.0;
+                      final populationRemain =
+                          fcrResults.isNotEmpty ? fcrResults.last.sisaAyam : 0;
+                      final umur =
+                          recordings.isNotEmpty ? recordings.last.day : 0;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          PopulationSection(populationRemain: populationRemain),
+                          PopulationSection(
+                            populationRemain: populationRemain,
+                            capacity: controller.initialPopulation,
+                          ),
                           const SizedBox(height: 15),
                           StatisticsSection(
                             fcr: fcr,
@@ -367,17 +442,13 @@ class _DashboardContentState extends State<DashboardContent> {
                               constraints: const BoxConstraints(maxWidth: 720),
                               child: ChickenDataTable(
                                 chickenDataList: recordings,
-                                onViewAll: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ChangeNotifierProvider<RecordingController>(
-                                      create: (_) => RecordingController(
-                                        firebaseService: FirebaseService(),
-                                      )..loadActivePeriod(),
-                                      child: const DetailRecording(),
+                                onViewAll:
+                                    () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const DetailRecording(),
+                                      ),
                                     ),
-                                  ),
-                                ),
                               ),
                             ),
                           ),

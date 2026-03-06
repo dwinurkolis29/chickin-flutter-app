@@ -10,6 +10,9 @@ class PopulationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
     return SectionCard(
       title: 'Populasi',
       icon: Icons.pets_outlined,
