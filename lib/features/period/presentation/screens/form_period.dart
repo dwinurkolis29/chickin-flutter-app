@@ -210,7 +210,9 @@ class _FormPeriodState extends State<FormPeriod> {
             ),
         ],
       ),
-      body: Form(
+      body: SafeArea(
+        top: false,
+        child: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(24),
@@ -310,6 +312,7 @@ class _FormPeriodState extends State<FormPeriod> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

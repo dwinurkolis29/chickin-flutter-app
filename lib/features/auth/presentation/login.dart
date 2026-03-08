@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/components/dialogs/dialog_helper.dart';
+import '../../../core/components/snackbars/app_snackbar.dart';
 import '../controllers/auth_controller.dart';
 import '../../dashboard/presentation/dashboard.dart';
 import 'signup.dart';
@@ -15,55 +15,33 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-
-  // focus node untuk email
   final FocusNode _focusNodePassword = FocusNode();
-
-  // membuat controller untuk email dan password
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
-  // membuat variabel untuk menyimpan status password
   bool _obscurePassword = true;
-
-  // variabel untuk loading state
   bool _isLoading = false;
 
-  // auth controller
   final AuthController _authController = AuthController();
 
-
-  // fungsi untuk login
+  // ─── Email/Password Login ────────────────────────────────────────────────────
   void login() async {
-    // Validasi form terlebih dahulu
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
-    }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // Set loading state
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() => _isLoading = true);
     try {
-      // Menggunakan AuthController untuk login
       final result = await _authController.signIn(
         email: _controllerEmail.text.trim(),
         password: _controllerPassword.text,
       );
-
       if (!mounted) return;
 
       if (result.success) {
-        // Navigasi ke halaman Home
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const Dashboard(),
-          ),
+          MaterialPageRoute(builder: (_) => const Dashboard()),
         );
       } else {
-        // Show error dialog
         DialogHelper.showError(
           context,
           'Login Gagal',
@@ -71,185 +49,328 @@ class _LoginState extends State<Login> {
         );
       }
     } catch (e) {
-      // Handle error yang tidak terduga
       if (mounted) {
-        DialogHelper.showError(
-          context,
-          'Error',
-          'Terjadi kesalahan yang tidak terduga: $e',
-        );
+        DialogHelper.showError(context, 'Error', 'Terjadi kesalahan: $e');
       }
     } finally {
-      // Reset loading state
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  // ─── Google Sign-In (Under Development) ─────────────────────────────────────
+  void _signInWithGoogle() {
+    AppSnackbar.showInfo(
+      context,
+      'Login dengan Google sedang dalam tahap pengembangan.',
+    );
+  }
+
+  // ─── Build ───────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final bool busy = _isLoading;
+
+    final Color fieldFill = scheme.surfaceContainerHighest;
+    final Color iconColor = scheme.onSurfaceVariant;
+    final Color primaryColor = scheme.primary;
+
     return Scaffold(
-      // Membuat background warna biru
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Form(
-        key: _formKey,
-        // menggunakan scroll view agar form dapat di scroll
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(30.0),
-          child: Column(
-            children: [
-              // Header aplikasi
-              const SizedBox(height: 150),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // load gambar
-                  const Image(
-                    width: 50,
-                    height: 50,
-                    image: AssetImage('images/hen.png'),
-                  ),
-                  Text(
-                    "Recording App",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Silahkan login terlebih dahulu",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 60),
-              // Email field
-              TextFormField(
-                controller: _controllerEmail,
-                keyboardType: TextInputType.emailAddress,
-                enabled: !_isLoading,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+      backgroundColor: scheme.surface, // AppColors.background via theme
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 60),
+
+                // ── Logo ──
+                Container(
+                  width: 72,
+                  height: 72,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/logos/logo.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                // validasi email yang lebih ketat
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Email tidak boleh kosong';
-                  }
-                  // Regex untuk validasi email
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                  if (!emailRegex.hasMatch(value.trim())) {
-                    return 'Format email tidak valid';
-                  }
-                  return null;
-                },
-                onEditingComplete: () => _focusNodePassword.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-              // Password field
-              TextFormField(
-                controller: _controllerPassword,
-                focusNode: _focusNodePassword,
-                obscureText: _obscurePassword,
-                enabled: !_isLoading,
-                keyboardType: TextInputType.visiblePassword,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: const Icon(Icons.password_outlined),
+                const SizedBox(height: 24),
+
+                // ── Headline ──
+                Text(
+                  'Welcome back\nto Recording App',
+                  textAlign: TextAlign.center,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // ── Email Field ──
+                _buildField(
+                  controller: _controllerEmail,
+                  textTheme: textTheme,
+                  hint: 'E-mail',
+                  icon: Icons.mail_outline,
+                  keyboardType: TextInputType.emailAddress,
+                  enabled: !busy,
+                  fieldFill: fieldFill,
+                  iconColor: iconColor,
+                  scheme: scheme,
+                  onEditingComplete: () => _focusNodePassword.requestFocus(),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Email tidak boleh kosong';
+                    }
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return 'Format email tidak valid';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // ── Password Field ──
+                _buildField(
+                  controller: _controllerPassword,
+                  textTheme: textTheme,
+                  focusNode: _focusNodePassword,
+                  hint: 'Password',
+                  icon: Icons.lock_outline,
+                  obscureText: _obscurePassword,
+                  enabled: !busy,
+                  fieldFill: fieldFill,
+                  iconColor: iconColor,
+                  scheme: scheme,
                   suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        // mengubah status password untuk menampilkan password
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                    icon: _obscurePassword
-                        ? const Icon(Icons.visibility_outlined)
-                        : const Icon(Icons.visibility_off_outlined),
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: iconColor,
+                      size: 20,
+                    ),
+                    onPressed:
+                        () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Password tidak boleh kosong';
+                    }
+                    if (value.length < 6) {
+                      return 'Password minimal 6 karakter';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 32),
+
+                // ── Login Button ──
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: scheme.onPrimary,
+                      disabledBackgroundColor: primaryColor.withValues(
+                        alpha: 0.6,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: busy ? null : login,
+                    child:
+                        _isLoading
+                            ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  scheme.onPrimary,
+                                ),
+                              ),
+                            )
+                            : Text(
+                              'Sign in',
+                              style: textTheme.bodyLarge?.copyWith(
+                                color: scheme.onPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                   ),
                 ),
-                // validasi password
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Password tidak boleh kosong';
-                  }
-                  if (value.length < 6) {
-                    return 'Password minimal 6 karakter';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 60),
-              // Tombol login
-              Column(
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                const SizedBox(height: 28),
+
+                // ── Divider ──
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: scheme.outlineVariant)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'or',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                    // memanggil fungsi login atau menampilkan loading
-                    onPressed: _isLoading ? null : login,
-                    child: _isLoading
-                        ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                        : const Text("Login"),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Belum punya account?"),
-                      TextButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                          _formKey.currentState?.reset();
+                    Expanded(child: Divider(color: scheme.outlineVariant)),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
-                          // Navigasi ke halaman signup dan tunggu hasil
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return const Signup();
+                // ── Google Sign-In Button ──
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: scheme.onSurface,
+                      side: BorderSide(color: scheme.outline),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      backgroundColor: scheme.surface,
+                    ),
+                    onPressed: busy ? null : _signInWithGoogle,
+                    icon: Icon(
+                      Icons.g_mobiledata,
+                      color: scheme.onSurface,
+                      size: 24,
+                    ),
+                    label: Text(
+                      'Continue with Google',
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: scheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 36),
+
+                // ── Footer ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account? ",
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap:
+                          busy
+                              ? null
+                              : () async {
+                                _formKey.currentState?.reset();
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const Signup(),
+                                  ),
+                                );
+                                if (result != null &&
+                                    result is Map<String, String>) {
+                                  _controllerEmail.text = result['email'] ?? '';
+                                }
                               },
-                            ),
-                          );
-
-                          // Jika ada hasil dari signup, isi email saja
-                          if (result != null && result is Map<String, String>) {
-                            _controllerEmail.text = result['email'] ?? '';
-                          }
-                        },
-                        child: const Text("Daftar"),
+                      child: Text(
+                        'Sign up',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                          decorationColor: scheme.primary,
+                        ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Reusable Field Builder ──────────────────────────────────────────────────
+  Widget _buildField({
+    required TextEditingController controller,
+    required TextTheme textTheme,
+    FocusNode? focusNode,
+    required String hint,
+    required IconData icon,
+    required Color fieldFill,
+    required Color iconColor,
+    required ColorScheme scheme,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    bool enabled = true,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+    VoidCallback? onEditingComplete,
+  }) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      obscureText: obscureText,
+      enabled: enabled,
+      keyboardType: keyboardType,
+      onEditingComplete: onEditingComplete,
+      validator: validator,
+      style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurfaceVariant,
+        ),
+        prefixIcon: Icon(icon, color: iconColor, size: 20),
+        suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: fieldFill,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: scheme.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: scheme.error, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: scheme.error, width: 1.5),
         ),
       ),
     );
@@ -257,10 +378,7 @@ class _LoginState extends State<Login> {
 
   @override
   void dispose() {
-    // membuang focus node agar tidak terjadi memory leak
     _focusNodePassword.dispose();
-
-    // membuang controller agar tidak terjadi memory leak
     _controllerEmail.dispose();
     _controllerPassword.dispose();
     super.dispose();

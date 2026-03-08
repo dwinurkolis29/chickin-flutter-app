@@ -63,10 +63,7 @@ class _UserState extends State<User> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.showError(
-          context,
-          'Gagal mengirim email reset: $e',
-        );
+        AppSnackbar.showError(context, 'Gagal mengirim email reset: $e');
       }
     }
   }
@@ -94,27 +91,28 @@ class _UserState extends State<User> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const FormUser(),
-                ),
+                MaterialPageRoute(builder: (context) => const FormUser()),
               );
             },
           ),
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(color: colorScheme.primary),
-            )
-          : _errorMessage.isNotEmpty
+      body:
+          _isLoading
               ? Center(
-                  child: Text(
-                    _errorMessage,
-                    style: textTheme.bodyMedium
-                        ?.copyWith(color: colorScheme.error),
+                child: CircularProgressIndicator(color: colorScheme.primary),
+              )
+              : _errorMessage.isNotEmpty
+              ? Center(
+                child: Text(
+                  _errorMessage,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.error,
                   ),
-                )
-              : SingleChildScrollView(
+                ),
+              )
+              : SafeArea(
+                child: SingleChildScrollView(
                   child: Column(
                     children: [
                       // ── Profile Header ──
@@ -123,8 +121,9 @@ class _UserState extends State<User> {
                           children: [
                             CircleAvatar(
                               radius: 42,
-                              backgroundColor:
-                                  colorScheme.primary.withOpacity(0.12),
+                              backgroundColor: colorScheme.primary.withOpacity(
+                                0.12,
+                              ),
                               child: Icon(
                                 Icons.person,
                                 size: 48,
@@ -172,8 +171,8 @@ class _UserState extends State<User> {
                             ),
                             _InfoRow(
                               icon: Icons.mail_outline,
-                              value: _auth.currentUser?.email ??
-                                  'Tidak ada data',
+                              value:
+                                  _auth.currentUser?.email ?? 'Tidak ada data',
                             ),
                             Divider(
                               height: 20,
@@ -181,8 +180,7 @@ class _UserState extends State<User> {
                             ),
                             _InfoRow(
                               icon: Icons.location_on_outlined,
-                              value:
-                                  _userProfile?.address ?? 'Tidak ada data',
+                              value: _userProfile?.address ?? 'Tidak ada data',
                             ),
                           ],
                         ),
@@ -227,6 +225,7 @@ class _UserState extends State<User> {
                     ],
                   ),
                 ),
+              ),
     );
   }
 }
@@ -248,15 +247,12 @@ class _Card extends StatelessWidget {
         color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         // Allows border radius to clip the InkWell ripple
-        clipBehavior: Clip.antiAlias, 
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: SizedBox(
-              width: double.infinity,
-              child: child,
-            ),
+            child: SizedBox(width: double.infinity, child: child),
           ),
         ),
       ),
@@ -283,8 +279,7 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style:
-                textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
           ),
         ),
       ],

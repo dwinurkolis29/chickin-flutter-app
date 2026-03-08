@@ -44,92 +44,110 @@ class _ReminderState extends State<Reminder> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
+      builder:
+          (context) => SafeArea(
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
+              ),
               decoration: BoxDecoration(
-                color: colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
+                color: colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    DateFormat('MMMM yyyy').format(focusedDate),
-                    style: textTheme.titleLarge,
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left),
-                        onPressed: () {
-                          setState(() {
-                            focusedDate = DateTime(focusedDate.year, focusedDate.month - 1);
-                          });
-                          Navigator.pop(context);
-                          _showMonthCalendar();
-                        },
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right),
-                        onPressed: () {
-                          setState(() {
-                            focusedDate = DateTime(focusedDate.year, focusedDate.month + 1);
-                          });
-                          Navigator.pop(context);
-                          _showMonthCalendar();
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                    .map((day) => SizedBox(
-                          width: 40,
-                          child: Text(
-                            day,
-                            textAlign: TextAlign.center,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            DateFormat('MMMM yyyy').format(focusedDate),
+                            style: textTheme.titleLarge,
                           ),
-                        ))
-                    .toList(),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.chevron_left),
+                                onPressed: () {
+                                  setState(() {
+                                    focusedDate = DateTime(
+                                      focusedDate.year,
+                                      focusedDate.month - 1,
+                                    );
+                                  });
+                                  Navigator.pop(context);
+                                  _showMonthCalendar();
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.chevron_right),
+                                onPressed: () {
+                                  setState(() {
+                                    focusedDate = DateTime(
+                                      focusedDate.year,
+                                      focusedDate.month + 1,
+                                    );
+                                  });
+                                  Navigator.pop(context);
+                                  _showMonthCalendar();
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children:
+                            ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                                .map(
+                                  (day) => SizedBox(
+                                    width: 40,
+                                    child: Text(
+                                      day,
+                                      textAlign: TextAlign.center,
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _buildMonthCalendar(),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _buildMonthCalendar(),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -138,7 +156,11 @@ class _ReminderState extends State<Reminder> {
     final textTheme = Theme.of(context).textTheme;
 
     DateTime firstDayOfMonth = DateTime(focusedDate.year, focusedDate.month, 1);
-    DateTime lastDayOfMonth = DateTime(focusedDate.year, focusedDate.month + 1, 0);
+    DateTime lastDayOfMonth = DateTime(
+      focusedDate.year,
+      focusedDate.month + 1,
+      0,
+    );
     int daysInMonth = lastDayOfMonth.day;
     int startWeekday = firstDayOfMonth.weekday - 1;
 
@@ -150,10 +172,12 @@ class _ReminderState extends State<Reminder> {
 
     for (int day = 1; day <= daysInMonth; day++) {
       DateTime currentDay = DateTime(focusedDate.year, focusedDate.month, day);
-      bool isSelected = selectedDate.year == currentDay.year &&
+      bool isSelected =
+          selectedDate.year == currentDay.year &&
           selectedDate.month == currentDay.month &&
           selectedDate.day == currentDay.day;
-      bool isToday = DateTime.now().year == currentDay.year &&
+      bool isToday =
+          DateTime.now().year == currentDay.year &&
           DateTime.now().month == currentDay.month &&
           DateTime.now().day == currentDay.day;
 
@@ -173,16 +197,23 @@ class _ReminderState extends State<Reminder> {
             decoration: BoxDecoration(
               color: isSelected ? colorScheme.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
-              border: isToday && !isSelected
-                  ? Border.all(color: colorScheme.primary, width: 2)
-                  : null,
+              border:
+                  isToday && !isSelected
+                      ? Border.all(color: colorScheme.primary, width: 2)
+                      : null,
             ),
             child: Center(
               child: Text(
                 '$day',
                 style: textTheme.bodyMedium?.copyWith(
-                  color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
-                  fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal,
+                  color:
+                      isSelected
+                          ? colorScheme.onPrimary
+                          : colorScheme.onSurface,
+                  fontWeight:
+                      isSelected || isToday
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                 ),
               ),
             ),
@@ -198,19 +229,23 @@ class _ReminderState extends State<Reminder> {
       while (weekDays.length < 7) {
         weekDays.add(const SizedBox(width: 40, height: 40));
       }
-      weeks.add(Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: weekDays,
-      ));
+      weeks.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: weekDays,
+        ),
+      );
       weeks.add(const SizedBox(height: 8));
     }
 
-    return SingleChildScrollView(child: Column(children: weeks));
+    return Column(children: weeks);
   }
 
   List<ReminderData> _filterRemindersByDate(List<ReminderData> reminders) {
     String selectedDateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
-    return reminders.where((reminder) => reminder.date == selectedDateStr).toList();
+    return reminders
+        .where((reminder) => reminder.date == selectedDateStr)
+        .toList();
   }
 
   @override
@@ -232,9 +267,11 @@ class _ReminderState extends State<Reminder> {
       if (confirmed == true) {
         try {
           await _firebaseService.deleteReminder(reminder.id, user!.email!);
-          if (mounted) AppSnackbar.showSuccess(context, 'Reminder deleted successfully');
+          if (mounted)
+            AppSnackbar.showSuccess(context, 'Reminder deleted successfully');
         } catch (e) {
-          if (mounted) AppSnackbar.showError(context, 'Error deleting reminder: $e');
+          if (mounted)
+            AppSnackbar.showError(context, 'Error deleting reminder: $e');
         }
       }
     }
@@ -261,9 +298,13 @@ class _ReminderState extends State<Reminder> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_active, color: colorScheme.onSurface),
+            icon: Icon(
+              Icons.notifications_active,
+              color: colorScheme.onSurface,
+            ),
             onPressed: () async {
-              final pending = await _notificationService.getPendingNotifications();
+              final pending =
+                  await _notificationService.getPendingNotifications();
               if (!mounted) return;
               DialogHelper.showInfo(
                 context,
@@ -276,111 +317,150 @@ class _ReminderState extends State<Reminder> {
           ),
         ],
       ),
-      body: user == null
-          ? Center(child: Text('Silahkan login terlebih dahulu'))
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat('MMM yyyy').format(focusedDate),
-                        style: textTheme.titleLarge,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.calendar_today),
-                        onPressed: _showMonthCalendar,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                EasyDateTimeLine(
-                  initialDate: selectedDate,
-                  onDateChange: (date) {
-                    setState(() {
-                      selectedDate = date;
-                      focusedDate = date;
-                    });
-                  },
-                  headerProps: const EasyHeaderProps(showHeader: false),
-                  dayProps: EasyDayProps(
-                    height: 100,
-                    width: 60,
-                    dayStructure: DayStructure.dayStrDayNum,
-                    inactiveDayStyle: DayStyle(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      dayNumStyle: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
-                      dayStrStyle: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    activeDayStyle: DayStyle(
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      dayNumStyle: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimary,
-                      ),
-                      dayStrStyle: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onPrimary.withOpacity(0.8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body:
+          user == null
+              ? Center(child: Text('Silahkan login terlebih dahulu'))
+              : SafeArea(
+                top: false,
+                child: NestedScrollView(
+                  headerSliverBuilder:
+                      (context, innerBoxIsScrolled) => [
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Reminders',
-                                style: textTheme.titleMedium,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      DateFormat(
+                                        'MMM yyyy',
+                                      ).format(focusedDate),
+                                      style: textTheme.titleLarge,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.calendar_today),
+                                      onPressed: _showMonthCalendar,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Icon(Icons.more_horiz, color: colorScheme.onSurfaceVariant),
+                              const SizedBox(height: 20),
+                              EasyDateTimeLine(
+                                initialDate: selectedDate,
+                                onDateChange: (date) {
+                                  setState(() {
+                                    selectedDate = date;
+                                    focusedDate = date;
+                                  });
+                                },
+                                headerProps: const EasyHeaderProps(
+                                  showHeader: false,
+                                ),
+                                dayProps: EasyDayProps(
+                                  height: 100,
+                                  width: 60,
+                                  dayStructure: DayStructure.dayStrDayNum,
+                                  inactiveDayStyle: DayStyle(
+                                    decoration: BoxDecoration(
+                                      color:
+                                          colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    dayNumStyle: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                    dayStrStyle: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  activeDayStyle: DayStyle(
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    dayNumStyle: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onPrimary,
+                                    ),
+                                    dayStrStyle: TextStyle(
+                                      fontSize: 12,
+                                      color: colorScheme.onPrimary.withOpacity(
+                                        0.8,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
-                        Expanded(
-                          child: StreamBuilder<List<ReminderData>>(
-                            stream: _firebaseService.getReminderStream(user.email!),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(child: CircularProgressIndicator());
-                              }
-                              if (snapshot.hasError) {
-                                return Center(child: Text('Error: ${snapshot.error}'));
-                              }
-                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                return Center(
+                      ],
+                  body: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(30),
+                      ),
+                    ),
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Reminders', style: textTheme.titleMedium),
+                                Icon(
+                                  Icons.more_horiz,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        StreamBuilder<List<ReminderData>>(
+                          stream: _firebaseService.getReminderStream(
+                            user.email!,
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const SliverFillRemaining(
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            if (snapshot.hasError) {
+                              return SliverFillRemaining(
+                                child: Center(
+                                  child: Text('Error: ${snapshot.error}'),
+                                ),
+                              );
+                            }
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return SliverFillRemaining(
+                                child: Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.event_note, size: 80, color: colorScheme.outlineVariant),
+                                      Icon(
+                                        Icons.event_note,
+                                        size: 80,
+                                        color: colorScheme.outlineVariant,
+                                      ),
                                       const SizedBox(height: 16),
                                       Text(
                                         'Belum ada reminder',
@@ -390,27 +470,37 @@ class _ReminderState extends State<Reminder> {
                                       ),
                                     ],
                                   ),
-                                );
-                              }
+                                ),
+                              );
+                            }
 
-                              final allReminders = snapshot.data!;
-                              final filteredReminders = _filterRemindersByDate(allReminders);
+                            final allReminders = snapshot.data!;
+                            final filteredReminders = _filterRemindersByDate(
+                              allReminders,
+                            );
 
-                              if (filteredReminders.isEmpty) {
-                                return Center(
+                            if (filteredReminders.isEmpty) {
+                              return SliverFillRemaining(
+                                child: Center(
                                   child: Text(
                                     'Tidak ada reminder untuk tanggal ini',
                                     style: textTheme.bodyLarge?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
-                                );
-                              }
+                                ),
+                              );
+                            }
 
-                              return ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 20),
-                                itemCount: filteredReminders.length,
-                                itemBuilder: (context, index) {
+                            return SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
                                   final reminder = filteredReminders[index];
                                   return Container(
                                     margin: const EdgeInsets.only(bottom: 15),
@@ -425,7 +515,9 @@ class _ReminderState extends State<Reminder> {
                                           padding: const EdgeInsets.all(10),
                                           decoration: BoxDecoration(
                                             color: colorScheme.surface,
-                                            borderRadius: BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                           ),
                                           child: Icon(
                                             Icons.alarm,
@@ -436,55 +528,71 @@ class _ReminderState extends State<Reminder> {
                                         const SizedBox(width: 16),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 reminder.title,
-                                                style: textTheme.bodyLarge?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: colorScheme.onPrimaryContainer,
-                                                ),
+                                                style: textTheme.bodyLarge
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          colorScheme
+                                                              .onPrimaryContainer,
+                                                    ),
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
                                                 reminder.time,
-                                                style: textTheme.bodySmall?.copyWith(
-                                                  color: colorScheme.onPrimaryContainer.withOpacity(0.8),
-                                                ),
+                                                style: textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      color: colorScheme
+                                                          .onPrimaryContainer
+                                                          .withOpacity(0.8),
+                                                    ),
                                               ),
-                                              if (reminder.description.isNotEmpty) ...[
+                                              if (reminder
+                                                  .description
+                                                  .isNotEmpty) ...[
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   reminder.description,
-                                                  style: textTheme.labelSmall?.copyWith(
-                                                    color: colorScheme.onPrimaryContainer.withOpacity(0.7),
-                                                  ),
+                                                  style: textTheme.labelSmall
+                                                      ?.copyWith(
+                                                        color: colorScheme
+                                                            .onPrimaryContainer
+                                                            .withOpacity(0.7),
+                                                      ),
                                                   maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ],
                                           ),
                                         ),
                                         IconButton(
-                                          icon: Icon(Icons.delete, color: colorScheme.error),
-                                          onPressed: () => showDeleteDialog(reminder),
+                                          icon: Icon(
+                                            Icons.delete,
+                                            color: colorScheme.error,
+                                          ),
+                                          onPressed:
+                                              () => showDeleteDialog(reminder),
                                         ),
                                       ],
                                     ),
                                   );
-                                },
-                              );
-                            },
-                          ),
+                                }, childCount: filteredReminders.length),
+                              ),
+                            );
+                          },
                         ),
-                        const SizedBox(height: 80),
                       ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
     );
   }
 }

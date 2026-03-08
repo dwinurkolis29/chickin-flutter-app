@@ -78,7 +78,7 @@ class _FormUserState extends State<FormUser> {
 
   Future<void> _handleUpdate() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() {
       _isSaving = true;
     });
@@ -89,9 +89,9 @@ class _FormUserState extends State<FormUser> {
         phone: _phoneController.text.trim(),
         address: _addressController.text.trim(),
       );
-      
+
       await _firebaseService.updateUserProfile(updatedProfile);
-      
+
       if (mounted) {
         AppSnackbar.showSuccess(context, 'Profil berhasil diperbarui');
         Navigator.pop(context);
@@ -116,139 +116,147 @@ class _FormUserState extends State<FormUser> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
-      body: _isLoading
-      // Menampilkan indikator loading jika sedang memuat
-          ? const Center(child: CircularProgressIndicator())
-      // Menampilkan pesan kesalahan jika ada
-          : _errorMessage.isNotEmpty
-          ? Center(child: Text(_errorMessage))
-          : SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.person_pin, size: 50),
-                  const SizedBox(width: 10),
-                  Text(
-                    "Profil Peternak",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Informasi Akun",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 35),
-
-              // Name Field
-              TextFormField(
-                controller: _nameController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama tidak boleh kosong';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: "Nama",
-                  prefixIcon: const Icon(Icons.person),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Email Field (from Firebase Auth)
-              TextFormField(
-                // set hanya bisa di baca untuk textfield
-                readOnly: true,
-                // menampilkan email dari Firebase Auth
-                initialValue: _auth.currentUser?.email ?? 'Tidak ada data',
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Phone Field
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nomor telepon tidak boleh kosong';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: "Nomor Telepon",
-                  prefixIcon: const Icon(Icons.phone),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Address Field
-              TextFormField(
-                controller: _addressController,
-                maxLines: 2,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Alamat tidak boleh kosong';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  labelText: "Alamat",
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                onPressed: _isSaving ? null : _handleUpdate,
-                child: _isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      body: SafeArea(
+        top: false,
+        child:
+            _isLoading
+                // Menampilkan indikator loading jika sedang memuat
+                ? const Center(child: CircularProgressIndicator())
+                // Menampilkan pesan kesalahan jika ada
+                : _errorMessage.isNotEmpty
+                ? Center(child: Text(_errorMessage))
+                : SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 30),
+                        // Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.person_pin, size: 50),
+                            const SizedBox(width: 10),
+                            Text(
+                              "Profil Peternak",
+                              style: Theme.of(context).textTheme.headlineLarge,
+                            ),
+                          ],
                         ),
-                      )
-                    : const Text(
-                        "Simpan",
-                        style: TextStyle(fontSize: 16),
-                      ),
-              ),
-              const SizedBox(height: 50),
-            ],
-          ),
-        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Informasi Akun",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 35),
+
+                        // Name Field
+                        TextFormField(
+                          controller: _nameController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Nama tidak boleh kosong';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Nama",
+                            prefixIcon: const Icon(Icons.person),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Email Field (from Firebase Auth)
+                        TextFormField(
+                          // set hanya bisa di baca untuk textfield
+                          readOnly: true,
+                          // menampilkan email dari Firebase Auth
+                          initialValue:
+                              _auth.currentUser?.email ?? 'Tidak ada data',
+                          decoration: InputDecoration(
+                            labelText: "Email",
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Phone Field
+                        TextFormField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Nomor telepon tidak boleh kosong';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Nomor Telepon",
+                            prefixIcon: const Icon(Icons.phone),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Address Field
+                        TextFormField(
+                          controller: _addressController,
+                          maxLines: 2,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Alamat tidak boleh kosong';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Alamat",
+                            prefixIcon: const Icon(Icons.location_on_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          onPressed: _isSaving ? null : _handleUpdate,
+                          child:
+                              _isSaving
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                  : const Text(
+                                    "Simpan",
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                        ),
+                        const SizedBox(height: 50),
+                      ],
+                    ),
+                  ),
+                ),
       ),
     );
   }

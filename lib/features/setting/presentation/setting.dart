@@ -92,7 +92,7 @@ class Setting extends StatelessWidget {
         _buildMenuItem(
           context,
           icon: Icons.alarm,
-          title: 'Reminder Recording',
+          title: 'Reminder',
           onTap: () {
             Navigator.push(
               context,

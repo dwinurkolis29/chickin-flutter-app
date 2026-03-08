@@ -96,7 +96,8 @@ class _FormReminderState extends State<FormReminder> {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        if (mounted) AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
+        if (mounted)
+          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
         return;
       }
 
@@ -107,7 +108,11 @@ class _FormReminderState extends State<FormReminder> {
       final DateTime scheduledDateTime = _getScheduledDateTime();
 
       if (scheduledDateTime.isBefore(DateTime.now())) {
-        if (mounted) AppSnackbar.showError(context, 'Waktu reminder tidak boleh di masa lalu');
+        if (mounted)
+          AppSnackbar.showError(
+            context,
+            'Waktu reminder tidak boleh di masa lalu',
+          );
         setState(() => _isLoading = false);
         return;
       }
@@ -126,9 +131,10 @@ class _FormReminderState extends State<FormReminder> {
       await _notificationService.scheduleNotification(
         id: notificationId,
         title: reminder.title,
-        body: reminder.description.isNotEmpty
-            ? reminder.description
-            : 'Reminder pada ${reminder.time}',
+        body:
+            reminder.description.isNotEmpty
+                ? reminder.description
+                : 'Reminder pada ${reminder.time}',
         scheduledDate: scheduledDateTime,
         payload: id,
       );
@@ -141,7 +147,8 @@ class _FormReminderState extends State<FormReminder> {
         Navigator.pop(context, true);
       }
     } catch (e) {
-      if (mounted) AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
+      if (mounted)
+        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -191,155 +198,190 @@ class _FormReminderState extends State<FormReminder> {
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Pengingat',
-                style: textTheme.titleLarge,
-              ),
-              const SizedBox(height: 30),
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Pengingat', style: textTheme.titleLarge),
+                const SizedBox(height: 30),
 
-              // Title
-              TextFormField(
-                controller: _controllerTitle,
-                focusNode: _focusNodeTitle,
-                decoration: InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'Masukkan Judul',
-                  prefixIcon: const Icon(Icons.title),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  filled: true,
-                  fillColor: colorScheme.surfaceContainerLowest,
-                ),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Title tidak boleh kosong.' : null,
-                onEditingComplete: () => _focusNodeDate.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-
-              // Date
-              TextFormField(
-                controller: _controllerDate,
-                focusNode: _focusNodeDate,
-                readOnly: true,
-                onTap: _selectDate,
-                decoration: InputDecoration(
-                  labelText: 'Date',
-                  hintText: 'Select date',
-                  prefixIcon: const Icon(Icons.calendar_today),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  filled: true,
-                  fillColor: colorScheme.surfaceContainerLowest,
-                ),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Date tidak boleh kosong.' : null,
-                onEditingComplete: () => _focusNodeTime.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-
-              // Time
-              TextFormField(
-                controller: _controllerTime,
-                focusNode: _focusNodeTime,
-                readOnly: true,
-                onTap: _selectTime,
-                decoration: InputDecoration(
-                  labelText: 'Time',
-                  hintText: 'Select time',
-                  prefixIcon: const Icon(Icons.access_time),
-                  suffixText: selectedTime.hour < 12 ? 'AM' : 'PM',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  filled: true,
-                  fillColor: colorScheme.surfaceContainerLowest,
-                ),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Time tidak boleh kosong.' : null,
-                onEditingComplete: () => _focusNodeDescription.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-
-              // Description
-              TextFormField(
-                controller: _controllerDescription,
-                focusNode: _focusNodeDescription,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  hintText: 'Masukkan Deskripsi',
-                  prefixIcon: const Icon(Icons.description),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  filled: true,
-                  fillColor: colorScheme.surfaceContainerLowest,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Info box
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: colorScheme.secondary),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: colorScheme.onSecondaryContainer, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Notifikasi akan muncul pada waktu yang dijadwalkan',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSecondaryContainer,
-                        ),
-                      ),
+                // Title
+                TextFormField(
+                  controller: _controllerTitle,
+                  focusNode: _focusNodeTitle,
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    hintText: 'Masukkan Judul',
+                    prefixIcon: const Icon(Icons.title),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerLowest,
+                  ),
+                  validator:
+                      (value) =>
+                          (value == null || value.isEmpty)
+                              ? 'Title tidak boleh kosong.'
+                              : null,
+                  onEditingComplete: () => _focusNodeDate.requestFocus(),
                 ),
-              ),
-              const SizedBox(height: 30),
+                const SizedBox(height: 10),
 
-              // Submit button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                // Date
+                TextFormField(
+                  controller: _controllerDate,
+                  focusNode: _focusNodeDate,
+                  readOnly: true,
+                  onTap: _selectDate,
+                  decoration: InputDecoration(
+                    labelText: 'Date',
+                    hintText: 'Select date',
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerLowest,
+                  ),
+                  validator:
+                      (value) =>
+                          (value == null || value.isEmpty)
+                              ? 'Date tidak boleh kosong.'
+                              : null,
+                  onEditingComplete: () => _focusNodeTime.requestFocus(),
                 ),
-                onPressed: _isLoading
-                    ? null
-                    : () {
-                        if (_formKey.currentState?.validate() ?? false) addReminder();
-                      },
-                child: _isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
-                        ),
-                      )
-                    : Text(
-                        'Tambah Pengingat',
-                        style: textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimary,
+                const SizedBox(height: 10),
+
+                // Time
+                TextFormField(
+                  controller: _controllerTime,
+                  focusNode: _focusNodeTime,
+                  readOnly: true,
+                  onTap: _selectTime,
+                  decoration: InputDecoration(
+                    labelText: 'Time',
+                    hintText: 'Select time',
+                    prefixIcon: const Icon(Icons.access_time),
+                    suffixText: selectedTime.hour < 12 ? 'AM' : 'PM',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerLowest,
+                  ),
+                  validator:
+                      (value) =>
+                          (value == null || value.isEmpty)
+                              ? 'Time tidak boleh kosong.'
+                              : null,
+                  onEditingComplete: () => _focusNodeDescription.requestFocus(),
+                ),
+                const SizedBox(height: 10),
+
+                // Description
+                TextFormField(
+                  controller: _controllerDescription,
+                  focusNode: _focusNodeDescription,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Masukkan Deskripsi',
+                    prefixIcon: const Icon(Icons.description),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: colorScheme.surfaceContainerLowest,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Info box
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colorScheme.secondary),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: colorScheme.onSecondaryContainer,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Notifikasi akan muncul pada waktu yang dijadwalkan',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSecondaryContainer,
+                          ),
                         ),
                       ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // Submit button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed:
+                      _isLoading
+                          ? null
+                          : () {
+                            if (_formKey.currentState?.validate() ?? false)
+                              addReminder();
+                          },
+                  child:
+                      _isLoading
+                          ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colorScheme.onPrimary,
+                              ),
+                            ),
+                          )
+                          : Text(
+                            'Tambah Pengingat',
+                            style: textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

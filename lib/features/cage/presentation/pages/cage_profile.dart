@@ -52,126 +52,129 @@ class _CageProfileState extends State<CageProfile> {
           ),
         ],
       ),
-      body: Consumer<CageController>(
-        builder: (context, controller, child) {
-          if (controller.isLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: colorScheme.primary),
-            );
-          }
-
-          if (controller.errorMessage != null && controller.errorMessage!.isNotEmpty) {
-            if (!controller.hasValidCageData) {
-               return _buildEmptyState(context, colorScheme);
+      body: SafeArea(
+        top: false,
+        child: Consumer<CageController>(
+          builder: (context, controller, child) {
+            if (controller.isLoading) {
+              return Center(
+                child: CircularProgressIndicator(color: colorScheme.primary),
+              );
             }
-          }
 
-          if (!controller.hasValidCageData) {
-            return _buildEmptyState(context, colorScheme);
-          }
+            if (controller.errorMessage != null &&
+                controller.errorMessage!.isNotEmpty) {
+              if (!controller.hasValidCageData) {
+                return _buildEmptyState(context, colorScheme);
+              }
+            }
 
-          final cageData = controller.cageData!;
+            if (!controller.hasValidCageData) {
+              return _buildEmptyState(context, colorScheme);
+            }
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                _Card(
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 42,
-                        backgroundColor: colorScheme.primary.withOpacity(0.12),
-                        child: Icon(
-                          Icons.house_siding,
-                          size: 48,
-                          color: colorScheme.primary,
+            final cageData = controller.cageData!;
+
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  _Card(
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 42,
+                          backgroundColor: colorScheme.primary.withOpacity(
+                            0.12,
+                          ),
+                          child: Icon(
+                            Icons.house_siding,
+                            size: 48,
+                            color: colorScheme.primary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              cageData.type,
-                              style: textTheme.titleMedium?.copyWith(
-                                color: colorScheme.onSurface,
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cageData.type,
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Data Kandang',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.secondary,
+                              const SizedBox(height: 4),
+                              Text(
+                                'Data Kandang',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.secondary,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                _Card(
-                  child: Column(
-                    children: [
-                      _InfoRow(
-                        icon: Icons.reduce_capacity,
-                        value: '${cageData.capacity} Ekor',
-                      ),
-                      Divider(
-                        height: 20,
-                        color: colorScheme.outlineVariant,
-                      ),
-                      _InfoRow(
-                        icon: Icons.location_on_outlined,
-                        value: cageData.location,
-                      ),
-                    ],
+                  _Card(
+                    child: Column(
+                      children: [
+                        _InfoRow(
+                          icon: Icons.reduce_capacity,
+                          value: '${cageData.capacity} Ekor',
+                        ),
+                        Divider(height: 20, color: colorScheme.outlineVariant),
+                        _InfoRow(
+                          icon: Icons.location_on_outlined,
+                          value: cageData.location,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                _Card(
-                  onTap: () => controller.loadCageData(),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
+                  _Card(
+                    onTap: () => controller.loadCageData(),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.refresh,
+                            color: colorScheme.primary,
+                            size: 20,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.refresh,
-                          color: colorScheme.primary,
-                          size: 20,
+                        const SizedBox(width: 16),
+                        Text(
+                          'Refresh Data',
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Refresh Data',
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w500,
+                        const Spacer(),
+                        Icon(
+                          Icons.chevron_right,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.chevron_right,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -213,9 +216,7 @@ class _CageProfileState extends State<CageProfile> {
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const FormCage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const FormCage()),
                 );
                 if (result == true && mounted) {
                   context.read<CageController>().loadCageData();
@@ -245,15 +246,12 @@ class _Card extends StatelessWidget {
       child: Material(
         color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias, 
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: SizedBox(
-              width: double.infinity,
-              child: child,
-            ),
+            child: SizedBox(width: double.infinity, child: child),
           ),
         ),
       ),

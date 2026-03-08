@@ -43,13 +43,13 @@ class _PeriodReportView extends StatelessWidget {
         ),
         title: Text(
           'Laporan Periode',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: cs.onSurface,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(color: cs.onSurface),
         ),
         centerTitle: true,
       ),
-      body: _buildBody(context, controller),
+      body: SafeArea(top: false, child: _buildBody(context, controller)),
     );
   }
 
@@ -73,10 +73,11 @@ class _PeriodReportView extends StatelessWidget {
           const SizedBox(height: 16),
           if (controller.isLoadingRecordings)
             const Center(
-                child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ))
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(),
+              ),
+            )
           else if (controller.report != null) ...[
             PopulationCard(report: controller.report!),
             const SizedBox(height: 12),
@@ -117,7 +118,9 @@ class PeriodHeaderSection extends StatelessWidget {
       endStr =
           period.endDate != null ? dateFmt.format(period.endDate!) : 'Ongoing';
       durationStr =
-          controller.report != null ? '${controller.report!.durationDays} Hari' : '-';
+          controller.report != null
+              ? '${controller.report!.durationDays} Hari'
+              : '-';
       statusStr = period.isActive ? 'Active' : 'Closed';
       periodName = period.name;
     }
@@ -169,9 +172,10 @@ class PeriodHeaderSection extends StatelessWidget {
                 _InfoRow(
                   label: 'Status',
                   value: statusStr,
-                  valueColor: period?.isActive == true
-                      ? AppColors.success
-                      : AppColors.error,
+                  valueColor:
+                      period?.isActive == true
+                          ? AppColors.success
+                          : AppColors.error,
                 ),
               ],
             ),
@@ -207,15 +211,18 @@ class _PeriodDropdown extends StatelessWidget {
           isDense: true,
           icon: Icon(Icons.expand_more, size: 18, color: cs.primary),
           style: tt.bodyMedium?.copyWith(color: cs.onSurface),
-          items: periods
-              .map((p) => DropdownMenuItem(
-                    value: p.id,
-                    child: Text(
-                      p.name,
-                      style: tt.bodyMedium?.copyWith(color: cs.onSurface),
+          items:
+              periods
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(
+                        p.name,
+                        style: tt.bodyMedium?.copyWith(color: cs.onSurface),
+                      ),
                     ),
-                  ))
-              .toList(),
+                  )
+                  .toList(),
           onChanged: (id) {
             if (id != null) controller.selectPeriod(id);
           },
@@ -238,12 +245,16 @@ class _InfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(0.6))),
+        Text(
+          label,
+          style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(0.6)),
+        ),
         Text(
           value,
-          style: tt.bodyMedium
-              ?.copyWith(fontWeight: FontWeight.w600, color: valueColor ?? cs.onSurface),
+          style: tt.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: valueColor ?? cs.onSurface,
+          ),
         ),
       ],
     );
@@ -321,8 +332,11 @@ class _ExportChip extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback? onTap;
-  const _ExportChip(
-      {required this.label, required this.icon, required this.onTap});
+  const _ExportChip({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -344,18 +358,16 @@ class _ExportChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon,
-                size: 20,
-                color: disabled
-                    ? cs.onSurface.withOpacity(0.3)
-                    : cs.primary),
+            Icon(
+              icon,
+              size: 20,
+              color: disabled ? cs.onSurface.withOpacity(0.3) : cs.primary,
+            ),
             const SizedBox(height: 4),
             Text(
               label,
               style: tt.labelMedium?.copyWith(
-                color: disabled
-                    ? cs.onSurface.withOpacity(0.3)
-                    : cs.onSurface,
+                color: disabled ? cs.onSurface.withOpacity(0.3) : cs.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -365,8 +377,6 @@ class _ExportChip extends StatelessWidget {
     );
   }
 }
-
-
 
 // ── Empty State ────────────────────────────────────────────────────────────────
 

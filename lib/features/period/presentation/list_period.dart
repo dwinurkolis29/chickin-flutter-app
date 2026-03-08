@@ -80,7 +80,10 @@ class PeriodListScreen extends StatelessWidget {
                       children: [
                         const SizedBox(height: 12),
                         GestureDetector(
-                          onTap: activePeriod != null ? () => handlePeriodTap(activePeriod) : null,
+                          onTap:
+                              activePeriod != null
+                                  ? () => handlePeriodTap(activePeriod)
+                                  : null,
                           child: ActivePeriodCard(period: activePeriod),
                         ),
                         const SizedBox(height: 24),
@@ -102,5 +105,3 @@ class PeriodListScreen extends StatelessWidget {
     );
   }
 }
-
-
