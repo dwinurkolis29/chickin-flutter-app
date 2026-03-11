@@ -84,6 +84,7 @@ flutter:
      - .env
      - images/hen.png
      - assets/logos/logo.png
+     - assets/onboarding/
   #   - images/a_dot_ham.jpeg
 
 flutter_launcher_icons:

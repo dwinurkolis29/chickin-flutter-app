@@ -29,4 +29,5 @@ void main() async {
 Future<void> _initHive() async {
   await Hive.openBox("login");
   await Hive.openBox("accounts");
+  await Hive.openBox("onboarding");
 }
