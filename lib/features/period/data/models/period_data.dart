@@ -116,6 +116,7 @@ class PeriodSummary {
   final double finalFCR;
   final double avgDailyGain;
   final List<WeeklyFCR> weeklyFCR;
+  final List<String> insights;
 
   const PeriodSummary({
     this.totalFeedKg = 0.0,
@@ -125,6 +126,7 @@ class PeriodSummary {
     this.finalFCR = 0.0,
     this.avgDailyGain = 0.0,
     this.weeklyFCR = const [],
+    this.insights = const [],
   });
 
   factory PeriodSummary.fromJson(Map<String, dynamic>? json) {
@@ -143,6 +145,10 @@ class PeriodSummary {
           ?.map((e) => WeeklyFCR.fromJson(e as Map<String, dynamic>))
           .toList() ??
           [],
+      insights: (json['insights'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          [],
     );
   }
 
@@ -154,6 +160,7 @@ class PeriodSummary {
     'finalFCR': finalFCR,
     'avgDailyGain': avgDailyGain,
     'weeklyFCR': weeklyFCR.map((e) => e.toJson()).toList(),
+    'insights': insights,
   };
 
   PeriodSummary copyWith({
@@ -164,6 +171,7 @@ class PeriodSummary {
     double? finalFCR,
     double? avgDailyGain,
     List<WeeklyFCR>? weeklyFCR,
+    List<String>? insights,
   }) {
     return PeriodSummary(
       totalFeedKg: totalFeedKg ?? this.totalFeedKg,
@@ -173,6 +181,7 @@ class PeriodSummary {
       finalFCR: finalFCR ?? this.finalFCR,
       avgDailyGain: avgDailyGain ?? this.avgDailyGain,
       weeklyFCR: weeklyFCR ?? this.weeklyFCR,
+      insights: insights ?? this.insights,
     );
   }
 }

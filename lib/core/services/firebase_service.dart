@@ -262,6 +262,27 @@ class FirebaseService {
     }
   }
 
+  /// One-shot fetch recordings for a period (used at close time, not for UI streaming).
+  Future<List<RecordingData>> getRecordingsOnce(String periodId, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId)
+          .collection('recordings')
+          .orderBy('day')
+          .get();
+      return snapshot.docs
+          .map((doc) => RecordingData.fromJson(doc.data(), docId: doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get recordings: $e');
+    }
+  }
+
+
   /// Get weight data stream for chart (FlSpot)
   Stream<List<FlSpot>> getWeightStream(String periodId, [String? uid]) {
     try {

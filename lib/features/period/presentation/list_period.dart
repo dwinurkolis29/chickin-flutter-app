@@ -8,7 +8,7 @@ import 'controllers/period_controller.dart';
 import 'widgets/period_card.dart';
 import 'widgets/active_period_card.dart';
 import 'screens/form_period.dart';
-import 'package:recording_app/features/reporting/presentation/pages/period_report.dart';
+import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
 import 'widgets/create_period_button.dart';
 import 'widgets/top_bar.dart';
 import 'widgets/period_list_section.dart';
@@ -56,7 +56,7 @@ class PeriodListScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PeriodReportView(),
+                    builder: (context) => const PeriodReportPage(),
                   ),
                 );
               } else {

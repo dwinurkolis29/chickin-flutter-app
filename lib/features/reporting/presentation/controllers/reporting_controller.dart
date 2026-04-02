@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/reporting/domain/usecases/build_realtime_report_usecase.dart';
+import 'package:recording_app/features/reporting/domain/usecases/build_report_snapshot_usecase.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 
 class ReportingController extends ChangeNotifier {
   final FirebaseService _firebaseService;
-  final GeneratePeriodReport _generateReport;
+  final BuildReportSnapshotUseCase _snapshotUseCase;
+  final BuildRealtimeReportUseCase _realtimeUseCase;
 
   StreamSubscription<List<PeriodData>>? _periodSub;
 
@@ -21,9 +24,11 @@ class ReportingController extends ChangeNotifier {
 
   ReportingController({
     required FirebaseService firebaseService,
-    GeneratePeriodReport? generateReport,
+    BuildReportSnapshotUseCase? snapshotUseCase,
+    BuildRealtimeReportUseCase? realtimeUseCase,
   })  : _firebaseService = firebaseService,
-        _generateReport = generateReport ?? GeneratePeriodReport() {
+        _snapshotUseCase = snapshotUseCase ?? BuildReportSnapshotUseCase(),
+        _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase() {
     _init();
   }
 
@@ -49,14 +54,14 @@ class ReportingController extends ChangeNotifier {
         _closedPeriods = periods
             .where((p) => !p.isActive && p.endDate != null && !p.isDeleted)
             .toList()
-          ..sort((a, b) => b.startDate.compareTo(a.startDate)); // newest first
+          ..sort((a, b) => b.startDate.compareTo(a.startDate));
 
         _isLoading = false;
 
         // Auto-select first period on first load
         if (_selectedPeriodId == null && _closedPeriods.isNotEmpty) {
           _selectedPeriodId = _closedPeriods.first.id;
-          _loadRecordings();
+          _buildReport();
         } else {
           notifyListeners();
         }
@@ -76,11 +81,14 @@ class ReportingController extends ChangeNotifier {
     _recordings = [];
     _report = null;
     notifyListeners();
-    _loadRecordings();
+    _buildReport();
   }
 
-  // ── Load recordings & compute report ────────────────────────────────────────
-  Future<void> _loadRecordings() async {
+  // ── Build Report ─────────────────────────────────────────────────────────────
+  /// Aturan tegas:
+  /// - Period closed + punya summary valid → pakai snapshot (tidak fetch recordings)
+  /// - Lainnya (summary kosong / periode aktif) → hitung realtime dari recordings
+  Future<void> _buildReport() async {
     final period = selectedPeriod;
     if (period == null) return;
 
@@ -89,10 +97,19 @@ class ReportingController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _recordings = await _firebaseService
-          .getRecordingsStream(period.id)
-          .first;
-      _report = _generateReport.execute(period, _recordings);
+      final bool hasValidSnapshot = period.endDate != null &&
+          period.summary != null &&
+          period.summary!.finalFCR > 0;
+
+      if (hasValidSnapshot) {
+        // Periode ditutup setelah refactor — pakai snapshot langsung
+        _recordings = [];
+        _report = _snapshotUseCase.execute(period);
+      } else {
+        // Periode lama (sebelum refactor) atau belum ada summary — hitung realtime
+        _recordings = await _firebaseService.getRecordingsOnce(period.id);
+        _report = _realtimeUseCase.execute(period, _recordings);
+      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

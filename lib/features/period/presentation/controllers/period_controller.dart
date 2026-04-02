@@ -2,17 +2,26 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
+import 'package:recording_app/features/reporting/domain/usecases/insight_generator.dart';
+import 'package:recording_app/features/reporting/domain/usecases/summary_calculator.dart';
 
 class PeriodController extends ChangeNotifier {
   final FirebaseService _firebaseService;
+  final SummaryCalculator _summaryCalculator;
+  final InsightGenerator _insightGenerator;
   StreamSubscription<List<PeriodData>>? _periodSubscription;
 
   List<PeriodData> _periods = [];
   bool _isLoading = true;
   String? _errorMessage;
 
-  PeriodController({required FirebaseService firebaseService})
-      : _firebaseService = firebaseService {
+  PeriodController({
+    required FirebaseService firebaseService,
+    SummaryCalculator? summaryCalculator,
+    InsightGenerator? insightGenerator,
+  })  : _firebaseService = firebaseService,
+        _summaryCalculator = summaryCalculator ?? SummaryCalculator(),
+        _insightGenerator = insightGenerator ?? InsightGenerator() {
     _init();
   }
 
@@ -97,8 +106,8 @@ class PeriodController extends ChangeNotifier {
     await _firebaseService.updatePeriod(periodId, updatedPeriod);
   }
 
-  /// Close Period: Sets isActive = false, endDate = now, stores summary.
-  Future<void> closePeriod(String periodId, PeriodSummary summary) async {
+  /// Close Period: ambil recordings, kalkulasi summary + weeklyFCR + insights, simpan ke Firebase.
+  Future<void> closePeriod(String periodId) async {
     final period = _periods.firstWhere(
           (p) => p.id == periodId,
       orElse: () => throw Exception('Period not found'),
@@ -108,9 +117,29 @@ class PeriodController extends ChangeNotifier {
       throw Exception('Cannot close: Period is not active.');
     }
 
+    // Fetch recordings sekali untuk kalkulasi snapshot
+    final recordings = await _firebaseService.getRecordingsOnce(periodId);
+
+    // Kalkulasi snapshot
+    final closingPeriod = period.copyWith(endDate: DateTime.now());
+    final snapshot = _summaryCalculator.execute(closingPeriod, recordings);
+    final insights = _insightGenerator.execute(snapshot, period.initialCapacity);
+
+    // Susun PeriodSummary dari snapshot
+    final summary = PeriodSummary(
+      totalFeedKg: snapshot.totalFeedKg,
+      finalPopulation: snapshot.finalPopulation,
+      totalMortality: snapshot.totalMortality,
+      finalBiomass: snapshot.finalBiomassKg,
+      finalFCR: snapshot.finalFCR,
+      avgDailyGain: snapshot.avgDailyGain,
+      weeklyFCR: snapshot.weeklyFCR,
+      insights: insights,
+    );
+
     final updatedPeriod = period.copyWith(
       isActive: false,
-      endDate: DateTime.now(), // explicitly set close timestamp
+      endDate: DateTime.now(),
       summary: summary,
     );
     await _firebaseService.updatePeriod(periodId, updatedPeriod);

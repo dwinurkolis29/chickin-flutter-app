@@ -167,15 +167,7 @@ class _FormPeriodState extends State<FormPeriod> {
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          final summary = PeriodSummary(
-            totalFeedKg: 0,
-            finalPopulation: 0,
-            totalMortality: 0,
-            finalBiomass: 0,
-            finalFCR: 0,
-            avgDailyGain: 0,
-          );
-          await context.read<PeriodController>().closePeriod(widget.period!.id, summary);
+          await context.read<PeriodController>().closePeriod(widget.period!.id);
           if (mounted) {
             AppSnackbar.showSuccess(context, 'Periode berhasil ditutup');
             Navigator.pop(context, true);
