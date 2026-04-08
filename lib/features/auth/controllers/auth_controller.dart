@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
-import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 
 /// Result model for auth operations
@@ -50,17 +49,6 @@ class AuthController {
 
       // Create user document in Firestore
       await _firebaseService.createUserDocument(uid, profile, cage);
-
-      // Auto-create first period
-      final firstPeriod = PeriodData(
-        name: 'Periode 1',
-        initialCapacity: cage.capacity > 0 ? cage.capacity : 1000,
-        initialWeight: 0.4,
-        startDate: DateTime.now(),
-        isActive: true,
-        createdAt: DateTime.now(),
-      );
-      await _firebaseService.createPeriod(firstPeriod, uid);
 
       return AuthResult.success(userCredential.user!);
     } on FirebaseAuthException catch (e) {

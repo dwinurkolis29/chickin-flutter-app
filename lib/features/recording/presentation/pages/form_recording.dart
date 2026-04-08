@@ -1,12 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
-
-import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/tour/tour_controller.dart';
+import 'package:recording_app/core/tour/tour_step.dart';
+import 'package:recording_app/core/tour/widgets/tour_aware_wrapper.dart';
+import 'package:recording_app/core/tour/widgets/tour_overlay.dart';
+import 'package:recording_app/core/tour/widgets/tour_tooltip.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
+import 'package:recording_app/core/services/firebase_service.dart';
 
 /// Halaman form untuk menambahkan data recording baru.
 class FormRecording extends StatefulWidget {
@@ -18,6 +22,7 @@ class FormRecording extends StatefulWidget {
 
 class _FormRecordingState extends State<FormRecording> {
   final GlobalKey<FormState> _formKey = GlobalKey();
+  final GlobalKey _saveRecordBtnKey = GlobalKey();
   bool _isLoading = false;
 
   final FocusNode _focusNodeUmur = FocusNode();
@@ -38,6 +43,7 @@ class _FormRecordingState extends State<FormRecording> {
   void initState() {
     super.initState();
     _loadLastRecordingDay();
+    // Logic tour lama dihapus
   }
 
   Future<void> _loadLastRecordingDay() async {
@@ -156,7 +162,16 @@ class _FormRecordingState extends State<FormRecording> {
   Future<void> _saveData(String periodId, RecordingData recording) async {
     try {
       await _firebaseService.addRecording(periodId, recording);
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        // Advance tour jika sedang aktif di step addRecording
+        final tourController = context.read<TourController>();
+        if (tourController.isTourActive &&
+            tourController.currentStep == TourStep.addRecording) {
+          tourController.advance();
+        }
+
+        Navigator.pop(context, true);
+      }
     } catch (e) {
       if (mounted) {
         AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
@@ -181,137 +196,184 @@ class _FormRecordingState extends State<FormRecording> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
-      body: SafeArea(
-        top: false,
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    'Tambah Data Recording',
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
+      body: Stack(
+        children: [
+          SafeArea(
+            top: false,
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 30),
+                    _buildHeader(context),
+                    const SizedBox(height: 35),
+                    _buildUmurField(context),
+                    const SizedBox(height: 10),
+                    _buildPakanField(context),
+                    const SizedBox(height: 10),
+                    _buildMatiField(context),
+                    const SizedBox(height: 10),
+                    _buildBeratField(context),
+                    const SizedBox(height: 50),
+                    _buildSubmitButton(context),
+                    const SizedBox(height: 30),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Menambahkan data recording ayam broiler.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 35),
-                TextFormField(
-                  controller: _controllerUmur,
-                  focusNode: _focusNodeUmur,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Umur Ayam (hari)',
-                    prefixIcon: const Icon(Icons.data_saver_on_rounded),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator:
-                      (v) =>
-                          (v == null || v.isEmpty)
-                              ? 'Umur tidak boleh kosong.'
-                              : null,
-                  onEditingComplete: () => _focusNodeTerimaPakan.requestFocus(),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _controllerHabisPakan,
-                  focusNode: _focusNodeHabisPakan,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Habis pakan (sak)',
-                    prefixIcon: const Icon(Icons.arrow_circle_up),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator:
-                      (v) =>
-                          (v == null || v.isEmpty)
-                              ? 'Habis pakan tidak boleh kosong.'
-                              : null,
-                  onEditingComplete: () => _focusNodeMatiAyam.requestFocus(),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _controllerMatiAyam,
-                  focusNode: _focusNodeMatiAyam,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Mati ayam (Ekor)',
-                    prefixIcon: const Icon(Icons.highlight_remove),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onEditingComplete: () => _focusNodeBeratAyam.requestFocus(),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _controllerBeratAyam,
-                  focusNode: _focusNodeBeratAyam,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Berat Ayam (gram)',
-                    prefixIcon: const Icon(Icons.scale),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator:
-                      (v) =>
-                          (v == null || v.isEmpty)
-                              ? 'Berat ayam tidak boleh kosong.'
-                              : null,
-                ),
-                const SizedBox(height: 50),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onPressed: _isLoading ? null : _addRecord,
-                  child:
-                      _isLoading
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                          : const Text('Tambah Data'),
-                ),
-                const SizedBox(height: 30),
-              ],
+              ),
             ),
           ),
+          _buildTourOverlay(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTourOverlay(BuildContext context) {
+    final tourController = context.watch<TourController>();
+    if (!tourController.isTourActive ||
+        tourController.currentStep != TourStep.addRecording) {
+      return const SizedBox.shrink();
+    }
+
+    final rect = TourAwareWrapper.getRect(_saveRecordBtnKey);
+    if (rect == null) return const SizedBox.shrink();
+
+    return TourOverlay(
+      targetKey: _saveRecordBtnKey,
+      tooltip: TourTooltip(
+        title: 'Langkah 2: Tambah Recording',
+        description:
+            'Setelah mengisi data harian ayam, klik tombol ini untuk menyimpan. Data ini akan digunakan untuk menghitung FCR dan statistik lainnya.',
+        stepText: '2 / 3',
+        showSkip: true,
+        onSkip: () => tourController.skip(),
+      ),
+      onSkip: () {},
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Text(
+            'Tambah Data Recording',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
         ),
+        const SizedBox(height: 10),
+        Text(
+          'Menambahkan data recording ayam broiler.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUmurField(BuildContext context) {
+    return TextFormField(
+      controller: _controllerUmur,
+      focusNode: _focusNodeUmur,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: 'Umur Ayam (hari)',
+        prefixIcon: const Icon(Icons.data_saver_on_rounded),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      validator:
+          (v) => (v == null || v.isEmpty) ? 'Umur tidak boleh kosong.' : null,
+      onEditingComplete: () => _focusNodeTerimaPakan.requestFocus(),
+    );
+  }
+
+  Widget _buildPakanField(BuildContext context) {
+    return TextFormField(
+      controller: _controllerHabisPakan,
+      focusNode: _focusNodeHabisPakan,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: 'Habis pakan (sak)',
+        prefixIcon: const Icon(Icons.arrow_circle_up),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      validator:
+          (v) =>
+              (v == null || v.isEmpty)
+                  ? 'Habis pakan tidak boleh kosong.'
+                  : null,
+      onEditingComplete: () => _focusNodeMatiAyam.requestFocus(),
+    );
+  }
+
+  Widget _buildMatiField(BuildContext context) {
+    return TextFormField(
+      controller: _controllerMatiAyam,
+      focusNode: _focusNodeMatiAyam,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: 'Mati ayam (Ekor)',
+        prefixIcon: const Icon(Icons.highlight_remove),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      onEditingComplete: () => _focusNodeBeratAyam.requestFocus(),
+    );
+  }
+
+  Widget _buildBeratField(BuildContext context) {
+    return TextFormField(
+      controller: _controllerBeratAyam,
+      focusNode: _focusNodeBeratAyam,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: 'Berat Ayam (gram)',
+        prefixIcon: const Icon(Icons.scale),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      validator:
+          (v) =>
+              (v == null || v.isEmpty)
+                  ? 'Berat ayam tidak boleh kosong.'
+                  : null,
+    );
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return TourAwareWrapper(
+      tourKey: _saveRecordBtnKey,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: _isLoading ? null : _addRecord,
+        child:
+            _isLoading
+                ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                : const Text('Tambah Data'),
       ),
     );
   }

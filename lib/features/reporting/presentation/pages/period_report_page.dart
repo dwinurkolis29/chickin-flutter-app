@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
@@ -22,8 +23,21 @@ class PeriodReportPage extends StatelessWidget {
   }
 }
 
-class _PeriodReportPageView extends StatelessWidget {
+class _PeriodReportPageView extends StatefulWidget {
   const _PeriodReportPageView();
+
+  @override
+  State<_PeriodReportPageView> createState() => _PeriodReportPageViewState();
+}
+
+class _PeriodReportPageViewState extends State<_PeriodReportPageView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<TourController>().complete();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

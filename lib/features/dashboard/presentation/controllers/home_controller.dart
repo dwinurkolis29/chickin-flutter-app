@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
@@ -50,12 +51,16 @@ class HomeController extends ChangeNotifier {
     }
   }
 
-  // Refresh streams to get latest data (e.g., after adding new recording)
+  // Refresh streams to get latest data (e.g., after adding new recording).
+  // notifyListeners() di-defer ke post-frame agar tidak bentrok dengan
+  // BuildScope._flushDirtyElements yang sedang berjalan saat pop navigation.
   void refreshStreams() {
     if (_activePeriodId != null) {
       _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
       _weightStream = _firebaseService.getWeightStream(_activePeriodId!);
-      notifyListeners();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     }
   }
 

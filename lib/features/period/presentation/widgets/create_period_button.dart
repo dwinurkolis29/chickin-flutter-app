@@ -11,9 +11,7 @@ class CreatePeriodButton extends StatelessWidget {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const FormPeriod(),
-          ),
+          MaterialPageRoute(builder: (context) => const FormPeriod()),
         );
       },
       child: const Icon(Icons.add),

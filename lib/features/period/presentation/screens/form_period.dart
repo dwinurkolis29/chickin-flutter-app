@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/tour/tour_controller.dart';
+import 'package:recording_app/core/tour/tour_step.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import '../../data/models/period_data.dart';
@@ -44,6 +46,10 @@ class _FormPeriodState extends State<FormPeriod> {
     _isActiveSwitchValue = widget.period?.isActive ?? false;
     // Close switch ON = period is open/active
     _closePeriodSwitch = widget.period?.isActive ?? false;
+
+    if (!_isEditing) {
+      // Logic tour lama dihapus karena sudah dikelola di Dashboard/List
+    }
   }
 
   @override
@@ -82,6 +88,13 @@ class _FormPeriodState extends State<FormPeriod> {
       } else {
         await controller.createPeriod(periodData);
         if (mounted) {
+          // Advance tour jika sedang aktif di step createPeriod
+          final tourController = context.read<TourController>();
+          if (tourController.isTourActive &&
+              tourController.currentStep == TourStep.createPeriod) {
+            tourController.advance();
+          }
+
           AppSnackbar.showSuccess(context, 'Periode berhasil dibuat');
           Navigator.pop(context, true);
         }
@@ -108,7 +121,9 @@ class _FormPeriodState extends State<FormPeriod> {
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          await context.read<PeriodController>().deletePeriod(widget.period!.id);
+          await context.read<PeriodController>().deletePeriod(
+            widget.period!.id,
+          );
           if (mounted) {
             AppSnackbar.showSuccess(context, 'Periode berhasil dihapus');
             Navigator.pop(context, true);
@@ -139,8 +154,14 @@ class _FormPeriodState extends State<FormPeriod> {
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          await context.read<PeriodController>().activatePeriod(widget.period!.id);
+          await context.read<PeriodController>().activatePeriod(
+            widget.period!.id,
+          );
           if (mounted) {
+            final tourController = context.read<TourController>();
+            if (tourController.isTourActive && tourController.currentStep == TourStep.createPeriod) {
+              tourController.advance();
+            }
             AppSnackbar.showSuccess(context, 'Periode berhasil diaktifkan');
             Navigator.pop(context, true);
           }
@@ -187,9 +208,11 @@ class _FormPeriodState extends State<FormPeriod> {
   @override
   Widget build(BuildContext context) {
     // Show activate switch for non-active periods (both draft and closed)
-    final bool showActivateSwitch = _isEditing && !(widget.period?.isActive ?? false);
+    final bool showActivateSwitch =
+        _isEditing && !(widget.period?.isActive ?? false);
     // Show close switch only when currently active
-    final bool showCloseSwitch = _isEditing && (widget.period?.isActive ?? false);
+    final bool showCloseSwitch =
+        _isEditing && (widget.period?.isActive ?? false);
 
     return Scaffold(
       appBar: AppBar(
@@ -197,7 +220,10 @@ class _FormPeriodState extends State<FormPeriod> {
         actions: [
           if (_isEditing)
             IconButton(
-              icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+              icon: Icon(
+                Icons.delete_outline,
+                color: Theme.of(context).colorScheme.error,
+              ),
               onPressed: _isLoading ? null : _deletePeriod,
             ),
         ],
@@ -205,106 +231,116 @@ class _FormPeriodState extends State<FormPeriod> {
       body: SafeArea(
         top: false,
         child: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Periode',
-                hintText: 'Misal: Batch 1 2024',
-                border: OutlineInputBorder(),
-              ),
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'Nama wajib diisi';
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _capacityController,
-              decoration: const InputDecoration(
-                labelText: 'Kapasitas Awal (Ekor)',
-                hintText: 'Misal: 5000',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'Kapasitas wajib diisi';
-                if (int.tryParse(val.trim()) == null) return 'Harus angka';
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _weightController,
-              decoration: const InputDecoration(
-                labelText: 'Bobot Awal (Kg)',
-                hintText: 'Misal: 0.4',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'Bobot wajib diisi';
-                if (double.tryParse(val.trim()) == null) return 'Harus angka';
-                return null;
-              },
-            ),
-
-            // --- Activate Switch (draft or closed periods) ---
-            if (showActivateSwitch) ...[
-              const SizedBox(height: 16),
-              _StatusSwitch(
-                label: 'Aktifkan Periode',
-                subtitle: widget.period?.endDate != null
-                    ? 'Periode ini sebelumnya sudah ditutup'
-                    : 'Aktifkan untuk mulai mencatat data periode ini',
-                value: _isActiveSwitchValue,
-                isActive: _isActiveSwitchValue,
-                disabled: _isLoading,
-                onChanged: (val) {
-                  setState(() => _isActiveSwitchValue = val);
-                  if (val) _activatePeriod();
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Periode',
+                  hintText: 'Misal: Batch 1 2024',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty)
+                    return 'Nama wajib diisi';
+                  return null;
                 },
               ),
-            ],
-
-            // --- Close Switch (active periods only) ---
-            if (showCloseSwitch) ...[
               const SizedBox(height: 16),
-              _StatusSwitch(
-                label: 'Status Periode',
-                subtitle: _closePeriodSwitch
-                    ? 'Periode sedang aktif'
-                    : 'Periode ditutup',
-                value: _closePeriodSwitch,
-                isActive: _closePeriodSwitch,
-                disabled: _isLoading,
-                onChanged: (val) {
-                  setState(() => _closePeriodSwitch = val);
-                  if (!val) _closePeriod();
+              TextFormField(
+                controller: _capacityController,
+                decoration: const InputDecoration(
+                  labelText: 'Kapasitas Awal (Ekor)',
+                  hintText: 'Misal: 5000',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty)
+                    return 'Kapasitas wajib diisi';
+                  if (int.tryParse(val.trim()) == null) return 'Harus angka';
+                  return null;
                 },
               ),
-            ],
-
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submitForm,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _weightController,
+                decoration: const InputDecoration(
+                  labelText: 'Bobot Awal (Kg)',
+                  hintText: 'Misal: 0.4',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty)
+                    return 'Bobot wajib diisi';
+                  if (double.tryParse(val.trim()) == null) return 'Harus angka';
+                  return null;
+                },
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-                  : Text(_isEditing ? 'Simpan Perubahan' : 'Buat Periode'),
-            ),
-          ],
+
+              // --- Activate Switch (draft or closed periods) ---
+              if (showActivateSwitch) ...[
+                const SizedBox(height: 16),
+                _StatusSwitch(
+                  label: 'Aktifkan Periode',
+                  subtitle:
+                      widget.period?.endDate != null
+                          ? 'Periode ini sebelumnya sudah ditutup'
+                          : 'Aktifkan untuk mulai mencatat data periode ini',
+                  value: _isActiveSwitchValue,
+                  isActive: _isActiveSwitchValue,
+                  disabled: _isLoading,
+                  onChanged: (val) {
+                    setState(() => _isActiveSwitchValue = val);
+                    if (val) _activatePeriod();
+                  },
+                ),
+              ],
+
+              // --- Close Switch (active periods only) ---
+              if (showCloseSwitch) ...[
+                const SizedBox(height: 16),
+                _StatusSwitch(
+                  label: 'Status Periode',
+                  subtitle:
+                      _closePeriodSwitch
+                          ? 'Periode sedang aktif'
+                          : 'Periode ditutup',
+                  value: _closePeriodSwitch,
+                  isActive: _closePeriodSwitch,
+                  disabled: _isLoading,
+                  onChanged: (val) {
+                    setState(() => _closePeriodSwitch = val);
+                    if (!val) _closePeriod();
+                  },
+                ),
+              ],
+
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _submitForm,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : Text(
+                          _isEditing ? 'Simpan Perubahan' : 'Buat Periode',
+                        ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -335,9 +371,10 @@ class _StatusSwitch extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
-        color: isActive
-            ? colorScheme.primary.withOpacity(0.07)
-            : Colors.grey.shade100,
+        color:
+            isActive
+                ? colorScheme.primary.withOpacity(0.07)
+                : Colors.grey.shade100,
         border: Border.all(
           color: isActive ? colorScheme.primary : Colors.grey.shade400,
           width: isActive ? 1.5 : 1.0,
@@ -356,9 +393,10 @@ class _StatusSwitch extends StatelessWidget {
           subtitle,
           style: TextStyle(
             fontSize: 12,
-            color: isActive
-                ? colorScheme.primary.withOpacity(0.75)
-                : Colors.grey.shade500,
+            color:
+                isActive
+                    ? colorScheme.primary.withOpacity(0.75)
+                    : Colors.grey.shade500,
           ),
         ),
         value: value,

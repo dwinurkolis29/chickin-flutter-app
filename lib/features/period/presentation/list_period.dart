@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_theme.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/tour/tour_controller.dart';
+import 'package:recording_app/core/tour/tour_step.dart';
+import 'package:recording_app/core/tour/widgets/tour_aware_wrapper.dart';
+import 'package:recording_app/core/tour/widgets/tour_overlay.dart';
+import 'package:recording_app/core/tour/widgets/tour_tooltip.dart';
 import '../data/models/period_data.dart';
 import 'controllers/period_controller.dart';
-import 'widgets/period_card.dart';
 import 'widgets/active_period_card.dart';
 import 'screens/form_period.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
@@ -13,7 +14,7 @@ import 'widgets/create_period_button.dart';
 import 'widgets/top_bar.dart';
 import 'widgets/period_list_section.dart';
 
-class PeriodListScreen extends StatelessWidget {
+class PeriodListScreen extends StatefulWidget {
   final String farmName;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onSeeAllTap;
@@ -27,6 +28,19 @@ class PeriodListScreen extends StatelessWidget {
     this.onPeriodTap,
   });
 
+  @override
+  State<PeriodListScreen> createState() => _PeriodListScreenState();
+}
+
+class _PeriodListScreenState extends State<PeriodListScreen> {
+  final GlobalKey _createPeriodFabKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // Logic tour lama dihapus
+  }
+
   PeriodData? _getActivePeriod(List<PeriodData> periods) =>
       periods.where((p) => p.isActive).isNotEmpty
           ? periods.where((p) => p.isActive).first
@@ -34,11 +48,16 @@ class PeriodListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: const CreatePeriodButton(),
-      body: SafeArea(
-        child: Consumer<PeriodController>(
-          builder: (context, controller, child) {
+    return Stack(
+      children: [
+        Scaffold(
+          floatingActionButton: TourAwareWrapper(
+            tourKey: _createPeriodFabKey,
+            child: const CreatePeriodButton(),
+          ),
+          body: SafeArea(
+            child: Consumer<PeriodController>(
+              builder: (context, controller, child) {
             if (controller.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -71,7 +90,7 @@ class PeriodListScreen extends StatelessWidget {
 
             return Column(
               children: [
-                TopBar(onNotificationTap: onNotificationTap),
+                TopBar(onNotificationTap: widget.onNotificationTap),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -89,7 +108,7 @@ class PeriodListScreen extends StatelessWidget {
                         const SizedBox(height: 24),
                         PeriodListSection(
                           periods: periods,
-                          onSeeAllTap: onSeeAllTap,
+                          onSeeAllTap: widget.onSeeAllTap,
                           onPeriodTap: handlePeriodTap,
                         ),
                         const SizedBox(height: 24),
@@ -99,9 +118,34 @@ class PeriodListScreen extends StatelessWidget {
                 ),
               ],
             );
-          },
+              },
+            ),
+          ),
         ),
+        _buildTourOverlay(context),
+      ],
+    );
+  }
+
+  Widget _buildTourOverlay(BuildContext context) {
+    final tourController = context.watch<TourController>();
+    if (!tourController.isTourActive || tourController.currentStep != TourStep.createPeriod) {
+      return const SizedBox.shrink();
+    }
+
+    final rect = TourAwareWrapper.getRect(_createPeriodFabKey);
+    if (rect == null) return const SizedBox.shrink();
+
+    return TourOverlay(
+      targetKey: _createPeriodFabKey,
+      tooltip: TourTooltip(
+        title: 'Buat Periode Baru',
+        description: 'Tekan tombol ini untuk mulai membuat periode peternakan baru.',
+        stepText: '1 / 3',
+        showSkip: true,
+        onSkip: () => tourController.skip(),
       ),
+      onSkip: () {},
     );
   }
 }

@@ -64,6 +64,18 @@ class FirebaseService {
     }
   }
 
+  /// Update status penyelesaian tour
+  Future<void> updateTourStatus(bool completed, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore.collection('users').doc(userId).update({
+        'profile.hasCompletedTour': completed,
+      });
+    } catch (e) {
+      throw Exception('Failed to update tour status: $e');
+    }
+  }
+
   // ============================================================================
   // CAGE METHODS
   // ============================================================================

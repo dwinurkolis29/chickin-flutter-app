@@ -10,6 +10,7 @@ import 'package:recording_app/features/dashboard/presentation/controllers/home_c
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
+import 'package:recording_app/core/tour/tour_controller.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -49,6 +50,12 @@ class MainApp extends StatelessWidget {
             firebaseService: FirebaseService(),
           ),
         ),
+        // Setup TourController
+        ChangeNotifierProvider(
+          create: (_) => TourController(
+            firebaseService: FirebaseService(),
+          ),
+        ),
       ],
       child: MaterialApp(
         theme: AppTheme.light(),
@@ -59,4 +66,4 @@ class MainApp extends StatelessWidget {
       ),
     );
   }
-}
+}
