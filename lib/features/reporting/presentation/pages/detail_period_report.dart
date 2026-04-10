@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
-import 'package:recording_app/features/export/domain/usecases/export_period_csv.dart';
-import 'package:recording_app/features/export/domain/usecases/export_period_excel.dart';
+import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/analytics_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/performance_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/population_card.dart';
-import 'package:recording_app/features/reporting/presentation/widgets/recording_table.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 
 /// Halaman detail laporan lengkap: periode info, kartu metrik, tabel harian, export.
@@ -74,8 +72,8 @@ class DetailPeriodReport extends StatelessWidget {
           PerformanceCard(report: controller.report!),
           const SizedBox(height: 12),
           AnalyticsCard(report: controller.report!),
-          const SizedBox(height: 12),
-          RecordingTable(report: controller.report!),
+          const SizedBox(height: 16),
+          _RecapHarianButton(),
         ],
       ),
     );
@@ -194,13 +192,17 @@ class _ExportButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Disable semua tombol saat sedang export — cegah double tap.
+    final busy = controller.isExporting;
+
     return Row(
       children: [
         Expanded(
           child: _ExportChip(
             label: 'Export CSV',
             icon: Icons.table_rows_outlined,
-            onTap: controller.report == null ? null : () => _exportCsv(context),
+            isLoading: busy,
+            onTap: busy ? null : () => _exportCsv(context),
           ),
         ),
         const SizedBox(width: 8),
@@ -208,7 +210,8 @@ class _ExportButtons extends StatelessWidget {
           child: _ExportChip(
             label: 'Export Excel',
             icon: Icons.grid_on_outlined,
-            onTap: controller.report == null ? null : () => _exportExcel(context),
+            isLoading: busy,
+            onTap: busy ? null : () => _exportExcel(context),
           ),
         ),
         const SizedBox(width: 8),
@@ -216,35 +219,44 @@ class _ExportButtons extends StatelessWidget {
           child: _ExportChip(
             label: 'Export PDF',
             icon: Icons.picture_as_pdf_outlined,
-            onTap: () => AppSnackbar.showInfo(context, 'PDF export: coming soon'),
+            isLoading: false,
+            onTap: busy
+                ? null
+                : () => AppSnackbar.showInfo(context, 'PDF export: coming soon'),
           ),
         ),
       ],
     );
   }
 
-  Future<void> _exportCsv(BuildContext context) async {
-    try {
-      await ExportPeriodCsv().execute(controller.report!);
-    } catch (e) {
-      if (context.mounted) AppSnackbar.showError(context, 'CSV export gagal: $e');
-    }
+  void _exportCsv(BuildContext context) {
+    controller.exportCsv(
+      onError: (msg) {
+        if (context.mounted) AppSnackbar.showError(context, 'CSV export gagal: $msg');
+      },
+    );
   }
 
-  Future<void> _exportExcel(BuildContext context) async {
-    try {
-      await ExportPeriodExcel().execute(controller.report!);
-    } catch (e) {
-      if (context.mounted) AppSnackbar.showError(context, 'Excel export gagal: $e');
-    }
+  void _exportExcel(BuildContext context) {
+    controller.exportExcel(
+      onError: (msg) {
+        if (context.mounted) AppSnackbar.showError(context, 'Excel export gagal: $msg');
+      },
+    );
   }
 }
 
 class _ExportChip extends StatelessWidget {
   final String label;
   final IconData icon;
+  final bool isLoading;
   final VoidCallback? onTap;
-  const _ExportChip({required this.label, required this.icon, this.onTap});
+  const _ExportChip({
+    required this.label,
+    required this.icon,
+    required this.isLoading,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -266,8 +278,18 @@ class _ExportChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 20,
-                color: disabled ? cs.onSurface.withOpacity(0.3) : cs.primary),
+            if (isLoading)
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: cs.primary,
+                ),
+              )
+            else
+              Icon(icon, size: 20,
+                  color: disabled ? cs.onSurface.withOpacity(0.3) : cs.primary),
             const SizedBox(height: 4),
             Text(
               label,
@@ -280,6 +302,68 @@ class _ExportChip extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Rekap Harian Button ───────────────────────────────────────────────────────
+
+/// Button "Rekap Harian" — mengambil recordings langsung dari DB saat diklik,
+/// lalu membuka [DetailRecording] dalam mode read-only.
+///
+/// Tidak bergantung pada [PeriodReport.recordings] yang bisa kosong
+/// (misal: periode yang menggunakan snapshot).
+class _RecapHarianButton extends StatelessWidget {
+  const _RecapHarianButton();
+
+  @override
+  Widget build(BuildContext context) {
+    // watch agar rebuild otomatis saat isLoadingRecordingDetail berubah.
+    final controller = context.watch<ReportingController>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final loading = controller.isLoadingRecordingDetail;
+
+    return OutlinedButton.icon(
+      onPressed: loading ? null : () => _open(context, controller),
+      icon: loading
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
+            )
+          : Icon(Icons.receipt_long_outlined, size: 18, color: cs.primary),
+      label: Text(
+        loading ? 'Memuat data...' : 'Rekap Harian',
+        style: tt.labelLarge?.copyWith(
+          color: loading ? cs.onSurface.withOpacity(0.5) : cs.primary,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        side: BorderSide(color: cs.primary.withOpacity(0.5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _open(BuildContext context, ReportingController controller) {
+    controller.viewRecordingDetail(
+      onReady: (recordings) {
+        if (!context.mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailRecording(
+              recordings: recordings,
+              readOnly: true,
+            ),
+          ),
+        );
+      },
+      onError: (msg) {
+        if (context.mounted) AppSnackbar.showError(context, msg);
+      },
     );
   }
 }

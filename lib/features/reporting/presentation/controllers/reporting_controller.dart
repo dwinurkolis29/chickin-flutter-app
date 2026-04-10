@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/export/domain/usecases/export_period_csv.dart';
+import 'package:recording_app/features/export/domain/usecases/export_period_excel.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/reporting/domain/usecases/build_realtime_report_usecase.dart';
@@ -18,9 +20,15 @@ class ReportingController extends ChangeNotifier {
   String? _selectedPeriodId;
   bool _isLoading = true;
   bool _isLoadingRecordings = false;
+  bool _isExporting = false;
+  bool _isLoadingRecordingDetail = false;
   List<RecordingData> _recordings = [];
   PeriodReport? _report;
   String? _errorMessage;
+
+  // Lightweight cache: skipping redundant DB fetches when exporting same period twice.
+  String? _cachedFullReportPeriodId;
+  PeriodReport? _cachedFullReport;
 
   ReportingController({
     required FirebaseService firebaseService,
@@ -37,6 +45,8 @@ class ReportingController extends ChangeNotifier {
   String? get selectedPeriodId => _selectedPeriodId;
   bool get isLoading => _isLoading;
   bool get isLoadingRecordings => _isLoadingRecordings;
+  bool get isExporting => _isExporting;
+  bool get isLoadingRecordingDetail => _isLoadingRecordingDetail;
   List<RecordingData> get recordings => _recordings;
   PeriodReport? get report => _report;
   String? get errorMessage => _errorMessage;
@@ -80,6 +90,9 @@ class ReportingController extends ChangeNotifier {
     _selectedPeriodId = periodId;
     _recordings = [];
     _report = null;
+    // Invalidate export cache when period changes.
+    _cachedFullReportPeriodId = null;
+    _cachedFullReport = null;
     notifyListeners();
     _buildReport();
   }
@@ -114,6 +127,125 @@ class ReportingController extends ChangeNotifier {
       _errorMessage = e.toString();
     } finally {
       _isLoadingRecordings = false;
+      notifyListeners();
+    }
+  }
+
+  // ── Export Flow ──────────────────────────────────────────────────────────────
+  /// Selalu fetch recordings dari DB, hitung ulang report, lalu export.
+  /// TIDAK pakai [_report] yang ada di UI — data bisa tidak lengkap (recordings=[]).
+  ///
+  /// [onError] dipanggil kalau ada kegagalan di mana saja dalam flow.
+  Future<void> exportCsv({required void Function(String) onError}) async {
+    await _runExport(
+      onError: onError,
+      doExport: (report) => ExportPeriodCsv().execute(report),
+    );
+  }
+
+  Future<void> exportExcel({required void Function(String) onError}) async {
+    await _runExport(
+      onError: onError,
+      doExport: (report) => ExportPeriodExcel().execute(report),
+    );
+  }
+
+  Future<void> _runExport({
+    required void Function(String) onError,
+    required Future<void> Function(PeriodReport) doExport,
+  }) async {
+    if (_isExporting) return; // Cegah double tap.
+
+    _isExporting = true;
+    notifyListeners();
+
+    try {
+      final fullReport = await _buildFullReportForExport();
+
+      if (fullReport == null) {
+        onError('Tidak ada data recording untuk periode ini.');
+        return;
+      }
+
+      await doExport(fullReport);
+    } catch (e) {
+      onError(e.toString());
+    } finally {
+      _isExporting = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetch recordings dari DB dan generate report ulang dari awal.
+  /// Pakai cache ringan: jika period sama dan cache masih ada, skip fetch.
+  Future<PeriodReport?> _buildFullReportForExport() async {
+    final period = selectedPeriod;
+    if (period == null) return null;
+
+    // Return cache jika period sama.
+    if (_cachedFullReportPeriodId == period.id && _cachedFullReport != null) {
+      return _cachedFullReport;
+    }
+
+    final recordings = await _firebaseService.getRecordingsOnce(period.id);
+
+    if (recordings.isEmpty) return null;
+
+    final fullReport = _realtimeUseCase.execute(period, recordings);
+
+    // Simpan cache.
+    _cachedFullReportPeriodId = period.id;
+    _cachedFullReport = fullReport;
+
+    return fullReport;
+  }
+
+  // ── View Recording Detail Flow ────────────────────────────────────────────────
+  /// Fetch recordings dari DB lalu panggil [onReady] dengan hasilnya.
+  /// Reuses cache yang sama dengan export flow — tidak double fetch jika sudah ada.
+  ///
+  /// [onReady]  dipanggil dengan list recordings saat data siap.
+  /// [onError]  dipanggil dengan pesan error jika gagal.
+  Future<void> viewRecordingDetail({
+    required void Function(List<RecordingData>) onReady,
+    required void Function(String) onError,
+  }) async {
+    if (_isLoadingRecordingDetail) return; // Cegah double tap.
+
+    _isLoadingRecordingDetail = true;
+    notifyListeners();
+
+    try {
+      final period = selectedPeriod;
+      if (period == null) {
+        onError('Tidak ada periode yang dipilih.');
+        return;
+      }
+
+      List<RecordingData> recordings;
+
+      // Reuse cache dari export jika tersedia — skip fetch.
+      if (_cachedFullReportPeriodId == period.id && _cachedFullReport != null) {
+        recordings = _cachedFullReport!.recordings;
+      } else {
+        recordings = await _firebaseService.getRecordingsOnce(period.id);
+        if (recordings.isNotEmpty) {
+          final fullReport = _realtimeUseCase.execute(period, recordings);
+          _cachedFullReportPeriodId = period.id;
+          _cachedFullReport = fullReport;
+        }
+      }
+
+      if (recordings.isEmpty) {
+        onError('Tidak ada data recording untuk periode ini.');
+        return;
+      }
+
+      onReady(recordings);
+    } catch (e) {
+      onError(e.toString());
+    } finally {
+      _isLoadingRecordingDetail = false;
       notifyListeners();
     }
   }

@@ -105,9 +105,10 @@ class Setting extends StatelessWidget {
           icon: Icons.monitor,
           title: 'Monitoring IoT',
           onTap: () {
-            Navigator.push(
+            DialogHelper.showInfo(
               context,
-              MaterialPageRoute(builder: (context) => const Reminder()),
+              'Informasi',
+              'tahap pengembangan untuk monitoring IoT',
             );
           },
         ),

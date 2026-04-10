@@ -8,7 +8,14 @@ import 'package:recording_app/features/recording/presentation/controllers/record
 
 /// Halaman yang menampilkan semua data recording beserta tombol Edit di tiap baris.
 class DetailRecording extends StatefulWidget {
-  const DetailRecording({super.key});
+  final List<RecordingData>? recordings;
+  final bool readOnly;
+
+  const DetailRecording({
+    super.key,
+    this.recordings,
+    this.readOnly = false,
+  });
 
   @override
   State<DetailRecording> createState() => _DetailRecordingState();
@@ -18,9 +25,12 @@ class _DetailRecordingState extends State<DetailRecording> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RecordingController>().loadActivePeriod();
-    });
+    // Only load active period if no recordings are passed externally.
+    if (widget.recordings == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<RecordingController>().loadActivePeriod();
+      });
+    }
   }
 
   @override
@@ -28,15 +38,28 @@ class _DetailRecordingState extends State<DetailRecording> {
     final controller = context.watch<RecordingController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Semua Recording'), centerTitle: true),
+      appBar: AppBar(
+        title: Text(widget.readOnly ? 'Laporan Recording' : 'Semua Recording'),
+        centerTitle: true,
+      ),
       body: Builder(
         builder: (context) {
-          // Fase 1: controller sedang loadActivePeriod() — stream belum tersedia
+          // If recordings are provided directly (e.g. from report), skip loading/streams.
+          if (widget.recordings != null) {
+            final fcrResults = controller.calculateWeeklyFCR(widget.recordings!);
+            return _RecordingTable(
+              recordings: widget.recordings!,
+              controller: controller,
+              fcrResults: fcrResults,
+              readOnly: widget.readOnly,
+            );
+          }
+
+          // Case for Active Period (dashboard entry)
           if (controller.isLoadingPeriod) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Fase 2: tidak ada periode aktif
           if (controller.recordingsStream == null) {
             return Center(
               child: Column(
@@ -51,15 +74,14 @@ class _DetailRecordingState extends State<DetailRecording> {
                   Text(
                     'Tidak ada periode aktif',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
             );
           }
 
-          // Fase 3: stream tersedia — pantau data
           return StreamBuilder<List<RecordingData>>(
             stream: controller.recordingsStream,
             builder: (context, snapshot) {
@@ -86,11 +108,9 @@ class _DetailRecordingState extends State<DetailRecording> {
                       const SizedBox(height: 16),
                       Text(
                         'Belum ada data recording',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
@@ -102,6 +122,7 @@ class _DetailRecordingState extends State<DetailRecording> {
                 recordings: recordings,
                 controller: controller,
                 fcrResults: fcrResults,
+                readOnly: widget.readOnly,
               );
             },
           );
@@ -116,11 +137,13 @@ class _RecordingTable extends StatefulWidget {
     required this.recordings,
     required this.controller,
     required this.fcrResults,
+    this.readOnly = false,
   });
 
   final List<RecordingData> recordings;
   final RecordingController controller;
   final List<FCRData> fcrResults;
+  final bool readOnly;
 
   @override
   State<_RecordingTable> createState() => _RecordingTableState();
@@ -373,12 +396,13 @@ class _RecordingTableState extends State<_RecordingTable> {
                             numeric: true,
                             onSort: _onSort,
                           ),
-                          const DataColumn(
-                            label: Text(
-                              'Edit',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                          if (!widget.readOnly)
+                            const DataColumn(
+                              label: Text(
+                                'Edit',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          ),
                         ],
                         rows:
                             filtered.map((rec) {
@@ -388,17 +412,18 @@ class _RecordingTableState extends State<_RecordingTable> {
                                   DataCell(Text('${rec.avgWeightGram}')),
                                   DataCell(Text('${rec.feedSack}')),
                                   DataCell(Text('${rec.mortality}')),
-                                  DataCell(
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit_outlined,
-                                        size: 20,
+                                  if (!widget.readOnly)
+                                    DataCell(
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit_outlined,
+                                          size: 20,
+                                        ),
+                                        tooltip: 'Edit recording',
+                                        onPressed:
+                                            () => _showEditSheet(context, rec),
                                       ),
-                                      tooltip: 'Edit recording',
-                                      onPressed:
-                                          () => _showEditSheet(context, rec),
                                     ),
-                                  ),
                                 ],
                               );
                             }).toList(),
