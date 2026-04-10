@@ -102,6 +102,17 @@ class Setting extends StatelessWidget {
         ),
         _buildMenuItem(
           context,
+          icon: Icons.monitor,
+          title: 'Monitoring IoT',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Reminder()),
+            );
+          },
+        ),
+        _buildMenuItem(
+          context,
           icon: Icons.analytics,
           title: 'Report',
           onTap: () {
