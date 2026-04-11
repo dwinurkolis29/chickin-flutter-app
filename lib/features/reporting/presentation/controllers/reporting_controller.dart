@@ -36,9 +36,7 @@ class ReportingController extends ChangeNotifier {
     BuildRealtimeReportUseCase? realtimeUseCase,
   })  : _firebaseService = firebaseService,
         _snapshotUseCase = snapshotUseCase ?? BuildReportSnapshotUseCase(),
-        _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase() {
-    _init();
-  }
+        _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase();
 
   // ── Getters ─────────────────────────────────────────────────────────────────
   List<PeriodData> get closedPeriods => _closedPeriods;
@@ -248,6 +246,41 @@ class ReportingController extends ChangeNotifier {
       _isLoadingRecordingDetail = false;
       notifyListeners();
     }
+  }
+
+  /// Bersihkan data tanpa subscribe ulang. Dipanggil saat logout.
+  void clear() {
+    _periodSub?.cancel();
+    _periodSub = null;
+    _closedPeriods = [];
+    _selectedPeriodId = null;
+    _isLoading = false;
+    _isLoadingRecordings = false;
+    _isExporting = false;
+    _recordings = [];
+    _report = null;
+    _errorMessage = null;
+    _cachedFullReportPeriodId = null;
+    _cachedFullReport = null;
+    notifyListeners();
+  }
+
+  /// Subscribe ulang dengan UID baru. Dipanggil saat ganti akun.
+  void reload() {
+    _periodSub?.cancel();
+    _periodSub = null;
+    _closedPeriods = [];
+    _selectedPeriodId = null;
+    _isLoading = true;
+    _isLoadingRecordings = false;
+    _isExporting = false;
+    _recordings = [];
+    _report = null;
+    _errorMessage = null;
+    _cachedFullReportPeriodId = null;
+    _cachedFullReport = null;
+    notifyListeners();
+    _init();
   }
 
   @override

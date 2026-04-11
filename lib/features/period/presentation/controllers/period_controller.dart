@@ -21,9 +21,7 @@ class PeriodController extends ChangeNotifier {
     InsightGenerator? insightGenerator,
   })  : _firebaseService = firebaseService,
         _summaryCalculator = summaryCalculator ?? SummaryCalculator(),
-        _insightGenerator = insightGenerator ?? InsightGenerator() {
-    _init();
-  }
+        _insightGenerator = insightGenerator ?? InsightGenerator();
 
   List<PeriodData> get periods => _periods;
   bool get isLoading => _isLoading;
@@ -57,6 +55,27 @@ class PeriodController extends ChangeNotifier {
       _errorMessage = e.toString();
       notifyListeners();
     }
+  }
+
+  /// Bersihkan data tanpa subscribe ulang. Dipanggil saat logout.
+  void clear() {
+    _periodSubscription?.cancel();
+    _periodSubscription = null;
+    _periods = [];
+    _isLoading = false;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Subscribe ulang dengan UID baru. Dipanggil saat ganti akun.
+  void reload() {
+    _periodSubscription?.cancel();
+    _periodSubscription = null;
+    _periods = [];
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    _loadPeriods();
   }
 
   @override

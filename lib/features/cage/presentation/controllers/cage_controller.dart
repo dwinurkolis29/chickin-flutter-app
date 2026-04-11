@@ -22,10 +22,8 @@ class CageController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // TAMBAHKAN METHOD INI - CEK APAKAH DATA VALID
   bool get hasValidCageData {
     if (_cageData == null) return false;
-    // Cek apakah data benar-benar ada (bukan default value)
     return _cageData!.type.isNotEmpty && _cageData!.capacity > 0;
   }
 
@@ -53,7 +51,6 @@ class CageController extends ChangeNotifier {
       }
 
       final cageData = await _firebaseService.getCage();
-
       _cageData = cageData;
       _isLoading = false;
       notifyListeners();
@@ -78,7 +75,7 @@ class CageController extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      
+
       await _firebaseService.updateCage(cage);
       _cageData = cage;
       _isLoading = false;
@@ -90,5 +87,20 @@ class CageController extends ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+
+  /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
+  void clear() {
+    _cageData = null;
+    _isLoading = false;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Load ulang dengan UID baru. Dipanggil saat ganti akun.
+  void reload() {
+    _cageData = null;
+    _errorMessage = null;
+    loadCageData();
   }
 }

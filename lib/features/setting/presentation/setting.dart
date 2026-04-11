@@ -3,7 +3,6 @@ import 'package:recording_app/features/reminder/presentation/reminder.dart';
 import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart';
 import 'package:recording_app/features/user/presentation/pages/user_profile.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
-import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
 import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
@@ -23,10 +22,8 @@ class Setting extends StatelessWidget {
       onConfirm: () async {
         try {
           await FirebaseAuth.instance.signOut();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Login()),
-          );
+          // AuthWrapper memantau authStateChanges() secara reaktif.
+          // Navigasi ke Login ditangani otomatis saat Firebase Auth state berubah.
         } catch (e) {
           debugPrint('Logout error: $e');
         }

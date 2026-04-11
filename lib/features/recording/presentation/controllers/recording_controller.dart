@@ -63,4 +63,25 @@ class RecordingController extends ChangeNotifier {
     if (_activePeriodId == null) return;
     await _firebaseService.updateRecording(_activePeriodId!, recording.id, recording);
   }
+
+  /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
+  void clear() {
+    _activePeriodId = null;
+    _initialPopulation = 0;
+    _recordingsStream = null;
+    _weightStream = null;
+    _isLoadingPeriod = false;
+    notifyListeners();
+  }
+
+  /// Load ulang dengan UID baru. Dipanggil saat ganti akun.
+  void reload() {
+    _activePeriodId = null;
+    _initialPopulation = 0;
+    _recordingsStream = null;
+    _weightStream = null;
+    _isLoadingPeriod = true;
+    notifyListeners();
+    loadActivePeriod();
+  }
 }

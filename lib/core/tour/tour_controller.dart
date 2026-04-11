@@ -4,11 +4,11 @@ import 'tour_step.dart';
 
 class TourController extends ChangeNotifier {
   final FirebaseService _firebaseService;
-  
+
   TourStep _currentStep = TourStep.none;
   bool _isTourActive = false;
 
-  TourController({FirebaseService? firebaseService}) 
+  TourController({FirebaseService? firebaseService})
       : _firebaseService = firebaseService ?? FirebaseService();
 
   TourStep get currentStep => _currentStep;
@@ -94,4 +94,14 @@ class TourController extends ChangeNotifier {
     _isTourActive = step != TourStep.none && step != TourStep.completed;
     notifyListeners();
   }
+
+  /// Bersihkan state saat logout.
+  void clear() {
+    _currentStep = TourStep.none;
+    _isTourActive = false;
+    notifyListeners();
+  }
+
+  /// Tidak ada stream, reload = clear. Dipanggil saat ganti akun.
+  void reload() => clear();
 }
