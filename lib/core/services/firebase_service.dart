@@ -76,6 +76,18 @@ class FirebaseService {
     }
   }
 
+  /// Update avatar URL
+  Future<void> updateProfileAvatarUrl(String avatarUrl, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore.collection('users').doc(userId).update({
+        'profile.avatarUrl': avatarUrl,
+      });
+    } catch (e) {
+      throw Exception('Failed to update avatar url: $e');
+    }
+  }
+
   // ============================================================================
   // CAGE METHODS
   // ============================================================================
@@ -106,6 +118,18 @@ class FirebaseService {
       }, SetOptions(merge: true));
     } catch (e) {
       throw Exception('Failed to update cage: $e');
+    }
+  }
+
+  /// Update cage image URL
+  Future<void> updateCageImageUrl(String imageUrl, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore.collection('users').doc(userId).update({
+        'cage.imageUrl': imageUrl,
+      });
+    } catch (e) {
+      throw Exception('Failed to update cage image url: $e');
     }
   }
 

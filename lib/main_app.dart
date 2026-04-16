@@ -6,6 +6,8 @@ import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/auth/auth_wrapper.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
+import 'package:recording_app/core/services/storage_service.dart';
+import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
@@ -20,8 +22,16 @@ class MainApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => UserController(
+            firebaseService: FirebaseService(),
+            storageService: StorageService(),
+            auth: FirebaseAuth.instance,
+          ),
+        ),
+        ChangeNotifierProvider(
           create: (_) => CageController(
             firebaseService: FirebaseService(),
+            storageService: StorageService(),
             auth: FirebaseAuth.instance,
           ),
         ),

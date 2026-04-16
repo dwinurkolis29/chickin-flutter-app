@@ -54,5 +54,9 @@
 		<string>alert</string>
 		<key>UIStatusBarHidden</key>
 		<false />
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Akses galeri dibutuhkan untuk mengunggah foto profil dan foto kandang.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Akses kamera dibutuhkan untuk mengambil foto profil dan foto kandang.</string>
 	</dict>
 </plist>

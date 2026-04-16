@@ -4,6 +4,9 @@ import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/user/presentation/pages/form_user.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
+import 'package:image_picker/image_picker.dart';
 
 class User extends StatefulWidget {
   const User({super.key});
@@ -13,41 +16,42 @@ class User extends StatefulWidget {
 }
 
 class _UserState extends State<User> {
-  final FirebaseService _firebaseService = FirebaseService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  UserProfile? _userProfile;
-  bool _isLoading = true;
-  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserController>().loadUserData();
+    });
   }
 
-  Future<void> _loadUserData() async {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        final userProfile = await _firebaseService.getUserProfile();
-        if (mounted) {
-          setState(() {
-            _userProfile = userProfile;
-            _isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          _errorMessage = 'Pengguna tidak login';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Gagal memuat data: $e';
-        _isLoading = false;
-      });
-    }
+  void _showImageSourceBottomSheet(BuildContext context, UserController controller) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeri'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.handleProfileImageUpload(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.handleProfileImageUpload(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _resetPassword() async {
@@ -72,6 +76,10 @@ class _UserState extends State<User> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final controller = context.watch<UserController>();
+    final _isLoading = controller.isLoading;
+    final _errorMessage = controller.errorMessage ?? '';
+    final _userProfile = controller.userProfile;
 
     return Scaffold(
       // surface = AppColors.background (light) / M3 dark default (dark)
@@ -119,16 +127,40 @@ class _UserState extends State<User> {
                       _Card(
                         child: Row(
                           children: [
-                            CircleAvatar(
-                              radius: 42,
-                              backgroundColor: colorScheme.primary.withOpacity(
-                                0.12,
-                              ),
-                              child: Icon(
-                                Icons.person,
-                                size: 48,
-                                color: colorScheme.primary,
-                              ),
+                            Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 42,
+                                  backgroundColor: colorScheme.primary.withOpacity(0.12),
+                                  backgroundImage: _userProfile?.avatarUrl != null
+                                      ? NetworkImage(_userProfile!.avatarUrl!)
+                                      : null,
+                                  child: _userProfile?.avatarUrl == null
+                                      ? Icon(Icons.person, size: 48, color: colorScheme.primary)
+                                      : null,
+                                ),
+                                if (controller.isUploadingAvatar)
+                                  Positioned.fill(
+                                    child: Container(
+                                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.black38),
+                                      child: const Center(
+                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      ),
+                                    ),
+                                  ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: controller.isUploadingAvatar ? null : () => _showImageSourceBottomSheet(context, controller),
+                                    child: CircleAvatar(
+                                      radius: 14,
+                                      backgroundColor: colorScheme.primary,
+                                      child: Icon(Icons.edit, size: 16, color: colorScheme.onPrimary),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(width: 20),
                             Expanded(

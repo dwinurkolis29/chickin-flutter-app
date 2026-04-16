@@ -5,11 +5,13 @@ class CageData {
   final String type;
   final int capacity;
   final String location;
+  final String? imageUrl;
 
   const CageData({
     this.type = '',
     this.capacity = 0,
     this.location = '',
+    this.imageUrl,
   });
 
   factory CageData.fromJson(Map<String, dynamic>? json) {
@@ -21,6 +23,7 @@ class CageData {
       type: asString(json, 'type'),
       capacity: asInt(json, 'capacity'),
       location: asString(json, 'location'),
+      imageUrl: json['imageUrl'] as String?,
     );
   }
 
@@ -28,23 +31,26 @@ class CageData {
     'type': type,
     'capacity': capacity,
     'location': location,
+    if (imageUrl != null) 'imageUrl': imageUrl,
   };
 
   CageData copyWith({
     String? type,
     int? capacity,
     String? location,
+    String? imageUrl,
   }) {
     return CageData(
       type: type ?? this.type,
       capacity: capacity ?? this.capacity,
       location: location ?? this.location,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
   @override
   String toString() {
-    return 'CageData(type: $type, capacity: $capacity, location: $location)';
+    return 'CageData(type: $type, capacity: $capacity, location: $location, imageUrl: $imageUrl)';
   }
 }
 

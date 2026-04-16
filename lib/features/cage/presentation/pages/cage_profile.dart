@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CageProfile extends StatefulWidget {
   const CageProfile({super.key});
@@ -19,6 +20,34 @@ class _CageProfileState extends State<CageProfile> {
         context.read<CageController>().loadCageData();
       }
     });
+  }
+
+  void _showImageSourceBottomSheet(BuildContext context, CageController controller) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeri'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.handleCageImageUpload(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.handleCageImageUpload(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -81,16 +110,40 @@ class _CageProfileState extends State<CageProfile> {
                   _Card(
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 42,
-                          backgroundColor: colorScheme.primary.withOpacity(
-                            0.12,
-                          ),
-                          child: Icon(
-                            Icons.house_siding,
-                            size: 48,
-                            color: colorScheme.primary,
-                          ),
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 42,
+                              backgroundColor: colorScheme.primary.withOpacity(0.12),
+                              backgroundImage: cageData.imageUrl != null
+                                  ? NetworkImage(cageData.imageUrl!)
+                                  : null,
+                              child: cageData.imageUrl == null
+                                  ? Icon(Icons.house_siding, size: 48, color: colorScheme.primary)
+                                  : null,
+                            ),
+                            if (controller.isUploadingImage)
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.black38),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  ),
+                                ),
+                              ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: controller.isUploadingImage ? null : () => _showImageSourceBottomSheet(context, controller),
+                                child: CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: colorScheme.primary,
+                                  child: Icon(Icons.edit, size: 16, color: colorScheme.onPrimary),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(width: 20),
                         Expanded(
