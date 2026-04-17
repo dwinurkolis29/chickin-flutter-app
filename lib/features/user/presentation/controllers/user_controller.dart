@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/storage_service.dart';
+import 'package:recording_app/core/utils/image_picker_helper.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -61,10 +62,10 @@ class UserController extends ChangeNotifier {
       final user = _auth.currentUser;
       if (user == null) return;
       
-      final File? imageFile = await _storageService.pickImage(source);
+      final File? imageFile = await ImagePickerHelper.pickImage(source);
       if (imageFile == null) return; // User canceled
 
-      final File? croppedFile = await _storageService.cropImage(
+      final File? croppedFile = await ImagePickerHelper.cropImage(
         imageFile: imageFile, 
         aspectRatio: CropAspectRatioPreset.square
       );
