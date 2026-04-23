@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/storage_service.dart';
+import 'package:recording_app/core/utils/image_picker_helper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CageController extends ChangeNotifier {
@@ -85,10 +86,10 @@ class CageController extends ChangeNotifier {
       final user = _auth.currentUser;
       if (user == null) return;
       
-      final File? imageFile = await _storageService.pickImage(source);
+      final File? imageFile = await ImagePickerHelper.pickImage(source);
       if (imageFile == null) return;
 
-      final File? croppedFile = await _storageService.cropImage(
+      final File? croppedFile = await ImagePickerHelper.cropImage(
         imageFile: imageFile, 
         aspectRatio: null // Free crop ratio
       );

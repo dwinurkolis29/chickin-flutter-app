@@ -19,4 +19,13 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+
+    <!-- Theme khusus untuk UCropActivity mengatasi issue safe area overlap -->
+    <style name="UCropTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">#09637E</item>
+        <!-- Matikan light status bar text supaya jam/baterai berwarna putih di atas biru gelap -->
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 </resources>
