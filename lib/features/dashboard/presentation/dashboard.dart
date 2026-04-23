@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' hide User;
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
@@ -58,12 +60,8 @@ class _DashboardState extends State<Dashboard> {
       isDestructive: true,
       onConfirm: () async {
         try {
-          await FirebaseAuth.instance.signOut();
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Login()),
-          );
+          await context.read<AuthService>().signOut();
+          // AuthWrapper reaktif — tidak perlu navigate manual.
         } catch (e) {
           debugPrint('Logout error: $e');
         }

@@ -35,30 +35,13 @@ class CageController extends ChangeNotifier {
     return _cageData!.type.isNotEmpty && _cageData!.capacity > 0;
   }
 
-  Future<void> loadCageData() async {
+  Future<void> loadCageData([String? uid]) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final user = _auth.currentUser;
-
-      if (user == null) {
-        _errorMessage = 'Anda belum login';
-        _isLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      final email = user.email;
-      if (email == null || email.isEmpty) {
-        _errorMessage = 'Email pengguna tidak ditemukan';
-        _isLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      final cageData = await _firebaseService.getCage();
+      final cageData = await _firebaseService.getCage(uid);
       _cageData = cageData;
       _isLoading = false;
       notifyListeners();
@@ -131,6 +114,17 @@ class CageController extends ChangeNotifier {
     }
   }
 
+  /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
+  void onAuthChanged(String? uid) {
+    if (uid == null) {
+      clear();
+    } else {
+      _cageData = null;
+      _errorMessage = null;
+      loadCageData(uid);
+    }
+  }
+
   /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
   void clear() {
     _cageData = null;
@@ -140,10 +134,6 @@ class CageController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Load ulang dengan UID baru. Dipanggil saat ganti akun.
-  void reload() {
-    _cageData = null;
-    _errorMessage = null;
-    loadCageData();
-  }
+  /// Load ulang dengan UID baru. Delegate ke onAuthChanged.
+  void reload([String? uid]) => onAuthChanged(uid);
 }

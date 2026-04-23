@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
-import 'package:recording_app/features/auth/controllers/auth_controller.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 
 class Signup extends StatefulWidget {
@@ -28,8 +29,6 @@ class _SignupState extends State<Signup> {
   final TextEditingController _controllerPassword        = TextEditingController();
   final TextEditingController _controllerConFirmPassword = TextEditingController();
 
-  final AuthController _authController = AuthController();
-
   bool _obscurePassword        = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading              = false;
@@ -47,7 +46,7 @@ class _SignupState extends State<Signup> {
         address: _controllerAddress.text.trim(),
       );
 
-      final result = await _authController.signUp(
+      final result = await context.read<AuthService>().signUp(
         email:    _controllerEmail.text.trim(),
         password: _controllerPassword.text,
         profile:  profile,

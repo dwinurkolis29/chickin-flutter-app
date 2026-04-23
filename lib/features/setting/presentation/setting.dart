@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/features/reminder/presentation/reminder.dart';
 import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart';
 import 'package:recording_app/features/user/presentation/pages/user_profile.dart';
@@ -6,7 +8,6 @@ import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
 import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 
 class Setting extends StatelessWidget {
   const Setting({Key? key}) : super(key: key);
@@ -21,9 +22,9 @@ class Setting extends StatelessWidget {
       isDestructive: true,
       onConfirm: () async {
         try {
-          await FirebaseAuth.instance.signOut();
-          // AuthWrapper memantau authStateChanges() secara reaktif.
-          // Navigasi ke Login ditangani otomatis saat Firebase Auth state berubah.
+          final authService = context.read<AuthService>();
+          await authService.signOut();
+          // AuthWrapper reaktif — tidak perlu navigate manual.
         } catch (e) {
           debugPrint('Logout error: $e');
         }

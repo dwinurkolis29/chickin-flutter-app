@@ -17,7 +17,7 @@ class HomeController extends ChangeNotifier {
         _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR();
 
   String? _activePeriodId;
-  bool _isLoadingPeriod = true;
+  bool _isLoadingPeriod = false;
   int _initialPopulation = 0;
   Stream<List<RecordingData>>? _recordingsStream;
   Stream<List<FlSpot>>? _weightStream;
@@ -28,9 +28,9 @@ class HomeController extends ChangeNotifier {
   Stream<List<RecordingData>>? get recordingsStream => _recordingsStream;
   Stream<List<FlSpot>>? get weightStream => _weightStream;
 
-  Future<void> loadActivePeriod() async {
+  Future<void> loadActivePeriod([String? uid]) async {
     try {
-      final activePeriod = await _firebaseService.getActivePeriod();
+      final activePeriod = await _firebaseService.getActivePeriod(uid);
       _activePeriodId = activePeriod?.id;
       
       // Load initial population from cage data
@@ -39,8 +39,8 @@ class HomeController extends ChangeNotifier {
         // This ensures FCR is consistent with active_period_card
         _initialPopulation = activePeriod!.initialCapacity;
         // Cache streams so they don't get recreated on every rebuild
-        _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
-        _weightStream = _firebaseService.getWeightStream(_activePeriodId!);
+        _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!, uid);
+        _weightStream = _firebaseService.getWeightStream(_activePeriodId!, uid);
       }
       
       _isLoadingPeriod = false;
@@ -64,6 +64,21 @@ class HomeController extends ChangeNotifier {
     }
   }
 
+  /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
+  void onAuthChanged(String? uid) {
+    if (uid == null) {
+      clear();
+    } else {
+      _activePeriodId = null;
+      _initialPopulation = 0;
+      _recordingsStream = null;
+      _weightStream = null;
+      _isLoadingPeriod = true;
+      notifyListeners();
+      loadActivePeriod(uid);
+    }
+  }
+
   /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
   void clear() {
     _activePeriodId = null;
@@ -74,16 +89,8 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Load ulang dengan UID baru. Dipanggil saat ganti akun.
-  void reload() {
-    _activePeriodId = null;
-    _initialPopulation = 0;
-    _recordingsStream = null;
-    _weightStream = null;
-    _isLoadingPeriod = true;
-    notifyListeners();
-    loadActivePeriod();
-  }
+  /// Load ulang dengan UID baru. Delegate ke onAuthChanged.
+  void reload([String? uid]) => onAuthChanged(uid);
 
   List<FCRData> calculateWeeklyFCR(List<RecordingData> recordings) {
     if (recordings.isEmpty || _initialPopulation == 0) {

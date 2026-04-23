@@ -95,6 +95,12 @@ class TourController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
+  void onAuthChanged(String? uid) {
+    if (uid == null) clear();
+    // Login: Dashboard akan memanggil shouldShowTour() secara eksplisit.
+  }
+
   /// Bersihkan state saat logout.
   void clear() {
     _currentStep = TourStep.none;

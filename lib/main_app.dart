@@ -1,7 +1,7 @@
-// main_app.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/auth/auth_wrapper.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
@@ -21,44 +21,91 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // AuthService — satu pintu semua urusan autentikasi.
+        // Didaftarkan paling atas agar bisa diakses oleh StreamProvider di bawah.
         ChangeNotifierProvider(
+          create: (_) => AuthService(),
+        ),
+
+        // UID stream dari AuthService — single source of truth.
+        // ProxyProvider semua controller bergantung pada ini.
+        StreamProvider<String?>(
+          create: (context) => context.read<AuthService>().uidStream,
+          initialData: null,
+        ),
+
+        ChangeNotifierProxyProvider<String?, UserController>(
           create: (_) => UserController(
             firebaseService: FirebaseService(),
             storageService: StorageService(),
             auth: FirebaseAuth.instance,
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
-        ChangeNotifierProvider(
+
+        ChangeNotifierProxyProvider<String?, CageController>(
           create: (_) => CageController(
-            firebaseService: FirebaseService(),
+            firebaseService: FirebaseService(), 
             storageService: StorageService(),
             auth: FirebaseAuth.instance,
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
-        ChangeNotifierProvider(
+
+        ChangeNotifierProxyProvider<String?, HomeController>(
           create: (_) => HomeController(
             firebaseService: FirebaseService(),
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
-        ChangeNotifierProvider(
+
+        ChangeNotifierProxyProvider<String?, PeriodController>(
           create: (_) => PeriodController(
             firebaseService: FirebaseService(),
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
-        ChangeNotifierProvider(
+
+        ChangeNotifierProxyProvider<String?, RecordingController>(
           create: (_) => RecordingController(
             firebaseService: FirebaseService(),
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
-        ChangeNotifierProvider(
+
+        ChangeNotifierProxyProvider<String?, ReportingController>(
           create: (_) => ReportingController(
             firebaseService: FirebaseService(),
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
-        ChangeNotifierProvider(
+
+        ChangeNotifierProxyProvider<String?, TourController>(
           create: (_) => TourController(
             firebaseService: FirebaseService(),
           ),
+          update: (_, uid, controller) {
+            controller!.onAuthChanged(uid);
+            return controller;
+          },
         ),
       ],
       child: MaterialApp(

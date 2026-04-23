@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import '../../../core/components/dialogs/dialog_helper.dart';
 import '../../../core/components/snackbars/app_snackbar.dart';
-import '../controllers/auth_controller.dart';
 import 'signup.dart';
 
 class Login extends StatefulWidget {
@@ -21,31 +21,26 @@ class _LoginState extends State<Login> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  final AuthController _authController = AuthController();
-
   // ─── Email/Password Login ────────────────────────────────────────────────────
   void login() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isLoading = true);
     try {
-      final result = await _authController.signIn(
+      final result = await context.read<AuthService>().signIn(
         email: _controllerEmail.text.trim(),
         password: _controllerPassword.text,
       );
       if (!mounted) return;
 
-      if (result.success) {
-        // AuthWrapper memantau authStateChanges() secara reaktif.
-        // Navigasi ke Dashboard ditangani otomatis saat Firebase Auth state berubah.
-        // Tidak perlu Navigator manual di sini.
-      } else {
+      if (!result.success) {
         DialogHelper.showError(
           context,
           'Login Gagal',
           result.errorMessage ?? 'Terjadi kesalahan yang tidak terduga',
         );
       }
+      // Sukses: AuthWrapper reaktif — tidak perlu navigate manual.
     } catch (e) {
       if (mounted) {
         DialogHelper.showError(context, 'Error', 'Terjadi kesalahan: $e');

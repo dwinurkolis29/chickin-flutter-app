@@ -102,4 +102,12 @@ class UserController extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
+
+  void onAuthChanged(String? uid) {
+    if (uid == null) {
+      clear();
+    } else {
+      loadUserData();
+    }
+  }
 }

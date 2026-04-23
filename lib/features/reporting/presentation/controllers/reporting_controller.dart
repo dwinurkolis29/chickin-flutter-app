@@ -18,7 +18,7 @@ class ReportingController extends ChangeNotifier {
 
   List<PeriodData> _closedPeriods = [];
   String? _selectedPeriodId;
-  bool _isLoading = true;
+  bool _isLoading = false;
   bool _isLoadingRecordings = false;
   bool _isExporting = false;
   bool _isLoadingRecordingDetail = false;
@@ -53,10 +53,29 @@ class ReportingController extends ChangeNotifier {
       .where((p) => p.id == _selectedPeriodId)
       .firstOrNull;
 
-  // ── Init ────────────────────────────────────────────────────────────────────
-  void _init() {
+  // ── Lifecycle ────────────────────────────────────────────────────────────────
+  /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
+  void onAuthChanged(String? uid) {
+    if (uid == null) {
+      clear();
+      return;
+    }
+
+    _periodSub?.cancel(); // Cancel sebelum buat yang baru — hindari leak
+    _periodSub = null;
+    _closedPeriods = [];
+    _selectedPeriodId = null;
     _isLoading = true;
-    _periodSub = _firebaseService.getPeriodsStream().listen(
+    _isLoadingRecordings = false;
+    _isExporting = false;
+    _recordings = [];
+    _report = null;
+    _errorMessage = null;
+    _cachedFullReportPeriodId = null;
+    _cachedFullReport = null;
+    notifyListeners();
+
+    _periodSub = _firebaseService.getPeriodsStream(uid).listen(
       (periods) {
         // Closed = not active, has endDate, not deleted
         _closedPeriods = periods
@@ -265,23 +284,8 @@ class ReportingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Subscribe ulang dengan UID baru. Dipanggil saat ganti akun.
-  void reload() {
-    _periodSub?.cancel();
-    _periodSub = null;
-    _closedPeriods = [];
-    _selectedPeriodId = null;
-    _isLoading = true;
-    _isLoadingRecordings = false;
-    _isExporting = false;
-    _recordings = [];
-    _report = null;
-    _errorMessage = null;
-    _cachedFullReportPeriodId = null;
-    _cachedFullReport = null;
-    notifyListeners();
-    _init();
-  }
+  /// Subscribe ulang dengan UID baru. Delegate ke onAuthChanged.
+  void reload([String? uid]) => onAuthChanged(uid);
 
   @override
   void dispose() {
