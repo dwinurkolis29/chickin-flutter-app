@@ -53,16 +53,16 @@ run-release: ## Run aplikasi (release)
 	@fvm flutter run --release
 
 run-a: ## Run di Android
-	@fvm flutter run -d android
+	@fvm flutter run -d $(shell fvm flutter devices | grep 'android' | cut -d '•' -f 2 | awk '{print $$1}' | head -n 1)
 
 run-i: ## Run di iOS
-	@fvm flutter run -d ios
+	@fvm flutter run -d iPhone
 
 run-ar: ## Run di Android (release)
-	@fvm flutter run -d android --release
+	@fvm flutter run -d $(shell fvm flutter devices | grep 'android' | cut -d '•' -f 2 | awk '{print $$1}' | head -n 1) --release
 
 run-ir: ## Run di iOS (release)
-	@fvm flutter run -d ios --release
+	@fvm flutter run -d iPhone --release
 
 run-web: ## Run di Web (Chrome)
 	@fvm flutter run -d chrome

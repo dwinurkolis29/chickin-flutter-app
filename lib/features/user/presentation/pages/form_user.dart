@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
@@ -115,6 +116,12 @@ class _FormUserState extends State<FormUser> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
+        ),
       ),
       body: SafeArea(
         top: false,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
@@ -7,33 +6,47 @@ import 'package:recording_app/features/auth/presentation/login.dart';
 import 'package:recording_app/features/dashboard/presentation/dashboard.dart';
 import 'package:recording_app/features/onboarding/presentation/pages/onboarding_page.dart';
 
-/// AuthWrapper bertanggung jawab untuk routing saja — bukan lifecycle controller.
-/// Lifecycle controller dikelola oleh ProxyProvider di main_app.dart.
+/// Entry point routing setelah app boot.
+///
+/// Urutan:
+///   1. Cek onboarding — kalau belum pernah lihat, tampilkan [OnboardingPage].
+///   2. Kalau sudah, serahkan ke [_AuthGate] yang reactive terhadap auth state.
+///
+/// Onboarding dan auth state sengaja dipisah — keduanya punya concern berbeda.
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // First-launch guard: tampilkan onboarding jika belum pernah dilihat
     final onboardingSeen =
         Hive.box('onboarding').get('seen', defaultValue: false) as bool;
+
     if (!onboardingSeen) {
       return const OnboardingPage();
     }
 
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+    return const _AuthGate();
+  }
+}
 
-        return snapshot.hasData ? const Dashboard() : const Login();
-      },
-    );
+/// Gate reaktif yang bergantung pada [AuthService] via ChangeNotifier.
+///
+/// Tidak ada StreamBuilder. Tidak ada manual navigation.
+/// UI berubah semata-mata karena [AuthService] memanggil notifyListeners().
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+
+    // Guard saat cold start — tunggu listener Firebase pertama kali fire.
+    if (!auth.isInitialized) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return auth.isLoggedIn ? const Dashboard() : const Login();
   }
 }

@@ -92,9 +92,7 @@ class _DashboardState extends State<Dashboard> {
 
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const FormRecording(),
-      ),
+      MaterialPageRoute(builder: (context) => const FormRecording()),
     );
 
     if (result == true && mounted) {
@@ -109,10 +107,11 @@ class _DashboardState extends State<Dashboard> {
     return Stack(
       children: [
         Scaffold(
-          body: SafeArea(child: _pages[_selectedIndex]),
+          body: SafeArea(bottom: false, child: _pages[_selectedIndex]),
 
           // ── FAB ────────────────────────────────────────────────────────────────
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
           floatingActionButton: Semantics(
             button: true,
             label: 'Tambah recording',
@@ -129,140 +128,144 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
 
-      // ── Bottom nav bar ─────────────────────────────────────────────────────
-      bottomNavigationBar: BottomAppBar(
-        clipBehavior: Clip.antiAlias,
-        color:
-            Theme.of(context).brightness == Brightness.dark
-                ? Theme.of(context).colorScheme.surfaceContainer
-                : Colors.white,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        elevation: 12,
-        padding: EdgeInsets.zero,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Home tab
-              Expanded(
-                child: Semantics(
-                  selected: _selectedIndex == 0,
-                  button: true,
-                  label: 'Home',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _onNavTap(0),
-                      splashColor: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.12),
-                      highlightColor: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.06),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _selectedIndex == 0
-                                ? Icons.home
-                                : Icons.home_outlined,
-                            color:
+          // ── Bottom nav bar ─────────────────────────────────────────────────────
+          bottomNavigationBar: BottomAppBar(
+            clipBehavior: Clip.antiAlias,
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainer
+                    : Colors.white,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 8.0,
+            elevation: 12,
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Home tab
+                  Expanded(
+                    child: Semantics(
+                      selected: _selectedIndex == 0,
+                      button: true,
+                      label: 'Home',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _onNavTap(0),
+                          splashColor: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.12),
+                          highlightColor: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.06),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
                                 _selectedIndex == 0
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                            size: 24,
+                                    ? Icons.home
+                                    : Icons.home_outlined,
+                                color:
+                                    _selectedIndex == 0
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                size: 24,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'Home',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight:
+                                      _selectedIndex == 0
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                  color:
+                                      _selectedIndex == 0
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Home',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight:
-                                  _selectedIndex == 0
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                              color:
-                                  _selectedIndex == 0
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
 
-              // Centre gap for the notched FAB
-              const SizedBox(width: 80),
+                  // Centre gap for the notched FAB
+                  const SizedBox(width: 80),
 
-              // Setting tab
-              Expanded(
-                child: Semantics(
-                  selected: _selectedIndex == 1,
-                  button: true,
-                  label: 'Setting',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _onNavTap(1),
-                      splashColor: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.12),
-                      highlightColor: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.06),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _selectedIndex == 1
-                                ? Icons.settings
-                                : Icons.settings_outlined,
-                            color:
+                  // Setting tab
+                  Expanded(
+                    child: Semantics(
+                      selected: _selectedIndex == 1,
+                      button: true,
+                      label: 'Setting',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _onNavTap(1),
+                          splashColor: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.12),
+                          highlightColor: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.06),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
                                 _selectedIndex == 1
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                            size: 24,
+                                    ? Icons.settings
+                                    : Icons.settings_outlined,
+                                color:
+                                    _selectedIndex == 1
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                size: 24,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'Setting',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight:
+                                      _selectedIndex == 1
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                  color:
+                                      _selectedIndex == 1
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Setting',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight:
-                                  _selectedIndex == 1
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                              color:
-                                  _selectedIndex == 1
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-        ),
-      _buildFabTourOverlay(context),
+        _buildFabTourOverlay(context),
       ],
     );
   }
@@ -270,10 +273,11 @@ class _DashboardState extends State<Dashboard> {
   Widget _buildFabTourOverlay(BuildContext context) {
     final tourController = context.watch<TourController>();
     // Jika tidak aktif, tutup overlay
-    if (!tourController.isTourActive || tourController.currentStep != TourStep.addRecording) {
+    if (!tourController.isTourActive ||
+        tourController.currentStep != TourStep.addRecording) {
       return const SizedBox.shrink();
     }
-    
+
     // Khusus: pastikan kita berada di Dashboard tab (selectedIndex == 0)
     // Jika di setting tab, sebaiknya skip dlu atau paksa ke tab 0
     if (_selectedIndex != 0) return const SizedBox.shrink();
@@ -282,7 +286,8 @@ class _DashboardState extends State<Dashboard> {
       targetKey: _fabKey,
       tooltip: TourTooltip(
         title: 'Langkah 2: Tambah Recording',
-        description: 'Bagus! Periode sudah berjalan. Sekarang, klik tombol + ini setiap hari untuk mencatat data harian ayam (recording).',
+        description:
+            'Bagus! Periode sudah berjalan. Sekarang, klik tombol + ini setiap hari untuk mencatat data harian ayam (recording).',
         stepText: '2 / 3',
         showSkip: true,
         onSkip: () => tourController.skip(),
@@ -308,10 +313,10 @@ class _DashboardContentState extends State<DashboardContent> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<HomeController>().loadActivePeriod();
-      
+
       final tourController = context.read<TourController>();
       final shouldShow = await tourController.shouldShowTour();
-      
+
       if (shouldShow && mounted) {
         // Tampilkan dialog selamat datang hanya jika belum ada period
         if (context.read<HomeController>().activePeriodId == null) {
@@ -325,16 +330,17 @@ class _DashboardContentState extends State<DashboardContent> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => TourEntryDialog(
-        onStart: () {
-          Navigator.pop(context);
-          context.read<TourController>().startTour();
-        },
-        onSkip: () {
-          Navigator.pop(context);
-          context.read<TourController>().skip();
-        },
-      ),
+      builder:
+          (context) => TourEntryDialog(
+            onStart: () {
+              Navigator.pop(context);
+              context.read<TourController>().startTour();
+            },
+            onSkip: () {
+              Navigator.pop(context);
+              context.read<TourController>().skip();
+            },
+          ),
     );
   }
 
@@ -345,21 +351,23 @@ class _DashboardContentState extends State<DashboardContent> {
     return Stack(
       children: [
         _buildMainContent(context),
-        if (tourController.isTourActive && tourController.currentStep == TourStep.createPeriod)
+        if (tourController.isTourActive &&
+            tourController.currentStep == TourStep.createPeriod)
           _buildCreatePeriodOverlay(tourController),
-        if (tourController.isTourActive && tourController.currentStep == TourStep.viewDashboard)
+        if (tourController.isTourActive &&
+            tourController.currentStep == TourStep.viewDashboard)
           _buildStatisticsOverlay(tourController),
       ],
     );
   }
 
   Widget _buildCreatePeriodOverlay(TourController controller) {
-
     return TourOverlay(
       targetKey: _createPeriodKey,
       tooltip: TourTooltip(
         title: 'Langkah 1: Mulai Periode',
-        description: 'Klik tombol di bawah untuk membuat periode peternakan pertama Anda. Periode digunakan untuk mengelompokkan data recording harian.',
+        description:
+            'Klik tombol di bawah untuk membuat periode peternakan pertama Anda. Periode digunakan untuk mengelompokkan data recording harian.',
         stepText: '1 / 3',
         showSkip: true,
         onSkip: () => controller.skip(),
@@ -369,12 +377,12 @@ class _DashboardContentState extends State<DashboardContent> {
   }
 
   Widget _buildStatisticsOverlay(TourController controller) {
-
     return TourOverlay(
       targetKey: _statisticsKey,
       tooltip: TourTooltip(
         title: 'Langkah 3: Pantau Hasil',
-        description: 'Bagus! Data Anda sudah diolah menjadi statistik. Di sini Anda bisa melihat FCR, sisa ayam, dan pertumbuhan berat secara real-time.',
+        description:
+            'Bagus! Data Anda sudah diolah menjadi statistik. Di sini Anda bisa melihat FCR, sisa ayam, dan pertumbuhan berat secara real-time.',
         stepText: '3 / 3',
         onSkip: () => controller.complete(),
         actionButtonText: 'Selesai',
@@ -472,7 +480,10 @@ class _DashboardContentState extends State<DashboardContent> {
                     icon: const Icon(Icons.add),
                     label: const Text('Buat Periode Baru'),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -567,16 +578,16 @@ class _DashboardContentState extends State<DashboardContent> {
                             populationRemain: populationRemain,
                             capacity: controller.initialPopulation,
                           ),
-                           const SizedBox(height: 15),
-                           TourAwareWrapper(
-                             tourKey: _statisticsKey,
-                             child: StatisticsSection(
-                               fcr: fcr,
-                               umur: umur,
-                               weightStream: controller.weightStream,
-                             ),
-                           ),
-                           const SizedBox(height: 10),
+                          const SizedBox(height: 15),
+                          TourAwareWrapper(
+                            tourKey: _statisticsKey,
+                            child: StatisticsSection(
+                              fcr: fcr,
+                              umur: umur,
+                              weightStream: controller.weightStream,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
                           Center(
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 720),

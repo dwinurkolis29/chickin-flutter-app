@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
@@ -21,89 +21,82 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // AuthService — satu pintu semua urusan autentikasi.
-        // Didaftarkan paling atas agar bisa diakses oleh StreamProvider di bawah.
+        // AuthService — single source of truth untuk semua auth state.
+        // Semua controller bergantung langsung ke instance ini via ProxyProvider.
         ChangeNotifierProvider(
           create: (_) => AuthService(),
         ),
 
-        // UID stream dari AuthService — single source of truth.
-        // ProxyProvider semua controller bergantung pada ini.
-        StreamProvider<String?>(
-          create: (context) => context.read<AuthService>().uidStream,
-          initialData: null,
-        ),
-
-        ChangeNotifierProxyProvider<String?, UserController>(
+        ChangeNotifierProxyProvider<AuthService, UserController>(
           create: (_) => UserController(
             firebaseService: FirebaseService(),
             storageService: StorageService(),
             auth: FirebaseAuth.instance,
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),
 
-        ChangeNotifierProxyProvider<String?, CageController>(
+        ChangeNotifierProxyProvider<AuthService, CageController>(
           create: (_) => CageController(
-            firebaseService: FirebaseService(), 
+            firebaseService: FirebaseService(),
             storageService: StorageService(),
             auth: FirebaseAuth.instance,
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),
 
-        ChangeNotifierProxyProvider<String?, HomeController>(
+        ChangeNotifierProxyProvider<AuthService, HomeController>(
           create: (_) => HomeController(
             firebaseService: FirebaseService(),
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),
 
-        ChangeNotifierProxyProvider<String?, PeriodController>(
+        ChangeNotifierProxyProvider<AuthService, PeriodController>(
           create: (_) => PeriodController(
             firebaseService: FirebaseService(),
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),
 
-        ChangeNotifierProxyProvider<String?, RecordingController>(
+        ChangeNotifierProxyProvider<AuthService, RecordingController>(
           create: (_) => RecordingController(
             firebaseService: FirebaseService(),
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),
 
-        ChangeNotifierProxyProvider<String?, ReportingController>(
+        ChangeNotifierProxyProvider<AuthService, ReportingController>(
           create: (_) => ReportingController(
             firebaseService: FirebaseService(),
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),
 
-        ChangeNotifierProxyProvider<String?, TourController>(
+        ChangeNotifierProxyProvider<AuthService, TourController>(
           create: (_) => TourController(
             firebaseService: FirebaseService(),
           ),
-          update: (_, uid, controller) {
-            controller!.onAuthChanged(uid);
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
             return controller;
           },
         ),

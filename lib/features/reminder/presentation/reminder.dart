@@ -9,6 +9,7 @@ import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
 import 'package:recording_app/features/reminder/presentation/form_reminder.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 
 class Reminder extends StatefulWidget {
   const Reminder({Key? key}) : super(key: key);
@@ -292,9 +293,12 @@ class _ReminderState extends State<Reminder> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
+        surfaceTintColor: Colors.transparent,
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
         ),
         actions: [
           IconButton(

@@ -65,7 +65,7 @@ class Setting extends StatelessWidget {
             );
           },
         ),
-         _buildMenuItem(
+        _buildMenuItem(
           context,
           icon: Icons.document_scanner_outlined,
           title: 'Detail Recording',
@@ -98,18 +98,18 @@ class Setting extends StatelessWidget {
             );
           },
         ),
-        _buildMenuItem(
-          context,
-          icon: Icons.monitor,
-          title: 'Monitoring IoT',
-          onTap: () {
-            DialogHelper.showInfo(
-              context,
-              'Informasi',
-              'tahap pengembangan untuk monitoring IoT',
-            );
-          },
-        ),
+        // _buildMenuItem(
+        //   context,
+        //   icon: Icons.monitor,
+        //   title: 'Monitoring IoT',
+        //   onTap: () {
+        //     DialogHelper.showInfo(
+        //       context,
+        //       'Informasi',
+        //       'tahap pengembangan untuk monitoring IoT',
+        //     );
+        //   },
+        // ),
         _buildMenuItem(
           context,
           icon: Icons.analytics,
@@ -140,7 +140,11 @@ class Setting extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeaderBold(BuildContext context, String title, {String? badge}) {
+  Widget _buildSectionHeaderBold(
+    BuildContext context,
+    String title, {
+    String? badge,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -174,7 +178,11 @@ class Setting extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, {String? badge}) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    String? badge,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -209,12 +217,12 @@ class Setting extends StatelessWidget {
   }
 
   Widget _buildMenuItem(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required VoidCallback onTap,
-        Widget? trailing,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -227,11 +235,7 @@ class Setting extends StatelessWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Icon(
-          icon,
-          color: colorScheme.onSurfaceVariant,
-          size: 24,
-        ),
+        leading: Icon(icon, color: colorScheme.onSurfaceVariant, size: 24),
         title: Text(
           title,
           style: textTheme.bodyLarge?.copyWith(
@@ -239,7 +243,8 @@ class Setting extends StatelessWidget {
             color: colorScheme.onSurface,
           ),
         ),
-        trailing: trailing ??
+        trailing:
+            trailing ??
             Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
         onTap: onTap,
       ),

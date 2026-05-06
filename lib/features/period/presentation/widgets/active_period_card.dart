@@ -12,27 +12,16 @@ class ActivePeriodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
+    return Card(
+      color: Theme.of(context).colorScheme.primary,
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child:
+            period == null
+                ? const _NoActivePeriod()
+                : _ActivePeriodContent(period: period!),
       ),
-      child: period == null
-          ? const _NoActivePeriod()
-          : _ActivePeriodContent(period: period!),
     );
   }
 }
@@ -45,11 +34,17 @@ class _NoActivePeriod extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     return Column(
       children: [
-        Icon(Icons.inbox_outlined, size: 40, color: Colors.white.withOpacity(0.6)),
+        Icon(
+          Icons.inbox_outlined,
+          size: 40,
+          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.6),
+        ),
         const SizedBox(height: 8),
         Text(
           'Tidak ada periode aktif',
-          style: tt.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.7)),
+          style: tt.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+          ),
         ),
       ],
     );
@@ -62,9 +57,12 @@ class _ActivePeriodContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt     = Theme.of(context).textTheme;
-    final fmt    = DateFormat('dd MMM yyyy');
+    final tt = Theme.of(context).textTheme;
+    final fmt = DateFormat('dd MMM yyyy');
     final dayAge = DateTime.now().difference(period.startDate).inDays;
+
+    final cs = Theme.of(context).colorScheme;
+    final onPrimary = cs.onPrimary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +73,9 @@ class _ActivePeriodContent extends StatelessWidget {
           children: [
             Text(
               'Periode Aktif',
-              style: tt.bodySmall?.copyWith(color: Colors.white.withOpacity(0.75)),
+              style: tt.bodySmall?.copyWith(
+                color: onPrimary.withOpacity(0.75),
+              ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -86,7 +86,7 @@ class _ActivePeriodContent extends StatelessWidget {
               ),
               child: Text(
                 '● Aktif',
-                style: tt.labelMedium?.copyWith(color: Colors.white),
+                style: tt.labelMedium?.copyWith(color: onPrimary),
               ),
             ),
           ],
@@ -96,7 +96,7 @@ class _ActivePeriodContent extends StatelessWidget {
         Text(
           period.name.isNotEmpty ? period.name : 'Periode Tanpa Nama',
           style: tt.titleLarge?.copyWith(
-            color: Colors.white,
+            color: onPrimary,
             fontSize: 26,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
@@ -105,10 +105,10 @@ class _ActivePeriodContent extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Mulai ${fmt.format(period.startDate)}',
-          style: tt.bodySmall?.copyWith(color: Colors.white.withOpacity(0.75)),
+          style: tt.bodySmall?.copyWith(color: onPrimary.withOpacity(0.75)),
         ),
         const SizedBox(height: 20),
-        Divider(color: Colors.white.withOpacity(0.2)),
+        Divider(color: onPrimary.withOpacity(0.3)),
         const SizedBox(height: 12),
         StreamBuilder<List<RecordingData>>(
           stream: FirebaseService().getRecordingsStream(period.id),
@@ -120,11 +120,15 @@ class _ActivePeriodContent extends StatelessWidget {
 
             if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               final recordings = snapshot.data!;
-              final sorted = List<RecordingData>.from(recordings)..sort((a, b) => a.day.compareTo(b.day));
+              final sorted = List<RecordingData>.from(recordings)
+                ..sort((a, b) => a.day.compareTo(b.day));
               final lastRec = sorted.last;
 
               final fcrUseCase = CalculateFCR();
-              final weeklyFCRs = fcrUseCase.execute(recordings, period.initialCapacity);
+              final weeklyFCRs = fcrUseCase.execute(
+                recordings,
+                period.initialCapacity,
+              );
 
               if (weeklyFCRs.isNotEmpty) {
                 final lastWeekFcr = weeklyFCRs.last;
@@ -150,22 +154,34 @@ class _ActivePeriodContent extends StatelessWidget {
                   children: [
                     _StatItem(label: 'Usia', value: '$liveUsia hari'),
                     const _CardDivider(),
-                    _StatItem(label: 'Populasi', value: '${_fmt(livePopulasi)} ekor'),
+                    _StatItem(
+                      label: 'Populasi',
+                      value: '${_fmt(livePopulasi)} ekor',
+                    ),
                     const _CardDivider(),
                     _StatItem(label: 'FCR', value: liveFcr.toStringAsFixed(2)),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Divider(color: Colors.white.withOpacity(0.2)),
+                Divider(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
                 const SizedBox(height: 12),
                 // Stats row 2
                 Row(
                   children: [
-                    _StatItem(label: 'Bobot Awal', value: '${period.initialWeight} kg'),
+                    _StatItem(
+                      label: 'Bobot Awal',
+                      value: '${period.initialWeight} kg',
+                    ),
                     const _CardDivider(),
-                    _StatItem(label: 'Kapasitas Awal', value: '${_fmt(period.initialCapacity)} ekor'),
+                    _StatItem(
+                      label: 'Kapasitas Awal',
+                      value: '${_fmt(period.initialCapacity)} ekor',
+                    ),
                     const _CardDivider(),
-                    _StatItem(label: 'Total Pakan', value: '${liveTotalPakan.toStringAsFixed(0)} kg'),
+                    _StatItem(
+                      label: 'Total Pakan',
+                      value: '${liveTotalPakan.toStringAsFixed(0)} kg',
+                    ),
                   ],
                 ),
               ],
@@ -187,18 +203,24 @@ class _StatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return Expanded(
       child: Column(
         children: [
           Text(
             value,
-            style: tt.titleSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+            style: tt.titleSmall?.copyWith(
+              color: onPrimary,
+              fontWeight: FontWeight.w700,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: tt.labelSmall?.copyWith(color: Colors.white.withOpacity(0.7)),
+            style: tt.labelSmall?.copyWith(
+              color: onPrimary.withOpacity(0.7),
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -212,7 +234,8 @@ class _CardDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 1, height: 32,
-    color: Colors.white.withOpacity(0.2),
-  );
+        width: 1,
+        height: 32,
+        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+      );
 }

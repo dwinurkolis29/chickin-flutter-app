@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
@@ -41,6 +42,12 @@ class _DetailRecordingState extends State<DetailRecording> {
       appBar: AppBar(
         title: Text(widget.readOnly ? 'Laporan Recording' : 'Semua Recording'),
         centerTitle: true,
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
+        ),
       ),
       body: Builder(
         builder: (context) {

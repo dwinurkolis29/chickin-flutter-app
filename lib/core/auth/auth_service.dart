@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
@@ -28,8 +30,7 @@ class AuthResult {
 ///
 /// Yang boleh ada di sini:
 ///   - Login / logout / register
-///   - State & info user (currentUser, uid, isLoggedIn)
-///   - Stream auth state (untuk trigger ProxyProvider)
+///   - State & info user (currentUser, uid, isLoggedIn, isInitialized)
 ///   - Error mapping Firebase Auth
 ///
 /// Yang TIDAK boleh ada di sini:
@@ -40,8 +41,20 @@ class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseService _firebaseService;
 
+  StreamSubscription<User?>? _authSub;
+
+  /// True setelah listener auth pertama kali fire.
+  /// Digunakan sebagai guard loading spinner di [AuthWrapper] saat cold start.
+  bool _initialized = false;
+
   AuthService({FirebaseService? firebaseService})
-      : _firebaseService = firebaseService ?? FirebaseService();
+      : _firebaseService = firebaseService ?? FirebaseService() {
+    _authSub = _auth.authStateChanges().listen((user) {
+      debugPrint('AUTH STATE CHANGED: ${user?.uid}');
+      _initialized = true;
+      notifyListeners();
+    });
+  }
 
   // ── State & Info User ──────────────────────────────────────────────────────
 
@@ -49,10 +62,9 @@ class AuthService extends ChangeNotifier {
   String? get currentUid => _auth.currentUser?.uid;
   bool get isLoggedIn => _auth.currentUser != null;
 
-  /// Stream UID — sumber tunggal yang drives [StreamProvider<String?>]
-  /// di [main_app.dart]. ProxyProvider semua controller bergantung pada ini.
-  Stream<String?> get uidStream =>
-      _auth.authStateChanges().map((u) => u?.uid);
+  /// True setelah listener auth pertama kali fire.
+  /// Gunakan ini untuk guard spinner di UI saat cold start.
+  bool get isInitialized => _initialized;
 
   // ── Aksi Utama ─────────────────────────────────────────────────────────────
 
@@ -66,6 +78,8 @@ class AuthService extends ChangeNotifier {
         email: email.trim(),
         password: password,
       );
+      debugPrint('SIGN IN SUCCESS: ${credential.user?.uid}');
+      notifyListeners();
       return AuthResult.success(credential.user!);
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(_mapFirebaseError(e));
@@ -88,6 +102,7 @@ class AuthService extends ChangeNotifier {
       final uid = credential.user!.uid;
       const cage = CageData();
       await _firebaseService.createUserDocument(uid, profile, cage);
+      notifyListeners();
       return AuthResult.success(credential.user!);
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(_mapFirebaseError(e));
@@ -97,10 +112,19 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Logout.
-  /// [AuthWrapper] reaktif via StreamBuilder — tidak perlu navigate manual
-  /// setelah memanggil ini.
+  /// [AuthWrapper] reaktif via context.watch<AuthService>() — tidak perlu
+  /// navigate manual setelah memanggil ini.
   Future<void> signOut() async {
     await _auth.signOut();
+    notifyListeners();
+  }
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
   // ── Error Mapping ──────────────────────────────────────────────────────────

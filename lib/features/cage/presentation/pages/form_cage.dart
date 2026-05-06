@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
@@ -83,6 +84,12 @@ class _FormCageState extends State<FormCage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
+        ),
         title: Text(isEditing ? 'Edit Kandang' : 'Tambah Kandang'),
       ),
       body: SafeArea(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:recording_app/core/tour/tour_step.dart';
@@ -217,6 +218,12 @@ class _FormPeriodState extends State<FormPeriod> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Edit Periode' : 'Buat Periode Baru'),
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
+        ),
         actions: [
           if (_isEditing)
             IconButton(

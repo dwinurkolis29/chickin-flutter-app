@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
@@ -25,9 +26,11 @@ class DetailPeriodReport extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: cs.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.chevron_left, color: cs.onSurface),
-          onPressed: () => Navigator.maybePop(context),
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
         ),
         title: Text(
           'Detail Laporan',

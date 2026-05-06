@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
@@ -65,7 +66,12 @@ class _CageProfileState extends State<CageProfile> {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        leading: const BackButton(),
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.edit_outlined, color: colorScheme.onSurface),
@@ -293,19 +299,13 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Material(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: SizedBox(width: double.infinity, child: child),
-          ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: SizedBox(width: double.infinity, child: child),
         ),
       ),
     );

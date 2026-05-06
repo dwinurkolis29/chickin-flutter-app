@@ -67,10 +67,7 @@ class StatisticsSection extends StatelessWidget {
 class WeightChartCard extends StatelessWidget {
   final Stream<List<FlSpot>>? weightStream;
 
-  const WeightChartCard({
-    super.key,
-    required this.weightStream,
-  });
+  const WeightChartCard({super.key, required this.weightStream});
 
   @override
   Widget build(BuildContext context) {
@@ -87,103 +84,110 @@ class WeightChartCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      child: weightStream == null
-          ? Center(
-              child: Text(
-                'Belum ada periode aktif',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+      child:
+          weightStream == null
+              ? Center(
+                child: Text(
+                  'Belum ada periode aktif',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            )
-          : StreamBuilder<List<FlSpot>>(
-              stream: weightStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final flSpot = snapshot.data ?? [];
+              )
+              : StreamBuilder<List<FlSpot>>(
+                stream: weightStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final flSpot = snapshot.data ?? [];
 
-                  // Cek apakah data bobot ayam kosong
-                  if (flSpot.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Data recording belum diisi',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    // Cek apakah data bobot ayam kosong
+                    if (flSpot.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'Data recording belum diisi',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  // Ambil data bobot terakhir untuk ditampilkan
-                  final lastWeight = flSpot.last.y;
+                    // Ambil data bobot terakhir untuk ditampilkan
+                    final lastWeight = flSpot.last.y;
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.show_chart,
-                              color: Colors.green,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Bobot Ayam',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        height: 70,
-                        child: LineChart(
-                          LineChartData(
-                            gridData: const FlGridData(show: false),
-                            titlesData: const FlTitlesData(show: false),
-                            borderData: FlBorderData(show: false),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: flSpot,
-                                isCurved: true,
-                                color: Colors.green,
-                                barWidth: 4,
-                                isStrokeCapRound: true,
-                                dotData: const FlDotData(show: false),
-                                belowBarData: BarAreaData(show: false),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
+                              child: const Icon(
+                                Icons.show_chart,
+                                color: Colors.green,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Bobot Ayam',
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          height: 70,
+                          child: LineChart(
+                            LineChartData(
+                              gridData: const FlGridData(show: false),
+                              titlesData: const FlTitlesData(show: false),
+                              borderData: FlBorderData(show: false),
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: flSpot,
+                                  isCurved: true,
+                                  color: Colors.green,
+                                  barWidth: 4,
+                                  isStrokeCapRound: true,
+                                  dotData: const FlDotData(show: false),
+                                  belowBarData: BarAreaData(show: false),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        '$lastWeight',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 20),
+                        Text(
+                          '$lastWeight',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Gram',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        Text(
+                          'Gram',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
+                      ],
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
     );
   }
 }
@@ -205,22 +209,12 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
-            spreadRadius: 1,
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -259,6 +253,7 @@ class _InfoCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

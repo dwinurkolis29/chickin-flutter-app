@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/user/presentation/pages/form_user.dart';
@@ -92,7 +93,12 @@ class _UserState extends State<User> {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        leading: BackButton(color: colorScheme.onSurface),
+        leading: Center(
+          child: CircleIconButton(
+            icon: Icons.chevron_left,
+            onTap: () => Navigator.maybePop(context),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.edit_outlined, color: colorScheme.onSurface),
@@ -272,20 +278,13 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Material(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        // Allows border radius to clip the InkWell ripple
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: SizedBox(width: double.infinity, child: child),
-          ),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: SizedBox(width: double.infinity, child: child),
         ),
       ),
     );

@@ -12,14 +12,23 @@ class AppTheme {
       seedColor: AppColors.primary,
       brightness: Brightness.light,
     ).copyWith(
-      secondary:        AppColors.secondary,
-      surface:          AppColors.background,
-      error:            AppColors.error,
+      primary: AppColors.primary,
+      secondary: AppColors.secondary,
+      onSecondary: Colors.white,
+      secondaryContainer: Color(0xFFB2DFDF),
+      onSecondaryContainer: AppColors.primary,
+      surface: AppColors.background,
+      error: AppColors.error,
     );
     return ThemeData.from(
       colorScheme: scheme,
       textTheme: AppTextTheme.textTheme,
       useMaterial3: true,
+    ).copyWith(
+      cardTheme: const CardThemeData(
+        color: Colors.white,
+        elevation: 1,
+      ),
     );
   }
 
@@ -29,7 +38,7 @@ class AppTheme {
       brightness: Brightness.dark,
     ).copyWith(
       secondary: AppColors.secondary,
-      error:     AppColors.error,
+      error: AppColors.error,
       // background keeps M3 dark default — light background on dark is wrong
     );
     return ThemeData.from(

@@ -21,6 +21,27 @@ class _LoginState extends State<Login> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
+  // ─── Logout Dialog ────────────────────────────────────────────────────────────
+  void _showLogoutDialog(BuildContext context) {
+    DialogHelper.showConfirm(
+      context,
+      'Logout',
+      'Apakah kamu yakin ingin logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+      isDestructive: true,
+      onConfirm: () async {
+        try {
+          final authService = context.read<AuthService>();
+          await authService.signOut();
+          // AuthWrapper reaktif — tidak perlu navigate manual.
+        } catch (e) {
+          debugPrint('Logout error: $e');
+        }
+      },
+    );
+  }
+
   // ─── Email/Password Login ────────────────────────────────────────────────────
   void login() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -52,6 +73,7 @@ class _LoginState extends State<Login> {
 
   // ─── Google Sign-In (Under Development) ─────────────────────────────────────
   void _signInWithGoogle() {
+    _showLogoutDialog(context);
     AppSnackbar.showInfo(
       context,
       'Login dengan Google sedang dalam tahap pengembangan.',
