@@ -25,37 +25,43 @@ class StatisticsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: WeightChartCard(weightStream: weightStream),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 1,
-              child: Column(
-                children: [
-                  _InfoCard(
-                    icon: Icons.edit_note_outlined,
-                    iconColor: Theme.of(context).colorScheme.primary,
-                    label: 'FCR',
-                    value: fcr.toStringAsFixed(2),
-                    unit: '',
-                  ),
-                  const SizedBox(height: 5),
-                  _InfoCard(
-                    icon: Icons.calendar_month,
-                    iconColor: Theme.of(context).colorScheme.primary,
-                    label: 'Umur',
-                    value: umur.toString(),
-                    unit: 'Hari',
-                  ),
-                ],
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 2,
+                child: WeightChartCard(weightStream: weightStream),
               ),
-            ),
-          ],
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: _InfoCard(
+                        icon: Icons.edit_note_outlined,
+                        iconColor: Theme.of(context).colorScheme.primary,
+                        label: 'FCR',
+                        value: fcr.toStringAsFixed(2),
+                        unit: '',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: _InfoCard(
+                        icon: Icons.calendar_month,
+                        iconColor: Theme.of(context).colorScheme.primary,
+                        label: 'Umur',
+                        value: umur.toString(),
+                        unit: 'Hari',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -210,50 +216,51 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label, style: Theme.of(context).textTheme.labelMedium),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(label, style: Theme.of(context).textTheme.labelMedium),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: iconColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Flexible(
-                fit: FlexFit.loose,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      value,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Text(unit),
-            ],
-          ),
-        ],
+                const SizedBox(width: 4),
+                Text(unit),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

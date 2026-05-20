@@ -18,33 +18,11 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onboardingSeen =
-        Hive.box('onboarding').get('seen', defaultValue: false) as bool;
-
-    if (!onboardingSeen) {
-      return const OnboardingPage();
-    }
-
-    return const _AuthGate();
-  }
-}
-
-/// Gate reaktif yang bergantung pada [AuthService] via ChangeNotifier.
-///
-/// Tidak ada StreamBuilder. Tidak ada manual navigation.
-/// UI berubah semata-mata karena [AuthService] memanggil notifyListeners().
-class _AuthGate extends StatelessWidget {
-  const _AuthGate();
-
-  @override
-  Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
 
     // Guard saat cold start — tunggu listener Firebase pertama kali fire.
     if (!auth.isInitialized) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return auth.isLoggedIn ? const Dashboard() : const Login();

@@ -27,31 +27,35 @@ class _UserState extends State<User> {
     });
   }
 
-  void _showImageSourceBottomSheet(BuildContext context, UserController controller) {
+  void _showImageSourceBottomSheet(
+    BuildContext context,
+    UserController controller,
+  ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Galeri'),
-              onTap: () {
-                Navigator.pop(context);
-                controller.handleProfileImageUpload(ImageSource.gallery);
-              },
+      builder:
+          (context) => SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Galeri'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    controller.handleProfileImageUpload(ImageSource.gallery);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Kamera'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    controller.handleProfileImageUpload(ImageSource.camera);
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Kamera'),
-              onTap: () {
-                Navigator.pop(context);
-                controller.handleProfileImageUpload(ImageSource.camera);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -99,17 +103,17 @@ class _UserState extends State<User> {
             onTap: () => Navigator.maybePop(context),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit_outlined, color: colorScheme.onSurface),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FormUser()),
-              );
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.edit_outlined, color: colorScheme.onSurface),
+        //     onPressed: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(builder: (context) => const FormUser()),
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
       body:
           _isLoading
@@ -131,26 +135,49 @@ class _UserState extends State<User> {
                     children: [
                       // ── Profile Header ──
                       _Card(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FormUser(),
+                            ),
+                          );
+                        },
                         child: Row(
                           children: [
                             Stack(
                               children: [
                                 CircleAvatar(
                                   radius: 42,
-                                  backgroundColor: colorScheme.primary.withOpacity(0.12),
-                                  backgroundImage: _userProfile?.avatarUrl != null
-                                      ? NetworkImage(_userProfile!.avatarUrl!)
-                                      : null,
-                                  child: _userProfile?.avatarUrl == null
-                                      ? Icon(Icons.person, size: 48, color: colorScheme.primary)
-                                      : null,
+                                  backgroundColor: colorScheme.primary
+                                      .withOpacity(0.12),
+                                  backgroundImage:
+                                      _userProfile?.avatarUrl != null
+                                          ? NetworkImage(
+                                            _userProfile!.avatarUrl!,
+                                          )
+                                          : null,
+                                  child:
+                                      _userProfile?.avatarUrl == null
+                                          ? Icon(
+                                            Icons.person,
+                                            size: 48,
+                                            color: colorScheme.primary,
+                                          )
+                                          : null,
                                 ),
                                 if (controller.isUploadingAvatar)
                                   Positioned.fill(
                                     child: Container(
-                                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.black38),
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.black38,
+                                      ),
                                       child: const Center(
-                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -158,11 +185,21 @@ class _UserState extends State<User> {
                                   bottom: 0,
                                   right: 0,
                                   child: GestureDetector(
-                                    onTap: controller.isUploadingAvatar ? null : () => _showImageSourceBottomSheet(context, controller),
+                                    onTap:
+                                        controller.isUploadingAvatar
+                                            ? null
+                                            : () => _showImageSourceBottomSheet(
+                                              context,
+                                              controller,
+                                            ),
                                     child: CircleAvatar(
                                       radius: 14,
                                       backgroundColor: colorScheme.primary,
-                                      child: Icon(Icons.edit, size: 16, color: colorScheme.onPrimary),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 16,
+                                        color: colorScheme.onPrimary,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -188,6 +225,10 @@ class _UserState extends State<User> {
                                   ),
                                 ],
                               ),
+                            ),
+                            Icon(
+                              Icons.chevron_right,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ],
                         ),
@@ -278,15 +319,29 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isInteractive = onTap != null;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: SizedBox(width: double.infinity, child: child),
-        ),
-      ),
+      child:
+          isInteractive
+              ? InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
+                  child: SizedBox(width: double.infinity, child: child),
+                ),
+              )
+              : Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
+                child: SizedBox(width: double.infinity, child: child),
+              ),
     );
   }
 }

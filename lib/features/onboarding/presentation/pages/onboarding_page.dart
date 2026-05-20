@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_wrapper.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
-import 'package:recording_app/features/auth/presentation/login.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/features/onboarding/data/onboarding_data.dart';
 import 'package:recording_app/features/onboarding/presentation/widgets/onboarding_item.dart';
 
@@ -26,6 +28,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
         setState(() => _currentIndex = page);
       }
     });
+
+    try {
+      final authService = context.read<AuthService>();
+      authService.signOut().whenComplete(() {
+        debugPrint('Logout success');
+      });
+      // AuthWrapper reaktif — tidak perlu navigate manual.
+    } catch (e) {
+      debugPrint('Logout error: $e');
+    }
   }
 
   @override
@@ -46,9 +58,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _finishOnboarding() async {
     await Hive.box('onboarding').put('seen', true);
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const Login()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthWrapper()));
   }
 
   @override
@@ -84,22 +96,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
             // Bottom action area — animates between nav and start
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.12),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: child,
-                ),
-              ),
-              child: isLastPage
-                  ? _buildStartButton(textTheme)
-                  : _buildNavButtons(textTheme, screenWidth),
+              transitionBuilder:
+                  (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.12),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      ),
+                      child: child,
+                    ),
+                  ),
+              child:
+                  isLastPage
+                      ? _buildStartButton(textTheme)
+                      : _buildNavButtons(textTheme, screenWidth),
             ),
           ],
         ),
