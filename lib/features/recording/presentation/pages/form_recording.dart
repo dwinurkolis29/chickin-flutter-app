@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
@@ -281,18 +282,12 @@ class _FormRecordingState extends State<FormRecording> {
   }
 
   Widget _buildUmurField(BuildContext context) {
-    return TextFormField(
+    return AppTextFormField(
       controller: _controllerUmur,
       focusNode: _focusNodeUmur,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: 'Umur Ayam (hari)',
-        prefixIcon: const Icon(Icons.data_saver_on_rounded),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
+      labelText: 'Umur Ayam (hari)',
+      prefixIcon: Icons.data_saver_on_rounded,
       validator:
           (v) => (v == null || v.isEmpty) ? 'Umur tidak boleh kosong.' : null,
       onEditingComplete: () => _focusNodeTerimaPakan.requestFocus(),
@@ -300,18 +295,12 @@ class _FormRecordingState extends State<FormRecording> {
   }
 
   Widget _buildPakanField(BuildContext context) {
-    return TextFormField(
+    return AppTextFormField(
       controller: _controllerHabisPakan,
       focusNode: _focusNodeHabisPakan,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: 'Habis pakan (sak)',
-        prefixIcon: const Icon(Icons.arrow_circle_up),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
+      labelText: 'Habis pakan (sak)',
+      prefixIcon: Icons.arrow_circle_up,
       validator:
           (v) =>
               (v == null || v.isEmpty)
@@ -322,35 +311,23 @@ class _FormRecordingState extends State<FormRecording> {
   }
 
   Widget _buildMatiField(BuildContext context) {
-    return TextFormField(
+    return AppTextFormField(
       controller: _controllerMatiAyam,
       focusNode: _focusNodeMatiAyam,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: 'Mati ayam (Ekor)',
-        prefixIcon: const Icon(Icons.highlight_remove),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
+      labelText: 'Mati ayam (Ekor)',
+      prefixIcon: Icons.highlight_remove,
       onEditingComplete: () => _focusNodeBeratAyam.requestFocus(),
     );
   }
 
   Widget _buildBeratField(BuildContext context) {
-    return TextFormField(
+    return AppTextFormField(
       controller: _controllerBeratAyam,
       focusNode: _focusNodeBeratAyam,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: 'Berat Ayam (gram)',
-        prefixIcon: const Icon(Icons.scale),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
+      labelText: 'Berat Ayam (gram)',
+      prefixIcon: Icons.scale,
       validator:
           (v) =>
               (v == null || v.isEmpty)
@@ -360,27 +337,40 @@ class _FormRecordingState extends State<FormRecording> {
   }
 
   Widget _buildSubmitButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return TourAwareWrapper(
       tourKey: _saveRecordBtnKey,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
         onPressed: _isLoading ? null : _addRecord,
         child:
             _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.onPrimary,
+                    ),
                   ),
                 )
-                : const Text('Tambah Data'),
+                : Text(
+                  'Tambah Data',
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onPrimary,
+                  ),
+                ),
       ),
     );
   }

@@ -173,7 +173,7 @@ class WeightChartCard extends StatelessWidget {
                         const SizedBox(height: 20),
                         Text(
                           '$lastWeight',
-                          style: const TextStyle(
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
@@ -247,7 +247,7 @@ class _InfoCard extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       value,
-                      style: const TextStyle(
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),

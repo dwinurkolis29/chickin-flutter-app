@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -213,22 +214,12 @@ class _FormReminderState extends State<FormReminder> {
                 const SizedBox(height: 30),
 
                 // Title
-                TextFormField(
+                AppTextFormField(
                   controller: _controllerTitle,
                   focusNode: _focusNodeTitle,
-                  decoration: InputDecoration(
-                    labelText: 'Title',
-                    hintText: 'Masukkan Judul',
-                    prefixIcon: const Icon(Icons.title),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surfaceContainerLowest,
-                  ),
+                  labelText: 'Title',
+                  hintText: 'Masukkan Judul',
+                  prefixIcon: Icons.title,
                   validator:
                       (value) =>
                           (value == null || value.isEmpty)
@@ -239,24 +230,14 @@ class _FormReminderState extends State<FormReminder> {
                 const SizedBox(height: 10),
 
                 // Date
-                TextFormField(
+                AppTextFormField(
                   controller: _controllerDate,
                   focusNode: _focusNodeDate,
                   readOnly: true,
                   onTap: _selectDate,
-                  decoration: InputDecoration(
-                    labelText: 'Date',
-                    hintText: 'Select date',
-                    prefixIcon: const Icon(Icons.calendar_today),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surfaceContainerLowest,
-                  ),
+                  labelText: 'Date',
+                  hintText: 'Select date',
+                  prefixIcon: Icons.calendar_today,
                   validator:
                       (value) =>
                           (value == null || value.isEmpty)
@@ -267,25 +248,15 @@ class _FormReminderState extends State<FormReminder> {
                 const SizedBox(height: 10),
 
                 // Time
-                TextFormField(
+                AppTextFormField(
                   controller: _controllerTime,
                   focusNode: _focusNodeTime,
                   readOnly: true,
                   onTap: _selectTime,
-                  decoration: InputDecoration(
-                    labelText: 'Time',
-                    hintText: 'Select time',
-                    prefixIcon: const Icon(Icons.access_time),
-                    suffixText: selectedTime.hour < 12 ? 'AM' : 'PM',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surfaceContainerLowest,
-                  ),
+                  labelText: 'Time',
+                  hintText: 'Select time',
+                  prefixIcon: Icons.access_time,
+                  suffixText: selectedTime.hour < 12 ? 'AM' : 'PM',
                   validator:
                       (value) =>
                           (value == null || value.isEmpty)
@@ -296,23 +267,13 @@ class _FormReminderState extends State<FormReminder> {
                 const SizedBox(height: 10),
 
                 // Description
-                TextFormField(
+                AppTextFormField(
                   controller: _controllerDescription,
                   focusNode: _focusNodeDescription,
                   maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Masukkan Deskripsi',
-                    prefixIcon: const Icon(Icons.description),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surfaceContainerLowest,
-                  ),
+                  labelText: 'Description',
+                  hintText: 'Masukkan Deskripsi',
+                  prefixIcon: Icons.description,
                 ),
                 const SizedBox(height: 10),
 

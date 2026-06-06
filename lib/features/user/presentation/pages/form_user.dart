@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
@@ -112,6 +113,9 @@ class _FormUserState extends State<FormUser> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -159,7 +163,7 @@ class _FormUserState extends State<FormUser> {
                         const SizedBox(height: 35),
 
                         // Name Field
-                        TextFormField(
+                        AppTextFormField(
                           controller: _nameController,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -167,35 +171,25 @@ class _FormUserState extends State<FormUser> {
                             }
                             return null;
                           },
-                          decoration: InputDecoration(
-                            labelText: "Nama",
-                            prefixIcon: const Icon(Icons.person),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: "Nama",
+                          prefixIcon: Icons.person,
                         ),
                         const SizedBox(height: 10),
 
                         // Email Field (from Firebase Auth)
-                        TextFormField(
+                        AppTextFormField(
                           // set hanya bisa di baca untuk textfield
                           readOnly: true,
                           // menampilkan email dari Firebase Auth
                           initialValue:
                               _auth.currentUser?.email ?? 'Tidak ada data',
-                          decoration: InputDecoration(
-                            labelText: "Email",
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: "Email",
+                          prefixIcon: Icons.email_outlined,
                         ),
                         const SizedBox(height: 10),
 
                         // Phone Field
-                        TextFormField(
+                        AppTextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           validator: (value) {
@@ -204,18 +198,13 @@ class _FormUserState extends State<FormUser> {
                             }
                             return null;
                           },
-                          decoration: InputDecoration(
-                            labelText: "Nomor Telepon",
-                            prefixIcon: const Icon(Icons.phone),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: "Nomor Telepon",
+                          prefixIcon: Icons.phone,
                         ),
                         const SizedBox(height: 10),
 
                         // Address Field
-                        TextFormField(
+                        AppTextFormField(
                           controller: _addressController,
                           maxLines: 2,
                           validator: (value) {
@@ -224,39 +213,39 @@ class _FormUserState extends State<FormUser> {
                             }
                             return null;
                           },
-                          decoration: InputDecoration(
-                            labelText: "Alamat",
-                            prefixIcon: const Icon(Icons.location_on_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                          labelText: "Alamat",
+                          prefixIcon: Icons.location_on_outlined,
                         ),
                         const SizedBox(height: 30),
 
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size.fromHeight(50),
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           onPressed: _isSaving ? null : _handleUpdate,
                           child:
                               _isSaving
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                     height: 20,
                                     width: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
+                                        colorScheme.onPrimary,
                                       ),
                                     ),
                                   )
-                                  : const Text(
+                                  : Text(
                                     "Simpan",
-                                    style: TextStyle(fontSize: 16),
+                                    style: textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onPrimary,
+                                    ),
                                   ),
                         ),
                         const SizedBox(height: 50),

@@ -12,16 +12,22 @@ class TopBar extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: CircleIconButton(
+              icon: Icons.chevron_left,
+              onTap: () => Navigator.maybePop(context),
+            ),
           ),
-          const SizedBox(width: 12),
-          Text(
-            'Periode',
-            style: tt.titleSmall?.copyWith(color: cs.onBackground),
+          Center(
+            child: Text(
+              'Periode',
+              textAlign: TextAlign.center,
+              style: tt.titleLarge?.copyWith(color: cs.onSurface),
+            ),
           ),
         ],
       ),

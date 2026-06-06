@@ -111,33 +111,41 @@ class _RecordingTableState extends State<RecordingTable> {
                       ),
                       columns: [
                         DataColumn(
-                          label: const Text(
+                          label: Text(
                             'Hari',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: tt.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           numeric: true,
                           onSort: _onSort,
                         ),
                         DataColumn(
-                          label: const Text(
+                          label: Text(
                             'Berat (g)',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: tt.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           numeric: true,
                           onSort: _onSort,
                         ),
                         DataColumn(
-                          label: const Text(
+                          label: Text(
                             'Pakan (sak)',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: tt.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           numeric: true,
                           onSort: _onSort,
                         ),
                         DataColumn(
-                          label: const Text(
+                          label: Text(
                             'Mati',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: tt.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           numeric: true,
                           onSort: _onSort,
@@ -147,10 +155,10 @@ class _RecordingTableState extends State<RecordingTable> {
                           recordings.map((r) {
                             return DataRow(
                               cells: [
-                                DataCell(Text('${r.day}')),
-                                DataCell(Text('${r.avgWeightGram}')),
-                                DataCell(Text('${r.feedSack}')),
-                                DataCell(Text('${r.mortality}')),
+                                DataCell(Text('${r.day}', style: tt.bodyMedium)),
+                                DataCell(Text('${r.avgWeightGram}', style: tt.bodyMedium)),
+                                DataCell(Text('${r.feedSack}', style: tt.bodyMedium)),
+                                DataCell(Text('${r.mortality}', style: tt.bodyMedium)),
                               ],
                             );
                           }).toList(),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/notification_service.dart';
@@ -290,36 +289,58 @@ class _ReminderState extends State<Reminder> {
         child: const Icon(Icons.add),
       ),
       backgroundColor: colorScheme.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: CircleIconButton(
+                    icon: Icons.chevron_left,
+                    onTap: () => Navigator.maybePop(context),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    'Reminder',
+                    textAlign: TextAlign.center,
+                    style: textTheme.titleLarge?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.notifications_active,
+                      color: colorScheme.onSurface,
+                    ),
+                    onPressed: () async {
+                      final pending =
+                          await _notificationService.getPendingNotifications();
+                      if (!mounted) return;
+                      DialogHelper.showInfo(
+                        context,
+                        'Pending Notifications',
+                        pending.isEmpty
+                            ? 'No pending notifications'
+                            : pending
+                                .map((n) => '${n.id}: ${n.title}')
+                                .join('\n'),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.notifications_active,
-              color: colorScheme.onSurface,
-            ),
-            onPressed: () async {
-              final pending =
-                  await _notificationService.getPendingNotifications();
-              if (!mounted) return;
-              DialogHelper.showInfo(
-                context,
-                'Pending Notifications',
-                pending.isEmpty
-                    ? 'No pending notifications'
-                    : pending.map((n) => '${n.id}: ${n.title}').join('\n'),
-              );
-            },
-          ),
-        ],
       ),
       body:
           user == null
@@ -376,13 +397,11 @@ class _ReminderState extends State<Reminder> {
                                           colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(15),
                                     ),
-                                    dayNumStyle: TextStyle(
-                                      fontSize: 20,
+                                    dayNumStyle: textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: colorScheme.onSurface,
                                     ),
-                                    dayStrStyle: TextStyle(
-                                      fontSize: 12,
+                                    dayStrStyle: textTheme.bodySmall?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
@@ -391,13 +410,11 @@ class _ReminderState extends State<Reminder> {
                                       color: colorScheme.primary,
                                       borderRadius: BorderRadius.circular(15),
                                     ),
-                                    dayNumStyle: TextStyle(
-                                      fontSize: 20,
+                                    dayNumStyle: textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: colorScheme.onPrimary,
                                     ),
-                                    dayStrStyle: TextStyle(
-                                      fontSize: 12,
+                                    dayStrStyle: textTheme.bodySmall?.copyWith(
                                       color: colorScheme.onPrimary.withOpacity(
                                         0.8,
                                       ),

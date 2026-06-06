@@ -96,18 +96,7 @@ class _PeriodInfoCard extends StatelessWidget {
     final period = controller.selectedPeriod;
     final dateFmt = DateFormat('dd MMM yyyy');
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: cs.primary.withOpacity(0.07),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
         child: Column(
@@ -119,7 +108,7 @@ class _PeriodInfoCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Info Periode',
-                  style: tt.titleSmall?.copyWith(
+                  style: tt.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
@@ -273,11 +262,22 @@ class _ExportChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: disabled ? cs.surface.withOpacity(0.5) : cs.surface,
+          color: disabled
+              ? (Theme.of(context).cardTheme.color ?? Colors.white).withOpacity(0.6)
+              : (Theme.of(context).cardTheme.color ?? Colors.white),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.4),
+            color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.15),
           ),
+          boxShadow: disabled
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Column(
           children: [

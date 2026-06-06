@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/forms/app_dropdown_form_field.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
@@ -79,10 +81,12 @@ class _FormCageState extends State<FormCage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: Center(
           child: CircleIconButton(
@@ -116,7 +120,7 @@ class _FormCageState extends State<FormCage> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 35),
-                DropdownButtonFormField<String>(
+                AppDropdownFormField<String>(
                   value:
                       _controllerType.text.isNotEmpty
                           ? (_controllerType.text.toLowerCase() == 'close house'
@@ -127,58 +131,16 @@ class _FormCageState extends State<FormCage> {
                                   : null))
                           : null,
                   focusNode: _focusNodeType,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  dropdownColor:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
-                  decoration: InputDecoration(
-                    labelText: "Jenis Kandang",
-                    labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.bloodtype,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                  ),
+                  labelText: "Jenis Kandang",
+                  prefixIcon: Icons.bloodtype,
                   items: [
-                    DropdownMenuItem(
+                    const DropdownMenuItem(
                       value: "Close House",
-                      child: Text(
-                        "Close House",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
+                      child: Text("Close House"),
                     ),
-                    DropdownMenuItem(
+                    const DropdownMenuItem(
                       value: "Open House",
-                      child: Text(
-                        "Open House",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
+                      child: Text("Open House"),
                     ),
                   ],
                   onChanged: (String? newValue) {
@@ -196,20 +158,12 @@ class _FormCageState extends State<FormCage> {
                   },
                 ),
                 const SizedBox(height: 10),
-                TextFormField(
+                AppTextFormField(
                   controller: _controllerCapacity,
                   focusNode: _focusNodeCapacity,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: "Kapasitas Kandang",
-                    prefixIcon: const Icon(Icons.reduce_capacity),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  labelText: "Kapasitas Kandang",
+                  prefixIcon: Icons.reduce_capacity,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
                       return "Kapasitas kandang tidak boleh kosong.";
@@ -222,20 +176,12 @@ class _FormCageState extends State<FormCage> {
                   onEditingComplete: () => _focusNodeLocation.requestFocus(),
                 ),
                 const SizedBox(height: 10),
-                TextFormField(
+                AppTextFormField(
                   controller: _controllerLocation,
                   focusNode: _focusNodeLocation,
                   maxLines: 3,
-                  decoration: InputDecoration(
-                    labelText: "Lokasi Kandang",
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  labelText: "Lokasi Kandang",
+                  prefixIcon: Icons.location_on_outlined,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
                       return "Lokasi kandang tidak boleh kosong.";
@@ -247,25 +193,31 @@ class _FormCageState extends State<FormCage> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(50),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onPressed: _isLoading ? null : _submitData,
                   child:
                       _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                colorScheme.onPrimary,
                               ),
                             ),
                           )
                           : Text(
                             isEditing ? "Simpan Perubahan" : "Tambah Kandang",
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimary,
+                            ),
                           ),
                 ),
                 const SizedBox(height: 30),

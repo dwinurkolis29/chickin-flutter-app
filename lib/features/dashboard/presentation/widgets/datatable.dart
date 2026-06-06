@@ -46,7 +46,8 @@ class ChickenDataTableState extends State<ChickenDataTable> {
       // membuat paginated data table
       child: PaginatedDataTable(
         // membuat header pada paginated data table
-        header: const Text('Recording Data'),
+        header: Text('Recording Data',
+            style: Theme.of(context).textTheme.titleMedium),
         actions: [
           if (widget.onViewAll != null)
             TextButton.icon(

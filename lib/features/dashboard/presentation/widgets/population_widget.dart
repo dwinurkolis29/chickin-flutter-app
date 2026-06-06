@@ -76,6 +76,9 @@ class _PopulationSectionState extends State<PopulationSection>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     // Menghitung persentase ayam yang masih hidup dari jumlah populasi
     double progress =
         widget.capacity == 0 ? 0 : widget.populationRemain / widget.capacity;
@@ -90,19 +93,21 @@ class _PopulationSectionState extends State<PopulationSection>
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Populasi',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 AnimatedBuilder(
                   animation: _counterAnimation,
                   builder: (context, child) {
                     return Text(
                       _counterAnimation.value.toString(),
-                      style: TextStyle(
+                      style: textTheme.titleLarge?.copyWith(
                         fontSize: 45,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: colorScheme.primary,
                       ),
                     );
                   },
@@ -113,16 +118,16 @@ class _PopulationSectionState extends State<PopulationSection>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Text(
                     'Ekor ayam',
-                    style: TextStyle(
+                    style: textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ],
@@ -145,11 +150,9 @@ class _PopulationSectionState extends State<PopulationSection>
                         value: _progressAnimation.value,
                         strokeWidth: 10,
                         backgroundColor:
-                            Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
+                            colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.primary,
+                          colorScheme.primary,
                         ),
                       ),
                       Center(
@@ -158,20 +161,14 @@ class _PopulationSectionState extends State<PopulationSection>
                           children: [
                             Text(
                               '$animatedPercentage%',
-                              style: const TextStyle(
-                                fontSize: 20,
+                              style: textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
                               'dari 100%',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.labelSmall?.copyWith(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
+                              style: textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],

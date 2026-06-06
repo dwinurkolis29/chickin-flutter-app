@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import '../../../core/components/dialogs/dialog_helper.dart';
 import '../../../core/components/snackbars/app_snackbar.dart';
 import 'signup.dart';
@@ -20,27 +21,6 @@ class _LoginState extends State<Login> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
-
-  // ─── Logout Dialog ────────────────────────────────────────────────────────────
-  void _showLogoutDialog(BuildContext context) {
-    DialogHelper.showConfirm(
-      context,
-      'Logout',
-      'Apakah kamu yakin ingin logout?',
-      confirmText: 'Logout',
-      cancelText: 'Cancel',
-      isDestructive: true,
-      onConfirm: () async {
-        try {
-          final authService = context.read<AuthService>();
-          await authService.signOut();
-          // AuthWrapper reaktif — tidak perlu navigate manual.
-        } catch (e) {
-          debugPrint('Logout error: $e');
-        }
-      },
-    );
-  }
 
   // ─── Email/Password Login ────────────────────────────────────────────────────
   void login() async {
@@ -73,7 +53,6 @@ class _LoginState extends State<Login> {
 
   // ─── Google Sign-In (Under Development) ─────────────────────────────────────
   void _signInWithGoogle() {
-    _showLogoutDialog(context);
     AppSnackbar.showInfo(
       context,
       'Login dengan Google sedang dalam tahap pengembangan.',
@@ -87,8 +66,6 @@ class _LoginState extends State<Login> {
     final textTheme = Theme.of(context).textTheme;
     final bool busy = _isLoading;
 
-    final Color fieldFill = scheme.surfaceContainerHighest;
-    final Color iconColor = scheme.onSurfaceVariant;
     final Color primaryColor = scheme.primary;
 
     return Scaffold(
@@ -131,14 +108,10 @@ class _LoginState extends State<Login> {
                 // ── Email Field ──
                 _buildField(
                   controller: _controllerEmail,
-                  textTheme: textTheme,
                   hint: 'E-mail',
                   icon: Icons.mail_outline,
                   keyboardType: TextInputType.emailAddress,
                   enabled: !busy,
-                  fieldFill: fieldFill,
-                  iconColor: iconColor,
-                  scheme: scheme,
                   onEditingComplete: () => _focusNodePassword.requestFocus(),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -158,21 +131,16 @@ class _LoginState extends State<Login> {
                 // ── Password Field ──
                 _buildField(
                   controller: _controllerPassword,
-                  textTheme: textTheme,
                   focusNode: _focusNodePassword,
                   hint: 'Password',
                   icon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   enabled: !busy,
-                  fieldFill: fieldFill,
-                  iconColor: iconColor,
-                  scheme: scheme,
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: iconColor,
                       size: 20,
                     ),
                     onPressed:
@@ -331,13 +299,9 @@ class _LoginState extends State<Login> {
   // ─── Reusable Field Builder ──────────────────────────────────────────────────
   Widget _buildField({
     required TextEditingController controller,
-    required TextTheme textTheme,
     FocusNode? focusNode,
     required String hint,
     required IconData icon,
-    required Color fieldFill,
-    required Color iconColor,
-    required ColorScheme scheme,
     TextInputType keyboardType = TextInputType.text,
     bool obscureText = false,
     bool enabled = true,
@@ -345,49 +309,17 @@ class _LoginState extends State<Login> {
     String? Function(String?)? validator,
     VoidCallback? onEditingComplete,
   }) {
-    return TextFormField(
+    return AppTextFormField(
       controller: controller,
       focusNode: focusNode,
+      labelText: hint,
       obscureText: obscureText,
       enabled: enabled,
       keyboardType: keyboardType,
       onEditingComplete: onEditingComplete,
       validator: validator,
-      style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: textTheme.bodyMedium?.copyWith(
-          color: scheme.onSurfaceVariant,
-        ),
-        prefixIcon: Icon(icon, color: iconColor, size: 20),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: fieldFill,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: scheme.primary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: scheme.error, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: scheme.error, width: 1.5),
-        ),
-      ),
+      prefixIcon: icon,
+      suffixIcon: suffixIcon,
     );
   }
 

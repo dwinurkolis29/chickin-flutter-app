@@ -31,7 +31,7 @@ class FCRDataTable extends StatelessWidget {
               padding: const EdgeInsets.all(15),
               child: Text(
                 'FCR Data',
-                style: textTheme.titleLarge?.copyWith(
+                style: textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurface,
                 ),
               ),

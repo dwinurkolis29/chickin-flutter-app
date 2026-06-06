@@ -350,11 +350,22 @@ class _ExportChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: disabled ? cs.surface.withOpacity(0.5) : cs.surface,
+          color: disabled
+              ? (Theme.of(context).cardTheme.color ?? Colors.white).withOpacity(0.6)
+              : (Theme.of(context).cardTheme.color ?? Colors.white),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.4),
+            color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.15),
           ),
+          boxShadow: disabled
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Column(
           children: [

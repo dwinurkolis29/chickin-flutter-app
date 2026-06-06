@@ -104,6 +104,9 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Stack(
       children: [
         Scaffold(
@@ -119,8 +122,8 @@ class _DashboardState extends State<Dashboard> {
               tourKey: _fabKey,
               child: FloatingActionButton(
                 onPressed: _navigateToAddRecord,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 elevation: 4,
                 shape: const CircleBorder(),
                 child: const Icon(Icons.add, size: 28),
@@ -154,12 +157,8 @@ class _DashboardState extends State<Dashboard> {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () => _onNavTap(0),
-                          splashColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.12),
-                          highlightColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.06),
+                          splashColor: colorScheme.primary.withOpacity(0.12),
+                          highlightColor: colorScheme.primary.withOpacity(0.06),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -169,29 +168,22 @@ class _DashboardState extends State<Dashboard> {
                                     : Icons.home_outlined,
                                 color:
                                     _selectedIndex == 0
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurfaceVariant,
                                 size: 24,
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 'Home',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: textTheme.labelSmall?.copyWith(
                                   fontWeight:
                                       _selectedIndex == 0
                                           ? FontWeight.w600
                                           : FontWeight.w400,
                                   color:
                                       _selectedIndex == 0
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.primary
-                                          : Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -214,12 +206,8 @@ class _DashboardState extends State<Dashboard> {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () => _onNavTap(1),
-                          splashColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.12),
-                          highlightColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.06),
+                          splashColor: colorScheme.primary.withOpacity(0.12),
+                          highlightColor: colorScheme.primary.withOpacity(0.06),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -229,29 +217,22 @@ class _DashboardState extends State<Dashboard> {
                                     : Icons.settings_outlined,
                                 color:
                                     _selectedIndex == 1
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurfaceVariant,
                                 size: 24,
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 'Setting',
-                                style: TextStyle(
-                                  fontSize: 11,
+                                style: textTheme.labelSmall?.copyWith(
                                   fontWeight:
                                       _selectedIndex == 1
                                           ? FontWeight.w600
                                           : FontWeight.w400,
                                   color:
                                       _selectedIndex == 1
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.primary
-                                          : Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],

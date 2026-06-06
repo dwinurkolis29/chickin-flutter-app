@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:recording_app/core/tour/tour_step.dart';
@@ -160,7 +161,8 @@ class _FormPeriodState extends State<FormPeriod> {
           );
           if (mounted) {
             final tourController = context.read<TourController>();
-            if (tourController.isTourActive && tourController.currentStep == TourStep.createPeriod) {
+            if (tourController.isTourActive &&
+                tourController.currentStep == TourStep.createPeriod) {
               tourController.advance();
             }
             AppSnackbar.showSuccess(context, 'Periode berhasil diaktifkan');
@@ -208,6 +210,9 @@ class _FormPeriodState extends State<FormPeriod> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     // Show activate switch for non-active periods (both draft and closed)
     final bool showActivateSwitch =
         _isEditing && !(widget.period?.isActive ?? false);
@@ -242,13 +247,11 @@ class _FormPeriodState extends State<FormPeriod> {
           child: ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              TextFormField(
+              AppTextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Periode',
-                  hintText: 'Misal: Batch 1 2024',
-                  border: OutlineInputBorder(),
-                ),
+                labelText: 'Nama Periode',
+                prefixIcon: Icons.file_present,
+                hintText: 'Misal: Batch 1 2024',
                 validator: (val) {
                   if (val == null || val.trim().isEmpty)
                     return 'Nama wajib diisi';
@@ -256,13 +259,11 @@ class _FormPeriodState extends State<FormPeriod> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              AppTextFormField(
                 controller: _capacityController,
-                decoration: const InputDecoration(
-                  labelText: 'Kapasitas Awal (Ekor)',
-                  hintText: 'Misal: 5000',
-                  border: OutlineInputBorder(),
-                ),
+                labelText: 'Kapasitas Awal (Ekor)',
+                prefixIcon: Icons.reduce_capacity,
+                hintText: 'Misal: 5000',
                 keyboardType: TextInputType.number,
                 validator: (val) {
                   if (val == null || val.trim().isEmpty)
@@ -272,13 +273,11 @@ class _FormPeriodState extends State<FormPeriod> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              AppTextFormField(
                 controller: _weightController,
-                decoration: const InputDecoration(
-                  labelText: 'Bobot Awal (Kg)',
-                  hintText: 'Misal: 0.4',
-                  border: OutlineInputBorder(),
-                ),
+                labelText: 'Bobot Awal (Kg)',
+                prefixIcon: Icons.line_weight,
+                hintText: 'Misal: 0.4',
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -333,16 +332,30 @@ class _FormPeriodState extends State<FormPeriod> {
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child:
                     _isLoading
-                        ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              colorScheme.onPrimary,
+                            ),
+                          ),
                         )
                         : Text(
                           _isEditing ? 'Simpan Perubahan' : 'Buat Periode',
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onPrimary,
+                          ),
                         ),
               ),
             ],
@@ -374,6 +387,7 @@ class _StatusSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
@@ -391,15 +405,14 @@ class _StatusSwitch extends StatelessWidget {
       child: SwitchListTile(
         title: Text(
           label,
-          style: TextStyle(
+          style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: isActive ? colorScheme.primary : Colors.grey.shade600,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            fontSize: 12,
+          style: textTheme.bodySmall?.copyWith(
             color:
                 isActive
                     ? colorScheme.primary.withOpacity(0.75)
