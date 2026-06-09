@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 
 class CageProfile extends StatefulWidget {
-  const CageProfile({super.key});
+  final bool isTab;
+  const CageProfile({super.key, this.isTab = false});
 
   @override
   State<CageProfile> createState() => _CageProfileState();
@@ -29,29 +31,52 @@ class _CageProfileState extends State<CageProfile> {
   ) {
     showModalBottomSheet(
       context: context,
-      builder:
-          (context) => SafeArea(
-            child: Wrap(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Galeri'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.handleCageImageUpload(ImageSource.gallery);
-                  },
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Kamera'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.handleCageImageUpload(ImageSource.camera);
-                  },
-                ),
-              ],
-            ),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                title: Text('Galeri', style: Theme.of(context).textTheme.bodyMedium),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.handleCageImageUpload(ImageSource.gallery);
+                },
+              ),
+              Divider(
+                height: 0,
+                thickness: 0.5,
+                indent: 16,
+                endIndent: 16,
+                color: AppColors.secondary.withOpacity(0.3),
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                title: Text('Kamera', style: Theme.of(context).textTheme.bodyMedium),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.handleCageImageUpload(ImageSource.camera);
+                },
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
@@ -62,21 +87,9 @@ class _CageProfileState extends State<CageProfile> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: Text(
-          'Profil Kandang',
-          style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
-        ),
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-      ),
+      appBar: widget.isTab
+          ? null
+          : AppHeader(title: 'Profil Kandang'),
       body: SafeArea(
         top: false,
         child: Consumer<CageController>(

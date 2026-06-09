@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:provider/provider.dart';
@@ -194,16 +195,7 @@ class _FormRecordingState extends State<FormRecording> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-      ),
+      appBar: const AppHeader(title: 'Data Recording'),
       body: Stack(
         children: [
           SafeArea(
@@ -214,8 +206,6 @@ class _FormRecordingState extends State<FormRecording> {
                 padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 30),
-                    _buildHeader(context),
                     const SizedBox(height: 35),
                     _buildUmurField(context),
                     const SizedBox(height: 10),
@@ -259,25 +249,6 @@ class _FormRecordingState extends State<FormRecording> {
         onSkip: () => tourController.skip(),
       ),
       onSkip: () {},
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      children: [
-        FittedBox(
-          fit: BoxFit.fitWidth,
-          child: Text(
-            'Tambah Data Recording',
-            style: Theme.of(context).textTheme.headlineLarge,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'Menambahkan data recording ayam broiler.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ],
     );
   }
 

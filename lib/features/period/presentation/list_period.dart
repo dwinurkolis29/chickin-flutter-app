@@ -11,7 +11,7 @@ import 'widgets/active_period_card.dart';
 import 'screens/form_period.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
 import 'widgets/create_period_button.dart';
-import 'widgets/top_bar.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'widgets/period_list_section.dart';
 
 class PeriodListScreen extends StatefulWidget {
@@ -51,6 +51,7 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
     return Stack(
       children: [
         Scaffold(
+          appBar: const AppHeader(title: 'Periode'),
           floatingActionButton: TourAwareWrapper(
             tourKey: _createPeriodFabKey,
             child: const CreatePeriodButton(),
@@ -90,7 +91,6 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
 
             return Column(
               children: [
-                TopBar(onNotificationTap: widget.onNotificationTap),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

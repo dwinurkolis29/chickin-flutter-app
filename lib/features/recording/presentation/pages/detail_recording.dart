@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -36,18 +37,8 @@ class _DetailRecordingState extends State<DetailRecording> {
     final controller = context.watch<RecordingController>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.readOnly ? 'Laporan Recording' : 'Semua Recording',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        centerTitle: true,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
+      appBar: AppHeader(
+        title: widget.readOnly ? 'Laporan Recording' : 'Semua Recording',
       ),
       body: Builder(
         builder: (context) {
@@ -866,11 +857,12 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
       padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + padding),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Drag handle
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Drag handle
             Center(
               child: Container(
                 width: 36,
@@ -973,6 +965,7 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

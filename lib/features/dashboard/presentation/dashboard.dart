@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:recording_app/core/tour/tour_step.dart';
@@ -16,15 +15,26 @@ import 'package:recording_app/features/dashboard/presentation/widgets/statistics
 import 'package:recording_app/features/dashboard/presentation/widgets/datatable.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/population_widget.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
+import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart';
 import 'package:recording_app/features/recording/presentation/pages/form_recording.dart';
 import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
 import 'package:recording_app/features/auth/presentation/login.dart';
-import 'package:recording_app/features/setting/presentation/setting.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
+import 'package:recording_app/features/user/presentation/pages/profile_screen.dart';
+import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/features/reminder/presentation/widgets/reminder_badge_icon.dart';
+import 'widgets/fcr_datacard.dart';
 
-import 'widgets/fcr_datatable.dart';
+// ── Nav index constants ───────────────────────────────────────────────────────
+const int _kHome = 0;
+const int _kKandang = 1;
+// index 2 is the FAB notch — not a real page
+const int _kLaporan = 2;
+const int _kProfil = 3;
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -37,7 +47,7 @@ class _DashboardState extends State<Dashboard> {
   final FirebaseService _firebaseService = FirebaseService();
   final GlobalKey _fabKey = GlobalKey();
 
-  // 0 = Home, 1 = Setting
+  // Logical page index: 0=Home, 1=Kandang, 2=Laporan, 3=Profil
   int _selectedIndex = 0;
 
   late final List<Widget> _pages;
@@ -45,29 +55,15 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    _pages = <Widget>[const DashboardContent(), const Setting()];
+    _pages = const <Widget>[
+      DashboardContent(),
+      CageProfile(isTab: true),
+      PeriodReportPage(isTab: true),
+      ProfileScreen(),
+    ];
   }
 
   void _onNavTap(int index) => setState(() => _selectedIndex = index);
-
-  void _showLogoutDialog(BuildContext context) {
-    DialogHelper.showConfirm(
-      context,
-      'Logout',
-      'Apakah kamu yakin ingin logout?',
-      confirmText: 'Logout',
-      cancelText: 'Cancel',
-      isDestructive: true,
-      onConfirm: () async {
-        try {
-          await context.read<AuthService>().signOut();
-          // AuthWrapper reaktif — tidak perlu navigate manual.
-        } catch (e) {
-          debugPrint('Logout error: $e');
-        }
-      },
-    );
-  }
 
   Future<void> _navigateToAddRecord() async {
     final cageData = await _firebaseService.getCage();
@@ -102,17 +98,80 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  // ── Bottom nav helpers ────────────────────────────────────────────────────
+  Widget _navItem({
+    required int index,
+    required IconData activeIcon,
+    required IconData inactiveIcon,
+    required String label,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isSelected = _selectedIndex == index;
+
+    return Expanded(
+      child: Semantics(
+        selected: isSelected,
+        button: true,
+        label: label,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _onNavTap(index),
+            splashColor: colorScheme.primary.withOpacity(0.12),
+            highlightColor: colorScheme.primary.withOpacity(0.06),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : inactiveIcon,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.secondary,
+                  size: 24,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected
+                        ? colorScheme.primary
+                        : colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Stack(
       children: [
         Scaffold(
+          // AppHeader muncul di semua tab nav (Home, Kandang, Laporan, Profil).
+          // Badge reminder tampil di semua tab nav dan hilang ketika masuk halaman detail.
+          appBar: AppHeader(
+            title: switch (_selectedIndex) {
+              _kHome    => 'BroilerKu',
+              _kKandang => 'Kandang',
+              _kLaporan => 'Laporan',
+              _kProfil  => 'Profil',
+              _         => 'BroilerKu',
+            },
+            isHome: true,
+            actions: const [ReminderBadgeIcon()],
+          ),
           body: SafeArea(bottom: false, child: _pages[_selectedIndex]),
 
-          // ── FAB ────────────────────────────────────────────────────────────────
+          // ── FAB ──────────────────────────────────────────────────────────
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
           floatingActionButton: Semantics(
@@ -131,13 +190,12 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
 
-          // ── Bottom nav bar ─────────────────────────────────────────────────────
+          // ── Bottom nav bar (5 slots: 2 + notch + 2) ──────────────────────
           bottomNavigationBar: BottomAppBar(
             clipBehavior: Clip.antiAlias,
-            color:
-                Theme.of(context).brightness == Brightness.dark
-                    ? Theme.of(context).colorScheme.surfaceContainer
-                    : Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).colorScheme.surfaceContainer
+                : Colors.white,
             shape: const CircularNotchedRectangle(),
             notchMargin: 8.0,
             elevation: 12,
@@ -147,99 +205,35 @@ class _DashboardState extends State<Dashboard> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Home tab
-                  Expanded(
-                    child: Semantics(
-                      selected: _selectedIndex == 0,
-                      button: true,
-                      label: 'Home',
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => _onNavTap(0),
-                          splashColor: colorScheme.primary.withOpacity(0.12),
-                          highlightColor: colorScheme.primary.withOpacity(0.06),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _selectedIndex == 0
-                                    ? Icons.home
-                                    : Icons.home_outlined,
-                                color:
-                                    _selectedIndex == 0
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                size: 24,
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'Home',
-                                style: textTheme.labelSmall?.copyWith(
-                                  fontWeight:
-                                      _selectedIndex == 0
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                  color:
-                                      _selectedIndex == 0
-                                          ? colorScheme.primary
-                                          : colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                  // Home
+                  _navItem(
+                    index: _kHome,
+                    activeIcon: Icons.home,
+                    inactiveIcon: Icons.home_outlined,
+                    label: 'Home',
                   ),
-
-                  // Centre gap for the notched FAB
+                  // Kandang
+                  _navItem(
+                    index: _kKandang,
+                    activeIcon: Icons.warehouse,
+                    inactiveIcon: Icons.warehouse_outlined,
+                    label: 'Kandang',
+                  ),
+                  // Centre gap for notched FAB
                   const SizedBox(width: 80),
-
-                  // Setting tab
-                  Expanded(
-                    child: Semantics(
-                      selected: _selectedIndex == 1,
-                      button: true,
-                      label: 'Setting',
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => _onNavTap(1),
-                          splashColor: colorScheme.primary.withOpacity(0.12),
-                          highlightColor: colorScheme.primary.withOpacity(0.06),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _selectedIndex == 1
-                                    ? Icons.settings
-                                    : Icons.settings_outlined,
-                                color:
-                                    _selectedIndex == 1
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                size: 24,
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                'Setting',
-                                style: textTheme.labelSmall?.copyWith(
-                                  fontWeight:
-                                      _selectedIndex == 1
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                  color:
-                                      _selectedIndex == 1
-                                          ? colorScheme.primary
-                                          : colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                  // Laporan
+                  _navItem(
+                    index: _kLaporan,
+                    activeIcon: Icons.bar_chart,
+                    inactiveIcon: Icons.bar_chart_outlined,
+                    label: 'Laporan',
+                  ),
+                  // Profil
+                  _navItem(
+                    index: _kProfil,
+                    activeIcon: Icons.person,
+                    inactiveIcon: Icons.person_outline,
+                    label: 'Profil',
                   ),
                 ],
               ),
@@ -253,15 +247,12 @@ class _DashboardState extends State<Dashboard> {
 
   Widget _buildFabTourOverlay(BuildContext context) {
     final tourController = context.watch<TourController>();
-    // Jika tidak aktif, tutup overlay
     if (!tourController.isTourActive ||
         tourController.currentStep != TourStep.addRecording) {
       return const SizedBox.shrink();
     }
 
-    // Khusus: pastikan kita berada di Dashboard tab (selectedIndex == 0)
-    // Jika di setting tab, sebaiknya skip dlu atau paksa ke tab 0
-    if (_selectedIndex != 0) return const SizedBox.shrink();
+    if (_selectedIndex != _kHome) return const SizedBox.shrink();
 
     return TourOverlay(
       targetKey: _fabKey,
@@ -277,6 +268,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 }
+
+// ── DashboardContent — Home tab body ─────────────────────────────────────────
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -299,7 +292,6 @@ class _DashboardContentState extends State<DashboardContent> {
       final shouldShow = await tourController.shouldShowTour();
 
       if (shouldShow && mounted) {
-        // Tampilkan dialog selamat datang hanya jika belum ada period
         if (context.read<HomeController>().activePeriodId == null) {
           _showTourEntryDialog();
         }
@@ -311,17 +303,16 @@ class _DashboardContentState extends State<DashboardContent> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => TourEntryDialog(
-            onStart: () {
-              Navigator.pop(context);
-              context.read<TourController>().startTour();
-            },
-            onSkip: () {
-              Navigator.pop(context);
-              context.read<TourController>().skip();
-            },
-          ),
+      builder: (context) => TourEntryDialog(
+        onStart: () {
+          Navigator.pop(context);
+          context.read<TourController>().startTour();
+        },
+        onSkip: () {
+          Navigator.pop(context);
+          context.read<TourController>().skip();
+        },
+      ),
     );
   }
 
@@ -400,19 +391,16 @@ class _DashboardContentState extends State<DashboardContent> {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Login()),
-                      ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login()),
+                  ),
                   child: const Text('Login'),
                 ),
               ],
             ),
           );
         }
-
-        final email = currentUser.email ?? 'No Email';
 
         if (controller.isLoadingPeriod) {
           return const Center(child: CircularProgressIndicator());
@@ -432,15 +420,17 @@ class _DashboardContentState extends State<DashboardContent> {
                 Text(
                   'Belum ada data recording',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Klik tombol di bawah untuk membuat periode pertama',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 24),
                 TourAwareWrapper(
@@ -454,7 +444,9 @@ class _DashboardContentState extends State<DashboardContent> {
                         ),
                       ).then((_) {
                         if (mounted) {
-                          context.read<HomeController>().loadActivePeriod();
+                          context
+                              .read<HomeController>()
+                              .loadActivePeriod();
                         }
                       });
                     },
@@ -473,129 +465,227 @@ class _DashboardContentState extends State<DashboardContent> {
           );
         }
 
-        return Container(
-          padding: const EdgeInsets.all(10),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.person_outline_outlined),
-                    const SizedBox(width: 10),
-                    Text(email, style: Theme.of(context).textTheme.titleMedium),
-                  ],
+        // ── Active period — show banner + content ──────────────────────────
+        final email = currentUser.email ?? '';
+        final periodName = controller.activePeriodName ?? '';
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Top Banner (spec §3.1) ────────────────────────────────
+              _TopBanner(periodName: periodName, email: email),
+
+              // ── Existing content below — untouched ────────────────────
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: StreamBuilder<List<RecordingData>>(
+                  stream: controller.recordingsStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+
+                    final recordings = snapshot.data ?? <RecordingData>[];
+
+                    if (recordings.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            Icon(
+                              Icons.inbox_outlined,
+                              size: 64,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Belum ada data recording',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Klik tombol + untuk menambah data',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final fcrResults =
+                        controller.calculateWeeklyFCR(recordings);
+                    final fcr = fcrResults.isNotEmpty
+                        ? fcrResults.last.fcr
+                        : 0.0;
+                    final populationRemain = fcrResults.isNotEmpty
+                        ? fcrResults.last.sisaAyam
+                        : 0;
+                    final umur =
+                        recordings.isNotEmpty ? recordings.last.day : 0;
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        PopulationSection(
+                          populationRemain: populationRemain,
+                          capacity: controller.initialPopulation,
+                        ),
+                        const SizedBox(height: 15),
+                        TourAwareWrapper(
+                          tourKey: _statisticsKey,
+                          child: StatisticsSection(
+                            fcr: fcr,
+                            umur: umur,
+                            weightStream: controller.weightStream,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: ConstrainedBox(
+                            constraints:
+                                const BoxConstraints(maxWidth: 720),
+                            child: ChickenDataTable(
+                              chickenDataList: recordings,
+                              onViewAll: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DetailRecording(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        FCRDataCard(fcrData: fcrResults),
+                        const SizedBox(height: 80),
+                      ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 10),
-                if (controller.recordingsStream != null)
-                  StreamBuilder<List<RecordingData>>(
-                    stream: controller.recordingsStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      }
-
-                      final recordings = snapshot.data ?? <RecordingData>[];
-
-                      if (recordings.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.inbox_outlined,
-                                size: 64,
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Belum ada data recording',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleMedium?.copyWith(
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Klik tombol + untuk menambah data',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.copyWith(
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      final fcrResults = controller.calculateWeeklyFCR(
-                        recordings,
-                      );
-                      final fcr =
-                          fcrResults.isNotEmpty ? fcrResults.last.fcr : 0.0;
-                      final populationRemain =
-                          fcrResults.isNotEmpty ? fcrResults.last.sisaAyam : 0;
-                      final umur =
-                          recordings.isNotEmpty ? recordings.last.day : 0;
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          PopulationSection(
-                            populationRemain: populationRemain,
-                            capacity: controller.initialPopulation,
-                          ),
-                          const SizedBox(height: 15),
-                          TourAwareWrapper(
-                            tourKey: _statisticsKey,
-                            child: StatisticsSection(
-                              fcr: fcr,
-                              umur: umur,
-                              weightStream: controller.weightStream,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 720),
-                              child: ChickenDataTable(
-                                chickenDataList: recordings,
-                                onViewAll:
-                                    () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const DetailRecording(),
-                                      ),
-                                    ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          FCRDataTable(fcrData: fcrResults),
-                          const SizedBox(height: 80),
-                        ],
-                      );
-                    },
-                  ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+// ── Top Banner widget (spec §3.1) ─────────────────────────────────────────────
+
+class _TopBanner extends StatelessWidget {
+  final String periodName;
+  final String email;
+
+  const _TopBanner({required this.periodName, required this.email});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary,
+            colorScheme.primary.withOpacity(0.75),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row with "Periode Aktif" and Green Badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Periode Aktif',
+                style: textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(0.75),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PeriodListScreen()),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.success.withOpacity(0.5)),
+                  ),
+                  child: Text(
+                    '● Aktif',
+                    style: textTheme.labelMedium?.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 8),
+
+          // Kandang / period name
+          Text(
+            periodName.isNotEmpty ? periodName : 'Periode Tanpa Nama',
+            style: textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+            ),
+          ),
+          
+          const SizedBox(height: 4),
+
+          // User email
+          Text(
+            email,
+            style: textTheme.bodySmall?.copyWith(
+              color: Colors.white.withOpacity(0.75),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

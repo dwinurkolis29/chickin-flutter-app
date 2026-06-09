@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
@@ -117,16 +118,7 @@ class _FormUserState extends State<FormUser> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-      ),
+      appBar: const AppHeader(title: 'Edit Profil'),
       body: SafeArea(
         top: false,
         child:
@@ -143,25 +135,6 @@ class _FormUserState extends State<FormUser> {
                     child: Column(
                       children: [
                         const SizedBox(height: 30),
-                        // Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.person_pin, size: 50),
-                            const SizedBox(width: 10),
-                            Text(
-                              "Profil Peternak",
-                              style: Theme.of(context).textTheme.headlineLarge,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Informasi Akun",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 35),
-
                         // Name Field
                         AppTextFormField(
                           controller: _nameController,

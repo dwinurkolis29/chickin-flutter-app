@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
-import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
-import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/notification_service.dart';
+import 'package:recording_app/core/services/reminder_local_service.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
+import 'package:intl/intl.dart';
 
+/// Form untuk tambah dan edit reminder.
+/// Jika [editReminder] diisi, form berjalan di mode edit.
 class FormReminder extends StatefulWidget {
-  const FormReminder({Key? key}) : super(key: key);
+  final ReminderData? editReminder;
+
+  const FormReminder({Key? key, this.editReminder}) : super(key: key);
 
   @override
   State<FormReminder> createState() => _FormReminderState();
@@ -18,10 +20,8 @@ class FormReminder extends StatefulWidget {
 
 class _FormReminderState extends State<FormReminder> {
   final _formKey = GlobalKey<FormState>();
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseService _firebaseService = FirebaseService();
-  final NotificationService _notificationService = NotificationService();
+  final _notificationService = NotificationService();
+  final _localService = ReminderLocalService();
 
   final TextEditingController _controllerTitle = TextEditingController();
   final TextEditingController _controllerDate = TextEditingController();
@@ -34,135 +34,34 @@ class _FormReminderState extends State<FormReminder> {
   final FocusNode _focusNodeDescription = FocusNode();
 
   bool _isLoading = false;
+  late DateTime _selectedDate;
+  late TimeOfDay _selectedTime;
 
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
+  bool get _isEditMode => widget.editReminder != null;
 
   @override
   void initState() {
     super.initState();
-    _controllerDate.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-    _controllerTime.text =
-        '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
-    _requestNotificationPermission();
-  }
 
-  Future<void> _requestNotificationPermission() async {
-    await _notificationService.requestPermissions();
-  }
-
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-        _controllerDate.text = DateFormat('yyyy-MM-dd').format(selectedDate);
-      });
-    }
-  }
-
-  Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-    if (picked != null) {
-      setState(() {
-        selectedTime = picked;
-        _controllerTime.text =
-            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-      });
-    }
-  }
-
-  DateTime _getScheduledDateTime() {
-    return DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      selectedTime.hour,
-      selectedTime.minute,
-    );
-  }
-
-  Future<void> addReminder() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        if (mounted)
-          AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
-        return;
-      }
-
-      final int notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      final String id = notificationId.toString();
-      final String createdAt = DateTime.now().toIso8601String();
-      final String updatedAt = DateTime.now().toIso8601String();
-      final DateTime scheduledDateTime = _getScheduledDateTime();
-
-      if (scheduledDateTime.isBefore(DateTime.now())) {
-        if (mounted)
-          AppSnackbar.showError(
-            context,
-            'Waktu reminder tidak boleh di masa lalu',
-          );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      final reminder = ReminderData(
-        id: id,
-        title: _controllerTitle.text.trim(),
-        date: _controllerDate.text.trim(),
-        time: _controllerTime.text.trim(),
-        description: _controllerDescription.text.trim(),
-        createdAt: createdAt,
-        updatedAt: updatedAt,
+    if (_isEditMode) {
+      final r = widget.editReminder!;
+      _selectedDate = DateTime.tryParse(r.date) ?? DateTime.now();
+      final parts = r.time.split(':');
+      _selectedTime = TimeOfDay(
+        hour: int.tryParse(parts[0]) ?? TimeOfDay.now().hour,
+        minute: int.tryParse(parts[1]) ?? TimeOfDay.now().minute,
       );
-
-      await _firebaseService.addReminder(reminder, user.email!);
-      await _notificationService.scheduleNotification(
-        id: notificationId,
-        title: reminder.title,
-        body:
-            reminder.description.isNotEmpty
-                ? reminder.description
-                : 'Reminder pada ${reminder.time}',
-        scheduledDate: scheduledDateTime,
-        payload: id,
-      );
-
-      if (mounted) {
-        AppSnackbar.showSuccess(
-          context,
-          'Reminder berhasil ditambahkan!\nNotifikasi dijadwalkan: ${DateFormat('dd MMM yyyy, HH:mm').format(scheduledDateTime)}',
-        );
-        Navigator.pop(context, true);
-      }
-    } catch (e) {
-      if (mounted)
-        AppSnackbar.showError(context, 'Gagal menyimpan data: ${e.toString()}');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      _controllerTitle.text = r.title;
+      _controllerDate.text = r.date;
+      _controllerTime.text = r.time;
+      _controllerDescription.text = r.description;
+    } else {
+      _selectedDate = DateTime.now();
+      _selectedTime = TimeOfDay.now();
+      _controllerDate.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      _controllerTime.text =
+          '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
     }
-  }
-
-  Future<void> _testNotification() async {
-    await _notificationService.showImmediateNotification(
-      id: 999,
-      title: 'Test Notification',
-      body: 'This is a test notification',
-    );
-    if (mounted) AppSnackbar.showInfo(context, 'Test notification sent!');
   }
 
   @override
@@ -178,25 +77,134 @@ class _FormReminderState extends State<FormReminder> {
     super.dispose();
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _controllerDate.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+        _controllerTime.text =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      });
+    }
+  }
+
+  DateTime _getScheduledDateTime() {
+    return DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      _selectedTime.hour,
+      _selectedTime.minute,
+    );
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final scheduledDateTime = _getScheduledDateTime();
+    if (scheduledDateTime.isBefore(DateTime.now())) {
+      AppSnackbar.showError(context, 'Waktu reminder tidak boleh di masa lalu');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final now = DateTime.now().toIso8601String();
+      final int notifId;
+      final String reminderId;
+
+      if (_isEditMode) {
+        reminderId = widget.editReminder!.id;
+        notifId = int.tryParse(reminderId) ?? reminderId.hashCode;
+        // Batalkan notif lama sebelum reschedule
+        await _notificationService.cancelNotification(notifId);
+      } else {
+        notifId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+        reminderId = notifId.toString();
+      }
+
+      final reminder = ReminderData(
+        id: reminderId,
+        title: _controllerTitle.text.trim(),
+        date: _controllerDate.text.trim(),
+        time: _controllerTime.text.trim(),
+        description: _controllerDescription.text.trim(),
+        createdAt: _isEditMode ? widget.editReminder!.createdAt : now,
+        updatedAt: now,
+      );
+
+      if (_isEditMode) {
+        await _localService.updateReminder(reminder);
+      } else {
+        await _localService.addReminder(reminder);
+      }
+
+      await _notificationService.scheduleNotification(
+        id: notifId,
+        title: reminder.title,
+        body: reminder.description.isNotEmpty
+            ? reminder.description
+            : 'Reminder pada ${reminder.time}',
+        scheduledDate: scheduledDateTime,
+        payload: reminderId,
+      );
+
+      if (mounted) {
+        AppSnackbar.showSuccess(
+          context,
+          _isEditMode
+              ? 'Reminder berhasil diperbarui!'
+              : 'Reminder berhasil ditambahkan!',
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) AppSnackbar.showError(context, 'Gagal menyimpan: ${e.toString()}');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _testNotification() async {
+    await _notificationService.showImmediateNotification(
+      id: 999,
+      title: 'Test Notification',
+      body: 'This is a test notification',
+    );
+    if (mounted) AppSnackbar.showInfo(context, 'Test notification sent!');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
+      backgroundColor: cs.surface,
+      appBar: AppHeader(
+        title: _isEditMode ? 'Edit Reminder' : 'Tambah Reminder',
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_active, color: colorScheme.tertiary),
+            icon: Icon(Icons.notifications_active, color: cs.tertiary),
             onPressed: _testNotification,
             tooltip: 'Test Notification',
           ),
@@ -210,95 +218,77 @@ class _FormReminderState extends State<FormReminder> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Pengingat', style: textTheme.titleLarge),
-                const SizedBox(height: 30),
+                const SizedBox(height: 16),
+                Text(
+                  _isEditMode ? 'Edit Pengingat' : 'Pengingat Baru',
+                  style: tt.titleLarge?.copyWith(color: cs.onSurface),
+                ),
+                const SizedBox(height: 24),
 
-                // Title
                 AppTextFormField(
                   controller: _controllerTitle,
                   focusNode: _focusNodeTitle,
-                  labelText: 'Title',
-                  hintText: 'Masukkan Judul',
+                  labelText: 'Judul',
+                  hintText: 'Masukkan judul reminder',
                   prefixIcon: Icons.title,
-                  validator:
-                      (value) =>
-                          (value == null || value.isEmpty)
-                              ? 'Title tidak boleh kosong.'
-                              : null,
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'Judul tidak boleh kosong' : null,
                   onEditingComplete: () => _focusNodeDate.requestFocus(),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                // Date
                 AppTextFormField(
                   controller: _controllerDate,
                   focusNode: _focusNodeDate,
                   readOnly: true,
                   onTap: _selectDate,
-                  labelText: 'Date',
-                  hintText: 'Select date',
+                  labelText: 'Tanggal',
+                  hintText: 'Pilih tanggal',
                   prefixIcon: Icons.calendar_today,
-                  validator:
-                      (value) =>
-                          (value == null || value.isEmpty)
-                              ? 'Date tidak boleh kosong.'
-                              : null,
-                  onEditingComplete: () => _focusNodeTime.requestFocus(),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'Tanggal tidak boleh kosong' : null,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                // Time
                 AppTextFormField(
                   controller: _controllerTime,
                   focusNode: _focusNodeTime,
                   readOnly: true,
                   onTap: _selectTime,
-                  labelText: 'Time',
-                  hintText: 'Select time',
+                  labelText: 'Waktu',
+                  hintText: 'Pilih waktu',
                   prefixIcon: Icons.access_time,
-                  suffixText: selectedTime.hour < 12 ? 'AM' : 'PM',
-                  validator:
-                      (value) =>
-                          (value == null || value.isEmpty)
-                              ? 'Time tidak boleh kosong.'
-                              : null,
-                  onEditingComplete: () => _focusNodeDescription.requestFocus(),
+                  suffixText: _selectedTime.hour < 12 ? 'AM' : 'PM',
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'Waktu tidak boleh kosong' : null,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                // Description
                 AppTextFormField(
                   controller: _controllerDescription,
                   focusNode: _focusNodeDescription,
                   maxLines: 3,
-                  labelText: 'Description',
-                  hintText: 'Masukkan Deskripsi',
+                  labelText: 'Deskripsi',
+                  hintText: 'Masukkan deskripsi (opsional)',
                   prefixIcon: Icons.description,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
 
-                // Info box
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: colorScheme.secondaryContainer,
+                    color: cs.secondaryContainer,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: colorScheme.secondary),
+                    border: Border.all(color: cs.secondary),
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: colorScheme.onSecondaryContainer,
-                        size: 20,
-                      ),
+                      Icon(Icons.info_outline, color: cs.onSecondaryContainer, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Notifikasi akan muncul pada waktu yang dijadwalkan',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSecondaryContainer,
-                          ),
+                          style: tt.labelSmall?.copyWith(color: cs.onSecondaryContainer),
                         ),
                       ),
                     ],
@@ -306,42 +296,32 @@ class _FormReminderState extends State<FormReminder> {
                 ),
                 const SizedBox(height: 30),
 
-                // Submit button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(50),
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
+                    backgroundColor: cs.primary,
+                    foregroundColor: cs.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed:
-                      _isLoading
-                          ? null
-                          : () {
-                            if (_formKey.currentState?.validate() ?? false)
-                              addReminder();
-                          },
-                  child:
-                      _isLoading
-                          ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.onPrimary,
-                              ),
-                            ),
-                          )
-                          : Text(
-                            'Tambah Pengingat',
-                            style: textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onPrimary,
-                            ),
+                  onPressed: _isLoading ? null : _save,
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
                           ),
+                        )
+                      : Text(
+                          _isEditMode ? 'Simpan Perubahan' : 'Tambah Pengingat',
+                          style: tt.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onPrimary,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 20),
               ],

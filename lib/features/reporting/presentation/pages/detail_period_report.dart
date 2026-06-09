@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
@@ -23,23 +24,7 @@ class DetailPeriodReport extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.background,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-        title: Text(
-          'Detail Laporan',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: cs.onSurface,
-              ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: const AppHeader(title: 'Detail Laporan'),
       body: SafeArea(
         top: false,
         child: _buildBody(context, controller),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/export/domain/usecases/export_period_csv.dart';
@@ -34,21 +35,7 @@ class _PeriodReportView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.background,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.chevron_left, color: cs.onSurface),
-          onPressed: () => Navigator.maybePop(context),
-        ),
-        title: Text(
-          'Laporan Periode',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(color: cs.onSurface),
-        ),
-        centerTitle: true,
-      ),
+      appBar: const AppHeader(title: 'Laporan Periode'),
       body: SafeArea(top: false, child: _buildBody(context, controller)),
     );
   }

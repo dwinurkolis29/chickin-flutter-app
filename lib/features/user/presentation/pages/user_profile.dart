@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/user/presentation/pages/form_user.dart';
@@ -33,29 +35,53 @@ class _UserState extends State<User> {
   ) {
     showModalBottomSheet(
       context: context,
-      builder:
-          (context) => SafeArea(
-            child: Wrap(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text('Galeri'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.handleProfileImageUpload(ImageSource.gallery);
-                  },
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text('Kamera'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.handleProfileImageUpload(ImageSource.camera);
-                  },
-                ),
-              ],
-            ),
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                title: Text('Galeri', style: Theme.of(context).textTheme.bodyMedium),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.handleProfileImageUpload(ImageSource.gallery);
+                },
+              ),
+              Divider(
+                height: 0,
+                thickness: 0.5,
+                indent: 16,
+                endIndent: 16,
+                color: AppColors.secondary.withOpacity(0.3),
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                title: Text('Kamera', style: Theme.of(context).textTheme.bodyMedium),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.handleProfileImageUpload(ImageSource.camera);
+                },
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
@@ -89,32 +115,7 @@ class _UserState extends State<User> {
     return Scaffold(
       // surface = AppColors.background (light) / M3 dark default (dark)
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: Text(
-          'Profil Saya',
-          style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
-        ),
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.edit_outlined, color: colorScheme.onSurface),
-        //     onPressed: () {
-        //       Navigator.push(
-        //         context,
-        //         MaterialPageRoute(builder: (context) => const FormUser()),
-        //       );
-        //     },
-        //   ),
-        // ],
-      ),
+      appBar: const AppHeader(title: 'Profil Saya'),
       body:
           _isLoading
               ? Center(

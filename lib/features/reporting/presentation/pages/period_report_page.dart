@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -16,16 +17,18 @@ import 'package:recording_app/features/reporting/presentation/widgets/report_sum
 /// Menampilkan summary: hero, key metrics, tren FCR, insight, detail collapsible.
 /// Tombol "Lihat Detail" membuka [DetailPeriodReport] (tabel + export).
 class PeriodReportPage extends StatelessWidget {
-  const PeriodReportPage({super.key});
+  final bool isTab;
+  const PeriodReportPage({super.key, this.isTab = false});
 
   @override
   Widget build(BuildContext context) {
-    return const _PeriodReportPageView();
+    return _PeriodReportPageView(isTab: isTab);
   }
 }
 
 class _PeriodReportPageView extends StatefulWidget {
-  const _PeriodReportPageView();
+  final bool isTab;
+  const _PeriodReportPageView({this.isTab = false});
 
   @override
   State<_PeriodReportPageView> createState() => _PeriodReportPageViewState();
@@ -45,32 +48,19 @@ class _PeriodReportPageViewState extends State<_PeriodReportPageView> {
     final controller = context.watch<ReportingController>();
     final cs = Theme.of(context).colorScheme;
 
+    // Saat dipakai sebagai tab di Dashboard, cukup return body tanpa Scaffold
+    // agar AppHeader dari Dashboard tidak terduplikasi.
+    if (widget.isTab) {
+      return SafeArea(
+        top: false,
+        child: _buildBody(context, controller),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: cs.background,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-        title: Text(
-          'Laporan Periode',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: cs.onSurface,
-              ),
-        ),
-        centerTitle: true,
-        actions: [
-          // Period selector di appbar
-          if (!controller.isLoading && controller.closedPeriods.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _PeriodSelector(controller: controller),
-            ),
-        ],
+      backgroundColor: cs.surface,
+      appBar: const AppHeader(
+        title: 'Laporan Periode',
       ),
       body: SafeArea(
         top: false,
@@ -140,6 +130,13 @@ class _SummaryContent extends StatelessWidget {
             fcr: report.fcr,
             survivalRate: report.survivalRate,
             finalAvgWeightGram: report.finalAvgWeightGram,
+            showPeriodSelector: controller.closedPeriods.length > 1,
+            onPeriodSelectorTap: () => DialogHelper.showPeriodPicker(
+              context,
+              periods: controller.closedPeriods,
+              selectedPeriodId: controller.selectedPeriodId,
+              onSelected: controller.selectPeriod,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -180,48 +177,6 @@ class _SummaryContent extends StatelessWidget {
   }
 }
 
-// ── Period Selector ───────────────────────────────────────────────────────────
-
-class _PeriodSelector extends StatelessWidget {
-  final ReportingController controller;
-  const _PeriodSelector({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final periods = controller.closedPeriods;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: cs.background,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: controller.selectedPeriodId,
-          isDense: true,
-          icon: Icon(Icons.expand_more, size: 16, color: cs.primary),
-          style: tt.bodySmall?.copyWith(color: cs.onSurface),
-          items: periods
-              .map((p) => DropdownMenuItem(
-                    value: p.id,
-                    child: Text(
-                      p.name,
-                      style: tt.bodySmall?.copyWith(color: cs.onSurface),
-                    ),
-                  ))
-              .toList(),
-          onChanged: (id) {
-            if (id != null) controller.selectPeriod(id);
-          },
-        ),
-      ),
-    );
-  }
-}
 
 // ── Detail Button ─────────────────────────────────────────────────────────────
 

@@ -20,38 +20,44 @@ class NotificationService {
 
     // Android initialization settings
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // iOS initialization settings
+    // iOS: jangan rely pada requestAlertPermission di sini untuk v17+
+    // Permission diminta eksplisit via requestPermissions() di bawah
     const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
-    // Combine initialization settings
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
     );
 
-    // Initialize with settings
     await _notifications.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
+
+    // Selalu request permission segera setelah initialize
+    await requestPermissions();
   }
 
-  // Request permission (especially for iOS 10+)
+  // Request permission — iOS dan Android 13+ (runtime)
   Future<bool> requestPermissions() async {
-    final bool? result = await _notifications
+    // iOS
+    final bool? iosResult = await _notifications
         .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-    return result ?? true;
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+
+    // Android 13+ (API 33+) butuh runtime permission POST_NOTIFICATIONS
+    final bool? androidResult = await _notifications
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    print('🔔 Notification permissions — iOS: $iosResult | Android: $androidResult');
+    return (iosResult ?? true) && (androidResult ?? true);
   }
 
   // Handle notification tap
@@ -97,7 +103,13 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // Schedule the notification
+    // Guard: jangan schedule jika waktu sudah lewat
+    final now = tz.TZDateTime.now(tz.local);
+    if (scheduledTZDate.isBefore(now)) {
+      print('⚠️ Scheduled time is in the past ($scheduledTZDate). Notification skipped.');
+      return;
+    }
+
     await _notifications.zonedSchedule(
       id,
       title,

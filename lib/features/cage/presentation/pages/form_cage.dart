@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
-import 'package:recording_app/core/components/forms/app_dropdown_form_field.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
@@ -85,16 +86,8 @@ class _FormCageState extends State<FormCage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        leading: Center(
-          child: CircleIconButton(
-            icon: Icons.chevron_left,
-            onTap: () => Navigator.maybePop(context),
-          ),
-        ),
-        title: Text(isEditing ? 'Edit Kandang' : 'Tambah Kandang'),
+      appBar: AppHeader(
+        title: isEditing ? 'Edit Kandang' : 'Tambah Kandang',
       ),
       body: SafeArea(
         top: false,
@@ -105,56 +98,33 @@ class _FormCageState extends State<FormCage> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
-                FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    isEditing ? "Edit Data Kandang" : "Tambah Data Kandang",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  isEditing
-                      ? "Memperbarui data kandang ayam broiler."
-                      : "Menambahkan data kandang ayam broiler.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 35),
-                AppDropdownFormField<String>(
-                  value:
-                      _controllerType.text.isNotEmpty
-                          ? (_controllerType.text.toLowerCase() == 'close house'
-                              ? 'Close House'
-                              : (_controllerType.text.toLowerCase() ==
-                                      'open house'
-                                  ? 'Open House'
-                                  : null))
-                          : null,
+                AppTextFormField(
+                  controller: _controllerType,
                   focusNode: _focusNodeType,
+                  readOnly: true,
                   labelText: "Jenis Kandang",
                   prefixIcon: Icons.bloodtype,
-                  items: [
-                    const DropdownMenuItem(
-                      value: "Close House",
-                      child: Text("Close House"),
-                    ),
-                    const DropdownMenuItem(
-                      value: "Open House",
-                      child: Text("Open House"),
-                    ),
-                  ],
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        _controllerType.text = newValue;
-                      });
-                    }
-                  },
+                  suffixIcon: const Icon(Icons.expand_more),
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
                       return "Jenis kandang tidak boleh kosong.";
                     }
                     return null;
+                  },
+                  onTap: () {
+                    DialogHelper.showStringPicker(
+                      context,
+                      title: 'Pilih Jenis Kandang',
+                      options: const ['Close House', 'Open House'],
+                      selectedOption: _controllerType.text.isNotEmpty ? _controllerType.text : null,
+                      onSelected: (selected) {
+                        setState(() {
+                          _controllerType.text = selected;
+                        });
+                        // Otomatis pindah fokus ke kapasitas setelah memilih
+                        _focusNodeCapacity.requestFocus();
+                      },
+                    );
                   },
                 ),
                 const SizedBox(height: 10),

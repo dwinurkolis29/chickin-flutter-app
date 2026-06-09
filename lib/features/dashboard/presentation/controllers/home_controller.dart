@@ -17,12 +17,14 @@ class HomeController extends ChangeNotifier {
         _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR();
 
   String? _activePeriodId;
+  String? _activePeriodName;
   bool _isLoadingPeriod = false;
   int _initialPopulation = 0;
   Stream<List<RecordingData>>? _recordingsStream;
   Stream<List<FlSpot>>? _weightStream;
 
   String? get activePeriodId => _activePeriodId;
+  String? get activePeriodName => _activePeriodName;
   bool get isLoadingPeriod => _isLoadingPeriod;
   int get initialPopulation => _initialPopulation;
   Stream<List<RecordingData>>? get recordingsStream => _recordingsStream;
@@ -38,6 +40,7 @@ class HomeController extends ChangeNotifier {
         // Use period.initialCapacity as the source of truth for initial population
         // This ensures FCR is consistent with active_period_card
         _initialPopulation = activePeriod!.initialCapacity;
+        _activePeriodName = activePeriod.name;
         // Cache streams so they don't get recreated on every rebuild
         _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!, uid);
         _weightStream = _firebaseService.getWeightStream(_activePeriodId!, uid);
@@ -70,6 +73,7 @@ class HomeController extends ChangeNotifier {
       clear();
     } else {
       _activePeriodId = null;
+      _activePeriodName = null;
       _initialPopulation = 0;
       _recordingsStream = null;
       _weightStream = null;
@@ -82,6 +86,7 @@ class HomeController extends ChangeNotifier {
   /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
   void clear() {
     _activePeriodId = null;
+    _activePeriodName = null;
     _initialPopulation = 0;
     _recordingsStream = null;
     _weightStream = null;

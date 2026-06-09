@@ -14,9 +14,9 @@ class PeriodEvaluator {
 
   static Color statusColor(PeriodStatus status) {
     switch (status) {
-      case PeriodStatus.good: return AppColors.success;
-      case PeriodStatus.warning: return AppColors.warning;
-      case PeriodStatus.bad: return AppColors.error;
+      case PeriodStatus.good: return AppColors.successOnPrimary;
+      case PeriodStatus.warning: return AppColors.warningOnPrimary;
+      case PeriodStatus.bad: return AppColors.errorOnPrimary;
     }
   }
 
@@ -46,6 +46,8 @@ class ReportSummaryHeader extends StatelessWidget {
   final double fcr;
   final double survivalRate;
   final int finalAvgWeightGram;
+  final bool showPeriodSelector;
+  final VoidCallback? onPeriodSelectorTap;
 
   const ReportSummaryHeader({
     super.key,
@@ -55,6 +57,8 @@ class ReportSummaryHeader extends StatelessWidget {
     required this.fcr,
     required this.survivalRate,
     required this.finalAvgWeightGram,
+    this.showPeriodSelector = false,
+    this.onPeriodSelectorTap,
   });
 
   @override
@@ -96,18 +100,51 @@ class ReportSummaryHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        periodName,
-                        style: tt.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
+                      Material(
+                        color: (showPeriodSelector && onPeriodSelectorTap != null)
+                            ? Colors.white.withOpacity(0.15)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: (showPeriodSelector && onPeriodSelectorTap != null)
+                              ? onPeriodSelectorTap
+                              : null,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    periodName,
+                                    style: tt.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                if (showPeriodSelector && onPeriodSelectorTap != null) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '$dateRange • $durationDays Hari',
-                        style: tt.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: Text(
+                          '$dateRange • $durationDays Hari',
+                          style: tt.bodySmall?.copyWith(
+                            color: Colors.white.withOpacity(0.8),
+                          ),
                         ),
                       ),
                     ],

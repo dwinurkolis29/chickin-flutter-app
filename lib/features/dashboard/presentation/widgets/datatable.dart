@@ -48,6 +48,8 @@ class ChickenDataTableState extends State<ChickenDataTable> {
         // membuat header pada paginated data table
         header: Text('Recording Data',
             style: Theme.of(context).textTheme.titleMedium),
+        columnSpacing: 24,
+        horizontalMargin: 16,
         actions: [
           if (widget.onViewAll != null)
             TextButton.icon(
@@ -68,25 +70,45 @@ class ChickenDataTableState extends State<ChickenDataTable> {
         columns: [
           // membuat kolom pada paginated data table
           DataColumn(
-            label: const Text('Umur (hari)'),
+            label: const Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text('Umur (hari)'),
+              ),
+            ),
             numeric: true,
             onSort: (columnIndex, ascending) =>
                 _sort<num>((d) => d.day, columnIndex, ascending),
           ),
           DataColumn(
-            label: const Text('Habis pakan (sak)'),
+            label: const Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text('Pakan (sak)'),
+              ),
+            ),
             numeric: true,
             onSort: (columnIndex, ascending) =>
                 _sort<num>((d) => d.feedSack, columnIndex, ascending),
           ),
           DataColumn(
-            label: const Text('Mati (ekor)'),
+            label: const Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text('Mati (ekor)'),
+              ),
+            ),
             numeric: true,
             onSort: (columnIndex, ascending) =>
                 _sort<num>((d) => d.mortality, columnIndex, ascending),
           ),
           DataColumn(
-            label: const Text('Bobot (gram)'),
+            label: const Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text('Bobot (gram)'),
+              ),
+            ),
             numeric: true,
             onSort: (columnIndex, ascending) =>
                 _sort<num>((d) => d.avgWeightGram, columnIndex, ascending),
@@ -125,10 +147,30 @@ class ChickenDataSource extends DataTableSource {
       index: index,
       cells: [
         // membuat cell pada baris data
-        DataCell(Text(chicken.day.toString())),
-        DataCell(Text(chicken.feedSack.toString())),
-        DataCell(Text(chicken.mortality.toString())),
-        DataCell(Text(chicken.avgWeightGram.toStringAsFixed(2))),
+        DataCell(
+          Align(
+            alignment: Alignment.center,
+            child: Text(chicken.day.toString()),
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.center,
+            child: Text(chicken.feedSack.toString()),
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.center,
+            child: Text(chicken.mortality.toString()),
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.center,
+            child: Text(chicken.avgWeightGram.toStringAsFixed(2)),
+          ),
+        ),
       ],
     );
   }
