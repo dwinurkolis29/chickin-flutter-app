@@ -210,7 +210,7 @@ class _DashboardState extends State<Dashboard> {
                     index: _kHome,
                     activeIcon: Icons.home,
                     inactiveIcon: Icons.home_outlined,
-                    label: 'Home',
+                    label: 'Beranda',
                   ),
                   // Kandang
                   _navItem(
@@ -395,7 +395,7 @@ class _DashboardContentState extends State<DashboardContent> {
                     context,
                     MaterialPageRoute(builder: (context) => const Login()),
                   ),
-                  child: const Text('Login'),
+                  child: const Text('Masuk'),
                 ),
               ],
             ),

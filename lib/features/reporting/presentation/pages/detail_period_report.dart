@@ -176,7 +176,7 @@ class _ExportButtons extends StatelessWidget {
       children: [
         Expanded(
           child: _ExportChip(
-            label: 'Export CSV',
+            label: 'Ekspor CSV',
             icon: Icons.table_rows_outlined,
             isLoading: busy,
             onTap: busy ? null : () => _exportCsv(context),
@@ -185,7 +185,7 @@ class _ExportButtons extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _ExportChip(
-            label: 'Export Excel',
+            label: 'Ekspor Excel',
             icon: Icons.grid_on_outlined,
             isLoading: busy,
             onTap: busy ? null : () => _exportExcel(context),
@@ -194,7 +194,7 @@ class _ExportButtons extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _ExportChip(
-            label: 'Export PDF',
+            label: 'Ekspor PDF',
             icon: Icons.picture_as_pdf_outlined,
             isLoading: false,
             onTap: busy

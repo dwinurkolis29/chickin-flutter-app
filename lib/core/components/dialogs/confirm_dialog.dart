@@ -14,8 +14,8 @@ class ConfirmDialog extends StatelessWidget {
     Key? key,
     required this.title,
     required this.message,
-    this.confirmText = 'Confirm',
-    this.cancelText = 'Cancel',
+    this.confirmText = 'Konfirmasi',
+    this.cancelText = 'Batal',
     this.isDestructive = false,
     this.onConfirm,
   }) : super(key: key);
@@ -49,8 +49,8 @@ class ConfirmDialog extends StatelessWidget {
     required BuildContext context,
     required String title,
     required String message,
-    String confirmText = 'Confirm',
-    String cancelText = 'Cancel',
+    String confirmText = 'Konfirmasi',
+    String cancelText = 'Batal',
     bool isDestructive = false,
     VoidCallback? onConfirm,
   }) {

@@ -187,7 +187,7 @@ class _FormReminderState extends State<FormReminder> {
   Future<void> _testNotification() async {
     await _notificationService.showImmediateNotification(
       id: 999,
-      title: 'Test Notification',
+      title: 'Uji Notifikasi',
       body: 'This is a test notification',
     );
     if (mounted) AppSnackbar.showInfo(context, 'Test notification sent!');

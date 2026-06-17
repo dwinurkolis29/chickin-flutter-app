@@ -95,7 +95,7 @@ class _LoginState extends State<Login> {
 
                 // ── Headline ──
                 Text(
-                  'Welcome back\nto Recording App',
+                  'Selamat datang kembali\ndi Aplikasi Recording',
                   textAlign: TextAlign.center,
                   style: textTheme.headlineSmall?.copyWith(
                     color: scheme.onSurface,
@@ -108,7 +108,7 @@ class _LoginState extends State<Login> {
                 // ── Email Field ──
                 _buildField(
                   controller: _controllerEmail,
-                  hint: 'E-mail',
+                  hint: 'Email',
                   icon: Icons.mail_outline,
                   keyboardType: TextInputType.emailAddress,
                   enabled: !busy,
@@ -132,7 +132,7 @@ class _LoginState extends State<Login> {
                 _buildField(
                   controller: _controllerPassword,
                   focusNode: _focusNodePassword,
-                  hint: 'Password',
+                  hint: 'Kata Sandi',
                   icon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   enabled: !busy,
@@ -190,7 +190,7 @@ class _LoginState extends State<Login> {
                               ),
                             )
                             : Text(
-                              'Sign in',
+                              'Masuk',
                               style: textTheme.bodyLarge?.copyWith(
                                 color: scheme.onPrimary,
                                 fontWeight: FontWeight.w600,
@@ -207,7 +207,7 @@ class _LoginState extends State<Login> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        'or',
+                        'atau',
                         style: textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -238,7 +238,7 @@ class _LoginState extends State<Login> {
                       size: 24,
                     ),
                     label: Text(
-                      'Continue with Google',
+                      'Lanjutkan dengan Google',
                       style: textTheme.bodyLarge?.copyWith(
                         color: scheme.onSurface,
                         fontWeight: FontWeight.w500,
@@ -253,7 +253,7 @@ class _LoginState extends State<Login> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      "Belum punya akun? ",
                       style: textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -276,7 +276,7 @@ class _LoginState extends State<Login> {
                                 }
                               },
                       child: Text(
-                        'Sign up',
+                        'Daftar',
                         style: textTheme.bodyMedium?.copyWith(
                           color: scheme.primary,
                           fontWeight: FontWeight.w700,

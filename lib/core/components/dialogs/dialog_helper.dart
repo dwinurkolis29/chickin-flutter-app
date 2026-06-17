@@ -44,8 +44,8 @@ class DialogHelper {
     BuildContext context,
     String title,
     String message, {
-    String confirmText = 'Confirm',
-    String cancelText = 'Cancel',
+    String confirmText = 'Konfirmasi',
+    String cancelText = 'Batal',
     bool isDestructive = false,
     VoidCallback? onConfirm,
   }) {

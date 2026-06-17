@@ -683,7 +683,7 @@ class _PeriodSummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SummaryTile(
-                    label: 'Total Feed',
+                    label: 'Total Pakan',
                     value: '${numFmt.format(totalFeed)} kg',
                     icon: Icons.grass_outlined,
                     labelColor: onPrimaryMuted,
@@ -693,7 +693,7 @@ class _PeriodSummaryCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _SummaryTile(
-                    label: 'Total Mortality',
+                    label: 'Total Kematian',
                     value: '${numFmt.format(totalMort)} ekor',
                     icon: Icons.remove_circle_outline,
                     labelColor: onPrimaryMuted,
@@ -707,7 +707,7 @@ class _PeriodSummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SummaryTile(
-                    label: 'Final Avg Weight',
+                    label: 'Berat Rata-rata Akhir',
                     value: '${numFmt.format(finalWeight)} g',
                     icon: Icons.scale_outlined,
                     labelColor: onPrimaryMuted,

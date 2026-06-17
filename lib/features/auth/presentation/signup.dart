@@ -108,7 +108,7 @@ class _SignupState extends State<Signup> {
 
                 // ── Headline ──
                 Text(
-                  'Create your\nRecording App account',
+                  'Buat akun\nAplikasi Recording Anda',
                   textAlign: TextAlign.center,
                   style: textTheme.headlineSmall?.copyWith(
                     color: scheme.onSurface,
@@ -122,7 +122,7 @@ class _SignupState extends State<Signup> {
                 _buildField(
                   controller: _controllerUsername,
                   focusNode: _focusNodeUsername,
-                  hint: 'Username',
+                  hint: 'Nama Pengguna',
                   icon: Icons.person_outline,
                   keyboardType: TextInputType.name,
                   enabled: !busy,
@@ -140,7 +140,7 @@ class _SignupState extends State<Signup> {
                 _buildField(
                   controller: _controllerEmail,
                   focusNode: _focusNodeEmail,
-                  hint: 'E-mail',
+                  hint: 'Email',
                   icon: Icons.mail_outline,
                   keyboardType: TextInputType.emailAddress,
                   enabled: !busy,
@@ -164,7 +164,7 @@ class _SignupState extends State<Signup> {
                 _buildField(
                   controller: _controllerPhone,
                   focusNode: _focusNodePhone,
-                  hint: 'Phone',
+                  hint: 'Nomor Telepon',
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                   enabled: !busy,
@@ -176,7 +176,7 @@ class _SignupState extends State<Signup> {
                 _buildField(
                   controller: _controllerAddress,
                   focusNode: _focusNodeAddress,
-                  hint: 'Address',
+                  hint: 'Alamat',
                   icon: Icons.location_on_outlined,
                   keyboardType: TextInputType.streetAddress,
                   enabled: !busy,
@@ -188,7 +188,7 @@ class _SignupState extends State<Signup> {
                 _buildField(
                   controller: _controllerPassword,
                   focusNode: _focusNodePassword,
-                  hint: 'Password',
+                  hint: 'Kata Sandi',
                   icon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   enabled: !busy,
@@ -282,7 +282,7 @@ class _SignupState extends State<Signup> {
                               ),
                             )
                             : Text(
-                              'Register',
+                              'Daftar',
                               style: textTheme.bodyLarge?.copyWith(
                                 color: scheme.onPrimary,
                                 fontWeight: FontWeight.w600,
@@ -297,7 +297,7 @@ class _SignupState extends State<Signup> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      'Sudah punya akun? ',
                       style: textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -305,7 +305,7 @@ class _SignupState extends State<Signup> {
                     GestureDetector(
                       onTap: busy ? null : () => Navigator.pop(context),
                       child: Text(
-                        'Sign in',
+                        'Masuk',
                         style: textTheme.bodyMedium?.copyWith(
                           color: scheme.primary,
                           fontWeight: FontWeight.w700,

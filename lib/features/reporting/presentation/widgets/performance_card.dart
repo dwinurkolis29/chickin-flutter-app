@@ -19,6 +19,10 @@ class PerformanceCard extends StatelessWidget {
           value: '${NumberFormat('#,###.##').format(report.totalFeedKg)} kg',
         ),
         MetricRow(
+          label: 'Total Sak',
+          value: '${NumberFormat('#,###.##').format(report.totalFeedKg / 50)} sak',
+        ),
+        MetricRow(
           label: 'Bobot Rata-rata Akhir',
           value: '${NumberFormat('#,###').format(report.finalAvgWeightGram)} g',
         ),

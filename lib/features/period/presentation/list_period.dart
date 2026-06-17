@@ -10,6 +10,7 @@ import 'controllers/period_controller.dart';
 import 'widgets/active_period_card.dart';
 import 'screens/form_period.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
+import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 import 'widgets/create_period_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'widgets/period_list_section.dart';
@@ -73,6 +74,7 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
             void handlePeriodTap(PeriodData period) {
               final isClosed = !period.isActive && period.endDate != null;
               if (isClosed) {
+                context.read<ReportingController>().selectPeriod(period.id);
                 Navigator.push(
                   context,
                   MaterialPageRoute(

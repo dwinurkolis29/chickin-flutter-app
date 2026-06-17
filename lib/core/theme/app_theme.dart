@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_text_theme.dart';
+import '../transitions/slide_fade_transition_builder.dart';
+
+const _pageTransitionsTheme = PageTransitionsTheme(
+  builders: {
+    TargetPlatform.android: SlideFadeTransitionBuilder(),
+    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(), // Menjaga swipe back iOS
+    TargetPlatform.windows: SlideFadeTransitionBuilder(),
+    TargetPlatform.macOS: SlideFadeTransitionBuilder(),
+    TargetPlatform.linux: SlideFadeTransitionBuilder(),
+  },
+);
 
 /// Single source of truth for ThemeData.
 /// Use AppTheme.light() and AppTheme.dark() in MaterialApp.
@@ -25,6 +36,7 @@ class AppTheme {
       textTheme: AppTextTheme.textTheme,
       useMaterial3: true,
     ).copyWith(
+      pageTransitionsTheme: _pageTransitionsTheme,
       cardTheme: const CardThemeData(
         color: Colors.white,
         elevation: 1,
@@ -45,6 +57,8 @@ class AppTheme {
       colorScheme: scheme,
       textTheme: AppTextTheme.textTheme,
       useMaterial3: true,
+    ).copyWith(
+      pageTransitionsTheme: _pageTransitionsTheme,
     );
   }
 }
