@@ -10,6 +10,8 @@ import 'package:recording_app/features/reporting/presentation/widgets/performanc
 import 'package:recording_app/features/reporting/presentation/widgets/population_card.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 
 /// Halaman detail laporan lengkap: periode info, kartu metrik, tabel harian, export.
 /// Dibuka dari [PeriodReportPage] via tombol "Lihat Detail & Export".
@@ -37,32 +39,42 @@ class DetailPeriodReport extends StatelessWidget {
       return const ReportSkeleton();
     }
 
-    if (controller.report == null) {
-      return Center(
-        child: Text(
-          'Tidak ada data laporan',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+    if (controller.errorMessage != null) {
+      return AppErrorState(
+        message: 'Gagal memuat detail laporan',
+        subtitle: controller.errorMessage,
+        onRetry: () => controller.reload(),
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _PeriodInfoCard(controller: controller),
-          const SizedBox(height: 16),
-          _ExportButtons(controller: controller),
-          const SizedBox(height: 16),
-          PopulationCard(report: controller.report!),
-          const SizedBox(height: 12),
-          PerformanceCard(report: controller.report!),
-          const SizedBox(height: 12),
-          AnalyticsCard(report: controller.report!),
-          const SizedBox(height: 16),
-          _RecapHarianButton(),
-        ],
+    if (controller.report == null) {
+      return const AppEmptyState(
+        icon: Icons.bar_chart_outlined,
+        message: 'Tidak ada data laporan',
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async => controller.reload(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _PeriodInfoCard(controller: controller),
+            const SizedBox(height: 16),
+            _ExportButtons(controller: controller),
+            const SizedBox(height: 16),
+            PopulationCard(report: controller.report!),
+            const SizedBox(height: 12),
+            PerformanceCard(report: controller.report!),
+            const SizedBox(height: 12),
+            AnalyticsCard(report: controller.report!),
+            const SizedBox(height: 16),
+            _RecapHarianButton(),
+          ],
+        ),
       ),
     );
   }

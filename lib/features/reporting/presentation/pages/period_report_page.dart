@@ -14,6 +14,7 @@ import 'package:recording_app/features/reporting/presentation/widgets/insight_ca
 import 'package:recording_app/features/reporting/presentation/widgets/key_metrics_grid.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/report_summary_header.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 
 /// Entry point laporan periode.
 /// Menampilkan summary: hero, key metrics, tren FCR, insight, detail collapsible.
@@ -76,6 +77,14 @@ class _PeriodReportPageViewState extends State<_PeriodReportPageView> {
       return const ReportSkeleton();
     }
 
+    if (controller.errorMessage != null) {
+      return AppErrorState(
+        message: 'Gagal memuat data laporan',
+        subtitle: controller.errorMessage,
+        onRetry: () => controller.reload(),
+      );
+    }
+
     if (controller.closedPeriods.isEmpty) {
       return const AppEmptyState(
         icon: Icons.bar_chart_outlined,
@@ -119,13 +128,12 @@ class _SummaryContent extends StatelessWidget {
     final endStr = period.endDate != null ? dateFmt.format(period.endDate!) : 'Aktif';
     final dateRange = '$startStr – $endStr';
 
-    // Insights: ambil dari summary jika ada, fallback kosong
     final insights = summary?.insights ?? [];
-
-    // WeeklyFCR: dari summary (snapshot) atau dari report fallback
     final weeklyFCR = summary?.weeklyFCR ?? [];
 
-    return SingleChildScrollView(
+    return RefreshIndicator(
+      onRefresh: () async => controller.reload(),
+      child: SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -181,6 +189,7 @@ class _SummaryContent extends StatelessWidget {
           _DetailButton(controller: controller),
         ],
       ),
+    ),
     );
   }
 }

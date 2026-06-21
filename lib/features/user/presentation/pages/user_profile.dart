@@ -1,5 +1,6 @@
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
@@ -120,14 +121,11 @@ class _UserState extends State<User> {
                 child: CircularProgressIndicator(color: colorScheme.primary),
               )
               : _errorMessage.isNotEmpty
-              ? Center(
-                child: Text(
-                  _errorMessage,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.error,
-                  ),
-                ),
-              )
+              ? AppErrorState(
+                  message: 'Gagal memuat profil',
+                  subtitle: _errorMessage,
+                  onRetry: () => controller.loadUserData(),
+                )
               : SafeArea(
                 child: SingleChildScrollView(
                   child: Column(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
 import 'package:image_picker/image_picker.dart';
@@ -103,9 +104,11 @@ class _CageProfileState extends State<CageProfile> {
 
             if (controller.errorMessage != null &&
                 controller.errorMessage!.isNotEmpty) {
-              if (!controller.hasValidCageData) {
-                return _buildEmptyState(context, colorScheme);
-              }
+              return AppErrorState(
+                message: 'Gagal memuat data kandang',
+                subtitle: controller.errorMessage,
+                onRetry: () => controller.loadCageData(),
+              );
             }
 
             if (!controller.hasValidCageData) {

@@ -10,6 +10,7 @@ class PeriodController extends ChangeNotifier {
   final SummaryCalculator _summaryCalculator;
   final InsightGenerator _insightGenerator;
   StreamSubscription<List<PeriodData>>? _periodSubscription;
+  String? _currentUid;
 
   List<PeriodData> _periods = [];
   bool _isLoading = false;
@@ -58,8 +59,10 @@ class PeriodController extends ChangeNotifier {
   /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
   void onAuthChanged(String? uid) {
     if (uid == null) {
+      _currentUid = null;
       clear();
     } else {
+      _currentUid = uid;
       _loadPeriods(uid);
     }
   }
@@ -74,8 +77,8 @@ class PeriodController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Subscribe ulang dengan UID baru. Delegate ke onAuthChanged.
-  void reload([String? uid]) => onAuthChanged(uid);
+  /// Refresh data menggunakan UID saat ini. Aman dipanggil dari pull-to-refresh.
+  void reload([String? uid]) => onAuthChanged(uid ?? _currentUid);
 
   @override
   void dispose() {

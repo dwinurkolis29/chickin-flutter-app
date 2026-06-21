@@ -1,5 +1,6 @@
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
@@ -121,7 +122,11 @@ class _FormUserState extends State<FormUser> {
                 ? const Center(child: CircularProgressIndicator())
                 // Menampilkan pesan kesalahan jika ada
                 : _errorMessage.isNotEmpty
-                ? Center(child: Text(_errorMessage))
+                ? AppErrorState(
+                    message: 'Gagal memuat data pengguna',
+                    subtitle: _errorMessage,
+                    onRetry: () => _loadUserData(),
+                  )
                 : SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 30.0),
                   child: Form(

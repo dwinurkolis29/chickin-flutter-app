@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:recording_app/core/tour/tour_step.dart';
@@ -371,34 +372,16 @@ class _DashboardContentState extends State<DashboardContent> {
         final currentUser = context.watch<AuthService>().currentUser;
 
         if (currentUser == null) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 50,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Anda belum login',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Silahkan login terlebih dahulu',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Login()),
-                  ),
-                  child: const Text('Masuk'),
-                ),
-              ],
+          return AppErrorState(
+            icon: Icons.lock_outline_rounded,
+            message: 'Anda belum login',
+            subtitle: 'Silakan login terlebih dahulu',
+            action: ElevatedButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Login()),
+              ),
+              child: const Text('Masuk'),
             ),
           );
         }
@@ -488,7 +471,11 @@ class _DashboardContentState extends State<DashboardContent> {
                     }
 
                     if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return AppErrorState(
+                        message: 'Gagal memuat data recording',
+                        subtitle: snapshot.error.toString(),
+                        onRetry: () => controller.loadActivePeriod(),
+                      );
                     }
 
                     final recordings = snapshot.data ?? <RecordingData>[];

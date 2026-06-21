@@ -13,6 +13,7 @@ import 'package:recording_app/features/reporting/presentation/widgets/analytics_
 import 'package:recording_app/features/reporting/presentation/widgets/recording_table.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 
 /// Navigate to this page using [Navigator.push] or push a named route.
 /// [ReportingController] must be available in the provider tree
@@ -46,6 +47,14 @@ class _PeriodReportView extends StatelessWidget {
       return const ReportSkeleton();
     }
 
+    if (controller.errorMessage != null) {
+      return AppErrorState(
+        message: 'Gagal memuat data laporan',
+        subtitle: controller.errorMessage,
+        onRetry: () => controller.reload(),
+      );
+    }
+
     if (controller.closedPeriods.isEmpty) {
       return const AppEmptyState(
         icon: Icons.bar_chart_outlined,
@@ -53,27 +62,31 @@ class _PeriodReportView extends StatelessWidget {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          PeriodHeaderSection(controller: controller),
-          const SizedBox(height: 16),
-          _ExportButtons(controller: controller),
-          const SizedBox(height: 16),
-          if (controller.isLoadingRecordings)
-            const TableSkeleton()
-          else if (controller.report != null) ...[
-            PopulationCard(report: controller.report!),
-            const SizedBox(height: 12),
-            PerformanceCard(report: controller.report!),
-            const SizedBox(height: 12),
-            AnalyticsCard(report: controller.report!),
-            const SizedBox(height: 12),
-            RecordingTable(report: controller.report!),
+    return RefreshIndicator(
+      onRefresh: () async => controller.reload(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PeriodHeaderSection(controller: controller),
+            const SizedBox(height: 16),
+            _ExportButtons(controller: controller),
+            const SizedBox(height: 16),
+            if (controller.isLoadingRecordings)
+              const TableSkeleton()
+            else if (controller.report != null) ...[
+              PopulationCard(report: controller.report!),
+              const SizedBox(height: 12),
+              PerformanceCard(report: controller.report!),
+              const SizedBox(height: 12),
+              AnalyticsCard(report: controller.report!),
+              const SizedBox(height: 12),
+              RecordingTable(report: controller.report!),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

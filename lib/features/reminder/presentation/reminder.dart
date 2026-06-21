@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:intl/intl.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/services/reminder_local_service.dart';
@@ -230,7 +231,9 @@ class _ReminderState extends State<Reminder> {
       appBar: const AppHeader(title: 'Reminder'),
       body: SafeArea(
         top: false,
-        child: NestedScrollView(
+        child: RefreshIndicator(
+          onRefresh: () async => setState(() {}),
+          child: NestedScrollView(
           headerSliverBuilder: (context, _) => [
             SliverToBoxAdapter(
               child: Column(
@@ -311,6 +314,7 @@ class _ReminderState extends State<Reminder> {
               ],
             ),
           ),
+          ),
         ),
       ),
     );
@@ -323,6 +327,16 @@ class _ReminderState extends State<Reminder> {
       // initialData agar tidak kosong saat pertama load
       initialData: _localService.getAllReminders(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return SliverFillRemaining(
+            child: AppErrorState(
+              message: 'Gagal memuat data reminder',
+              subtitle: snapshot.error.toString(),
+              onRetry: () => setState(() {}),
+            ),
+          );
+        }
+
         final all = snapshot.data ?? [];
         final filtered = _filterByDate(all);
 

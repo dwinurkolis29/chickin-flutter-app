@@ -15,6 +15,7 @@ class ReportingController extends ChangeNotifier {
   final BuildRealtimeReportUseCase _realtimeUseCase;
 
   StreamSubscription<List<PeriodData>>? _periodSub;
+  String? _currentUid;
 
   List<PeriodData> _closedPeriods = [];
   String? _selectedPeriodId;
@@ -57,10 +58,12 @@ class ReportingController extends ChangeNotifier {
   /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
   void onAuthChanged(String? uid) {
     if (uid == null) {
+      _currentUid = null;
       clear();
       return;
     }
 
+    _currentUid = uid;
     _periodSub?.cancel(); // Cancel sebelum buat yang baru — hindari leak
     _periodSub = null;
     _closedPeriods = [];
@@ -284,8 +287,9 @@ class ReportingController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Subscribe ulang dengan UID baru. Delegate ke onAuthChanged.
-  void reload([String? uid]) => onAuthChanged(uid);
+  /// Refresh data menggunakan UID saat ini. Aman dipanggil dari pull-to-refresh.
+  /// Berbeda dengan onAuthChanged — tidak butuh uid dari luar, tidak akan trigger clear().
+  void reload([String? uid]) => onAuthChanged(uid ?? _currentUid);
 
   @override
   void dispose() {

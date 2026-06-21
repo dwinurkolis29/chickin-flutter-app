@@ -15,6 +15,7 @@ import 'widgets/create_period_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'widgets/period_list_section.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 
 class PeriodListScreen extends StatefulWidget {
   final String farmName;
@@ -71,7 +72,11 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
             }
 
             if (controller.errorMessage != null) {
-              return Center(child: Text('Error: ${controller.errorMessage}'));
+              return AppErrorState(
+                message: 'Gagal memuat data periode',
+                subtitle: controller.errorMessage,
+                onRetry: () => controller.reload(),
+              );
             }
 
             final periods = controller.periods;
@@ -100,8 +105,11 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
             return Column(
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: RefreshIndicator(
+                    onRefresh: () async => controller.reload(),
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -122,6 +130,7 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
                         const SizedBox(height: 24),
                       ],
                     ),
+                  ),
                   ),
                 ),
               ],

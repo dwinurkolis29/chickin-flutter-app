@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:intl/intl.dart';
@@ -97,7 +98,11 @@ class _DetailRecordingState extends State<DetailRecording> {
               }
 
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
+                return AppErrorState(
+                  message: 'Gagal memuat data recording',
+                  subtitle: snapshot.error.toString(),
+                  onRetry: () => controller.loadActivePeriod(),
+                );
               }
 
               final recordings = snapshot.data ?? <RecordingData>[];
