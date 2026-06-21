@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
@@ -27,10 +26,10 @@ class MainApp extends StatelessWidget {
 
         ChangeNotifierProxyProvider<AuthService, UserController>(
           create:
-              (_) => UserController(
+              (context) => UserController(
                 firebaseService: FirebaseService(),
                 storageService: StorageService(),
-                auth: FirebaseAuth.instance,
+                authService: context.read<AuthService>(),
               ),
           update: (_, auth, controller) {
             controller!.onAuthChanged(auth.currentUid);
@@ -40,10 +39,10 @@ class MainApp extends StatelessWidget {
 
         ChangeNotifierProxyProvider<AuthService, CageController>(
           create:
-              (_) => CageController(
+              (context) => CageController(
                 firebaseService: FirebaseService(),
                 storageService: StorageService(),
-                auth: FirebaseAuth.instance,
+                authService: context.read<AuthService>(),
               ),
           update: (_, auth, controller) {
             controller!.onAuthChanged(auth.currentUid);

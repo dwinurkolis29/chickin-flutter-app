@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +9,7 @@ import 'package:recording_app/features/reporting/presentation/widgets/analytics_
 import 'package:recording_app/features/reporting/presentation/widgets/performance_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/population_card.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 
 /// Halaman detail laporan lengkap: periode info, kartu metrik, tabel harian, export.
 /// Dibuka dari [PeriodReportPage] via tombol "Lihat Detail & Export".
@@ -34,7 +34,7 @@ class DetailPeriodReport extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, ReportingController controller) {
     if (controller.isLoadingRecordings) {
-      return const Center(child: CircularProgressIndicator());
+      return const ReportSkeleton();
     }
 
     if (controller.report == null) {

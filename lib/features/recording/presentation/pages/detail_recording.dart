@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,8 @@ import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 
 /// Halaman yang menampilkan semua data recording beserta tombol Edit di tiap baris.
 class DetailRecording extends StatefulWidget {
@@ -55,7 +58,10 @@ class _DetailRecordingState extends State<DetailRecording> {
           }
 
           if (controller.isLoadingPeriod) {
-            return const Center(child: CircularProgressIndicator());
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: TableSkeleton(),
+            );
           }
 
           if (controller.recordingsStream == null) {
@@ -84,7 +90,10 @@ class _DetailRecordingState extends State<DetailRecording> {
             stream: controller.recordingsStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: TableSkeleton(),
+                );
               }
 
               if (snapshot.hasError) {
@@ -94,26 +103,9 @@ class _DetailRecordingState extends State<DetailRecording> {
               final recordings = snapshot.data ?? <RecordingData>[];
 
               if (recordings.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inbox_outlined,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada data recording',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                return const AppEmptyState(
+                  icon: Icons.inbox_outlined,
+                  message: 'Belum ada data recording',
                 );
               }
 
@@ -569,29 +561,23 @@ class _RecordingTableState extends State<_RecordingTable> {
   }
 
   void _showEditSheet(BuildContext context, RecordingData recording) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    DialogHelper.showBottomSheet(
+      context,
+      builder: _EditRecordingSheet(
+        recording: recording,
+        onSave: (updated) async {
+          try {
+            await widget.controller.updateRecording(updated);
+            if (context.mounted) {
+              AppSnackbar.showSuccess(context, 'Data berhasil diperbarui');
+            }
+          } catch (e) {
+            if (context.mounted) {
+              AppSnackbar.showError(context, 'Gagal memperbarui data: $e');
+            }
+          }
+        },
       ),
-      builder:
-          (_) => _EditRecordingSheet(
-            recording: recording,
-            onSave: (updated) async {
-              try {
-                await widget.controller.updateRecording(updated);
-                if (context.mounted) {
-                  AppSnackbar.showSuccess(context, 'Data berhasil diperbarui');
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  AppSnackbar.showError(context, 'Gagal memperbarui data: $e');
-                }
-              }
-            },
-          ),
     );
   }
 }

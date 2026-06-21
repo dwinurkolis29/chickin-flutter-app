@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
@@ -40,7 +40,7 @@ class _FormRecordingState extends State<FormRecording> {
   final TextEditingController _controllerBeratAyam = TextEditingController();
 
   final FirebaseService _firebaseService = FirebaseService();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+
 
   @override
   void initState() {
@@ -81,7 +81,7 @@ class _FormRecordingState extends State<FormRecording> {
     setState(() => _isLoading = true);
 
     try {
-      final user = _auth.currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user == null) {
         if (mounted)
           AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');

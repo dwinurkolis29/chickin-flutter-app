@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/export/domain/usecases/export_period_csv.dart';
 import 'package:recording_app/features/export/domain/usecases/export_period_excel.dart';
-import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/population_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/performance_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/analytics_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/recording_table.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 
 /// Navigate to this page using [Navigator.push] or push a named route.
 /// [ReportingController] must be available in the provider tree
@@ -42,11 +43,14 @@ class _PeriodReportView extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, ReportingController controller) {
     if (controller.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const ReportSkeleton();
     }
 
     if (controller.closedPeriods.isEmpty) {
-      return _EmptyState();
+      return const AppEmptyState(
+        icon: Icons.bar_chart_outlined,
+        message: 'Belum ada periode yang selesai',
+      );
     }
 
     return SingleChildScrollView(
@@ -59,12 +63,7 @@ class _PeriodReportView extends StatelessWidget {
           _ExportButtons(controller: controller),
           const SizedBox(height: 16),
           if (controller.isLoadingRecordings)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
-              ),
-            )
+            const TableSkeleton()
           else if (controller.report != null) ...[
             PopulationCard(report: controller.report!),
             const SizedBox(height: 12),
@@ -377,28 +376,3 @@ class _ExportChip extends StatelessWidget {
 }
 
 // ── Empty State ────────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.bar_chart_outlined, size: 48, color: cs.outlineVariant),
-            const SizedBox(height: 12),
-            Text(
-              'Belum ada periode yang selesai',
-              style: tt.bodyMedium?.copyWith(color: cs.outlineVariant),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

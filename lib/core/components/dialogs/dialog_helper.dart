@@ -91,4 +91,38 @@ class DialogHelper {
       onSelected: onSelected,
     );
   }
+
+  /// Show modal bottom sheet wrapper
+  static Future<T?> showBottomSheet<T>(
+    BuildContext context, {
+    required Widget builder,
+    bool isScrollControlled = true,
+    bool useSafeArea = true,
+    Color? backgroundColor,
+    ShapeBorder? shape,
+  }) {
+    return showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: isScrollControlled,
+      useSafeArea: useSafeArea,
+      backgroundColor: backgroundColor,
+      shape: shape ?? const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => builder,
+    );
+  }
+
+  /// Show custom dialog wrapper
+  static Future<T?> showCustomDialog<T>(
+    BuildContext context, {
+    required Widget builder,
+    bool barrierDismissible = true,
+  }) {
+    return showDialog<T>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (_) => builder,
+    );
+  }
 }

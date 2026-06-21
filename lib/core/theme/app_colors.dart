@@ -23,4 +23,17 @@ class AppColors {
   static const Color warningOnPrimary = Color(0xFFFFD180);
   static const Color infoOnPrimary    = Color(0xFF80D8FF);
   static const Color successOnPrimary = Color(0xFFCCFF90);
+
+  // FCR Status Colors
+  static const Color fcrGoodBg     = Color(0xFFEAF3DE);
+  static const Color fcrGoodText   = Color(0xFF27500A);
+  static const Color fcrGoodBorder = Color(0xFF639922);
+
+  static const Color fcrWarnBg     = Color(0xFFFAEEDA);
+  static const Color fcrWarnText   = Color(0xFF633806);
+  static const Color fcrWarnBorder = Color(0xFFBA7517);
+
+  static const Color fcrBadBg      = Color(0xFFFCEBEB);
+  static const Color fcrBadText    = Color(0xFF791F1F);
+  static const Color fcrBadBorder  = Color(0xFFE24B4A);
 }

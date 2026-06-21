@@ -5,6 +5,7 @@ import 'package:recording_app/features/cage/presentation/controllers/cage_contro
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 
 class CageProfile extends StatefulWidget {
   final bool isTab;
@@ -29,13 +30,13 @@ class _CageProfileState extends State<CageProfile> {
     BuildContext context,
     CageController controller,
   ) {
-    showModalBottomSheet(
-      context: context,
+    DialogHelper.showBottomSheet(
+      context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
+      builder: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(

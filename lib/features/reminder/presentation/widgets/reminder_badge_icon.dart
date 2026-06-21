@@ -53,7 +53,7 @@ class ReminderBadgeIcon extends StatelessWidget {
                       child: Center(
                         child: Text(
                           count > 99 ? '99+' : '$count',
-                          style: const TextStyle(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Colors.white,
                             fontSize: 9,
                             fontWeight: FontWeight.bold,

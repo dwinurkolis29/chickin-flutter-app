@@ -119,6 +119,11 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Kirim email reset password.
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override

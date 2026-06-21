@@ -1,5 +1,4 @@
-// lib/features/cage/presentation/controllers/cage_controller.dart
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
@@ -11,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 class CageController extends ChangeNotifier {
   final FirebaseService _firebaseService;
   final StorageService _storageService;
-  final FirebaseAuth _auth;
+  final AuthService _authService;
 
   CageData? _cageData;
   bool _isLoading = false;
@@ -21,10 +20,10 @@ class CageController extends ChangeNotifier {
   CageController({
     required FirebaseService firebaseService,
     required StorageService storageService,
-    required FirebaseAuth auth,
+    required AuthService authService,
   })  : _firebaseService = firebaseService,
         _storageService = storageService,
-        _auth = auth;
+        _authService = authService;
 
   CageData? get cageData => _cageData;
   bool get isLoading => _isLoading;
@@ -60,7 +59,7 @@ class CageController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = _auth.currentUser;
+      final user = _authService.currentUser;
       if (user == null) {
         _errorMessage = 'Anda belum login';
         _isLoading = false;
@@ -83,7 +82,7 @@ class CageController extends ChangeNotifier {
 
   Future<void> handleCageImageUpload(ImageSource source) async {
     try {
-      final user = _auth.currentUser;
+      final user = _authService.currentUser;
       if (user == null) return;
       
       final File? imageFile = await ImagePickerHelper.pickImage(source);

@@ -57,6 +57,7 @@ dependencies:
   http: ^1.2.1
   image_picker: ^1.1.2
   image_cropper: ^8.0.0
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

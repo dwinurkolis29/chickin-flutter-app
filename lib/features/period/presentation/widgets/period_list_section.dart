@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import '../../data/models/period_data.dart';
 import 'period_card.dart';
 
@@ -26,7 +27,7 @@ class PeriodListSection extends StatelessWidget {
           children: [
             Text(
               'Semua Periode',
-              style: tt.titleSmall?.copyWith(color: cs.onBackground),
+              style: tt.titleSmall?.copyWith(color: cs.onSurface),
             ),
             GestureDetector(
               onTap: onSeeAllTap,
@@ -49,38 +50,21 @@ class PeriodListSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (periods.isEmpty)
-          const PeriodEmptyState()
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const AppEmptyState(
+              icon: Icons.layers_outlined,
+              message: 'Belum ada periode',
+              compact: true,
+            ),
+          )
         else
           ...periods.map((p) => PeriodCard(period: p, onTap: onPeriodTap)),
       ],
-    );
-  }
-}
-
-class PeriodEmptyState extends StatelessWidget {
-  const PeriodEmptyState({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.layers_outlined, size: 36, color: cs.outlineVariant),
-          const SizedBox(height: 8),
-          Text(
-            'Belum ada periode',
-            style: tt.bodyMedium?.copyWith(color: cs.outlineVariant),
-          ),
-        ],
-      ),
     );
   }
 }

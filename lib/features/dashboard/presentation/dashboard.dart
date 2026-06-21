@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:recording_app/core/tour/tour_step.dart';
@@ -28,6 +28,7 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/reminder/presentation/widgets/reminder_badge_icon.dart';
 import 'widgets/fcr_datacard.dart';
+import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 
 // ── Nav index constants ───────────────────────────────────────────────────────
 const int _kHome = 0;
@@ -300,10 +301,10 @@ class _DashboardContentState extends State<DashboardContent> {
   }
 
   void _showTourEntryDialog() {
-    showDialog(
-      context: context,
+    DialogHelper.showCustomDialog(
+      context,
       barrierDismissible: false,
-      builder: (context) => TourEntryDialog(
+      builder: TourEntryDialog(
         onStart: () {
           Navigator.pop(context);
           context.read<TourController>().startTour();
@@ -367,7 +368,7 @@ class _DashboardContentState extends State<DashboardContent> {
   Widget _buildMainContent(BuildContext context) {
     return Consumer<HomeController>(
       builder: (context, controller, child) {
-        final currentUser = FirebaseAuth.instance.currentUser;
+        final currentUser = context.watch<AuthService>().currentUser;
 
         if (currentUser == null) {
           return Center(
@@ -403,7 +404,7 @@ class _DashboardContentState extends State<DashboardContent> {
         }
 
         if (controller.isLoadingPeriod) {
-          return const Center(child: CircularProgressIndicator());
+          return const ReportSkeleton();
         }
 
         if (controller.activePeriodId == null) {
@@ -483,7 +484,7 @@ class _DashboardContentState extends State<DashboardContent> {
                   stream: controller.recordingsStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const TableSkeleton();
                     }
 
                     if (snapshot.hasError) {
@@ -493,44 +494,10 @@ class _DashboardContentState extends State<DashboardContent> {
                     final recordings = snapshot.data ?? <RecordingData>[];
 
                     if (recordings.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 40),
-                            Icon(
-                              Icons.inbox_outlined,
-                              size: 64,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Belum ada data recording',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Klik tombol + untuk menambah data',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
+                      return const AppEmptyState(
+                        icon: Icons.inbox_outlined,
+                        message: 'Belum ada data recording',
+                        subtitle: 'Klik tombol + untuk menambah data',
                       );
                     }
 

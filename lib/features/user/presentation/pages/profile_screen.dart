@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
@@ -63,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final controller = context.watch<UserController>();
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final firebaseUser = context.watch<AuthService>().currentUser;
 
     final displayName = controller.userProfile?.name ?? firebaseUser?.displayName ?? '';
     final email = firebaseUser?.email ?? '';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/tour/tour_controller.dart';
@@ -12,6 +13,7 @@ import 'package:recording_app/features/reporting/presentation/widgets/fcr_trend_
 import 'package:recording_app/features/reporting/presentation/widgets/insight_card.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/key_metrics_grid.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/report_summary_header.dart';
+import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 
 /// Entry point laporan periode.
 /// Menampilkan summary: hero, key metrics, tren FCR, insight, detail collapsible.
@@ -71,19 +73,25 @@ class _PeriodReportPageViewState extends State<_PeriodReportPageView> {
 
   Widget _buildBody(BuildContext context, ReportingController controller) {
     if (controller.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const ReportSkeleton();
     }
 
     if (controller.closedPeriods.isEmpty) {
-      return _EmptyState();
+      return const AppEmptyState(
+        icon: Icons.bar_chart_outlined,
+        message: 'Belum ada periode yang selesai',
+      );
     }
 
     if (controller.isLoadingRecordings) {
-      return const Center(child: CircularProgressIndicator());
+      return const ReportSkeleton();
     }
 
     if (controller.report == null) {
-      return _EmptyState();
+      return const AppEmptyState(
+        icon: Icons.bar_chart_outlined,
+        message: 'Belum ada periode yang selesai',
+      );
     }
 
     return _SummaryContent(
@@ -210,33 +218,6 @@ class _DetailButton extends StatelessWidget {
         minimumSize: const Size.fromHeight(48),
         side: BorderSide(color: cs.primary.withOpacity(0.5)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-}
-
-// ── Empty State ───────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.bar_chart_outlined, size: 56, color: cs.outlineVariant),
-            const SizedBox(height: 16),
-            Text(
-              'Belum ada periode yang selesai',
-              style: tt.bodyMedium?.copyWith(color: cs.outlineVariant),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       ),
     );
   }

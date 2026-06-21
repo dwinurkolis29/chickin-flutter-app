@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
-import 'package:recording_app/features/user/data/models/user_data.dart';
-import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/user/presentation/pages/form_user.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +17,6 @@ class User extends StatefulWidget {
 }
 
 class _UserState extends State<User> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   @override
   void initState() {
     super.initState();
@@ -33,13 +29,13 @@ class _UserState extends State<User> {
     BuildContext context,
     UserController controller,
   ) {
-    showModalBottomSheet(
-      context: context,
+    DialogHelper.showBottomSheet(
+      context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => SafeArea(
+      builder: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
@@ -86,10 +82,11 @@ class _UserState extends State<User> {
   }
 
   Future<void> _resetPassword() async {
-    final email = _auth.currentUser?.email;
+    final authService = context.read<AuthService>();
+    final email = authService.currentUser?.email;
     if (email == null) return;
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      await authService.sendPasswordResetEmail(email);
       if (mounted) {
         AppSnackbar.showSuccess(
           context,
@@ -107,6 +104,7 @@ class _UserState extends State<User> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final authService = context.watch<AuthService>();
     final controller = context.watch<UserController>();
     final _isLoading = controller.isLoading;
     final _errorMessage = controller.errorMessage ?? '';
@@ -252,7 +250,7 @@ class _UserState extends State<User> {
                             _InfoRow(
                               icon: Icons.mail_outline,
                               value:
-                                  _auth.currentUser?.email ?? 'Tidak ada data',
+                                  authService.currentUser?.email ?? 'Tidak ada data',
                             ),
                             Divider(
                               height: 20,

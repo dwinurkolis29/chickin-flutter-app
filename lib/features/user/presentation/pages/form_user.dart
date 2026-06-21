@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
@@ -17,17 +17,12 @@ class FormUser extends StatefulWidget {
 class _FormUserState extends State<FormUser> {
   // Deklarasi objek FirebaseService
   final FirebaseService _firebaseService = FirebaseService();
-  // Deklarasi objek FirebaseAuth
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   bool _isSaving = false;
-
-  // Deklarasi variabel untuk menyimpan data pengguna
-  UserProfile? _userProfile;
   bool _isLoading = true;
   String _errorMessage = '';
 
@@ -49,17 +44,16 @@ class _FormUserState extends State<FormUser> {
   // Fungsi untuk memuat data pengguna
   Future<void> _loadUserData() async {
     try {
-      final user = _auth.currentUser;
+      final user = context.read<AuthService>().currentUser;
       if (user != null) {
         // Memuat data profil pengguna/peternak
         final userProfile = await _firebaseService.getUserProfile();
         if (mounted) {
           // Memperbarui state dengan data pengguna
           setState(() {
-            _userProfile = userProfile;
-            _nameController.text = userProfile.name ?? '';
-            _phoneController.text = userProfile.phone ?? '';
-            _addressController.text = userProfile.address ?? '';
+            _nameController.text = userProfile.name;
+            _phoneController.text = userProfile.phone;
+            _addressController.text = userProfile.address;
             _isLoading = false;
           });
         }
@@ -155,7 +149,7 @@ class _FormUserState extends State<FormUser> {
                           readOnly: true,
                           // menampilkan email dari Firebase Auth
                           initialValue:
-                              _auth.currentUser?.email ?? 'Tidak ada data',
+                              context.read<AuthService>().currentUser?.email ?? 'Tidak ada data',
                           labelText: "Email",
                           prefixIcon: Icons.email_outlined,
                         ),

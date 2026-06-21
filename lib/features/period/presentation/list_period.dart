@@ -14,6 +14,7 @@ import 'package:recording_app/features/reporting/presentation/controllers/report
 import 'widgets/create_period_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'widgets/period_list_section.dart';
+import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 
 class PeriodListScreen extends StatefulWidget {
   final String farmName;
@@ -61,7 +62,12 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
             child: Consumer<PeriodController>(
               builder: (context, controller, child) {
             if (controller.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Column(
+                  children: List.generate(3, (_) => const PeriodCardSkeleton()),
+                ),
+              );
             }
 
             if (controller.errorMessage != null) {

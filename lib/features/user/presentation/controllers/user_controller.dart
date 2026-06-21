@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/storage_service.dart';
 import 'package:recording_app/core/utils/image_picker_helper.dart';
@@ -11,7 +11,7 @@ import 'package:image_cropper/image_cropper.dart';
 class UserController extends ChangeNotifier {
   final FirebaseService _firebaseService;
   final StorageService _storageService;
-  final FirebaseAuth _auth;
+  final AuthService _authService;
 
   UserProfile? _userProfile;
   bool _isLoading = false;
@@ -21,10 +21,10 @@ class UserController extends ChangeNotifier {
   UserController({
     required FirebaseService firebaseService,
     required StorageService storageService,
-    required FirebaseAuth auth,
+    required AuthService authService,
   })  : _firebaseService = firebaseService,
         _storageService = storageService,
-        _auth = auth;
+        _authService = authService;
 
   UserProfile? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
@@ -37,7 +37,7 @@ class UserController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = _auth.currentUser;
+      final user = _authService.currentUser;
       if (user == null) {
         _errorMessage = 'Anda belum login';
         _isLoading = false;
@@ -59,7 +59,7 @@ class UserController extends ChangeNotifier {
 
   Future<void> handleProfileImageUpload(ImageSource source) async {
     try {
-      final user = _auth.currentUser;
+      final user = _authService.currentUser;
       if (user == null) return;
       
       final File? imageFile = await ImagePickerHelper.pickImage(source);

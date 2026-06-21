@@ -25,7 +25,7 @@ class UserProfile {
       name: asString(json, 'name'),
       phone: asString(json, 'phone'),
       address: asString(json, 'address'),
-      hasCompletedTour: (json['hasCompletedTour'] as bool?) ?? false,
+      hasCompletedTour: asBool(json, 'hasCompletedTour'),
       avatarUrl: json['avatarUrl'] as String?,
     );
   }

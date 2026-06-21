@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
@@ -84,14 +84,10 @@ class _RecordingTableState extends State<RecordingTable> {
           ),
           const Divider(height: 20),
           if (recordings.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: Text(
-                  'Tidak ada data recording',
-                  style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ),
+            const AppEmptyState(
+              icon: Icons.table_rows_outlined,
+              message: 'Belum ada data recording',
+              compact: true,
             )
           else
             Align(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_date_timeline/easy_date_timeline.dart';
 import 'package:intl/intl.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/services/reminder_local_service.dart';
@@ -64,11 +65,10 @@ class _ReminderState extends State<Reminder> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    showModalBottomSheet(
-      context: context,
+    DialogHelper.showBottomSheet(
+      context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
+      builder: SafeArea(
         child: Container(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
           decoration: BoxDecoration(
@@ -327,30 +327,21 @@ class _ReminderState extends State<Reminder> {
         final filtered = _filterByDate(all);
 
         if (all.isEmpty) {
-          return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.event_note, size: 80, color: cs.outlineVariant),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Belum ada reminder',
-                    style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-                  ),
-                ],
-              ),
+          return const SliverFillRemaining(
+            child: AppEmptyState(
+              icon: Icons.event_note_outlined,
+              message: 'Belum ada reminder',
+              subtitle: 'Klik tombol + untuk menambah reminder',
             ),
           );
         }
 
         if (filtered.isEmpty) {
-          return SliverFillRemaining(
-            child: Center(
-              child: Text(
-                'Tidak ada reminder untuk tanggal ini',
-                style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-              ),
+          return const SliverFillRemaining(
+            child: AppEmptyState(
+              icon: Icons.event_busy_outlined,
+              message: 'Tidak ada reminder',
+              subtitle: 'Tidak ada reminder untuk tanggal ini',
             ),
           );
         }

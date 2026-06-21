@@ -113,25 +113,25 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
 
   Color get _badgeBackground {
     switch (widget.status) {
-      case _FCRStatus.good: return const Color(0xFFEAF3DE);
-      case _FCRStatus.warn: return const Color(0xFFFAEEDA);
-      case _FCRStatus.bad:  return const Color(0xFFFCEBEB);
+      case _FCRStatus.good: return AppColors.fcrGoodBg;
+      case _FCRStatus.warn: return AppColors.fcrWarnBg;
+      case _FCRStatus.bad:  return AppColors.fcrBadBg;
     }
   }
 
   Color get _badgeText {
     switch (widget.status) {
-      case _FCRStatus.good: return const Color(0xFF27500A);
-      case _FCRStatus.warn: return const Color(0xFF633806);
-      case _FCRStatus.bad:  return const Color(0xFF791F1F);
+      case _FCRStatus.good: return AppColors.fcrGoodText;
+      case _FCRStatus.warn: return AppColors.fcrWarnText;
+      case _FCRStatus.bad:  return AppColors.fcrBadText;
     }
   }
 
   Color get _barColor {
     switch (widget.status) {
-      case _FCRStatus.good: return const Color(0xFF639922);
-      case _FCRStatus.warn: return const Color(0xFFBA7517);
-      case _FCRStatus.bad:  return const Color(0xFFE24B4A);
+      case _FCRStatus.good: return AppColors.fcrGoodBorder;
+      case _FCRStatus.warn: return AppColors.fcrWarnBorder;
+      case _FCRStatus.bad:  return AppColors.fcrBadBorder;
     }
   }
 
