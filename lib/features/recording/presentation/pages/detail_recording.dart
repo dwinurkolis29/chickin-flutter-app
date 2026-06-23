@@ -570,6 +570,7 @@ class _RecordingTableState extends State<_RecordingTable> {
       context,
       builder: _EditRecordingSheet(
         recording: recording,
+        allRecordings: widget.recordings,
         onSave: (updated) async {
           try {
             await widget.controller.updateRecording(updated);
@@ -782,9 +783,14 @@ class _SummaryTile extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _EditRecordingSheet extends StatefulWidget {
-  const _EditRecordingSheet({required this.recording, required this.onSave});
+  const _EditRecordingSheet({
+    required this.recording,
+    required this.allRecordings,
+    required this.onSave,
+  });
 
   final RecordingData recording;
+  final List<RecordingData> allRecordings;
   final Future<void> Function(RecordingData updated) onSave;
 
   @override
@@ -827,8 +833,29 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
+    final newDay = int.tryParse(_ctrlDay.text.trim()) ?? widget.recording.day;
+
+    // ── Validasi duplikat hari (exclude recording yang sedang diedit) ──
+    final isDuplicate = widget.allRecordings.any(
+      (r) => r.id != widget.recording.id && r.day == newDay,
+    );
+
+    if (isDuplicate) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        DialogHelper.showError(
+          context,
+          'Hari Sudah Ada',
+          'Recording untuk hari ke-$newDay sudah ada. '
+          'Setiap hari hanya boleh ada satu catatan dalam satu periode.',
+        );
+      }
+      return;
+    }
+    // ─────────────────────────────────────────────────────────────
+
     final updated = widget.recording.copyWith(
-      day: int.tryParse(_ctrlDay.text.trim()),
+      day: newDay,
       avgWeightGram: int.tryParse(_ctrlWeight.text.trim()),
       feedSack: int.tryParse(_ctrlFeed.text.trim()),
       mortality: int.tryParse(_ctrlMortality.text.trim()),
@@ -885,9 +912,8 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
             _buildField(
               controller: _ctrlDay,
               label: 'Umur Ayam (Hari)',
-              icon:
-                  Icons
-                      .calendar_today_rounded, // Mengganti ikon internet data saver
+              icon: Icons.calendar_today_rounded,
+              isDay: true,
             ),
             const SizedBox(height: 16),
 
@@ -967,6 +993,7 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
     required String label,
     required IconData icon,
     bool required = true,
+    bool isDay = false,
   }) {
     return AppTextFormField(
       controller: controller,
@@ -974,7 +1001,6 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
         decimal: false,
         signed: false,
       ),
-      // Memaksa keyboard hanya memunculkan angka. Menghindari peternak salah ketik simbol/huruf.
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       labelText: label,
       prefixIcon: icon,
@@ -983,6 +1009,12 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
               ? (v) {
                 if (v == null || v.trim().isEmpty) {
                   return '$label tidak boleh kosong';
+                }
+                if (isDay) {
+                  final parsed = int.tryParse(v.trim());
+                  if (parsed == null || parsed <= 0) {
+                    return 'Umur harus berupa angka lebih dari 0';
+                  }
                 }
                 return null;
               }

@@ -85,6 +85,7 @@ class _FormRecordingState extends State<FormRecording> {
       if (user == null) {
         if (mounted)
           AppSnackbar.showError(context, 'Anda harus login terlebih dahulu');
+        setState(() => _isLoading = false);
         return;
       }
 
@@ -109,8 +110,30 @@ class _FormRecordingState extends State<FormRecording> {
         return;
       }
 
+      final inputDay = int.tryParse(_controllerUmur.text) ?? 0;
+
+      // ── Validasi duplikat hari ─────────────────────────────────────────────
+      final existingRecordings =
+          await _firebaseService.getRecordingsOnce(activePeriod.id);
+      final isDuplicate = existingRecordings.any((r) => r.day == inputDay);
+
+      if (isDuplicate) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          DialogHelper.showError(
+            context,
+            'Hari Sudah Ada',
+            'Recording untuk hari ke-$inputDay sudah pernah diinput. '
+            'Setiap hari hanya boleh ada satu catatan. '
+            'Gunakan tombol Edit jika ingin mengubah data yang sudah ada.',
+          );
+        }
+        return;
+      }
+      // ──────────────────────────────────────────────────────────────────────
+
       final recording = RecordingData(
-        day: int.tryParse(_controllerUmur.text) ?? 0,
+        day: inputDay,
         avgWeightGram: int.tryParse(_controllerBeratAyam.text) ?? 0,
         feedSack: int.tryParse(_controllerHabisPakan.text) ?? 0,
         mortality: int.tryParse(_controllerMatiAyam.text) ?? 0,
@@ -259,8 +282,12 @@ class _FormRecordingState extends State<FormRecording> {
       keyboardType: TextInputType.number,
       labelText: 'Umur Ayam (hari)',
       prefixIcon: Icons.data_saver_on_rounded,
-      validator:
-          (v) => (v == null || v.isEmpty) ? 'Umur tidak boleh kosong.' : null,
+      validator: (v) {
+        if (v == null || v.isEmpty) return 'Umur tidak boleh kosong.';
+        final parsed = int.tryParse(v);
+        if (parsed == null || parsed <= 0) return 'Umur harus berupa angka lebih dari 0.';
+        return null;
+      },
       onEditingComplete: () => _focusNodeTerimaPakan.requestFocus(),
     );
   }
