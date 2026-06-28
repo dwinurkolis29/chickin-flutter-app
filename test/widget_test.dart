@@ -1,31 +1,15 @@
-// This is a basic Flutter widget test.
+// Widget tests untuk Chickin App akan ditambahkan di sini sesuai Priority 4
+// pada TESTING_AGENT.md — setelah seluruh Domain Layer selesai diuji.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
-import 'package:recording_app/main.dart';
-import 'package:recording_app/main_app.dart';
+// Widget test memerlukan setup:
+//   - Hive.initFlutter() + openBox() untuk semua box
+//   - Firebase.initializeApp() dengan fake options
+//   - Provider setup dengan mock services
+//
+// File ini sengaja dikosongkan untuk mencegah boilerplate Flutter default
+// ("Counter increments smoke test") menyebabkan false failure.
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MainApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+  // Widget tests akan diimplementasi di Priority 4.
+  // Lihat TESTING_AGENT.md untuk panduan lengkap.
 }
