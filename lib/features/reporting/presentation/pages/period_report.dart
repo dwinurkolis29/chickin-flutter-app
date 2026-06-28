@@ -350,8 +350,8 @@ class _ExportChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: disabled
-              ? (Theme.of(context).cardTheme.color ?? Colors.white).withOpacity(0.6)
-              : (Theme.of(context).cardTheme.color ?? Colors.white),
+              ? (Theme.of(context).cardTheme.color ?? cs.surface).withOpacity(0.6)
+              : (Theme.of(context).cardTheme.color ?? cs.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.15),

@@ -5,11 +5,7 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:provider/provider.dart';
-import 'package:recording_app/core/tour/tour_controller.dart';
-import 'package:recording_app/core/tour/tour_step.dart';
-import 'package:recording_app/core/tour/widgets/tour_aware_wrapper.dart';
-import 'package:recording_app/core/tour/widgets/tour_overlay.dart';
-import 'package:recording_app/core/tour/widgets/tour_tooltip.dart';
+
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
@@ -25,7 +21,7 @@ class FormRecording extends StatefulWidget {
 
 class _FormRecordingState extends State<FormRecording> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  final GlobalKey _saveRecordBtnKey = GlobalKey();
+
   bool _isLoading = false;
 
   final FocusNode _focusNodeUmur = FocusNode();
@@ -189,13 +185,6 @@ class _FormRecordingState extends State<FormRecording> {
     try {
       await _firebaseService.addRecording(periodId, recording);
       if (mounted) {
-        // Advance tour jika sedang aktif di step addRecording
-        final tourController = context.read<TourController>();
-        if (tourController.isTourActive &&
-            tourController.currentStep == TourStep.addRecording) {
-          tourController.advance();
-        }
-
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -219,61 +208,34 @@ class _FormRecordingState extends State<FormRecording> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: const AppHeader(title: 'Data Recording'),
-      body: Stack(
-        children: [
-          SafeArea(
-            top: false,
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 35),
-                    _buildUmurField(context),
-                    const SizedBox(height: 10),
-                    _buildPakanField(context),
-                    const SizedBox(height: 10),
-                    _buildMatiField(context),
-                    const SizedBox(height: 10),
-                    _buildBeratField(context),
-                    const SizedBox(height: 50),
-                    _buildSubmitButton(context),
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
+      body: SafeArea(
+        top: false,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 35),
+                _buildUmurField(context),
+                const SizedBox(height: 10),
+                _buildPakanField(context),
+                const SizedBox(height: 10),
+                _buildMatiField(context),
+                const SizedBox(height: 10),
+                _buildBeratField(context),
+                const SizedBox(height: 50),
+                _buildSubmitButton(context),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
-          _buildTourOverlay(context),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildTourOverlay(BuildContext context) {
-    final tourController = context.watch<TourController>();
-    if (!tourController.isTourActive ||
-        tourController.currentStep != TourStep.addRecording) {
-      return const SizedBox.shrink();
-    }
 
-    final rect = TourAwareWrapper.getRect(_saveRecordBtnKey);
-    if (rect == null) return const SizedBox.shrink();
-
-    return TourOverlay(
-      targetKey: _saveRecordBtnKey,
-      tooltip: TourTooltip(
-        title: 'Langkah 2: Tambah Recording',
-        description:
-            'Setelah mengisi data harian ayam, klik tombol ini untuk menyimpan. Data ini akan digunakan untuk menghitung FCR dan statistik lainnya.',
-        stepText: '2 / 3',
-        showSkip: true,
-        onSkip: () => tourController.skip(),
-      ),
-      onSkip: () {},
-    );
-  }
 
   Widget _buildUmurField(BuildContext context) {
     return AppTextFormField(
@@ -338,9 +300,7 @@ class _FormRecordingState extends State<FormRecording> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return TourAwareWrapper(
-      tourKey: _saveRecordBtnKey,
-      child: ElevatedButton(
+    return ElevatedButton(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           backgroundColor: colorScheme.primary,
@@ -369,8 +329,7 @@ class _FormRecordingState extends State<FormRecording> {
                     color: colorScheme.onPrimary,
                   ),
                 ),
-      ),
-    );
+      );
   }
 
   @override

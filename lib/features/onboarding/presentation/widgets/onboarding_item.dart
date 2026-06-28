@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/onboarding/data/onboarding_data.dart';
 import 'onboarding_indicator.dart';
 
@@ -21,6 +20,9 @@ class OnboardingItemWidget extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
+    
+    final isWideScreen = size.width > 600;
+    final containerSize = isWideScreen ? 240.0 : size.width * 0.65;
 
     return Column(
       children: [
@@ -29,10 +31,10 @@ class OnboardingItemWidget extends StatelessWidget {
           flex: 6,
           child: Center(
             child: Container(
-              width: size.width * 0.65,
-              height: size.width * 0.65,
+              width: containerSize,
+              height: containerSize,
               decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.15),
+                color: colorScheme.secondary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               padding: const EdgeInsets.all(36),

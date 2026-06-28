@@ -12,11 +12,26 @@ class PeriodEvaluator {
     return PeriodStatus.warning;
   }
 
-  static Color statusColor(PeriodStatus status) {
-    switch (status) {
-      case PeriodStatus.good: return AppColors.successOnPrimary;
-      case PeriodStatus.warning: return AppColors.warningOnPrimary;
-      case PeriodStatus.bad: return AppColors.errorOnPrimary;
+  static Color statusColor(BuildContext context, PeriodStatus status) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    if (isDarkMode) {
+      switch (status) {
+        case PeriodStatus.good:
+          return const Color(0xFF1B5E20); // Hijau Tua
+        case PeriodStatus.warning:
+          return const Color(0xFFE65100); // Oranye/Kuning Tua
+        case PeriodStatus.bad:
+          return const Color(0xFFB71C1C); // Merah Tua
+      }
+    } else {
+      switch (status) {
+        case PeriodStatus.good:
+          return AppColors.successOnPrimary;
+        case PeriodStatus.warning:
+          return AppColors.warningOnPrimary;
+        case PeriodStatus.bad:
+          return AppColors.errorOnPrimary;
+      }
     }
   }
 
@@ -66,7 +81,7 @@ class ReportSummaryHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final status = PeriodEvaluator.evaluate(fcr: fcr, survivalRate: survivalRate);
-    final color = PeriodEvaluator.statusColor(status);
+    final color = PeriodEvaluator.statusColor(context, status);
 
     return Container(
       decoration: BoxDecoration(
@@ -102,7 +117,7 @@ class ReportSummaryHeader extends StatelessWidget {
                     children: [
                       Material(
                         color: (showPeriodSelector && onPeriodSelectorTap != null)
-                            ? Colors.white.withOpacity(0.15)
+                            ? cs.onPrimary.withOpacity(0.15)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                         clipBehavior: Clip.antiAlias,
@@ -119,16 +134,16 @@ class ReportSummaryHeader extends StatelessWidget {
                                   child: Text(
                                     periodName,
                                     style: tt.titleLarge?.copyWith(
-                                      color: Colors.white,
+                                      color: cs.onPrimary,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
                                 if (showPeriodSelector && onPeriodSelectorTap != null) ...[
                                   const SizedBox(width: 4),
-                                  const Icon(
+                                  Icon(
                                     Icons.keyboard_arrow_down_rounded,
-                                    color: Colors.white,
+                                    color: cs.onPrimary,
                                     size: 24,
                                   ),
                                 ],
@@ -143,7 +158,7 @@ class ReportSummaryHeader extends StatelessWidget {
                         child: Text(
                           '$dateRange • $durationDays Hari',
                           style: tt.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
+                            color: cs.onPrimary.withOpacity(0.8),
                           ),
                         ),
                       ),
@@ -175,7 +190,7 @@ class ReportSummaryHeader extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            const Divider(color: Colors.white24, height: 1),
+            Divider(color: cs.onPrimary.withOpacity(0.2), height: 1),
             const SizedBox(height: 20),
             // Key 3 metrics hero
             Row(
@@ -231,9 +246,10 @@ class _HeroMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     final color = status != null
-        ? PeriodEvaluator.statusColor(status!)
-        : Colors.white;
+        ? PeriodEvaluator.statusColor(context, status!)
+        : onPrimary;
 
     return Expanded(
       child: Column(
@@ -249,7 +265,7 @@ class _HeroMetric extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: tt.bodySmall?.copyWith(color: Colors.white60),
+            style: tt.bodySmall?.copyWith(color: onPrimary.withOpacity(0.6)),
           ),
         ],
       ),
@@ -260,10 +276,11 @@ class _HeroMetric extends StatelessWidget {
 class _VerticalDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return Container(
       width: 1,
       height: 40,
-      color: Colors.white24,
+      color: onPrimary.withOpacity(0.2),
       margin: const EdgeInsets.symmetric(horizontal: 8),
     );
   }

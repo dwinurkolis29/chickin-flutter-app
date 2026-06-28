@@ -9,6 +9,7 @@ import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart
 import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/theme/theme_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -63,6 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
     final controller = context.watch<UserController>();
     final firebaseUser = context.watch<AuthService>().currentUser;
+    final themeController = context.watch<ThemeController>();
 
     final displayName = controller.userProfile?.name ?? firebaseUser?.displayName ?? '';
     final email = firebaseUser?.email ?? '';
@@ -167,6 +169,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ],
+          ),
+
+          _MenuGroup(
+            label: 'Tampilan', 
+            items: [
+              _MenuItem(
+                icon: Icons.color_lens_outlined, 
+                label: 'Tema', 
+                trailingText: themeController.themeModeName,
+                onTap: () {
+                  DialogHelper.showStringPicker(
+                    context,
+                    title: 'Pilih Tema',
+                    options: const ['Terang', 'Gelap', 'Mengikuti Sistem'],
+                    selectedOption: themeController.themeModeName,
+                    onSelected: (selected) {
+                      themeController.setThemeMode(selected);
+                    },
+                  );
+                },
+              )
+            ]
           ),
 
           // ── 4.2 Group 2 — KONFIGURASI ─────────────────────────────────────
@@ -296,11 +320,13 @@ class _MenuItem {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final String? trailingText;
 
   const _MenuItem({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.trailingText,
   });
 
   Widget buildTile(BuildContext context) {
@@ -315,7 +341,21 @@ class _MenuItem {
         label,
         style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
       ),
-      trailing: Icon(Icons.chevron_right, size: 20, color: colorScheme.onSurfaceVariant),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (trailingText != null) ...[
+            Text(
+              trailingText!,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          Icon(Icons.chevron_right, size: 20, color: colorScheme.onSurfaceVariant),
+        ],
+      ),
       onTap: onTap,
     );
   }

@@ -1,4 +1,5 @@
 # CONTEXT.md — Chickin Flutter App
+
 ## Dokumen Konteks untuk AI Agent
 
 > **Berikan dokumen ini di awal setiap sesi AI agent.**
@@ -32,7 +33,7 @@ Export        : csv + excel
 ```yaml
 name: recording_app
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -296,6 +297,7 @@ class AppColors {
 ```
 
 **Catatan penting:**
+
 - Tidak ada hardcode hex string di widget manapun — selalu pakai token `AppColors.*`.
 - Untuk warna surface, card, onBackground, gunakan `Theme.of(context).colorScheme.*` — ini sudah dikonfigurasi di `AppTheme`.
 - Dark mode menggunakan `ColorScheme.fromSeed` dengan `brightness: Brightness.dark`.
@@ -364,33 +366,39 @@ users/{uid}/reminders/{reminderId}
 ## 6. MODEL DATA
 
 ### UserProfile — `features/user/data/models/user_data.dart`
+
 ```
 name, phone, address, hasCompletedTour, avatarUrl?
 ```
 
 ### CageData — `features/cage/data/models/cage_data.dart`
+
 ```
 type, capacity, location, imageUrl?
 ```
 
 ### PeriodData — `features/period/data/models/period_data.dart`
+
 ```
 id, name, initialCapacity, initialWeight, startDate, endDate?,
 isActive, isDeleted, createdAt, summary?
 ```
 
 ### PeriodSummary — nested di PeriodData
+
 ```
 totalFeedKg, finalPopulation, totalMortality, finalBiomass,
 finalFCR, avgDailyGain, weeklyFCR[], insights[]
 ```
 
 ### RecordingData — `features/recording/data/models/recording_data.dart`
+
 ```
 id, day, avgWeightGram, feedSack, mortality, createdAt
 ```
 
 ### ReminderData — `features/reminder/data/models/reminder_data.dart`
+
 ```
 id, title, date, time, description, createdAt, updatedAt
 ```
@@ -405,6 +413,7 @@ Semua controller harus melalui `FirebaseService` — tidak boleh ada `FirebaseFi
 ### Method tersedia:
 
 **User Profile**
+
 ```dart
 getUserProfile([String? uid]) → Future<UserProfile>
 updateUserProfile(UserProfile, [String? uid]) → Future<void>
@@ -414,6 +423,7 @@ updateProfileAvatarUrl(String, [String? uid]) → Future<void>
 ```
 
 **Cage**
+
 ```dart
 getCage([String? uid]) → Future<CageData>
 updateCage(CageData, [String? uid]) → Future<void>
@@ -421,6 +431,7 @@ updateCageImageUrl(String, [String? uid]) → Future<void>
 ```
 
 **Period**
+
 ```dart
 createPeriod(PeriodData, [String? uid]) → Future<String>  ← returns docId
 getActivePeriod([String? uid]) → Future<PeriodData?>
@@ -432,6 +443,7 @@ deletePeriod(String periodId, [String? uid]) → Future<void>
 ```
 
 **Recording**
+
 ```dart
 addRecording(String periodId, RecordingData, [String? uid]) → Future<void>
 getRecordingsStream(String periodId, [String? uid]) → Stream<List<RecordingData>>
@@ -442,6 +454,7 @@ updateRecording(String periodId, String recordingId, RecordingData, [String? uid
 ```
 
 **Reminder**
+
 ```dart
 addReminder(ReminderData, [String? uid]) → Future<void>
 deleteReminder(String reminderId, [String? uid]) → Future<void>
@@ -473,16 +486,16 @@ Controller harus handle kasus `uid == null` (user logout → clear state lokal).
 
 ### Controllers yang terdaftar
 
-| Controller | Bergantung ke |
-|---|---|
-| `AuthService` | — (root, bukan proxy) |
-| `UserController` | `AuthService` |
-| `CageController` | `AuthService` |
-| `HomeController` | `AuthService` |
-| `PeriodController` | `AuthService` |
-| `RecordingController` | `AuthService` |
-| `ReportingController` | `AuthService` |
-| `TourController` | `AuthService` |
+| Controller            | Bergantung ke         |
+| --------------------- | --------------------- |
+| `AuthService`         | — (root, bukan proxy) |
+| `UserController`      | `AuthService`         |
+| `CageController`      | `AuthService`         |
+| `HomeController`      | `AuthService`         |
+| `PeriodController`    | `AuthService`         |
+| `RecordingController` | `AuthService`         |
+| `ReportingController` | `AuthService`         |
+| `TourController`      | `AuthService`         |
 
 ---
 
@@ -498,6 +511,7 @@ App launch
 ```
 
 **AuthService** adalah single source of truth untuk state auth.
+
 - Tidak boleh ada `FirebaseAuth.instance` di luar `AuthService` dan `FirebaseService`.
 - Logout: `AuthService.signOut()` → `AuthWrapper` otomatis redirect ke login via `context.watch`.
 - Setelah logout: semua `ProxyProvider` otomatis fire `onAuthChanged(null)` → controller clear state.
@@ -515,12 +529,12 @@ DILARANG: showDialog() atau showModalBottomSheet() dipanggil langsung dari scree
 
 ### Method tersedia
 
-| Situasi | Method |
-|---|---|
-| Tampilkan error | `DialogHelper.showError(context, title, message)` |
-| Tampilkan info | `DialogHelper.showInfo(context, title, message)` |
-| Konfirmasi aksi | `DialogHelper.showConfirm(context, title, message, ...)` |
-| Pilih periode | `DialogHelper.showPeriodPicker(context, periods, ...)` |
+| Situasi                  | Method                                                        |
+| ------------------------ | ------------------------------------------------------------- |
+| Tampilkan error          | `DialogHelper.showError(context, title, message)`             |
+| Tampilkan info           | `DialogHelper.showInfo(context, title, message)`              |
+| Konfirmasi aksi          | `DialogHelper.showConfirm(context, title, message, ...)`      |
+| Pilih periode            | `DialogHelper.showPeriodPicker(context, periods, ...)`        |
 | Pilih dari daftar string | `DialogHelper.showStringPicker(context, title, options, ...)` |
 
 ### Yang TIDAK perlu dialog
@@ -537,47 +551,57 @@ Navigasi antar screen → tidak perlu konfirmasi
 ## 11. FITUR — RINGKASAN
 
 ### Auth
+
 - Login email/password via Firebase Auth
 - Register akun baru → otomatis buat dokumen user di Firestore
 - Firebase Auth state listener reactive via `AuthService`
 
 ### Onboarding
+
 - Muncul sekali saat pertama install (sebelum login)
 - `hasCompletedTour` disimpan di Firestore di `profile`
 
 ### Dashboard
+
 - Ringkasan periode aktif
 - Statistik populasi, mortalitas, FCR
 - Tabel recording
 
 ### Cage (Kandang)
+
 - CRUD data kandang: tipe, kapasitas, lokasi, foto
 - Data disimpan sebagai map di `users/{uid}/cage`
 
 ### Period (Periode Pemeliharaan)
+
 - Satu user hanya boleh punya satu periode aktif (`isActive: true`)
 - Menutup periode → hitung summary otomatis via `SummaryCalculator` / `AnalyticsCalculator`
 - Data: initialCapacity, initialWeight, startDate, endDate, summary
 
 ### Recording (Pencatatan Harian)
+
 - Input harian: hari ke-N, berat rata-rata (gram), pakan (sak), mortalitas
 - Nested di `periods/{periodId}/recordings`
 - FCR dihitung otomatis via `CalculateFCR` usecase
 
 ### Reporting (Laporan)
+
 - Laporan per periode: summary, analytics, insight, chart FCR trend
 - Export ke CSV dan Excel via fitur `export`
 - Realtime report vs snapshot report (dua usecase terpisah)
 
 ### Reminder
+
 - Reminder lokal dengan notifikasi (flutter_local_notifications)
 - Data disimpan di Firestore `users/{uid}/reminders`
 
 ### Export
+
 - Export data periode ke CSV dan Excel
 - Menggunakan `path_provider` + `share_plus` untuk simpan dan share file
 
 ### Tour / Guided Tour
+
 - Guided tour pertama kali masuk app
 - State dikelola `TourController`, status disimpan di Firestore
 
@@ -586,12 +610,14 @@ Navigasi antar screen → tidak perlu konfirmasi
 ## 12. ATURAN BISNIS PENTING
 
 ### Period — Satu Aktif Sekaligus
+
 ```
 Tidak boleh create periode baru jika sudah ada periode aktif (isActive: true).
 Untuk buat periode baru, tutup dulu periode yang sedang aktif.
 ```
 
 ### Menutup Periode
+
 ```
 1. Fetch semua recordings periode tersebut (getRecordingsOnce)
 2. Hitung summary via SummaryCalculator / AnalyticsCalculator
@@ -600,12 +626,14 @@ Untuk buat periode baru, tutup dulu periode yang sedang aktif.
 ```
 
 ### Recording — Tidak Duplikat per Hari
+
 ```
 Satu hari (day) dalam satu periode hanya boleh ada satu recording.
 Validasi dilakukan di form sebelum submit.
 ```
 
 ### Logout Flow
+
 ```
 1. Konfirmasi via DialogHelper.showConfirm()
 2. AuthService.signOut()

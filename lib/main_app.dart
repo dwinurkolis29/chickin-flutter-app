@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/theme/theme_controller.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
-import 'package:recording_app/core/tour/tour_controller.dart';
 import 'package:recording_app/core/services/storage_service.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
@@ -20,6 +20,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeController()),
         // AuthService — single source of truth untuk semua auth state.
         // Semua controller bergantung langsung ke instance ini via ProxyProvider.
         ChangeNotifierProvider(create: (_) => AuthService()),
@@ -84,19 +85,17 @@ class MainApp extends StatelessWidget {
           },
         ),
 
-        ChangeNotifierProxyProvider<AuthService, TourController>(
-          create: (_) => TourController(firebaseService: FirebaseService()),
-          update: (_, auth, controller) {
-            controller!.onAuthChanged(auth.currentUid);
-            return controller;
-          },
-        ),
+
       ],
-      child: MaterialApp(
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        themeMode: ThemeMode.system,
-        home: const AppChecker(),
+      child: Consumer<ThemeController>(
+        builder: (context, themeController, _) {
+          return MaterialApp(
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: themeController.themeMode,
+            home: const AppChecker(),
+          );
+        },
       ),
     );
   }

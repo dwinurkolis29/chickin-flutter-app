@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/theme/app_colors.dart';
 
 class OnboardingIndicator extends StatelessWidget {
   final int count;
@@ -13,6 +12,8 @@ class OnboardingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(count, (index) {
@@ -25,8 +26,8 @@ class OnboardingIndicator extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.primary
-                : AppColors.primary.withValues(alpha: 0.25),
+                ? primaryColor
+                : primaryColor.withValues(alpha: 0.25),
             borderRadius: BorderRadius.circular(100),
           ),
         );

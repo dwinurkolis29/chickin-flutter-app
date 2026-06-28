@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recording_app/core/tour/tour_controller.dart';
-import 'package:recording_app/core/tour/tour_step.dart';
-import 'package:recording_app/core/tour/widgets/tour_aware_wrapper.dart';
-import 'package:recording_app/core/tour/widgets/tour_overlay.dart';
-import 'package:recording_app/core/tour/widgets/tour_tooltip.dart';
+
 import '../data/models/period_data.dart';
 import 'controllers/period_controller.dart';
 import 'widgets/active_period_card.dart';
@@ -36,7 +32,7 @@ class PeriodListScreen extends StatefulWidget {
 }
 
 class _PeriodListScreenState extends State<PeriodListScreen> {
-  final GlobalKey _createPeriodFabKey = GlobalKey();
+
 
   @override
   void initState() {
@@ -51,15 +47,10 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: const AppHeader(title: 'Periode'),
-          floatingActionButton: TourAwareWrapper(
-            tourKey: _createPeriodFabKey,
-            child: const CreatePeriodButton(),
-          ),
-          body: SafeArea(
+    return Scaffold(
+      appBar: const AppHeader(title: 'Periode'),
+      floatingActionButton: const CreatePeriodButton(),
+      body: SafeArea(
             child: Consumer<PeriodController>(
               builder: (context, controller, child) {
             if (controller.isLoading) {
@@ -138,31 +129,6 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
               },
             ),
           ),
-        ),
-        _buildTourOverlay(context),
-      ],
-    );
-  }
-
-  Widget _buildTourOverlay(BuildContext context) {
-    final tourController = context.watch<TourController>();
-    if (!tourController.isTourActive || tourController.currentStep != TourStep.createPeriod) {
-      return const SizedBox.shrink();
-    }
-
-    final rect = TourAwareWrapper.getRect(_createPeriodFabKey);
-    if (rect == null) return const SizedBox.shrink();
-
-    return TourOverlay(
-      targetKey: _createPeriodFabKey,
-      tooltip: TourTooltip(
-        title: 'Buat Periode Baru',
-        description: 'Tekan tombol ini untuk mulai membuat periode peternakan baru.',
-        stepText: '1 / 3',
-        showSkip: true,
-        onSkip: () => tourController.skip(),
-      ),
-      onSkip: () {},
     );
   }
 }

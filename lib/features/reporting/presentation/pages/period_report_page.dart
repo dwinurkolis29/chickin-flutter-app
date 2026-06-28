@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
-import 'package:recording_app/core/tour/tour_controller.dart';
+
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
@@ -29,22 +29,9 @@ class PeriodReportPage extends StatelessWidget {
   }
 }
 
-class _PeriodReportPageView extends StatefulWidget {
+class _PeriodReportPageView extends StatelessWidget {
   final bool isTab;
-  const _PeriodReportPageView({this.isTab = false});
-
-  @override
-  State<_PeriodReportPageView> createState() => _PeriodReportPageViewState();
-}
-
-class _PeriodReportPageViewState extends State<_PeriodReportPageView> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<TourController>().complete();
-    });
-  }
+  const _PeriodReportPageView({super.key, this.isTab = false});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +40,7 @@ class _PeriodReportPageViewState extends State<_PeriodReportPageView> {
 
     // Saat dipakai sebagai tab di Dashboard, cukup return body tanpa Scaffold
     // agar AppHeader dari Dashboard tidak terduplikasi.
-    if (widget.isTab) {
+    if (isTab) {
       return SafeArea(
         top: false,
         child: _buildBody(context, controller),

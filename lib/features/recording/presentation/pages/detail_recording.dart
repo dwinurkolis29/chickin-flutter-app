@@ -421,12 +421,21 @@ class _RecordingTableState extends State<_RecordingTable> {
               _RecordingCard(
                 clipBehavior: Clip.antiAlias,
                 padding: EdgeInsets.zero,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    sortColumnIndex: _sortColumnIndex,
-                    sortAscending: _sortAscending,
-                    columnSpacing: 20,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double maxWidth = constraints.maxWidth;
+                    final bool hasEditColumn = !widget.readOnly;
+                    final double contentWidth = hasEditColumn ? 450.0 : 370.0;
+                    final int gapsCount = hasEditColumn ? 4 : 3;
+                    final double calculatedSpacing = (maxWidth - contentWidth) / gapsCount;
+                    final double finalColumnSpacing = calculatedSpacing.clamp(16.0, 120.0);
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        sortColumnIndex: _sortColumnIndex,
+                        sortAscending: _sortAscending,
+                        columnSpacing: finalColumnSpacing,
                     dataRowMinHeight: 44,
                     dataRowMaxHeight: 52,
                     headingRowHeight: 46,
@@ -554,7 +563,9 @@ class _RecordingTableState extends State<_RecordingTable> {
                             ],
                           );
                         }).toList(),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 24),

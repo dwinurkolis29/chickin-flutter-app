@@ -42,14 +42,23 @@ class ChickenDataTableState extends State<ChickenDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      // membuat paginated data table
-      child: PaginatedDataTable(
-        // membuat header pada paginated data table
-        header: Text('Recording Data',
-            style: Theme.of(context).textTheme.titleMedium),
-        columnSpacing: 24,
-        horizontalMargin: 16,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxWidth = constraints.maxWidth;
+        // Estimasi total lebar konten 4 kolom: ~420px
+        const double contentWidth = 420.0;
+        final double horizontalMargin = maxWidth > 600 ? 24.0 : 16.0;
+        final double calculatedSpacing = (maxWidth - contentWidth - (horizontalMargin * 2)) / 3;
+        final double finalColumnSpacing = calculatedSpacing.clamp(24.0, 120.0);
+
+        return SingleChildScrollView(
+          // membuat paginated data table
+          child: PaginatedDataTable(
+            // membuat header pada paginated data table
+            header: Text('Recording Data',
+                style: Theme.of(context).textTheme.titleMedium),
+            columnSpacing: finalColumnSpacing,
+            horizontalMargin: horizontalMargin,
         actions: [
           if (widget.onViewAll != null)
             TextButton.icon(
@@ -117,7 +126,9 @@ class ChickenDataTableState extends State<ChickenDataTable> {
         source: _chickenDataSource,
       ),
     );
-  }
+  },
+);
+}
 }
 
 class ChickenDataSource extends DataTableSource {

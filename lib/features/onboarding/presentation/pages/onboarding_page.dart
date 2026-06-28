@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_wrapper.dart';
-import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/features/onboarding/data/onboarding_data.dart';
 import 'package:recording_app/features/onboarding/presentation/widgets/onboarding_item.dart';
@@ -66,65 +65,98 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final colorScheme = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isWideScreen = size.width > 600;
     final isLastPage = _currentIndex == onboardingItems.length - 1;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // PageView — swipe kiri/kanan untuk previous/next
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: onboardingItems.length,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index) {
-                  setState(() => _currentIndex = index);
-                },
-                itemBuilder: (context, index) {
-                  return OnboardingItemWidget(
-                    item: onboardingItems[index],
-                    currentIndex: _currentIndex,
-                    totalCount: onboardingItems.length,
-                  );
-                },
-              ),
-            ),
+    Widget content = Column(
+      children: [
+        // PageView — swipe kiri/kanan untuk previous/next
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: onboardingItems.length,
+            physics: const BouncingScrollPhysics(),
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+            },
+            itemBuilder: (context, index) {
+              return OnboardingItemWidget(
+                item: onboardingItems[index],
+                currentIndex: _currentIndex,
+                totalCount: onboardingItems.length,
+              );
+            },
+          ),
+        ),
 
-            // Bottom action area — animates between nav and start
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder:
-                  (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.12),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOutCubic,
-                        ),
-                      ),
-                      child: child,
+        // Bottom action area — animates between nav and start
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder:
+              (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.12),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
                     ),
                   ),
-              child:
-                  isLastPage
-                      ? _buildStartButton(textTheme)
-                      : _buildNavButtons(textTheme, screenWidth),
-            ),
-          ],
+                  child: child,
+                ),
+              ),
+          child:
+              isLastPage
+                  ? _buildStartButton(textTheme, colorScheme)
+                  : _buildNavButtons(textTheme, colorScheme, isWideScreen ? 480 : size.width),
         ),
+      ],
+    );
+
+    if (isWideScreen) {
+      content = Center(
+        child: Container(
+          width: 480,
+          height: 800,
+          margin: const EdgeInsets.symmetric(vertical: 24),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            border: Border.all(
+              color: colorScheme.outlineVariant.withOpacity(0.4),
+              width: 1,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: content,
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: isWideScreen ? colorScheme.surfaceContainerHighest.withOpacity(0.3) : colorScheme.surface,
+      body: SafeArea(
+        child: content,
       ),
     );
   }
 
   /// Full-width START button — last page only
-  Widget _buildStartButton(TextTheme textTheme) {
+  Widget _buildStartButton(TextTheme textTheme, ColorScheme colorScheme) {
     return Padding(
       key: const ValueKey('start'),
       padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
@@ -134,15 +166,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: ElevatedButton(
           onPressed: _finishOnboarding,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             elevation: 0,
             shape: const StadiumBorder(),
           ),
           child: Text(
             'START',
             style: textTheme.labelLarge?.copyWith(
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.6,
               fontSize: 14,
@@ -154,7 +186,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   /// SKIP (left plain text) + NEXT pill button (right, ~40% screen width)
-  Widget _buildNavButtons(TextTheme textTheme, double screenWidth) {
+  Widget _buildNavButtons(TextTheme textTheme, ColorScheme colorScheme, double screenWidth) {
     return Padding(
       key: const ValueKey('nav'),
       padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
@@ -168,15 +200,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: TextButton(
               onPressed: _finishOnboarding,
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary.withValues(alpha: 0.65),
+                foregroundColor: colorScheme.primary.withValues(alpha: 0.65),
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                overlayColor: AppColors.primary.withValues(alpha: 0.08),
+                overlayColor: colorScheme.primary.withValues(alpha: 0.08),
               ),
               child: Text(
                 'SKIP',
                 style: textTheme.labelLarge?.copyWith(
-                  color: AppColors.primary.withValues(alpha: 0.65),
+                  color: colorScheme.primary.withValues(alpha: 0.65),
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.6,
                   fontSize: 14,
@@ -192,15 +224,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: ElevatedButton(
               onPressed: _nextPage,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 elevation: 0,
                 shape: const StadiumBorder(),
               ),
               child: Text(
                 'NEXT',
                 style: textTheme.labelLarge?.copyWith(
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.6,
                   fontSize: 14,

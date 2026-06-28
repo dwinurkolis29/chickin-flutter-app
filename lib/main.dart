@@ -31,4 +31,5 @@ Future<void> _initHive() async {
   await Hive.openBox("accounts");
   await Hive.openBox("onboarding");
   await Hive.openBox("reminders");
+  await Hive.openBox("settings");
 }

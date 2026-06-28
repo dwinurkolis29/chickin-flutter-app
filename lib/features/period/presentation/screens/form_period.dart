@@ -3,8 +3,7 @@ import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:provider/provider.dart';
-import 'package:recording_app/core/tour/tour_controller.dart';
-import 'package:recording_app/core/tour/tour_step.dart';
+
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import '../../data/models/period_data.dart';
@@ -91,13 +90,6 @@ class _FormPeriodState extends State<FormPeriod> {
       } else {
         await controller.createPeriod(periodData);
         if (mounted) {
-          // Advance tour jika sedang aktif di step createPeriod
-          final tourController = context.read<TourController>();
-          if (tourController.isTourActive &&
-              tourController.currentStep == TourStep.createPeriod) {
-            tourController.advance();
-          }
-
           AppSnackbar.showSuccess(context, 'Periode berhasil dibuat');
           Navigator.pop(context, true);
         }
@@ -161,11 +153,6 @@ class _FormPeriodState extends State<FormPeriod> {
             widget.period!.id,
           );
           if (mounted) {
-            final tourController = context.read<TourController>();
-            if (tourController.isTourActive &&
-                tourController.currentStep == TourStep.createPeriod) {
-              tourController.advance();
-            }
             AppSnackbar.showSuccess(context, 'Periode berhasil diaktifkan');
             Navigator.pop(context, true);
           }
