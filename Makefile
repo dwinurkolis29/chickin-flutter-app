@@ -116,14 +116,11 @@ format: ## Format kode
 	@dart format lib/
 	@echo '✅ Formatting selesai!'
 
-test: ## Jalankan unit tests
-	@echo '🧪 Running tests...'
-	@fvm flutter test
-	@echo '✅ Tests selesai!'
+test: ## Jalankan unit tests (simple output)
+	@bash scripts/test_report.sh
 
-test-coverage: ## Jalankan tests dengan coverage
-	@fvm flutter test --coverage
-	@echo '📊 Coverage report: coverage/lcov.info'
+test-coverage: ## Jalankan tests dengan coverage report lengkap
+	@bash scripts/test_report.sh --full
 
 lint: analyze format ## Lint (analyze + format)
 
