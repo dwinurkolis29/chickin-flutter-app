@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.uts_project"
+    namespace = "com.chickin.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -26,7 +26,7 @@ android {
     defaultConfig {
         multiDexEnabled = true
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.uts_project"
+        applicationId = "com.chickin.mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23

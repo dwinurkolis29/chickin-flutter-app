@@ -1,4 +1,4 @@
-package com.example.uts_project
+package com.chickin.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

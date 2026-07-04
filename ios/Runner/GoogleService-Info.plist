@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.utsProject</string>
+	<string>com.chickin.mobile</string>
 	<key>PROJECT_ID</key>
 	<string>recording-app-877d8</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:356333598974:ios:6128e6fda62bafc2d00daf</string>
+	<string>1:356333598974:ios:83e49b746349f6c9d00daf</string>
 </dict>
 </plist>

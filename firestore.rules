@@ -1,38 +1,115 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function: Check if user is authenticated
+
+    // ── Auth Helpers ─────────────────────────────────────────────────────────
+
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    // Helper function: Check if user owns the document
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    
-    // Users collection
+
+    // ── Data Validators ───────────────────────────────────────────────────────
+
+    // Validasi field user document: hanya keys yang diizinkan, tipe benar.
+    function isValidUserData(data) {
+      return data.keys().hasOnly(['profile', 'cage', 'createdAt'])
+        && (!('profile' in data) || data.profile is map)
+        && (!('cage' in data) || data.cage is map);
+    }
+
+    // Validasi field period: key wajib ada, tipe benar, constraint nilai.
+    function isValidPeriodData(data) {
+      return data.keys().hasOnly([
+          'name', 'initialCapacity', 'initialWeight',
+          'startDate', 'endDate', 'isActive', 'isDeleted',
+          'createdAt', 'summary'
+        ])
+        && 'name' in data && data.name is string
+        && data.name.size() > 0 && data.name.size() <= 100
+        && 'isActive' in data && data.isActive is bool
+        && 'isDeleted' in data && data.isDeleted is bool
+        && 'initialCapacity' in data && data.initialCapacity is int
+        && data.initialCapacity > 0;
+    }
+
+    // Validasi field recording: key wajib ada, semua numerik, nilai tidak negatif.
+    function isValidRecordingData(data) {
+      return data.keys().hasOnly(['day', 'avgWeightGram', 'feedSack', 'mortality', 'createdAt'])
+        && 'day' in data && data.day is int && data.day > 0
+        && 'avgWeightGram' in data && data.avgWeightGram is int && data.avgWeightGram >= 0
+        && 'feedSack' in data && data.feedSack is int && data.feedSack >= 0
+        && 'mortality' in data && data.mortality is int && data.mortality >= 0;
+    }
+
+    // Validasi field reminder: key dan tipe benar.
+    function isValidReminderData(data) {
+      return data.keys().hasOnly(['title', 'date', 'time', 'description', 'createdAt', 'updatedAt'])
+        && 'title' in data && data.title is string && data.title.size() > 0
+        && 'date' in data && data.date is string
+        && 'time' in data && data.time is string;
+    }
+
+    // Guard: field createdAt tidak boleh berubah setelah dokumen dibuat.
+    function createdAtUnchanged() {
+      return request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    // ── Users Collection ──────────────────────────────────────────────────────
+
     match /users/{userId} {
-      // User can only read/write their own document
-      allow read, write: if isOwner(userId);
-      
-      // Periods subcollection
+      allow read: if isOwner(userId);
+
+      // Create: validasi data, biarkan createdAt di-set bebas saat pertama kali.
+      allow create: if isOwner(userId) && isValidUserData(request.resource.data);
+
+      // Update: validasi data + lindungi createdAt dari perubahan.
+      allow update: if isOwner(userId)
+        && isValidUserData(request.resource.data)
+        && createdAtUnchanged();
+
+      // Delete: diblokir dari client — user document tidak boleh dihapus langsung.
+      allow delete: if false;
+
+      // ── Periods Subcollection ───────────────────────────────────────────────
+
       match /periods/{periodId} {
-        // User can read/write their own periods
-        allow read, write: if isOwner(userId);
-        
-        // Recordings subcollection within periods
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) && isValidPeriodData(request.resource.data);
+
+        allow update: if isOwner(userId)
+          && isValidPeriodData(request.resource.data)
+          && createdAtUnchanged();
+
+        allow delete: if isOwner(userId);
+
+        // ── Recordings Subcollection ──────────────────────────────────────────
+
         match /recordings/{recordingId} {
-          // User can read/write their own recordings
-          allow read, write: if isOwner(userId);
+          allow read: if isOwner(userId);
+
+          allow create: if isOwner(userId) && isValidRecordingData(request.resource.data);
+
+          allow update: if isOwner(userId) && isValidRecordingData(request.resource.data);
+
+          allow delete: if isOwner(userId);
         }
       }
-      
-      // Reminders subcollection (optional)
+
+      // ── Reminders Subcollection ─────────────────────────────────────────────
+
       match /reminders/{reminderId} {
-        // User can read/write their own reminders
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) && isValidReminderData(request.resource.data);
+
+        allow update: if isOwner(userId) && isValidReminderData(request.resource.data);
+
+        allow delete: if isOwner(userId);
       }
     }
   }

@@ -108,7 +108,8 @@ class CageController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error uploading cage image: $e');
-      _errorMessage = 'Gagal mengunggah foto kandang: $e';
+      final cleanMsg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception', '');
+      _errorMessage = 'Gagal mengunggah foto kandang: $cleanMsg';
       _isUploadingImage = false;
       notifyListeners();
     }

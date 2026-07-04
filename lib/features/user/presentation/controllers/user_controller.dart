@@ -90,7 +90,8 @@ class UserController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error uploading profile image: $e');
-      _errorMessage = 'Gagal mengunggah foto profil: $e';
+      final cleanMsg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception', '');
+      _errorMessage = 'Gagal mengunggah foto profil: $cleanMsg';
       _isUploadingAvatar = false;
       notifyListeners();
     }
