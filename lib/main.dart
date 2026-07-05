@@ -11,26 +11,29 @@ import 'main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: 'assets/env');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Aktifkan Firebase App Check.
-  // - Debug build: gunakan DebugProvider (tidak perlu token nyata, aman untuk CI/dev).
-  // - Release build: gunakan Play Integrity (Android) dan DeviceCheck (iOS).
-  // PENTING: Aktifkan juga enforcement di Firebase Console → App Check.
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: kDebugMode
-        ? AndroidProvider.debug
-        : AndroidProvider.playIntegrity,
-    appleProvider: kDebugMode
-        ? AppleProvider.debug
-        : AppleProvider.deviceCheck,
-    webProvider: ReCaptchaEnterpriseProvider(
-      dotenv.env['RECAPTCHA_ENTERPRISE_SITE_KEY'] ?? '',
-    ),
-  );
+  // Aktifkan Firebase App Check jika bukan web, atau jika di web site key reCAPTCHA diisi.
+  if (!kIsWeb) {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: kDebugMode
+          ? AndroidProvider.debug
+          : AndroidProvider.playIntegrity,
+      appleProvider: kDebugMode
+          ? AppleProvider.debug
+          : AppleProvider.deviceCheck,
+    );
+  } else {
+    final siteKey = dotenv.env['RECAPTCHA_ENTERPRISE_SITE_KEY'] ?? '';
+    if (siteKey.isNotEmpty) {
+      await FirebaseAppCheck.instance.activate(
+        webProvider: ReCaptchaEnterpriseProvider(siteKey),
+      );
+    }
+  }
 
   // Initialize Notification Service
   await NotificationService().initialize();

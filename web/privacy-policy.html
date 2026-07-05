@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebijakan Privasi - BroilerKu</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #10b981; /* Emerald/Green */
+            --primary-hover: #059669;
+            --primary-light: rgba(16, 185, 129, 0.08);
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --text-main: #334155;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--slate-50);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        /* Header Style with smooth gradient */
+        header {
+            background: linear-gradient(135deg, var(--slate-900) 0%, #064e3b 100%);
+            color: white;
+            padding: 80px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-area {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        .logo-highlight {
+            color: var(--primary);
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Container & Cards layout */
+        main {
+            max-width: 850px;
+            margin: -40px auto 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--slate-100);
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 40px;
+        }
+
+        section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--slate-800);
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--slate-100);
+            display: flex;
+            align-items: center;
+        }
+
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background-color: var(--primary);
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 8px;
+        }
+
+        li::before {
+            content: "✓";
+            color: var(--primary);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 24px;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            color: #047857;
+            font-weight: 500;
+        }
+
+        /* Footer Style */
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* Responsive details */
+        @media (max-width: 768px) {
+            header {
+                padding: 60px 16px;
+            }
+            header h1 {
+                font-size: 28px;
+            }
+            .card {
+                padding: 24px;
+                border-radius: 16px;
+            }
+            main {
+                margin-top: -20px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="logo-area">
+                <span class="logo-text">Broiler<span class="logo-highlight">Ku</span></span>
+            </div>
+            <h1>Kebijakan Privasi</h1>
+            <p>Terakhir Diperbarui: 4 Juli 2026</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            
+            <div class="highlight-box">
+                <p>Kami di BroilerKu berkomitmen sepenuhnya untuk menjaga kerahasiaan dan keamanan data operasional peternakan Anda. Halaman ini menjelaskan bagaimana data Anda dikumpulkan, disimpan, dan digunakan.</p>
+            </div>
+
+            <section>
+                <h2>1. Informasi yang Kami Kumpulkan</h2>
+                <p>BroilerKu mengumpulkan data yang diperlukan untuk mendukung fungsi monitoring kandang dan pencatatan harian peternakan Anda:</p>
+                <ul>
+                    <li><strong>Informasi Akun:</strong> Alamat email dan kata sandi saat mendaftar menggunakan Firebase Authentication.</li>
+                    <li><strong>Profil Pengguna:</strong> Nama peternak, nomor telepon, alamat, dan foto profil.</li>
+                    <li><strong>Data Kandang:</strong> Nama/tipe kandang, kapasitas, lokasi, dan foto kandang.</li>
+                    <li><strong>Data Recording Harian:</strong> Catatan populasi, rata-rata berat ayam (gram), pakan habis (karung), dan tingkat kematian ayam (mortality).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>2. Bagaimana Kami Menggunakan Data Anda</h2>
+                <p>Seluruh data yang dikumpulkan hanya digunakan untuk kepentingan operasional dan peningkatan efisiensi peternakan Anda sendiri, dengan rincian:</p>
+                <ul>
+                    <li>Mengotentikasi identitas Anda untuk masuk ke dalam aplikasi secara aman.</li>
+                    <li>Melakukan kalkulasi otomatis Feed Conversion Ratio (FCR) dan performa pertumbuhan ayam Anda.</li>
+                    <li>Menyajikan grafik analisis visual tren performa kandang Anda.</li>
+                    <li>Menghasilkan file laporan (format CSV atau Excel) untuk kebutuhan ekspor mandiri Anda.</li>
+                    <li>Mengirimkan notifikasi pengingat lokal (jadwal pakan, vaksinasi, penimbangan) ke perangkat Anda.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>3. Keamanan & Penyimpanan Data</h2>
+                <p>Kami menggunakan infrastruktur cloud Firebase (Google Cloud) untuk menyimpan data secara aman secara online di Cloud Firestore. Untuk performa yang cepat dan mendukung penggunaan offline, kami juga menggunakan penyimpanan lokal (Hive) yang terenkripsi di dalam perangkat Anda.</p>
+                <p>Kami menerapkan standar keamanan terbaik untuk melindungi data Anda dari akses tanpa izin, kehilangan, atau penyalahgunaan.</p>
+            </section>
+
+            <section>
+                <h2>4. Berbagi Data dengan Pihak Ketiga</h2>
+                <p>Kami <strong>tidak pernah menjual, menukar, atau menyebarkan data pribadi maupun data operasional peternakan Anda</strong> kepada pihak ketiga untuk kepentingan komersial.</p>
+                <p>Penggunaan layanan pihak ketiga terbatas pada Google Firebase (Authentication & Cloud Firestore) untuk infrastruktur database yang aman.</p>
+            </section>
+
+            <section>
+                <h2>5. Hak-Hak Anda atas Data</h2>
+                <p>Anda memiliki kontrol penuh terhadap data Anda di aplikasi BroilerKu:</p>
+                <ul>
+                    <li>Anda dapat memperbarui, mengedit, atau menghapus data kandang dan recording kapan saja dari aplikasi.</li>
+                    <li>Anda memiliki hak untuk meminta penghapusan akun secara permanen beserta seluruh data yang terkait dengannya.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>6. Hubungi Kami</h2>
+                <p>Jika Anda memiliki pertanyaan, saran, atau permintaan terkait Kebijakan Privasi ini, silakan hubungi pengembang melalui:</p>
+                <p><strong>Email Kontak:</strong> <a href="mailto:muhdwinurkolis29@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: 600;">muhdwinurkolis29@gmail.com</a></p>
+            </section>
+
+        </div>
+
+        <footer>
+            <p>&copy; 2026 BroilerKu. All rights reserved.</p>
+            <p>Di-host menggunakan <a href="https://firebase.google.com" target="_blank" rel="noopener">Firebase Hosting</a>.</p>
+        </footer>
+    </main>
+
+</body>
+</html>
