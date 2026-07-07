@@ -344,7 +344,6 @@ class _DashboardContentState extends State<DashboardContent> {
         }
 
         // ── Active period — show banner + content ──────────────────────────
-        final email = currentUser.email ?? '';
         final periodName = controller.activePeriodName ?? '';
 
         return SingleChildScrollView(
@@ -352,7 +351,7 @@ class _DashboardContentState extends State<DashboardContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Top Banner (spec §3.1) ────────────────────────────────
-              _TopBanner(periodName: periodName, email: email),
+              _TopBanner(periodName: periodName),
 
               // ── Existing content below — untouched ────────────────────
               Padding(
@@ -442,9 +441,8 @@ class _DashboardContentState extends State<DashboardContent> {
 
 class _TopBanner extends StatelessWidget {
   final String periodName;
-  final String email;
 
-  const _TopBanner({required this.periodName, required this.email});
+  const _TopBanner({required this.periodName});
 
   @override
   Widget build(BuildContext context) {
@@ -456,7 +454,7 @@ class _TopBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -516,19 +514,6 @@ class _TopBanner extends StatelessWidget {
             periodName.isNotEmpty ? periodName : 'Periode Tanpa Nama',
             style: textTheme.titleLarge?.copyWith(
               color: onPrimary,
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
-          ),
-          
-          const SizedBox(height: 4),
-
-          // User email
-          Text(
-            email,
-            style: textTheme.bodySmall?.copyWith(
-              color: onPrimaryMuted,
             ),
           ),
         ],

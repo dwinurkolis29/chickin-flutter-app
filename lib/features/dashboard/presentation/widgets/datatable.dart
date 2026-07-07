@@ -12,7 +12,7 @@ class ChickenDataTable extends StatefulWidget {
 }
 
 class ChickenDataTableState extends State<ChickenDataTable> {
-  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
+  int _rowsPerPage = 7;
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
   // membuat variabel untuk menyimpan data recording ayam
@@ -24,6 +24,17 @@ class ChickenDataTableState extends State<ChickenDataTable> {
     super.initState();
     _chickenData = List.from(widget.chickenDataList);
     _chickenDataSource = ChickenDataSource(_chickenData);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChickenDataTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.chickenDataList != oldWidget.chickenDataList) {
+      setState(() {
+        _chickenData = List.from(widget.chickenDataList);
+        _chickenDataSource = ChickenDataSource(_chickenData);
+      });
+    }
   }
 
   void _sort<T>(Comparable<T> Function(RecordingData d) getField, int columnIndex, bool ascending) {
@@ -68,10 +79,11 @@ class ChickenDataTableState extends State<ChickenDataTable> {
             ),
         ],
         rowsPerPage: _rowsPerPage,
+        availableRowsPerPage: const <int>[7, 10, 20],
         onRowsPerPageChanged: (value) {
           setState(() {
             // mengatur jumlah baris per halaman
-            _rowsPerPage = value ?? 10;
+            _rowsPerPage = value ?? 7;
           });
         },
         sortColumnIndex: _sortColumnIndex,
