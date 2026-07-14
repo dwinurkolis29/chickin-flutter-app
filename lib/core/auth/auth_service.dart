@@ -50,7 +50,7 @@ class AuthService extends ChangeNotifier {
   AuthService({FirebaseService? firebaseService})
       : _firebaseService = firebaseService ?? FirebaseService() {
     _authSub = _auth.authStateChanges().listen((user) {
-      debugPrint('AUTH STATE CHANGED: ${user?.uid}');
+
       _initialized = true;
       notifyListeners();
     });
@@ -78,7 +78,7 @@ class AuthService extends ChangeNotifier {
         email: email.trim(),
         password: password,
       );
-      debugPrint('SIGN IN SUCCESS: ${credential.user?.uid}');
+
       notifyListeners();
       return AuthResult.success(credential.user!);
     } on FirebaseAuthException catch (e) {

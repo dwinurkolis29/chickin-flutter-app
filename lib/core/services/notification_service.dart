@@ -56,7 +56,7 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
 
-    print('🔔 Notification permissions — iOS: $iosResult | Android: $androidResult');
+
     return (iosResult ?? true) && (androidResult ?? true);
   }
 
@@ -64,7 +64,7 @@ class NotificationService {
   void _onNotificationTap(NotificationResponse response) {
     // TODO: Navigate to reminder detail page
     // You can pass reminder ID via payload
-    print('Notification tapped: ${response.payload}');
+
   }
 
   // Schedule a notification
@@ -106,7 +106,7 @@ class NotificationService {
     // Guard: jangan schedule jika waktu sudah lewat
     final now = tz.TZDateTime.now(tz.local);
     if (scheduledTZDate.isBefore(now)) {
-      print('⚠️ Scheduled time is in the past ($scheduledTZDate). Notification skipped.');
+
       return;
     }
 
@@ -116,24 +116,24 @@ class NotificationService {
       body,
       scheduledTZDate,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       payload: payload,
     );
 
-    print('✅ Notification scheduled for: $scheduledTZDate');
+
   }
 
   // Cancel a specific notification
   Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
-    print('🗑️ Notification cancelled: $id');
+
   }
 
   // Cancel all notifications
   Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
-    print('🗑️ All notifications cancelled');
+
   }
 
   // Get pending notifications (for debugging)
@@ -177,6 +177,6 @@ class NotificationService {
       payload: payload,
     );
 
-    print('📢 Immediate notification shown');
+
   }
 }

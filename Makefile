@@ -21,11 +21,17 @@ ifeq ($(detected_OS),Windows)
   null_dev := nul
   run_test := flutter test
   run_test_coverage := flutter test --coverage
+  # Windows: ambil device ID Android & iOS pertama dari output flutter devices
+  android_device = $(shell flutter devices 2>nul | findstr /i "android" | for /f "tokens=3" %i in ('more') do @echo %i & goto :break 2>nul || echo "")
+  ios_device     = $(shell flutter devices 2>nul | findstr /i "ios" | for /f "tokens=3" %i in ('more') do @echo %i & goto :break 2>nul || echo "")
 else
   gradle := ./gradlew
   null_dev := /dev/null
   run_test := bash scripts/test_report.sh
   run_test_coverage := bash scripts/test_report.sh --full
+  # Unix/Mac: ambil device ID (kolom ke-4 setelah '•') dari baris android/ios pertama
+  android_device = $(shell flutter devices 2>/dev/null | grep -i 'android' | head -1 | awk -F'•' '{gsub(/^[[:space:]]+|[[:space:]]+$$/, "", $$2); print $$2}')
+  ios_device     = $(shell flutter devices 2>/dev/null | grep -i 'ios' | head -1 | awk -F'•' '{gsub(/^[[:space:]]+|[[:space:]]+$$/, "", $$2); print $$2}')
   ifeq ($(detected_OS),Darwin)
     open_cmd := open
   else
@@ -100,17 +106,29 @@ run: ## Run aplikasi (debug)
 run-release: ## Run aplikasi (release)
 	@flutter run --release
 
-run-a: ## Run di Android
-	@flutter run -d android
+run-a: ## Run di Android (auto-detect device)
+	$(eval _adev := $(android_device))
+	@[ -n "$(_adev)" ] || (echo '[ERROR] Tidak ada Android device yang terdeteksi. Pastikan device terhubung dan USB debugging aktif.' && exit 1)
+	@echo '[RUN] Menjalankan di Android device: $(_adev)'
+	@flutter run -d $(_adev)
 
-run-i: ## Run di iOS
-	@flutter run -d ios
+run-i: ## Run di iOS (auto-detect device)
+	$(eval _idev := $(ios_device))
+	@[ -n "$(_idev)" ] || (echo '[ERROR] Tidak ada iOS device yang terdeteksi.' && exit 1)
+	@echo '[RUN] Menjalankan di iOS device: $(_idev)'
+	@flutter run -d $(_idev)
 
-run-ar: ## Run di Android (release)
-	@flutter run -d android --release
+run-ar: ## Run di Android release (auto-detect device)
+	$(eval _adev := $(android_device))
+	@[ -n "$(_adev)" ] || (echo '[ERROR] Tidak ada Android device yang terdeteksi. Pastikan device terhubung dan USB debugging aktif.' && exit 1)
+	@echo '[RUN] Menjalankan release di Android device: $(_adev)'
+	@flutter run -d $(_adev) --release
 
-run-ir: ## Run di iOS (release)
-	@flutter run -d ios --release
+run-ir: ## Run di iOS release (auto-detect device)
+	$(eval _idev := $(ios_device))
+	@[ -n "$(_idev)" ] || (echo '[ERROR] Tidak ada iOS device yang terdeteksi.' && exit 1)
+	@echo '[RUN] Menjalankan release di iOS device: $(_idev)'
+	@flutter run -d $(_idev) --release
 
 run-web: ## Run di Web (Chrome)
 	@flutter run -d chrome
@@ -203,7 +221,10 @@ doctor: ## Check development environment variables
 	@echo Organization    : $(org)
 	@echo Gradle Command  : $(gradle)
 	@echo Open Command    : $(open_cmd)
+	@echo Android Device  : $(android_device)
+	@echo iOS Device      : $(ios_device)
 	@echo ============================================================
+	@flutter doctor
 
 stop-daemon: ## Stop Gradle daemon to free memory
 	@echo '[GRADLE] Stopping Gradle daemon...'

@@ -50,7 +50,7 @@ class UserController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading user data: $e');
+
       _errorMessage = 'Gagal memuat data pengguna: $e';
       _isLoading = false;
       notifyListeners();
@@ -89,7 +89,7 @@ class UserController extends ChangeNotifier {
       _isUploadingAvatar = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error uploading profile image: $e');
+
       final cleanMsg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception', '');
       _errorMessage = 'Gagal mengunggah foto profil: $cleanMsg';
       _isUploadingAvatar = false;

@@ -30,13 +30,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     try {
       final authService = context.read<AuthService>();
-      authService.signOut().whenComplete(() {
-        debugPrint('Logout success');
-      });
+      authService.signOut().whenComplete(() {});
       // AuthWrapper reaktif — tidak perlu navigate manual.
-    } catch (e) {
-      debugPrint('Logout error: $e');
-    }
+    } catch (_) {}
   }
 
   @override

@@ -46,7 +46,7 @@ class CageController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading cage data: $e');
+
       _errorMessage = 'Gagal memuat data kandang. Silakan coba lagi.';
       _isLoading = false;
       notifyListeners();
@@ -72,7 +72,7 @@ class CageController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error saving cage data: $e');
+
       _errorMessage = 'Gagal menyimpan data kandang: $e';
       _isLoading = false;
       notifyListeners();
@@ -107,7 +107,7 @@ class CageController extends ChangeNotifier {
       _isUploadingImage = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error uploading cage image: $e');
+
       final cleanMsg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception', '');
       _errorMessage = 'Gagal mengunggah foto kandang: $cleanMsg';
       _isUploadingImage = false;
