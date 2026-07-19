@@ -35,7 +35,8 @@ class RecordingData {
   }
 
   Map<String, dynamic> toJson() => {
-    if (id.isNotEmpty) 'id': id,
+    // 'id' is intentionally excluded: the Firestore document ID is the key.
+    // Including it violates the isValidRecordingData hasOnly security rules.
     'day': day,
     'avgWeightGram': avgWeightGram,
     'feedSack': feedSack,

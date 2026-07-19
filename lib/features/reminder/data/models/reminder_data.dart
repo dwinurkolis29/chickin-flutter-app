@@ -31,7 +31,8 @@ class ReminderData {
   );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
+    // 'id' is intentionally excluded: the Firestore document ID is the key.
+    // Including it violates the isValidReminderData hasOnly security rules.
     'title': title,
     'date': date,
     'time': time,

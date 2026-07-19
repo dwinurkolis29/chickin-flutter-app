@@ -85,7 +85,7 @@ void main() {
     });
 
     group('toJson', () {
-      test('semua 7 key hadir', () {
+      test('semua 6 key hadir (id tidak diserialisasikan)', () {
         final data = ReminderData(
           id: 'rem-001',
           title: 'Vaksin',
@@ -96,17 +96,17 @@ void main() {
           updatedAt: '2025-06-01',
         );
         final json = data.toJson();
-        expect(json.containsKey('id'), true);
+        expect(json.containsKey('id'), false);
         expect(json.containsKey('title'), true);
         expect(json.containsKey('date'), true);
         expect(json.containsKey('time'), true);
         expect(json.containsKey('description'), true);
         expect(json.containsKey('createdAt'), true);
         expect(json.containsKey('updatedAt'), true);
-        expect(json.length, 7);
+        expect(json.length, 6);
       });
 
-      test('round-trip: toJson → fromJson → sama', () {
+      test('round-trip: toJson → fromJson → sama (tanpa id)', () {
         final original = ReminderData(
           id: 'rem-001',
           title: 'Vaksin ND',
@@ -118,7 +118,7 @@ void main() {
         );
         final json = original.toJson();
         final restored = ReminderData.fromJson(json);
-        expect(restored.id, original.id);
+        expect(restored.id, ''); // id tidak ada di json
         expect(restored.title, original.title);
         expect(restored.date, original.date);
         expect(restored.time, original.time);

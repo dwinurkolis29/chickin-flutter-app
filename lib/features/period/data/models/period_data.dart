@@ -59,7 +59,8 @@ class PeriodData {
   }
 
   Map<String, dynamic> toJson() => {
-    if (id.isNotEmpty) 'id': id,
+    // 'id' intentionally excluded: Firestore doc key is the ID — including it
+    // in the payload would violate the isValidPeriodData hasOnly allowlist.
     'name': name,
     'initialCapacity': initialCapacity,
     'initialWeight': initialWeight,

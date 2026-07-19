@@ -232,12 +232,15 @@ class FirebaseService {
   Future<void> updatePeriod(String periodId, PeriodData period, [String? uid]) async {
     try {
       final userId = uid ?? _currentUid;
+      final data = period.toJson();
+      data.remove('createdAt');
+      data['id'] = FieldValue.delete(); // Delete legacy 'id' field from document body to satisfy security rules
       await _firestore
           .collection('users')
           .doc(userId)
           .collection('periods')
           .doc(periodId)
-          .update(period.toJson());
+          .update(data);
     } catch (e) {
       throw Exception('Failed to update period: $e');
     }
@@ -364,6 +367,8 @@ class FirebaseService {
   Future<void> updateRecording(String periodId, String recordingId, RecordingData recording, [String? uid]) async {
     try {
       final userId = uid ?? _currentUid;
+      final data = recording.toJson();
+      data['id'] = FieldValue.delete(); // Delete legacy 'id' field from document body to satisfy security rules
       await _firestore
           .collection('users')
           .doc(userId)
@@ -371,7 +376,7 @@ class FirebaseService {
           .doc(periodId)
           .collection('recordings')
           .doc(recordingId)
-          .update(recording.toJson());
+          .update(data);
     } catch (e) {
       throw Exception('Failed to update recording: $e');
     }
