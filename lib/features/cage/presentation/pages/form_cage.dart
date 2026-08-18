@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';

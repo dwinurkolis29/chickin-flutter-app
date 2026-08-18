@@ -37,13 +37,13 @@ class _NoActivePeriod extends StatelessWidget {
         Icon(
           Icons.inbox_outlined,
           size: 40,
-          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.6),
+          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.6),
         ),
         const SizedBox(height: 8),
         Text(
           'Tidak ada periode aktif',
           style: tt.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -74,15 +74,15 @@ class _ActivePeriodContent extends StatelessWidget {
             Text(
               'Periode Aktif',
               style: tt.bodySmall?.copyWith(
-                color: onPrimary.withOpacity(0.75),
+                color: onPrimary.withValues(alpha: 0.75),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.2),
+                color: AppColors.success.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.success.withOpacity(0.5)),
+                border: Border.all(color: AppColors.success.withValues(alpha: 0.5)),
               ),
               child: Text(
                 '● Aktif',
@@ -105,10 +105,10 @@ class _ActivePeriodContent extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Mulai ${fmt.format(period.startDate)}',
-          style: tt.bodySmall?.copyWith(color: onPrimary.withOpacity(0.75)),
+          style: tt.bodySmall?.copyWith(color: onPrimary.withValues(alpha: 0.75)),
         ),
         const SizedBox(height: 20),
-        Divider(color: onPrimary.withOpacity(0.3)),
+        Divider(color: onPrimary.withValues(alpha: 0.3)),
         const SizedBox(height: 12),
         StreamBuilder<List<RecordingData>>(
           stream: FirebaseService().getRecordingsStream(period.id),
@@ -163,7 +163,7 @@ class _ActivePeriodContent extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Divider(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
+                Divider(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3)),
                 const SizedBox(height: 12),
                 // Stats row 2
                 Row(
@@ -219,7 +219,7 @@ class _StatItem extends StatelessWidget {
           Text(
             label,
             style: tt.labelSmall?.copyWith(
-              color: onPrimary.withOpacity(0.7),
+              color: onPrimary.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -236,6 +236,6 @@ class _CardDivider extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 1,
         height: 32,
-        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
       );
 }

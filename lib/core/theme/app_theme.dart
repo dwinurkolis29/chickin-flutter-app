@@ -1,64 +1,257 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
-import 'app_text_theme.dart';
-import '../transitions/slide_fade_transition_builder.dart';
+import 'app_theme_option.dart';
+import 'app_typography.dart';
 
-const _pageTransitionsTheme = PageTransitionsTheme(
-  builders: {
-    TargetPlatform.android: SlideFadeTransitionBuilder(),
-    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(), // Menjaga swipe back iOS
-    TargetPlatform.windows: SlideFadeTransitionBuilder(),
-    TargetPlatform.macOS: SlideFadeTransitionBuilder(),
-    TargetPlatform.linux: SlideFadeTransitionBuilder(),
-  },
-);
+/// Custom horizontal-slide page transition.
+///
+/// On Web: slides without registering a swipe-back gesture detector
+/// (avoids conflict with Safari's native back-swipe).
+/// On native iOS/macOS: falls back to the standard Cupertino transition.
+class _HorizontalSlidePageTransitionsBuilder extends PageTransitionsBuilder {
+  const _HorizontalSlidePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final slideIn = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+
+    final slideOut = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(-0.3, 0.0),
+    ).animate(
+        CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut));
+
+    return SlideTransition(
+      position: slideOut,
+      child: SlideTransition(position: slideIn, child: child),
+    );
+  }
+}
 
 /// Single source of truth for ThemeData.
-/// Use AppTheme.light() and AppTheme.dark() in MaterialApp.
+///
+/// Shape rule (sesuai design system):
+///   pill (999dp) = tombol, chip, nav, search, input field
+///   24dp         = card & container utama
+///   16dp         = sheet row / list tile decoration
+///   4dp          = snackbar only
+///
+/// Usage:
+/// ```dart
+/// theme:     AppTheme.build(AppThemeOption.light),
+/// darkTheme: AppTheme.build(AppThemeOption.dark),
+/// ```
 class AppTheme {
   AppTheme._();
 
-  static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: AppColors.primary,
-      secondary: AppColors.secondary,
-      onSecondary: Colors.white,
-      secondaryContainer: Color(0xFFB2DFDF),
-      onSecondaryContainer: AppColors.primary,
-      surface: AppColors.background,
-      error: AppColors.error,
-    );
-    return ThemeData.from(
-      colorScheme: scheme,
-      textTheme: AppTextTheme.textTheme,
-      useMaterial3: true,
-    ).copyWith(
-      pageTransitionsTheme: _pageTransitionsTheme,
-      cardTheme: const CardThemeData(
-        color: Colors.white,
-        elevation: 1,
-      ),
-    );
-  }
+  static const double pillRadius     = 999.0;
+  static const double cardRadius     = 24.0;
+  static const double rowRadius      = 16.0;
+  static const double snackbarRadius = 4.0;
 
-  static ThemeData dark() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.dark,
-    ).copyWith(
-      secondary: AppColors.secondary,
-      error: AppColors.error,
-      // background keeps M3 dark default — light background on dark is wrong
+  static ThemeData build(AppThemeOption option) {
+    final isDark = option == AppThemeOption.dark;
+
+    // ── Resolved surface tokens ──────────────────────────────────────────────
+    final Color surface              = isDark ? AppColors.surfaceDark              : AppColors.surface;
+    final Color surfaceContainer     = isDark ? AppColors.surfaceContainerDark     : AppColors.surfaceContainer;
+    final Color surfaceContainerHigh = isDark ? AppColors.surfaceContainerHighDark : AppColors.surfaceContainerHigh;
+    final Color onSurface            = isDark ? AppColors.onSurfaceDark            : AppColors.onSurface;
+    final Color onSurfaceVariant     = isDark ? AppColors.onSurfaceVariantDark     : AppColors.onSurfaceVariant;
+    final Color outline              = isDark ? AppColors.outlineDark              : AppColors.outline;
+    final Color outlineVariant       = isDark ? AppColors.outlineVariantDark       : AppColors.outlineVariant;
+    final Color background           = isDark ? AppColors.backgroundDark           : AppColors.background;
+
+    // ── Primary tokens ───────────────────────────────────────────────────────
+    const Color primary   = AppColors.primary;
+    const Color onPrimary = Color(0xFFFFFFFF); // putih — kontras di atas Vivid Blue
+
+    // primary container: tinted version of primary untuk chip/badge selected state
+    final Color primaryContainer = isDark
+        ? AppColors.surfaceContainerHighDark
+        : const Color(0xFFD6E0FF);
+    final Color onPrimaryContainer = isDark ? AppColors.onSurfaceDark : AppColors.onSurface;
+
+    // ── ColorScheme ──────────────────────────────────────────────────────────
+    final colorScheme = ColorScheme(
+      brightness: isDark ? Brightness.dark : Brightness.light,
+      primary: primary,
+      onPrimary: onPrimary,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: onPrimaryContainer,
+      // secondary: pakai primary dengan opacity untuk passive states
+      secondary: primary,
+      onSecondary: onPrimary,
+      secondaryContainer: primaryContainer,
+      onSecondaryContainer: onPrimaryContainer,
+      tertiary: primary,
+      error: AppColors.formError,
+      onError: const Color(0xFFFFFFFF),
+      surface: surface,
+      onSurface: onSurface,
+      surfaceContainer: surfaceContainer,
+      surfaceContainerHigh: surfaceContainerHigh,
+      outline: outline,
+      outlineVariant: outlineVariant,
+      onSurfaceVariant: onSurfaceVariant,
     );
-    return ThemeData.from(
-      colorScheme: scheme,
-      textTheme: AppTextTheme.textTheme,
+
+    return ThemeData(
       useMaterial3: true,
-    ).copyWith(
-      pageTransitionsTheme: _pageTransitionsTheme,
+      brightness: colorScheme.brightness,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: background,
+      textTheme: AppTypography.textTheme(onSurface, onSurfaceVariant),
+
+      // Flutter Web: force standard density agar button tidak flat/pendek.
+      visualDensity: VisualDensity.standard,
+
+      iconTheme: IconThemeData(color: onPrimaryContainer),
+
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: const ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: kIsWeb
+              ? const _HorizontalSlidePageTransitionsBuilder()
+              : const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: kIsWeb
+              ? const _HorizontalSlidePageTransitionsBuilder()
+              : const CupertinoPageTransitionsBuilder(),
+        },
+      ),
+
+      appBarTheme: AppBarTheme(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 2,
+        foregroundColor: onSurface,
+        iconTheme: IconThemeData(color: onSurface),
+        centerTitle: false,
+      ),
+
+      cardTheme: CardThemeData(
+        color: surfaceContainer,
+        elevation: 1,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+        ),
+      ),
+
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: onPrimary,
+          minimumSize: const Size(double.infinity, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(pillRadius),
+          ),
+        ),
+      ),
+
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: onSurface,
+          side: BorderSide(color: outline),
+          minimumSize: const Size(double.infinity, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(pillRadius),
+          ),
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primary,
+          minimumSize: const Size(0, 48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: surfaceContainer,
+          foregroundColor: onSurface,
+          elevation: 1,
+          minimumSize: const Size(double.infinity, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(pillRadius),
+          ),
+        ),
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceContainer.withValues(alpha: isDark ? 0.6 : 1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(pillRadius),
+          borderSide: BorderSide(color: outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(pillRadius),
+          borderSide: BorderSide(color: outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(pillRadius),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(pillRadius),
+          borderSide: const BorderSide(color: AppColors.formError),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(pillRadius),
+          borderSide: const BorderSide(color: AppColors.formError, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        hintStyle: TextStyle(color: onSurfaceVariant),
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.transparent,
+        selectedColor: primaryContainer,
+        shape: const StadiumBorder(),
+        side: BorderSide(color: outline),
+        labelStyle:
+            AppTypography.textTheme(onSurface, onSurfaceVariant).labelSmall,
+      ),
+
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: surfaceContainerHigh,
+        elevation: 3,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.onSurface,
+        contentTextStyle: const TextStyle(color: AppColors.background),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(snackbarRadius),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+
+      dividerTheme: DividerThemeData(color: outlineVariant, thickness: 1),
+
+      listTileTheme: ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        tileColor: Colors.transparent,
+        iconColor: onSurfaceVariant,
+      ),
     );
   }
 }

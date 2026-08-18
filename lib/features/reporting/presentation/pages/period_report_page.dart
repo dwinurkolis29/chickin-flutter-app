@@ -31,7 +31,7 @@ class PeriodReportPage extends StatelessWidget {
 
 class _PeriodReportPageView extends StatelessWidget {
   final bool isTab;
-  const _PeriodReportPageView({super.key, this.isTab = false});
+  const _PeriodReportPageView({this.isTab = false});
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +212,7 @@ class _DetailButton extends StatelessWidget {
       ),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
-        side: BorderSide(color: cs.primary.withOpacity(0.5)),
+        side: BorderSide(color: cs.primary.withValues(alpha: 0.5)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );

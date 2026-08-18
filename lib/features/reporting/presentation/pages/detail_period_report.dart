@@ -25,7 +25,7 @@ class DetailPeriodReport extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: cs.background,
+      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Detail Laporan'),
       body: SafeArea(
         top: false,
@@ -160,7 +160,7 @@ class _InfoRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(0.6))),
+            style: tt.bodyMedium?.copyWith(color: cs.onSurface.withValues(alpha: 0.6))),
         Text(
           value,
           style: tt.bodyMedium?.copyWith(
@@ -260,17 +260,17 @@ class _ExportChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: disabled
-              ? (Theme.of(context).cardTheme.color ?? cs.surface).withOpacity(0.6)
+              ? (Theme.of(context).cardTheme.color ?? cs.surface).withValues(alpha: 0.6)
               : (Theme.of(context).cardTheme.color ?? cs.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.15),
+            color: disabled ? cs.outlineVariant : cs.primary.withValues(alpha: 0.15),
           ),
           boxShadow: disabled
               ? null
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -289,13 +289,13 @@ class _ExportChip extends StatelessWidget {
               )
             else
               Icon(icon, size: 20,
-                  color: disabled ? cs.onSurface.withOpacity(0.3) : cs.primary),
+                  color: disabled ? cs.onSurface.withValues(alpha: 0.3) : cs.primary),
             const SizedBox(height: 4),
             Text(
               label,
               style: tt.labelMedium?.copyWith(
                 color:
-                    disabled ? cs.onSurface.withOpacity(0.3) : cs.onSurface,
+                    disabled ? cs.onSurface.withValues(alpha: 0.3) : cs.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -336,12 +336,12 @@ class _RecapHarianButton extends StatelessWidget {
       label: Text(
         loading ? 'Memuat data...' : 'Rekap Harian',
         style: tt.labelLarge?.copyWith(
-          color: loading ? cs.onSurface.withOpacity(0.5) : cs.primary,
+          color: loading ? cs.onSurface.withValues(alpha: 0.5) : cs.primary,
         ),
       ),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
-        side: BorderSide(color: cs.primary.withOpacity(0.5)),
+        side: BorderSide(color: cs.primary.withValues(alpha: 0.5)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );

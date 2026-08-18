@@ -1,30 +1,61 @@
 import 'package:flutter/material.dart';
 
-/// Brand color constants.
-/// semantic colors (error, warning, info, success) are used directly
-/// in components like AppSnackbar. All other colors flow through ColorScheme.
+/// Brand color constants for Chickin (BroilerKu).
+///
+/// Rules (dari flutter-design skill):
+/// - DILARANG menulis `Color(0xFF...)` baru langsung di widget/screen.
+/// - Selalu referensikan via `AppColors.*` atau `Theme.of(context).colorScheme.*`.
+/// - Gunakan `colorScheme.*` di widget agar light/dark otomatis switch.
+/// - Warna semantic (error, warning, success) hanya untuk status/badge — bukan elemen struktural.
 class AppColors {
   AppColors._();
 
-  // Brand
-  static const Color primary        = Color(0xFF09637E);
-  static const Color secondary      = Color(0xFF7AB2B2);
-  static const Color background     = Color(0xFFEBF4F6);
-  static const Color backgroundDark = Color(0xFF0F2027);
+  // ── Brand ─────────────────────────────────────────────────────────────────
+  /// Vivid Blue — satu-satunya brand color. Dipakai untuk CTA, icon aktif,
+  /// badge, progress indicator, tombol utama.
+  static const Color primary = Color(0xFF4B92DB);
 
-  // Semantic — gunakan di atas background TERANG (surface, white, #EBF4F6)
-  static const Color error   = Color(0xFFC62828);
-  static const Color warning = Color(0xFFE65100);
-  static const Color info    = Color(0xFF0277BD);
-  static const Color success = Color(0xFF2E7D32);
+  // ── Light Mode Surface Tokens ─────────────────────────────────────────────
+  /// Scaffold background — putih dengan blue tint ringan.
+  static const Color background           = Color(0xFFEEF2FF);
+  /// Card / dialog / sheet surface utama.
+  static const Color surface              = Color(0xFFFFFFFF);
+  /// Default card background, input fill.
+  static const Color surfaceContainer     = Color(0xFFF5F7FF);
+  /// Elevated card / bottom sheet.
+  static const Color surfaceContainerHigh = Color(0xFFEBF0FF);
+  /// Teks utama (dark navy, bukan hitam murni).
+  static const Color onSurface           = Color(0xFF0A1128);
+  /// Teks muted / label / hint.
+  static const Color onSurfaceVariant    = Color(0xFF5A6680);
+  /// Border aktif / input border.
+  static const Color outline             = Color(0xFFCDD5EE);
+  /// Divider tipis / border pasif.
+  static const Color outlineVariant      = Color(0xFFE8ECFB);
 
-  // Semantic ON PRIMARY — gunakan di atas hero card (#09637E)
-  static const Color errorOnPrimary   = Color(0xFFFF8A80);
-  static const Color warningOnPrimary = Color(0xFFFFD180);
-  static const Color infoOnPrimary    = Color(0xFF80D8FF);
-  static const Color successOnPrimary = Color(0xFFCCFF90);
+  // ── Dark Mode Surface Tokens ──────────────────────────────────────────────
+  static const Color backgroundDark           = Color(0xFF0C1229);
+  static const Color surfaceDark              = Color(0xFF111827);
+  static const Color surfaceContainerDark     = Color(0xFF1A2340);
+  static const Color surfaceContainerHighDark = Color(0xFF222D4A);
+  static const Color onSurfaceDark            = Color(0xFFDDE3FF);
+  static const Color onSurfaceVariantDark     = Color(0xFF8090B5);
+  static const Color outlineDark              = Color(0xFF2E3D66);
+  static const Color outlineVariantDark       = Color(0xFF1E2A4A);
 
-  // FCR Status Colors
+  // ── Semantic Status Colors ────────────────────────────────────────────────
+  /// Gunakan hanya di status badge, snackbar, dan teks status.
+  /// Jangan gunakan sebagai warna struktural / background lebar.
+  static const Color success  = Color(0xFF22C55E);
+  static const Color warning  = Color(0xFFF59E0B);
+  static const Color error    = Color(0xFFEF4444);
+
+  /// Alias untuk InputDecorationTheme.errorBorder.
+  static const Color formError = error;
+
+  // ── FCR Domain Status Colors ──────────────────────────────────────────────
+  /// Warna khusus domain FCR (Feed Conversion Ratio).
+  /// Hanya dipakai di komponen FCR badge / card.
   static const Color fcrGoodBg     = Color(0xFFEAF3DE);
   static const Color fcrGoodText   = Color(0xFF27500A);
   static const Color fcrGoodBorder = Color(0xFF639922);

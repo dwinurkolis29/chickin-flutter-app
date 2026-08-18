@@ -125,13 +125,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
             ],
             border: Border.all(
-              color: colorScheme.outlineVariant.withOpacity(0.4),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -144,7 +144,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     return Scaffold(
-      backgroundColor: isWideScreen ? colorScheme.surfaceContainerHighest.withOpacity(0.3) : colorScheme.surface,
+      backgroundColor: isWideScreen ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3) : colorScheme.surface,
       body: SafeArea(
         child: content,
       ),

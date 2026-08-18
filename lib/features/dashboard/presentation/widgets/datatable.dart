@@ -154,8 +154,8 @@ class ChickenDataSource extends DataTableSource {
       final aValue = getField(a);
       final bValue = getField(b);
       return ascending
-          ? Comparable.compare(aValue as Comparable<T>, bValue as Comparable<T>)
-          : Comparable.compare(bValue as Comparable<T>, aValue as Comparable<T>);
+          ? Comparable.compare(aValue, bValue)
+          : Comparable.compare(bValue, aValue);
     });
     notifyListeners();
   }
@@ -206,8 +206,4 @@ class ChickenDataSource extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
-
-  void dispose() {
-    // Clean up resources if needed
-  }
 }

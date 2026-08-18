@@ -1,6 +1,5 @@
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';

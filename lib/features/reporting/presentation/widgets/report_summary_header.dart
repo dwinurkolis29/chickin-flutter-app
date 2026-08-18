@@ -12,25 +12,28 @@ class PeriodEvaluator {
     return PeriodStatus.warning;
   }
 
+  /// Warna status yang ditampilkan di atas hero card (background primary biru).
+  /// Menggunakan pastel agar kontras di atas [AppColors.primary].
   static Color statusColor(BuildContext context, PeriodStatus status) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     if (isDarkMode) {
       switch (status) {
         case PeriodStatus.good:
-          return const Color(0xFF1B5E20); // Hijau Tua
+          return AppColors.fcrGoodText;
         case PeriodStatus.warning:
-          return const Color(0xFFE65100); // Oranye/Kuning Tua
+          return AppColors.fcrWarnText;
         case PeriodStatus.bad:
-          return const Color(0xFFB71C1C); // Merah Tua
+          return AppColors.fcrBadText;
       }
     } else {
+      // Pastel — kontras di atas hero card Vivid Blue (#1A47E5)
       switch (status) {
         case PeriodStatus.good:
-          return AppColors.successOnPrimary;
+          return const Color(0xFFA3E6BE); // pastel green
         case PeriodStatus.warning:
-          return AppColors.warningOnPrimary;
+          return const Color(0xFFFFD580); // pastel amber
         case PeriodStatus.bad:
-          return AppColors.errorOnPrimary;
+          return const Color(0xFFFF9A9A); // pastel red
       }
     }
   }
@@ -90,13 +93,13 @@ class ReportSummaryHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             cs.primary,
-            cs.primary.withOpacity(0.75),
+            cs.primary.withValues(alpha: 0.75),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: cs.primary.withOpacity(0.3),
+            color: cs.primary.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -117,7 +120,7 @@ class ReportSummaryHeader extends StatelessWidget {
                     children: [
                       Material(
                         color: (showPeriodSelector && onPeriodSelectorTap != null)
-                            ? cs.onPrimary.withOpacity(0.15)
+                            ? cs.onPrimary.withValues(alpha: 0.15)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                         clipBehavior: Clip.antiAlias,
@@ -158,7 +161,7 @@ class ReportSummaryHeader extends StatelessWidget {
                         child: Text(
                           '$dateRange • $durationDays Hari',
                           style: tt.bodySmall?.copyWith(
-                            color: cs.onPrimary.withOpacity(0.8),
+                            color: cs.onPrimary.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
@@ -168,7 +171,7 @@ class ReportSummaryHeader extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     border: Border.all(color: color, width: 1.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -190,7 +193,7 @@ class ReportSummaryHeader extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            Divider(color: cs.onPrimary.withOpacity(0.2), height: 1),
+            Divider(color: cs.onPrimary.withValues(alpha: 0.2), height: 1),
             const SizedBox(height: 20),
             // Key 3 metrics hero
             Row(
@@ -265,7 +268,7 @@ class _HeroMetric extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: tt.bodySmall?.copyWith(color: onPrimary.withOpacity(0.6)),
+            style: tt.bodySmall?.copyWith(color: onPrimary.withValues(alpha: 0.6)),
           ),
         ],
       ),
@@ -280,7 +283,7 @@ class _VerticalDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: onPrimary.withOpacity(0.2),
+      color: onPrimary.withValues(alpha: 0.2),
       margin: const EdgeInsets.symmetric(horizontal: 8),
     );
   }

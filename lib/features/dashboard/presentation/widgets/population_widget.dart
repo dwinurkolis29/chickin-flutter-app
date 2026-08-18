@@ -16,8 +16,6 @@ class PopulationSection extends StatefulWidget {
 
 class _PopulationSectionState extends State<PopulationSection>
     with SingleTickerProviderStateMixin {
-  bool _isLoading = false;
-
   late AnimationController _animationController;
   late Animation<double> _progressAnimation;
   late Animation<int> _counterAnimation;
@@ -80,10 +78,6 @@ class _PopulationSectionState extends State<PopulationSection>
     final textTheme = Theme.of(context).textTheme;
 
     // Menghitung persentase ayam yang masih hidup dari jumlah populasi
-    double progress =
-        widget.capacity == 0 ? 0 : widget.populationRemain / widget.capacity;
-    String percentage = (progress * 100).toStringAsFixed(1);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

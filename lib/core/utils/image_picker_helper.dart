@@ -32,7 +32,7 @@ class ImagePickerHelper {
         AndroidUiSettings(
             toolbarTitle: 'Potong Gambar',
             toolbarColor: AppColors.primary,
-            statusBarColor: AppColors.primary,
+            statusBarLight: false,
             toolbarWidgetColor: Colors.white,
             hideBottomControls: true,
             initAspectRatio: aspectRatio ?? CropAspectRatioPreset.original,

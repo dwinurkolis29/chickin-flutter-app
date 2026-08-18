@@ -163,7 +163,7 @@ class _DetailRow extends StatelessWidget {
       padding: EdgeInsets.only(bottom: isLast ? 0 : 10),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: cs.primary.withOpacity(0.7)),
+          Icon(icon, size: 16, color: cs.primary.withValues(alpha: 0.7)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

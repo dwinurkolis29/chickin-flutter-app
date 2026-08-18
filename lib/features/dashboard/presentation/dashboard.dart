@@ -449,7 +449,7 @@ class _TopBanner extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final onPrimary = colorScheme.onPrimary;
-    final onPrimaryMuted = colorScheme.onPrimary.withOpacity(0.75);
+    final onPrimaryMuted = colorScheme.onPrimary.withValues(alpha: 0.75);
 
     return Container(
       width: double.infinity,
@@ -461,13 +461,13 @@ class _TopBanner extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             colorScheme.primary,
-            colorScheme.primary.withOpacity(0.75),
+            colorScheme.primary.withValues(alpha: 0.75),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withOpacity(0.3),
+            color: colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -494,9 +494,9 @@ class _TopBanner extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.2),
+                    color: AppColors.success.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.success.withOpacity(0.5)),
+                    border: Border.all(color: AppColors.success.withValues(alpha: 0.5)),
                   ),
                   child: Text(
                     '● Aktif',

@@ -239,7 +239,7 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                                   child: LinearProgressIndicator(
                                     value: _barProgress,
                                     minHeight: 6,
-                                    backgroundColor: cs.outlineVariant.withOpacity(0.3),
+                                    backgroundColor: cs.outlineVariant.withValues(alpha: 0.3),
                                     valueColor: AlwaysStoppedAnimation<Color>(_barColor),
                                   ),
                                 ),
@@ -314,7 +314,7 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

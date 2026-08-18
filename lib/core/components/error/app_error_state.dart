@@ -51,7 +51,7 @@ class AppErrorState extends StatelessWidget {
           Text(
             subtitle!,
             style: tt.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant.withOpacity(0.8),
+              color: cs.onSurfaceVariant.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),

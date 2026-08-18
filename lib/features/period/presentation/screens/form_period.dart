@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,7 @@ import '../controllers/period_controller.dart';
 class FormPeriod extends StatefulWidget {
   final PeriodData? period;
 
-  const FormPeriod({Key? key, this.period}) : super(key: key);
+  const FormPeriod({super.key, this.period});
 
   @override
   State<FormPeriod> createState() => _FormPeriodState();
@@ -376,10 +375,10 @@ class _StatusSwitch extends StatelessWidget {
       decoration: BoxDecoration(
         color:
             isActive
-                ? colorScheme.primary.withOpacity(0.07)
-                : Colors.grey.shade100,
+                ? colorScheme.primary.withValues(alpha: 0.07)
+                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         border: Border.all(
-          color: isActive ? colorScheme.primary : Colors.grey.shade400,
+          color: isActive ? colorScheme.primary : colorScheme.outlineVariant,
           width: isActive ? 1.5 : 1.0,
         ),
         borderRadius: BorderRadius.circular(10),
@@ -389,7 +388,7 @@ class _StatusSwitch extends StatelessWidget {
           label,
           style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: isActive ? colorScheme.primary : Colors.grey.shade600,
+            color: isActive ? colorScheme.primary : colorScheme.onSurface,
           ),
         ),
         subtitle: Text(
@@ -397,14 +396,14 @@ class _StatusSwitch extends StatelessWidget {
           style: textTheme.bodySmall?.copyWith(
             color:
                 isActive
-                    ? colorScheme.primary.withOpacity(0.75)
-                    : Colors.grey.shade500,
+                    ? colorScheme.primary.withValues(alpha: 0.75)
+                    : colorScheme.onSurfaceVariant,
           ),
         ),
         value: value,
         activeColor: colorScheme.primary,
-        inactiveThumbColor: Colors.grey.shade400,
-        inactiveTrackColor: Colors.grey.shade300,
+        inactiveThumbColor: colorScheme.outline,
+        inactiveTrackColor: colorScheme.surfaceContainerHighest,
         onChanged: disabled ? null : onChanged,
       ),
     );

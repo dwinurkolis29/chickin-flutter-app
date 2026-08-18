@@ -31,8 +31,8 @@ class PeriodCard extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: isActive
-                    ? AppColors.success.withOpacity(0.1)
-                    : cs.surfaceVariant,
+                    ? AppColors.success.withValues(alpha: 0.1)
+                    : cs.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(

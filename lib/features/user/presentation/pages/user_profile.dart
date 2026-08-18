@@ -48,7 +48,7 @@ class _UserState extends State<User> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary.withOpacity(0.4),
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -65,7 +65,7 @@ class _UserState extends State<User> {
                 thickness: 0.5,
                 indent: 16,
                 endIndent: 16,
-                color: AppColors.secondary.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
               ListTile(
                 leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
@@ -107,23 +107,23 @@ class _UserState extends State<User> {
     final textTheme = Theme.of(context).textTheme;
     final authService = context.watch<AuthService>();
     final controller = context.watch<UserController>();
-    final _isLoading = controller.isLoading;
-    final _errorMessage = controller.errorMessage ?? '';
-    final _userProfile = controller.userProfile;
+    final isLoading = controller.isLoading;
+    final errorMessage = controller.errorMessage ?? '';
+    final userProfile = controller.userProfile;
 
     return Scaffold(
       // surface = AppColors.background (light) / M3 dark default (dark)
       backgroundColor: colorScheme.surface,
       appBar: const AppHeader(title: 'Profil Saya'),
       body:
-          _isLoading
+          isLoading
               ? Center(
                 child: CircularProgressIndicator(color: colorScheme.primary),
               )
-              : _errorMessage.isNotEmpty
+              : errorMessage.isNotEmpty
               ? AppErrorState(
                   message: 'Gagal memuat profil',
-                  subtitle: _errorMessage,
+                  subtitle: errorMessage,
                   onRetry: () => controller.loadUserData(),
                 )
               : SafeArea(
@@ -147,15 +147,15 @@ class _UserState extends State<User> {
                                 CircleAvatar(
                                   radius: 42,
                                   backgroundColor: colorScheme.primary
-                                      .withOpacity(0.12),
+                                      .withValues(alpha: 0.12),
                                   backgroundImage:
-                                      _userProfile?.avatarUrl != null
+                                      userProfile?.avatarUrl != null
                                           ? NetworkImage(
-                                            _userProfile!.avatarUrl!,
+                                            userProfile!.avatarUrl!,
                                           )
                                           : null,
                                   child:
-                                      _userProfile?.avatarUrl == null
+                                      userProfile?.avatarUrl == null
                                           ? Icon(
                                             Icons.person,
                                             size: 48,
@@ -208,7 +208,7 @@ class _UserState extends State<User> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _userProfile?.name ?? 'Tidak ada data',
+                                    userProfile?.name ?? 'Tidak ada data',
                                     style: textTheme.titleMedium?.copyWith(
                                       color: colorScheme.onSurface,
                                     ),
@@ -239,7 +239,7 @@ class _UserState extends State<User> {
                           children: [
                             _InfoRow(
                               icon: Icons.phone_outlined,
-                              value: _userProfile?.phone ?? 'Tidak ada data',
+                              value: userProfile?.phone ?? 'Tidak ada data',
                             ),
                             Divider(
                               height: 20,
@@ -256,7 +256,7 @@ class _UserState extends State<User> {
                             ),
                             _InfoRow(
                               icon: Icons.location_on_outlined,
-                              value: _userProfile?.address ?? 'Tidak ada data',
+                              value: userProfile?.address ?? 'Tidak ada data',
                             ),
                           ],
                         ),
@@ -273,7 +273,7 @@ class _UserState extends State<User> {
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: colorScheme.primary.withOpacity(0.12),
+                                color: colorScheme.primary.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(

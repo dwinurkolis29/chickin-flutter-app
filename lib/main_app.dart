@@ -4,6 +4,7 @@ import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/theme/theme_controller.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/core/theme/app_theme_option.dart';
 import 'package:recording_app/core/services/storage_service.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
@@ -90,8 +91,8 @@ class MainApp extends StatelessWidget {
       child: Consumer<ThemeController>(
         builder: (context, themeController, _) {
           return MaterialApp(
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
+            theme: AppTheme.build(AppThemeOption.light),
+            darkTheme: AppTheme.build(AppThemeOption.dark),
             themeMode: themeController.themeMode,
             home: const AppChecker(),
           );

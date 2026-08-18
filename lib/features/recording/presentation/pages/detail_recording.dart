@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
@@ -259,7 +258,7 @@ class _RecordingTableState extends State<_RecordingTable> {
       isDense: true,
       hintText: hint,
       hintStyle: textTheme.bodyMedium?.copyWith(
-        color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       filled: true,
@@ -446,7 +445,7 @@ class _RecordingTableState extends State<_RecordingTable> {
                     ),
                     dataRowColor: WidgetStateProperty.resolveWith((states) {
                       if (states.contains(WidgetState.selected)) {
-                        return colorScheme.primaryContainer.withOpacity(0.3);
+                        return colorScheme.primaryContainer.withValues(alpha: 0.3);
                       }
                       return null;
                     }),
@@ -651,7 +650,7 @@ class _PeriodSummaryCard extends StatelessWidget {
 
     // Warna konten di atas primary
     final onPrimary = colorScheme.onPrimary;
-    final onPrimaryMuted = colorScheme.onPrimary.withOpacity(0.65);
+    final onPrimaryMuted = colorScheme.onPrimary.withValues(alpha: 0.65);
 
     return Card(
       elevation: 0,
@@ -679,7 +678,7 @@ class _PeriodSummaryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            Divider(color: onPrimary.withOpacity(0.2), height: 1, thickness: 1),
+            Divider(color: onPrimary.withValues(alpha: 0.2), height: 1, thickness: 1),
             const SizedBox(height: 16),
 
             Row(

@@ -137,7 +137,7 @@ class _FCRWeekRow extends StatelessWidget {
                       // Background track
                       Container(
                         height: 8,
-                        color: cs.outlineVariant.withOpacity(0.3),
+                        color: cs.outlineVariant.withValues(alpha: 0.3),
                       ),
                       // Fill
                       FractionallySizedBox(

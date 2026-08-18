@@ -48,7 +48,7 @@ class _CageProfileState extends State<CageProfile> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary.withOpacity(0.4),
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -65,7 +65,7 @@ class _CageProfileState extends State<CageProfile> {
                 thickness: 0.5,
                 indent: 16,
                 endIndent: 16,
-                color: AppColors.secondary.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
               ListTile(
                 leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
@@ -89,11 +89,8 @@ class _CageProfileState extends State<CageProfile> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: widget.isTab
-          ? null
-          : AppHeader(title: 'Profil Kandang'),
+      appBar: const AppHeader(title: 'Profil Kandang'),
       body: SafeArea(
-        top: false,
         child: Consumer<CageController>(
           builder: (context, controller, child) {
             if (controller.isLoading) {
@@ -102,33 +99,33 @@ class _CageProfileState extends State<CageProfile> {
               );
             }
 
-            if (controller.errorMessage != null &&
-                controller.errorMessage!.isNotEmpty) {
+            if (controller.errorMessage != null) {
               return AppErrorState(
-                message: 'Gagal memuat data kandang',
+                message: 'Gagal memuat profil kandang',
                 subtitle: controller.errorMessage,
                 onRetry: () => controller.loadCageData(),
               );
             }
 
-            if (!controller.hasValidCageData) {
+            final cageData = controller.cageData;
+            if (cageData == null) {
               return _buildEmptyState(context, colorScheme);
             }
 
-            final cageData = controller.cageData!;
-
-            return RefreshIndicator(
-              onRefresh: () => controller.loadCageData(),
-              child: SingleChildScrollView(
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
                 child: Column(
                   children: [
                     _Card(
                       onTap: () {
-                        final cageData = controller.cageData;
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FormCage(cageData: cageData),
+                            builder:
+                                (context) => FormCage(
+                                  cageData: cageData,
+                                ),
                           ),
                         );
                       },
@@ -139,7 +136,7 @@ class _CageProfileState extends State<CageProfile> {
                               CircleAvatar(
                                 radius: 42,
                                 backgroundColor: colorScheme.primary
-                                    .withOpacity(0.12),
+                                    .withValues(alpha: 0.12),
                                 backgroundImage:
                                     cageData.imageUrl != null
                                         ? NetworkImage(cageData.imageUrl!)
@@ -261,7 +258,7 @@ class _CageProfileState extends State<CageProfile> {
             Icon(
               Icons.house_siding_outlined,
               size: 100,
-              color: colorScheme.primary.withOpacity(0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(

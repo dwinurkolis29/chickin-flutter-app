@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
 
 class StatisticsSection extends StatelessWidget {
   final double fcr;
@@ -30,31 +31,31 @@ class StatisticsSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: WeightChartCard(weightStream: weightStream),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 8),
               Expanded(
                 flex: 1,
                 child: Column(
                   children: [
                     Expanded(
                       child: _InfoCard(
-                        icon: Icons.edit_note_outlined,
-                        iconColor: Theme.of(context).colorScheme.primary,
-                        label: 'FCR',
-                        value: fcr.toStringAsFixed(2),
-                        unit: '',
+                        icon: Icons.calendar_today,
+                        iconColor: AppColors.primary,
+                        label: 'Umur Ayam',
+                        value: '$umur',
+                        unit: 'Hari',
                       ),
                     ),
                     const SizedBox(height: 8),
                     Expanded(
                       child: _InfoCard(
-                        icon: Icons.calendar_month,
-                        iconColor: Theme.of(context).colorScheme.primary,
-                        label: 'Umur',
-                        value: umur.toString(),
-                        unit: 'Hari',
+                        icon: Icons.percent,
+                        iconColor: AppColors.warning,
+                        label: 'FCR',
+                        value: '$fcr',
+                        unit: 'Ratio',
                       ),
                     ),
                   ],
@@ -67,8 +68,6 @@ class StatisticsSection extends StatelessWidget {
     );
   }
 }
-
-// Anda bisa menamai ulang class ini, misalnya menjadi _WeightChartCard
 
 class WeightChartCard extends StatelessWidget {
   final Stream<List<FlSpot>>? weightStream;
@@ -83,8 +82,8 @@ class WeightChartCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: [
-            Colors.green.withOpacity(0.1),
-            Theme.of(context).colorScheme.surface.withOpacity(0.5),
+            AppColors.success.withValues(alpha: 0.1),
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -132,12 +131,12 @@ class WeightChartCard extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: AppColors.success.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
                                 Icons.show_chart,
-                                color: Colors.green,
+                                color: AppColors.success,
                                 size: 20,
                               ),
                             ),
@@ -160,7 +159,7 @@ class WeightChartCard extends StatelessWidget {
                                 LineChartBarData(
                                   spots: flSpot,
                                   isCurved: true,
-                                  color: Colors.green,
+                                  color: AppColors.success,
                                   barWidth: 4,
                                   isStrokeCapRound: true,
                                   dotData: const FlDotData(show: false),
@@ -229,7 +228,7 @@ class _InfoCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.1),
+                    color: iconColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: iconColor, size: 20),

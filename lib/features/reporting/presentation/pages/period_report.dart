@@ -36,7 +36,7 @@ class _PeriodReportView extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: cs.background,
+      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Laporan Periode'),
       body: SafeArea(top: false, child: _buildBody(context, controller)),
     );
@@ -130,7 +130,7 @@ class PeriodHeaderSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: cs.primary.withOpacity(0.07),
+            color: cs.primary.withValues(alpha: 0.07),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -200,7 +200,7 @@ class _PeriodDropdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: cs.background,
+        color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: cs.outlineVariant),
       ),
@@ -246,7 +246,7 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(0.6)),
+          style: tt.bodyMedium?.copyWith(color: cs.onSurface.withValues(alpha: 0.6)),
         ),
         Text(
           value,
@@ -350,17 +350,17 @@ class _ExportChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: disabled
-              ? (Theme.of(context).cardTheme.color ?? cs.surface).withOpacity(0.6)
+              ? (Theme.of(context).cardTheme.color ?? cs.surface).withValues(alpha: 0.6)
               : (Theme.of(context).cardTheme.color ?? cs.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: disabled ? cs.outlineVariant : cs.primary.withOpacity(0.15),
+            color: disabled ? cs.outlineVariant : cs.primary.withValues(alpha: 0.15),
           ),
           boxShadow: disabled
               ? null
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -371,13 +371,13 @@ class _ExportChip extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: disabled ? cs.onSurface.withOpacity(0.3) : cs.primary,
+              color: disabled ? cs.onSurface.withValues(alpha: 0.3) : cs.primary,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: tt.labelMedium?.copyWith(
-                color: disabled ? cs.onSurface.withOpacity(0.3) : cs.onSurface,
+                color: disabled ? cs.onSurface.withValues(alpha: 0.3) : cs.onSurface,
               ),
               textAlign: TextAlign.center,
             ),

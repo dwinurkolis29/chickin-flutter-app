@@ -42,7 +42,7 @@ class AppSnackbar {
     _show(
       context,
       message,
-      backgroundColor: AppColors.info,
+      backgroundColor: AppColors.primary,
       icon: Icons.info,
       duration: duration,
     );
