@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 /// Evaluasi status berdasarkan FCR dan survival rate.
 enum PeriodStatus { good, warning, bad }
@@ -96,7 +97,7 @@ class ReportSummaryHeader extends StatelessWidget {
             cs.primary.withValues(alpha: 0.75),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         boxShadow: [
           BoxShadow(
             color: cs.primary.withValues(alpha: 0.3),
@@ -173,7 +174,7 @@ class ReportSummaryHeader extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.2),
                     border: Border.all(color: color, width: 1.5),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

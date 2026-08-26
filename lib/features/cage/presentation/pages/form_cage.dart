@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 class FormCage extends StatefulWidget {
   final CageData? cageData;
@@ -165,7 +166,7 @@ class _FormCageState extends State<FormCage> {
                     backgroundColor: colorScheme.primary,
                     foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                     ),
                   ),
                   onPressed: _isLoading ? null : _submitData,

@@ -1,5 +1,6 @@
 // lib/features/cage/presentation/widgets/cage_info_card.dart
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 
 class CageInfoCard extends StatelessWidget {
@@ -57,7 +58,7 @@ class _ReadOnlyField extends StatelessWidget {
         labelText: label,
         prefixIcon: Icon(icon),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,

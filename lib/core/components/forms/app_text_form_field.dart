@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../theme/app_theme.dart';
 
 class AppTextFormField extends StatelessWidget {
   const AppTextFormField({
@@ -70,9 +71,11 @@ class AppTextFormField extends StatelessWidget {
         prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
         suffixIcon: suffixIcon,
         suffixText: suffixText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
         ),
         filled: true,
         fillColor: colorScheme.surfaceContainerLowest,

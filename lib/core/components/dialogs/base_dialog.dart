@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 /// Base dialog widget with consistent styling across the app
 class BaseDialog extends StatelessWidget {
@@ -19,7 +20,7 @@ class BaseDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
       title: title != null
           ? Text(

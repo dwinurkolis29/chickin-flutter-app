@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 
@@ -264,7 +265,7 @@ class _SignupState extends State<Signup> {
                         alpha: 0.6,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                       ),
                       elevation: 0,
                     ),

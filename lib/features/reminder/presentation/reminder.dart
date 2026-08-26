@@ -10,6 +10,7 @@ import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
 import 'package:recording_app/features/reminder/presentation/form_reminder.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 class Reminder extends StatefulWidget {
   const Reminder({super.key});
@@ -74,7 +75,7 @@ class _ReminderState extends State<Reminder> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -300,7 +301,7 @@ class _ReminderState extends State<Reminder> {
           body: DecoratedBox(
             decoration: BoxDecoration(
               color: cs.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
             ),
             child: CustomScrollView(
               slivers: [
@@ -401,7 +402,7 @@ class _ReminderCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 15),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -410,7 +411,7 @@ class _ReminderCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: cs.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.alarm, color: cs.primary, size: 24),
               ),

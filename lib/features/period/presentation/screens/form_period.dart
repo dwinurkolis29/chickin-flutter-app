@@ -7,6 +7,7 @@ import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import '../../data/models/period_data.dart';
 import '../controllers/period_controller.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class FormPeriod extends StatefulWidget {
   final PeriodData? period;
@@ -316,7 +317,7 @@ class _FormPeriodState extends State<FormPeriod> {
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                   ),
                 ),
                 child:

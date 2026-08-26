@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
@@ -54,7 +55,7 @@ class _RecordingTableState extends State<RecordingTable> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         boxShadow: [
           BoxShadow(
             color: cs.primary.withValues(alpha: 0.06),
@@ -97,7 +98,6 @@ class _RecordingTableState extends State<RecordingTable> {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Card(
-                    elevation: 8,
                     child: DataTable(
                       sortColumnIndex: _sortColumnIndex,
                       sortAscending: _sortAscending,

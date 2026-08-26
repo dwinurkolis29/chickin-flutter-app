@@ -3,6 +3,7 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/analytics_card.dart';
@@ -342,7 +343,7 @@ class _RecapHarianButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
         side: BorderSide(color: cs.primary.withValues(alpha: 0.5)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.pillRadius)),
       ),
     );
   }

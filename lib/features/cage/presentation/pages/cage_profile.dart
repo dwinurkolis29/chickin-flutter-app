@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/cage/presentation/pages/form_cage.dart';
@@ -35,7 +36,7 @@ class _CageProfileState extends State<CageProfile> {
       context,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
       ),
       builder: SafeArea(
         child: Padding(
@@ -277,7 +278,7 @@ class _CageProfileState extends State<CageProfile> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
@@ -316,7 +317,7 @@ class _Card extends StatelessWidget {
           isInteractive
               ? InkWell(
                 onTap: onTap,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

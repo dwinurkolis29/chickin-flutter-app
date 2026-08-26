@@ -7,6 +7,7 @@ import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 class FormUser extends StatefulWidget {
   const FormUser({super.key});
@@ -196,7 +197,7 @@ class _FormUserState extends State<FormUser> {
                             backgroundColor: colorScheme.primary,
                             foregroundColor: colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                             ),
                           ),
                           onPressed: _isSaving ? null : _handleUpdate,

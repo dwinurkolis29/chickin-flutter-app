@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 /// Card collapsible berisi detail teknis yang tidak perlu dilihat setiap kali.
 /// Default: tersembunyi (collapsed). User expand sendiri jika butuh.
@@ -65,7 +66,7 @@ class _ExpandableDetailCardState extends State<ExpandableDetailCard>
           // Header — selalu tampil, bisa di-tap
           InkWell(
             onTap: _toggle,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Row(

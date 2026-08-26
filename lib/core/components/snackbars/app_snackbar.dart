@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 
 /// Reusable snackbar helper for consistent app-wide notifications
@@ -89,7 +90,7 @@ class AppSnackbar {
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppTheme.snackbarRadius),
         ),
         duration: duration,
       ),

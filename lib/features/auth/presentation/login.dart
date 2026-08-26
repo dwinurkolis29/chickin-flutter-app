@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import '../../../core/components/dialogs/dialog_helper.dart';
 import '../../../core/components/snackbars/app_snackbar.dart';
 import 'signup.dart';
@@ -172,7 +173,7 @@ class _LoginState extends State<Login> {
                         alpha: 0.6,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                       ),
                       elevation: 0,
                     ),
@@ -227,7 +228,7 @@ class _LoginState extends State<Login> {
                       foregroundColor: scheme.onSurface,
                       side: BorderSide(color: scheme.outline),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                       ),
                       backgroundColor: scheme.surface,
                     ),

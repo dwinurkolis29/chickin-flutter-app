@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:recording_app/core/components/empty/app_empty_state.dart';
-import 'package:recording_app/core/components/error/app_error_state.dart';
-import 'package:recording_app/core/components/header/app_header.dart';
-import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
-import 'package:recording_app/features/recording/data/models/fcr_data.dart';
-import 'package:recording_app/features/recording/data/models/recording_data.dart';
-import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
+import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/domain/usecases/recording_validator.dart';
+import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 
-/// Halaman yang menampilkan semua data recording beserta tombol Edit di tiap baris.
+/// Halaman yang menampilkan daftar lengkap catatan recording harian.
+/// Didesain mobile-first dengan kartu interaktif yang mudah dibaca dan diedit oleh peternak.
 class DetailRecording extends StatefulWidget {
   final List<RecordingData>? recordings;
   final bool readOnly;
@@ -46,13 +50,15 @@ class _DetailRecordingState extends State<DetailRecording> {
       body: Builder(
         builder: (context) {
           if (widget.recordings != null) {
-            final fcrResults = controller.calculateWeeklyFCR(
-              widget.recordings!,
-            );
-            return _RecordingTable(
+            if (widget.recordings!.isEmpty) {
+              return const AppEmptyState(
+                icon: Icons.inbox_outlined,
+                message: 'Belum ada data recording',
+              );
+            }
+            return _RecordingListView(
               recordings: widget.recordings!,
               controller: controller,
-              fcrResults: fcrResults,
               readOnly: widget.readOnly,
             );
           }
@@ -113,11 +119,9 @@ class _DetailRecordingState extends State<DetailRecording> {
                 );
               }
 
-              final fcrResults = controller.calculateWeeklyFCR(recordings);
-              return _RecordingTable(
+              return _RecordingListView(
                 recordings: recordings,
                 controller: controller,
-                fcrResults: fcrResults,
                 readOnly: widget.readOnly,
               );
             },
@@ -129,450 +133,84 @@ class _DetailRecordingState extends State<DetailRecording> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _RecordingTable
+// _RecordingListView
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _RecordingTable extends StatefulWidget {
-  const _RecordingTable({
+class _RecordingListView extends StatefulWidget {
+  const _RecordingListView({
     required this.recordings,
     required this.controller,
-    required this.fcrResults,
     this.readOnly = false,
   });
 
   final List<RecordingData> recordings;
   final RecordingController controller;
-  final List<FCRData> fcrResults;
   final bool readOnly;
 
   @override
-  State<_RecordingTable> createState() => _RecordingTableState();
+  State<_RecordingListView> createState() => _RecordingListViewState();
 }
 
-class _RecordingTableState extends State<_RecordingTable> {
-  // --- filter controllers ---
-  final _dayMinCtrl = TextEditingController();
-  final _dayMaxCtrl = TextEditingController();
-  final _weightMinCtrl = TextEditingController();
-  final _weightMaxCtrl = TextEditingController();
-  final _feedMinCtrl = TextEditingController();
-  final _feedMaxCtrl = TextEditingController();
-  final _mortMinCtrl = TextEditingController();
-  final _mortMaxCtrl = TextEditingController();
+class _RecordingListViewState extends State<_RecordingListView> {
+  final _searchCtrl = TextEditingController();
 
-  // --- sort state ---
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true;
+  /// 0 = Semua, 1 = Minggu 1, 2 = Minggu 2, 3 = Minggu 3, 4 = Minggu 4+, -1 = Ada Kematian
+  int _selectedWeekFilter = 0;
+
+  /// Default true: Hari terbaru tampil paling atas (H-terakhir -> H-1)
+  bool _sortDescending = true;
 
   @override
   void dispose() {
-    _dayMinCtrl.dispose();
-    _dayMaxCtrl.dispose();
-    _weightMinCtrl.dispose();
-    _weightMaxCtrl.dispose();
-    _feedMinCtrl.dispose();
-    _feedMaxCtrl.dispose();
-    _mortMinCtrl.dispose();
-    _mortMaxCtrl.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
-  int? _int(TextEditingController c) => int.tryParse(c.text.trim());
+  List<RecordingData> get _filteredRecordings {
+    final query = _searchCtrl.text.trim().toLowerCase();
+    final searchDay = int.tryParse(query);
 
-  List<RecordingData> get _filtered {
-    final dayMin = _int(_dayMinCtrl);
-    final dayMax = _int(_dayMaxCtrl);
-    final wMin = _int(_weightMinCtrl);
-    final wMax = _int(_weightMaxCtrl);
-    final fMin = _int(_feedMinCtrl);
-    final fMax = _int(_feedMaxCtrl);
-    final mMin = _int(_mortMinCtrl);
-    final mMax = _int(_mortMaxCtrl);
-
-    var list =
-        widget.recordings.where((r) {
-          if (dayMin != null && r.day < dayMin) return false;
-          if (dayMax != null && r.day > dayMax) return false;
-          if (wMin != null && r.avgWeightGram < wMin) return false;
-          if (wMax != null && r.avgWeightGram > wMax) return false;
-          if (fMin != null && r.feedSack < fMin) return false;
-          if (fMax != null && r.feedSack > fMax) return false;
-          if (mMin != null && r.mortality < mMin) return false;
-          if (mMax != null && r.mortality > mMax) return false;
-          return true;
-        }).toList();
-
-    list.sort((a, b) {
-      int cmp;
-      switch (_sortColumnIndex) {
-        case 0:
-          cmp = a.day.compareTo(b.day);
-          break;
-        case 1:
-          cmp = a.avgWeightGram.compareTo(b.avgWeightGram);
-          break;
-        case 2:
-          cmp = a.feedSack.compareTo(b.feedSack);
-          break;
-        case 3:
-          cmp = a.mortality.compareTo(b.mortality);
-          break;
-        default:
-          cmp = 0;
+    var list = widget.recordings.where((r) {
+      // 1. Filter Search (hari / query)
+      if (query.isNotEmpty) {
+        if (searchDay != null) {
+          if (r.day != searchDay) return false;
+        } else {
+          final dayStr = 'hari ${r.day}';
+          if (!dayStr.contains(query)) return false;
+        }
       }
-      return _sortAscending ? cmp : -cmp;
+
+      // 2. Filter Tab / Chip
+      if (_selectedWeekFilter == 1) {
+        if (r.day < 1 || r.day > 7) return false;
+      } else if (_selectedWeekFilter == 2) {
+        if (r.day < 8 || r.day > 14) return false;
+      } else if (_selectedWeekFilter == 3) {
+        if (r.day < 15 || r.day > 21) return false;
+      } else if (_selectedWeekFilter == 4) {
+        if (r.day < 22) return false;
+      } else if (_selectedWeekFilter == -1) {
+        if (r.mortality <= 0) return false;
+      }
+
+      return true;
+    }).toList();
+
+    // 3. Sorting
+    list.sort((a, b) {
+      return _sortDescending ? b.day.compareTo(a.day) : a.day.compareTo(b.day);
     });
 
     return list;
   }
 
-  void _onSort(int columnIndex, bool ascending) {
-    setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
-    });
-  }
-
   void _resetFilters() {
-    _dayMinCtrl.clear();
-    _dayMaxCtrl.clear();
-    _weightMinCtrl.clear();
-    _weightMaxCtrl.clear();
-    _feedMinCtrl.clear();
-    _feedMaxCtrl.clear();
-    _mortMinCtrl.clear();
-    _mortMaxCtrl.clear();
-    setState(() {});
-  }
-
-  // ── Filter row widget ──────────────────────────────────────────────────────
-
-  Widget _filterRow(
-    String label,
-    TextEditingController minC,
-    TextEditingController maxC,
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-  ) {
-    InputDecoration inputDeco(String hint) => InputDecoration(
-      isDense: true,
-      hintText: hint,
-      hintStyle: textTheme.bodyMedium?.copyWith(
-        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      filled: true,
-      fillColor: colorScheme.surfaceContainerLowest,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
-      ),
-    );
-
-    return Row(
-      children: [
-        SizedBox(
-          width: 82,
-          child: Text(
-            label,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: TextField(
-            controller: minC,
-            keyboardType: TextInputType.number,
-            style: textTheme.bodyMedium,
-            decoration: inputDeco('Min'),
-            onChanged: (_) => setState(() {}),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextField(
-            controller: maxC,
-            keyboardType: TextInputType.number,
-            style: textTheme.bodyMedium,
-            decoration: inputDeco('Max'),
-            onChanged: (_) => setState(() {}),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── Build ──────────────────────────────────────────────────────────────────
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final filtered = _filtered;
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── 1. Period Summary — paling atas ───────────────────────────
-              if (widget.fcrResults.isNotEmpty)
-                _PeriodSummaryCard(
-                  recordings: widget.recordings,
-                  fcrResults: widget.fcrResults,
-                ),
-              const SizedBox(height: 12),
-
-              // ── 2. Filter panel ───────────────────────────────────────────
-              _RecordingCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.tune_rounded,
-                          size: 18,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Filter',
-                          style: textTheme.titleSmall?.copyWith(
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: _resetFilters,
-                          style: TextButton.styleFrom(
-                            foregroundColor: colorScheme.primary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text('Reset', style: textTheme.labelLarge),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    _filterRow(
-                      'Hari',
-                      _dayMinCtrl,
-                      _dayMaxCtrl,
-                      colorScheme,
-                      textTheme,
-                    ),
-                    const SizedBox(height: 8),
-                    _filterRow(
-                      'Berat (g)',
-                      _weightMinCtrl,
-                      _weightMaxCtrl,
-                      colorScheme,
-                      textTheme,
-                    ),
-                    const SizedBox(height: 8),
-                    _filterRow(
-                      'Pakan (sak)',
-                      _feedMinCtrl,
-                      _feedMaxCtrl,
-                      colorScheme,
-                      textTheme,
-                    ),
-                    const SizedBox(height: 8),
-                    _filterRow(
-                      'Mati',
-                      _mortMinCtrl,
-                      _mortMaxCtrl,
-                      colorScheme,
-                      textTheme,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // ── 3. Result count ───────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: Text(
-                  '${filtered.length} dari ${widget.recordings.length} data',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              // ── 4. Table ──────────────────────────────────────────────────
-              _RecordingCard(
-                clipBehavior: Clip.antiAlias,
-                padding: EdgeInsets.zero,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double maxWidth = constraints.maxWidth;
-                    final bool hasEditColumn = !widget.readOnly;
-                    final double contentWidth = hasEditColumn ? 450.0 : 370.0;
-                    final int gapsCount = hasEditColumn ? 4 : 3;
-                    final double calculatedSpacing = (maxWidth - contentWidth) / gapsCount;
-                    final double finalColumnSpacing = calculatedSpacing.clamp(16.0, 120.0);
-
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        sortColumnIndex: _sortColumnIndex,
-                        sortAscending: _sortAscending,
-                        columnSpacing: finalColumnSpacing,
-                    dataRowMinHeight: 44,
-                    dataRowMaxHeight: 52,
-                    headingRowHeight: 46,
-                    dividerThickness: 0.5,
-                    // ── Header: primaryContainer ──────────────────────────
-                    headingRowColor: WidgetStateProperty.all(
-                      colorScheme.onPrimary,
-                    ),
-                    dataRowColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return colorScheme.primaryContainer.withValues(alpha: 0.3);
-                      }
-                      return null;
-                    }),
-                    columns: [
-                      DataColumn(
-                        label: Text(
-                          'Hari',
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        numeric: true,
-                        onSort: _onSort,
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Berat (g)',
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        numeric: true,
-                        onSort: _onSort,
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Pakan (sak)',
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        numeric: true,
-                        onSort: _onSort,
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Mati',
-                          style: textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        numeric: true,
-                        onSort: _onSort,
-                      ),
-                      if (!widget.readOnly)
-                        DataColumn(
-                          label: Text(
-                            'Edit',
-                            style: textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ),
-                    ],
-                    rows:
-                        filtered.map((rec) {
-                          return DataRow(
-                            cells: [
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    '${rec.day}',
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    '${rec.avgWeightGram}',
-                                    style: textTheme.bodyMedium,
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    '${rec.feedSack}',
-                                    style: textTheme.bodyMedium,
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Center(
-                                  child: Text(
-                                    '${rec.mortality}',
-                                    style: textTheme.bodyMedium,
-                                  ),
-                                ),
-                              ),
-                              if (!widget.readOnly)
-                                DataCell(
-                                  Center(
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.edit_outlined,
-                                        size: 20,
-                                        color: colorScheme.secondary,
-                                      ),
-                                      tooltip: 'Edit recording',
-                                      onPressed:
-                                          () => _showEditSheet(context, rec),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-    );
+    setState(() {
+      _searchCtrl.clear();
+      _selectedWeekFilter = 0;
+      _sortDescending = true;
+    });
   }
 
   void _showEditSheet(BuildContext context, RecordingData recording) {
@@ -596,194 +234,502 @@ class _RecordingTableState extends State<_RecordingTable> {
       ),
     );
   }
-}
-
-class _RecordingCard extends StatelessWidget {
-  const _RecordingCard({
-    required this.child,
-    this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-    this.clipBehavior = Clip.none,
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: clipBehavior,
-      child: Padding(
-        padding: padding,
-        child: SizedBox(width: double.infinity, child: child),
-      ),
-    );
-  }
-}
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final filtered = _filteredRecordings;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// _PeriodSummaryCard  —  primary background, onPrimary content
-// ─────────────────────────────────────────────────────────────────────────────
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: CustomScrollView(
+          slivers: [
+            // ── Sticky / Header Filter Panel ─────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search Bar
+                    TextField(
+                      controller: _searchCtrl,
+                      style: tt.bodyMedium?.copyWith(color: cs.onSurface),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Cari umur ayam / hari ke-...',
+                        hintStyle: tt.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          size: 20,
+                          color: cs.primary,
+                        ),
+                        suffixIcon: _searchCtrl.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  _searchCtrl.clear();
+                                  setState(() {});
+                                },
+                              )
+                            : null,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        filled: true,
+                        fillColor: cs.surfaceContainer,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderSide: BorderSide(
+                            color: cs.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderSide: BorderSide(color: cs.primary, width: 1.5),
+                        ),
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 12),
 
-class _PeriodSummaryCard extends StatelessWidget {
-  const _PeriodSummaryCard({
-    required this.recordings,
-    required this.fcrResults,
-  });
+                    // Quick Filter Chips
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip(label: 'Semua', filterValue: 0),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(label: 'Minggu 1 (H1-7)', filterValue: 1),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(label: 'Minggu 2 (H8-14)', filterValue: 2),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(label: 'Minggu 3 (H15-21)', filterValue: 3),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(label: 'Minggu 4+ (H22+)', filterValue: 4),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(
+                            label: 'Ada Kematian ⚠️',
+                            filterValue: -1,
+                            isWarning: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
 
-  final List<RecordingData> recordings;
-  final List<FCRData> fcrResults;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final numFmt = NumberFormat.decimalPattern('id_ID');
-
-    final last = fcrResults.last;
-    final totalFeed = last.totalPakan;
-    final totalMort = recordings.fold<int>(0, (sum, r) => sum + r.mortality);
-    final sortedRecs = List<RecordingData>.from(recordings)
-      ..sort((a, b) => a.day.compareTo(b.day));
-    final finalWeight = sortedRecs.last.avgWeightGram;
-    final fcr = last.fcr;
-
-    // Warna konten di atas primary
-    final onPrimary = colorScheme.onPrimary;
-    final onPrimaryMuted = colorScheme.onPrimary.withValues(alpha: 0.65);
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header label
-            Text(
-              'Ringkasan Periode',
-              style: textTheme.labelMedium?.copyWith(
-                color: onPrimaryMuted,
-                letterSpacing: 0.4,
+                    // Baris Status & Sort Toggle
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Menampilkan ${filtered.length} dari ${widget.recordings.length} hari',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _sortDescending = !_sortDescending;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _sortDescending
+                                      ? Icons.arrow_downward_rounded
+                                      : Icons.arrow_upward_rounded,
+                                  size: 16,
+                                  color: cs.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _sortDescending ? 'Hari Terbaru' : 'Hari Terlama',
+                                  style: tt.labelMedium?.copyWith(
+                                    color: cs.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Period Summary',
-              style: textTheme.titleMedium?.copyWith(
-                color: onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Divider(color: onPrimary.withValues(alpha: 0.2), height: 1, thickness: 1),
-            const SizedBox(height: 16),
 
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryTile(
-                    label: 'Total Pakan',
-                    value: '${numFmt.format(totalFeed)} kg',
-                    icon: Icons.grass_outlined,
-                    labelColor: onPrimaryMuted,
-                    valueColor: onPrimary,
+            // ── List Catatan Harian ───────────────────────────────────────────
+            if (filtered.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.filter_alt_off_rounded,
+                          size: 56,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Tidak ada data yang cocok dengan filter',
+                          style: tt.titleSmall?.copyWith(color: cs.onSurface),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        OutlinedButton(
+                          onPressed: _resetFilters,
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                            ),
+                          ),
+                          child: const Text('Reset Filter'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _SummaryTile(
-                    label: 'Total Kematian',
-                    value: '${numFmt.format(totalMort)} ekor',
-                    icon: Icons.remove_circle_outline,
-                    labelColor: onPrimaryMuted,
-                    valueColor: onPrimary,
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final rec = filtered[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _RecordingDayCard(
+                          recording: rec,
+                          readOnly: widget.readOnly,
+                          onEdit: () => _showEditSheet(context, rec),
+                        ),
+                      );
+                    },
+                    childCount: filtered.length,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryTile(
-                    label: 'Berat Rata-rata Akhir',
-                    value: '${numFmt.format(finalWeight)} g',
-                    icon: Icons.scale_outlined,
-                    labelColor: onPrimaryMuted,
-                    valueColor: onPrimary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _SummaryTile(
-                    label: 'FCR',
-                    value: fcr.toStringAsFixed(2),
-                    icon: Icons.analytics_outlined,
-                    labelColor: onPrimaryMuted,
-                    valueColor: onPrimary,
-                  ),
-                ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildFilterChip({
+    required String label,
+    required int filterValue,
+    bool isWarning = false,
+  }) {
+    final isSelected = _selectedWeekFilter == filterValue;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      showCheckmark: false,
+      labelStyle: tt.labelMedium?.copyWith(
+        color: isSelected
+            ? cs.onPrimary
+            : (isWarning ? AppColors.error : cs.onSurfaceVariant),
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+      ),
+      backgroundColor: isWarning
+          ? AppColors.error.withValues(alpha: 0.08)
+          : cs.surfaceContainer,
+      selectedColor: isWarning ? AppColors.error : cs.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+        side: BorderSide(
+          color: isSelected
+              ? (isWarning ? AppColors.error : cs.primary)
+              : cs.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      onSelected: (_) {
+        setState(() {
+          _selectedWeekFilter = filterValue;
+        });
+      },
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _SummaryTile  —  tile di dalam PeriodSummaryCard
+// _RecordingDayCard  —  Kartu Ringkasan Harian Ramah Peternak
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _SummaryTile extends StatelessWidget {
-  const _SummaryTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.labelColor,
-    required this.valueColor,
+class _RecordingDayCard extends StatelessWidget {
+  const _RecordingDayCard({
+    required this.recording,
+    required this.readOnly,
+    required this.onEdit,
   });
 
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color labelColor;
-  final Color valueColor;
+  final RecordingData recording;
+  final bool readOnly;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: labelColor),
-        const SizedBox(width: 8),
-        Expanded(
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+    final dateFmt = DateFormat('dd MMM yyyy');
+
+    final weekNum = ((recording.day - 1) ~/ 7) + 1;
+    final hasMortality = recording.mortality > 0;
+
+    return AppCard(
+      child: InkWell(
+        onTap: readOnly ? null : onEdit,
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                label,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: labelColor),
-                overflow: TextOverflow.ellipsis,
+              // ── Header Kartu: Badge Hari & Tombol Edit ─────────────────────
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Badge Hari
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.secondaryContainer,
+                      borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                    ),
+                    child: Text(
+                      'Hari ${recording.day}',
+                      style: tt.titleSmall?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+
+                  // Info Minggu & Tanggal
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Minggu ke-$weekNum',
+                          style: tt.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        Text(
+                          dateFmt.format(recording.createdAt),
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Tombol Edit
+                  if (!readOnly)
+                    OutlinedButton.icon(
+                      onPressed: onEdit,
+                      icon: const Icon(Icons.edit_outlined, size: 16),
+                      label: const Text('Edit'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: cs.primary,
+                        side: BorderSide(color: cs.primary.withValues(alpha: 0.5)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: valueColor,
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
+              const SizedBox(height: 14),
+
+              Divider(
+                height: 1,
+                color: cs.outlineVariant.withValues(alpha: 0.4),
+              ),
+              const SizedBox(height: 14),
+
+              // ── 3 Metrik Fisik Utama ──────────────────────────────────────
+              Row(
+                children: [
+                  // 1. Bobot Rata-rata
+                  Expanded(
+                    child: _buildMetricTile(
+                      context: context,
+                      icon: Icons.scale_rounded,
+                      iconBgColor: cs.secondaryContainer,
+                      iconColor: cs.primary,
+                      label: 'Bobot Ayam',
+                      value: recording.avgWeightGram > 0
+                          ? '${numFmt.format(recording.avgWeightGram)} g'
+                          : '-',
+                      subtitle: recording.avgWeightGram > 0
+                          ? '${(recording.avgWeightGram / 1000).toStringAsFixed(2)} kg'
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // 2. Pakan Terpakai
+                  Expanded(
+                    child: _buildMetricTile(
+                      context: context,
+                      icon: Icons.inventory_2_rounded,
+                      iconBgColor: cs.secondaryContainer,
+                      iconColor: cs.primary,
+                      label: 'Pakan',
+                      value: '${recording.feedSack} sak',
+                      subtitle: '~${recording.feedSack * 50} kg',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // 3. Kematian (Mortalitas)
+                  Expanded(
+                    child: _buildMetricTile(
+                      context: context,
+                      icon: hasMortality
+                          ? Icons.warning_amber_rounded
+                          : Icons.check_circle_outline_rounded,
+                      iconBgColor: hasMortality
+                          ? AppColors.error.withValues(alpha: 0.12)
+                          : AppColors.success.withValues(alpha: 0.12),
+                      iconColor: hasMortality ? AppColors.error : AppColors.success,
+                      label: 'Kematian',
+                      value: '${recording.mortality} ekor',
+                      valueColor: hasMortality ? AppColors.error : cs.onSurface,
+                      subtitle: hasMortality ? 'Perlu dicek' : 'Aman',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildMetricTile({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconBgColor,
+    required Color iconColor,
+    required String label,
+    required String value,
+    Color? valueColor,
+    String? subtitle,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.4),
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // 1. Icon (Tengah)
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 16, color: iconColor),
+          ),
+          const SizedBox(height: 8),
+
+          // 2. Teks label (Tengah)
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: tt.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+
+          // 3. Nilai Metrik (Tengah)
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: tt.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: valueColor ?? cs.onSurface,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontSize: 10,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -811,6 +757,9 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
+  String _feedUnit = 'Sak';
+  String _weightUnit = 'Gram';
+
   late final TextEditingController _ctrlDay;
   late final TextEditingController _ctrlWeight;
   late final TextEditingController _ctrlFeed;
@@ -824,7 +773,6 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
       text: '${widget.recording.avgWeightGram}',
     );
     _ctrlFeed = TextEditingController(text: '${widget.recording.feedSack}');
-    // Jika data awal 0, tetap tampilkan 0 agar peternak sadar angka tersebut harus valid
     _ctrlMortality = TextEditingController(
       text: '${widget.recording.mortality}',
     );
@@ -839,13 +787,77 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
     super.dispose();
   }
 
+  void _onFeedUnitChanged(String newUnit) {
+    if (_feedUnit == newUnit) return;
+    setState(() {
+      final raw = _ctrlFeed.text.trim().replaceAll(',', '.');
+      if (raw.isNotEmpty) {
+        final val = double.tryParse(raw);
+        if (val != null) {
+          if (newUnit == 'Kg') {
+            final kg = val * 50.0;
+            _ctrlFeed.text = kg % 1 == 0 ? kg.toInt().toString() : kg.toStringAsFixed(1);
+          } else {
+            final sacks = val / 50.0;
+            _ctrlFeed.text = sacks % 1 == 0 ? sacks.toInt().toString() : sacks.toStringAsFixed(2);
+          }
+        }
+      }
+      _feedUnit = newUnit;
+    });
+  }
+
+  void _onWeightUnitChanged(String newUnit) {
+    if (_weightUnit == newUnit) return;
+    setState(() {
+      final raw = _ctrlWeight.text.trim().replaceAll(',', '.');
+      if (raw.isNotEmpty) {
+        final val = double.tryParse(raw);
+        if (val != null) {
+          if (newUnit == 'Kg') {
+            final kg = val / 1000.0;
+            _ctrlWeight.text = kg % 1 == 0
+                ? kg.toInt().toString()
+                : kg.toStringAsFixed(3).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+          } else {
+            final grams = (val * 1000).round();
+            _ctrlWeight.text = grams.toString();
+          }
+        }
+      }
+      _weightUnit = newUnit;
+    });
+  }
+
+  int get _parsedFeedSack {
+    final raw = _ctrlFeed.text.trim().replaceAll(',', '.');
+    if (raw.isEmpty) return 0;
+    final val = double.tryParse(raw) ?? 0.0;
+    if (_feedUnit == 'Sak') {
+      return val.round();
+    } else {
+      return (val / 50.0).round();
+    }
+  }
+
+  int get _parsedWeightGram {
+    final raw = _ctrlWeight.text.trim().replaceAll(',', '.');
+    if (raw.isEmpty) return 0;
+    final val = double.tryParse(raw) ?? 0.0;
+    if (_weightUnit == 'Gram') {
+      return val.round();
+    } else {
+      return (val * 1000).round();
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
     final newDay = int.tryParse(_ctrlDay.text.trim()) ?? widget.recording.day;
 
-    // ── Validasi duplikat hari (exclude recording yang sedang diedit) ──
+    // Validasi duplikat hari (exclude recording yang sedang diedit)
     final isDuplicate = widget.allRecordings.any(
       (r) => r.id != widget.recording.id && r.day == newDay,
     );
@@ -862,14 +874,57 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
       }
       return;
     }
-    // ─────────────────────────────────────────────────────────────
 
     final updated = widget.recording.copyWith(
       day: newDay,
-      avgWeightGram: int.tryParse(_ctrlWeight.text.trim()),
-      feedSack: int.tryParse(_ctrlFeed.text.trim()),
-      mortality: int.tryParse(_ctrlMortality.text.trim()),
+      avgWeightGram: _parsedWeightGram,
+      feedSack: _parsedFeedSack,
+      mortality: int.tryParse(_ctrlMortality.text.trim()) ?? 0,
     );
+
+    // Validasi anomali dan typo
+    final initialPop = context.read<RecordingController>().initialPopulation > 0
+        ? context.read<RecordingController>().initialPopulation
+        : 1000;
+    final anomalies = RecordingValidator.checkAnomalies(
+      newRecording: updated,
+      initialPopulation: initialPop,
+      existingRecordings: widget.allRecordings,
+    );
+
+    for (final anomaly in anomalies) {
+      if (anomaly.isBlocking) {
+        setState(() => _isLoading = false);
+        if (mounted) {
+          DialogHelper.showError(
+            context,
+            anomaly.title,
+            anomaly.message,
+          );
+        }
+        return;
+      }
+    }
+
+    final nonBlocking = anomalies.where((a) => !a.isBlocking).toList();
+    if (nonBlocking.isNotEmpty && mounted) {
+      final messages = nonBlocking.map((a) => '• ${a.message}').join('\n\n');
+      final isConfirmed = await DialogHelper.showConfirm(
+        context,
+        nonBlocking.length == 1
+            ? nonBlocking.first.title
+            : 'Peringatan Data Recording',
+        '$messages\n\nApakah Anda yakin data ini sudah benar?',
+        confirmText: 'Tetap Simpan',
+        cancelText: 'Periksa Kembali',
+        isDestructive: true,
+      );
+
+      if (isConfirmed != true) {
+        setState(() => _isLoading = false);
+        return;
+      }
+    }
 
     await widget.onSave(updated);
     if (mounted) Navigator.pop(context);
@@ -877,8 +932,8 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final padding = MediaQuery.of(context).viewInsets.bottom;
 
     return Padding(
@@ -891,144 +946,164 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Drag handle
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: cs.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            Row(
-              children: [
-                Text(
-                  'Edit Recording',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  Text(
+                    'Edit Recording',
+                    style: tt.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            _buildField(
-              controller: _ctrlDay,
-              label: 'Umur Ayam (Hari)',
-              icon: Icons.calendar_today_rounded,
-              isDay: true,
-            ),
-            const SizedBox(height: 16),
-
-            _buildField(
-              controller: _ctrlWeight,
-              label:
-                  'Berat Rata-Rata (Gram)', // Lebih jelas secara teknis lapangan
-              icon: Icons.scale_rounded,
-            ),
-            const SizedBox(height: 16),
-
-            _buildField(
-              controller: _ctrlFeed,
-              label:
-                  'Pakan Terpakai (Sak)', // Mengganti kata "Habis pakan" yang kasual
-              icon:
-                  Icons
-                      .inventory_2_rounded, // Mengganti ikon panah yang membingungkan
-            ),
-            const SizedBox(height: 16),
-
-            _buildField(
-              controller: _ctrlMortality,
-              label:
-                  'Jumlah Kematian (Ekor)', // Struktur kata diperbaiki, bukan "Mati ayam"
-              icon:
-                  Icons
-                      .heart_broken_rounded, // Lebih merepresentasikan kematian/deplesi
-              required:
-                  true, // WAJIB diisi. Jika tidak ada yang mati, peternak harus isi 0.
-            ),
-            const SizedBox(height: 28),
-
-            SizedBox(
-              width: double.infinity,
-              height: 52, // Dipertebal sedikit agar mudah ditekan di lapangan
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  elevation: 0,
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              AppTextFormField(
+                controller: _ctrlDay,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                labelText: 'Umur Ayam (Hari)',
+                prefixIcon: Icons.calendar_month_outlined,
+                validator: RecordingValidator.validateDay,
+              ),
+              const SizedBox(height: 16),
+
+              AppTextFormField(
+                controller: _ctrlFeed,
+                keyboardType: _feedUnit == 'Sak'
+                    ? TextInputType.number
+                    : const TextInputType.numberWithOptions(decimal: true),
+                labelText: 'Pakan Terpakai ($_feedUnit)',
+                prefixIcon: Icons.inventory_2_outlined,
+                suffixIcon: _buildUnitToggle(
+                  currentUnit: _feedUnit,
+                  units: const ['Sak', 'Kg'],
+                  onChanged: _onFeedUnitChanged,
                 ),
-                onPressed: _isLoading ? null : _submit,
-                child:
-                    _isLoading
-                        ? SizedBox(
+                validator: (v) => RecordingValidator.validateFeedInput(v, _feedUnit),
+              ),
+              const SizedBox(height: 16),
+
+              AppTextFormField(
+                controller: _ctrlWeight,
+                keyboardType: _weightUnit == 'Gram'
+                    ? TextInputType.number
+                    : const TextInputType.numberWithOptions(decimal: true),
+                labelText: 'Berat Rata-Rata ($_weightUnit)',
+                prefixIcon: Icons.scale_outlined,
+                suffixIcon: _buildUnitToggle(
+                  currentUnit: _weightUnit,
+                  units: const ['Gram', 'Kg'],
+                  onChanged: _onWeightUnitChanged,
+                ),
+                validator: (v) => RecordingValidator.validateWeightInput(v, _weightUnit),
+              ),
+              const SizedBox(height: 16),
+
+              AppTextFormField(
+                controller: _ctrlMortality,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                labelText: 'Jumlah Kematian (Ekor)',
+                prefixIcon: Icons.heart_broken_outlined,
+                validator: RecordingValidator.validateMortality,
+              ),
+              const SizedBox(height: 28),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: cs.primary,
+                    foregroundColor: cs.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: _isLoading ? null : _submit,
+                  child: _isLoading
+                      ? SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              colorScheme.onPrimary,
+                              cs.onPrimary,
                             ),
                           ),
                         )
-                        : Text(
+                      : Text(
                           'Simpan Perubahan',
-                          style: textTheme.labelLarge?.copyWith(
-                            color: colorScheme.surface,
+                          style: tt.labelLarge?.copyWith(
+                            color: cs.onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool required = true,
-    bool isDay = false,
+  Widget _buildUnitToggle({
+    required String currentUnit,
+    required List<String> units,
+    required ValueChanged<String> onChanged,
   }) {
-    return AppTextFormField(
-      controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: false,
-        signed: false,
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: units.map((unit) {
+          final isSelected = currentUnit == unit;
+          return GestureDetector(
+            onTap: () => onChanged(unit),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? cs.primary
+                    : cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+              ),
+              child: Text(
+                unit,
+                style: tt.labelSmall?.copyWith(
+                  color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      labelText: label,
-      prefixIcon: icon,
-      validator:
-          required
-              ? (v) {
-                if (v == null || v.trim().isEmpty) {
-                  return '$label tidak boleh kosong';
-                }
-                if (isDay) {
-                  final parsed = int.tryParse(v.trim());
-                  if (parsed == null || parsed <= 0) {
-                    return 'Umur harus berupa angka lebih dari 0';
-                  }
-                }
-                return null;
-              }
-              : null,
     );
   }
 }

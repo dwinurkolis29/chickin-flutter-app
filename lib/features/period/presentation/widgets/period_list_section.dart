@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import '../../data/models/period_data.dart';
 import 'period_card.dart';
 
@@ -35,7 +36,7 @@ class PeriodListSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   color: cs.surface,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
                 child: Text(
                   'lihat semua',
@@ -54,7 +55,7 @@ class PeriodListSection extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               color: cs.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
             ),
             child: const AppEmptyState(
               icon: Icons.layers_outlined,

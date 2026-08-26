@@ -4,6 +4,7 @@ import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/user/presentation/pages/form_user.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,7 @@ class _UserState extends State<User> {
       context,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
       ),
       builder: SafeArea(
         child: Padding(
@@ -323,7 +324,7 @@ class _Card extends StatelessWidget {
           isInteractive
               ? InkWell(
                 onTap: onTap,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

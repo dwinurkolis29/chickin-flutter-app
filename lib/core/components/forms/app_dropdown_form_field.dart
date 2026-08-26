@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class AppDropdownFormField<T> extends StatelessWidget {
   const AppDropdownFormField({
@@ -34,9 +35,11 @@ class AppDropdownFormField<T> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
         ),
         filled: true,
         fillColor: colorScheme.surfaceContainerLowest,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'confirm_dialog.dart';
 import 'error_dialog.dart';
 import 'period_picker_dialog.dart';
@@ -107,7 +108,7 @@ class DialogHelper {
       useSafeArea: useSafeArea,
       backgroundColor: backgroundColor,
       shape: shape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
       ),
       builder: (_) => builder,
     );

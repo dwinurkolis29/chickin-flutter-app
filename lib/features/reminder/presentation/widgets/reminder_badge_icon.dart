@@ -22,27 +22,24 @@ class ReminderBadgeIcon extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.only(right: 8),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: () => Navigator.push(
+          child: IconButton(
+            tooltip: 'Pengingat',
+            onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const Reminder()),
             ),
-            child: Stack(
+            icon: Stack(
               clipBehavior: Clip.none,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.notifications_outlined,
-                    color: cs.onSurface,
-                    size: 24,
-                  ),
+                Icon(
+                  Icons.notifications_outlined,
+                  color: cs.onSurface,
+                  size: 24,
                 ),
                 if (count > 0)
                   Positioned(
-                    top: 2,
-                    right: 2,
+                    top: -2,
+                    right: -2,
                     child: Container(
                       constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                       padding: const EdgeInsets.symmetric(horizontal: 4),

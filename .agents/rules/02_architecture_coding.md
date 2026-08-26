@@ -34,3 +34,14 @@
 - Prefer concrete implementations over interfaces by default.
 - Do not over-engineer or add speculative scalability.
 - Optimize for team readability and ease of maintenance.
+
+## 6. Navigation & Stream State Persistence (Flicker Prevention)
+
+- **IndexedStack for Tabs**: Gunakan `IndexedStack` (atau `AutomaticKeepAliveClientMixin`) pada shell navigasi bawah agar state seluruh tab tetap hidup di memory dan tidak re-create widget tree saat berpindah tab.
+- **StreamBuilder Initial Data**: Selalu sediakan `initialData` dari controller cache (misal: `controller.cachedRecordings`) pada `StreamBuilder` untuk menghindari skeleton loading berkedip saat pengguna kembali ke tab tersebut.
+
+## 7. Form Flexibility & Unit Normalization
+
+- **Flexible Input Toggle**: Form input boleh menyediakan opsi fleksibilitas satuan untuk kenyamanan pengguna (misal: Sak vs Kg pada pakan, Gram vs Kg pada bobot), namun payload yang dikirim ke database/service **WAJIB** ternormalisasi ke satuan baku (misal: Sak dan Gram).
+- **Sanity Guards**: Terapkan validator domain real-time (misal: `RecordingValidator`) untuk mencegah angka tidak wajar, outlier ekstrim, atau salah ketik (typo).
+

@@ -13,7 +13,7 @@ class ActivePeriodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Theme.of(context).colorScheme.primary,
+      color: Theme.of(context).colorScheme.primaryContainer,
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -37,13 +37,19 @@ class _NoActivePeriod extends StatelessWidget {
         Icon(
           Icons.inbox_outlined,
           size: 40,
-          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.6),
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimaryContainer
+              .withValues(alpha: 0.6),
         ),
         const SizedBox(height: 8),
         Text(
           'Tidak ada periode aktif',
           style: tt.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+            color: Theme.of(context)
+                .colorScheme
+                .onPrimaryContainer
+                .withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -62,7 +68,7 @@ class _ActivePeriodContent extends StatelessWidget {
     final dayAge = DateTime.now().difference(period.startDate).inDays;
 
     final cs = Theme.of(context).colorScheme;
-    final onPrimary = cs.onPrimary;
+    final onPrimaryContainer = cs.onPrimaryContainer;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +80,7 @@ class _ActivePeriodContent extends StatelessWidget {
             Text(
               'Periode Aktif',
               style: tt.bodySmall?.copyWith(
-                color: onPrimary.withValues(alpha: 0.75),
+                color: onPrimaryContainer.withValues(alpha: 0.75),
               ),
             ),
             Container(
@@ -86,7 +92,7 @@ class _ActivePeriodContent extends StatelessWidget {
               ),
               child: Text(
                 '● Aktif',
-                style: tt.labelMedium?.copyWith(color: onPrimary),
+                style: tt.labelMedium?.copyWith(color: onPrimaryContainer),
               ),
             ),
           ],
@@ -96,7 +102,7 @@ class _ActivePeriodContent extends StatelessWidget {
         Text(
           period.name.isNotEmpty ? period.name : 'Periode Tanpa Nama',
           style: tt.titleLarge?.copyWith(
-            color: onPrimary,
+            color: onPrimaryContainer,
             fontSize: 26,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,
@@ -105,10 +111,12 @@ class _ActivePeriodContent extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Mulai ${fmt.format(period.startDate)}',
-          style: tt.bodySmall?.copyWith(color: onPrimary.withValues(alpha: 0.75)),
+          style: tt.bodySmall?.copyWith(
+            color: onPrimaryContainer.withValues(alpha: 0.75),
+          ),
         ),
         const SizedBox(height: 20),
-        Divider(color: onPrimary.withValues(alpha: 0.3)),
+        Divider(color: onPrimaryContainer.withValues(alpha: 0.3)),
         const SizedBox(height: 12),
         StreamBuilder<List<RecordingData>>(
           stream: FirebaseService().getRecordingsStream(period.id),
@@ -163,7 +171,12 @@ class _ActivePeriodContent extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Divider(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3)),
+                Divider(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimaryContainer
+                      .withValues(alpha: 0.3),
+                ),
                 const SizedBox(height: 12),
                 // Stats row 2
                 Row(
@@ -203,14 +216,15 @@ class _StatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final onPrimaryContainer =
+        Theme.of(context).colorScheme.onPrimaryContainer;
     return Expanded(
       child: Column(
         children: [
           Text(
             value,
             style: tt.titleSmall?.copyWith(
-              color: onPrimary,
+              color: onPrimaryContainer,
               fontWeight: FontWeight.w700,
             ),
             textAlign: TextAlign.center,
@@ -219,7 +233,7 @@ class _StatItem extends StatelessWidget {
           Text(
             label,
             style: tt.labelSmall?.copyWith(
-              color: onPrimary.withValues(alpha: 0.7),
+              color: onPrimaryContainer.withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -236,6 +250,9 @@ class _CardDivider extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 1,
         height: 32,
-        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .onPrimaryContainer
+            .withValues(alpha: 0.3),
       );
 }

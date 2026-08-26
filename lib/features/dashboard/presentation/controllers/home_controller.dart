@@ -22,6 +22,7 @@ class HomeController extends ChangeNotifier {
   int _initialPopulation = 0;
   Stream<List<RecordingData>>? _recordingsStream;
   Stream<List<FlSpot>>? _weightStream;
+  List<RecordingData>? _cachedRecordings;
 
   String? get activePeriodId => _activePeriodId;
   String? get activePeriodName => _activePeriodName;
@@ -29,6 +30,11 @@ class HomeController extends ChangeNotifier {
   int get initialPopulation => _initialPopulation;
   Stream<List<RecordingData>>? get recordingsStream => _recordingsStream;
   Stream<List<FlSpot>>? get weightStream => _weightStream;
+  List<RecordingData>? get cachedRecordings => _cachedRecordings;
+
+  void setCachedRecordings(List<RecordingData> data) {
+    _cachedRecordings = data;
+  }
 
   Future<void> loadActivePeriod([String? uid]) async {
     try {
@@ -90,6 +96,7 @@ class HomeController extends ChangeNotifier {
     _initialPopulation = 0;
     _recordingsStream = null;
     _weightStream = null;
+    _cachedRecordings = null;
     _isLoadingPeriod = false;
     notifyListeners();
   }

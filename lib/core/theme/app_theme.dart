@@ -46,11 +46,7 @@ class _HorizontalSlidePageTransitionsBuilder extends PageTransitionsBuilder {
 ///   16dp         = sheet row / list tile decoration
 ///   4dp          = snackbar only
 ///
-/// Usage:
-/// ```dart
-/// theme:     AppTheme.build(AppThemeOption.light),
-/// darkTheme: AppTheme.build(AppThemeOption.dark),
-/// ```
+/// The application currently runs with [AppThemeOption.dark].
 class AppTheme {
   AppTheme._();
 
@@ -73,14 +69,20 @@ class AppTheme {
     final Color background           = isDark ? AppColors.backgroundDark           : AppColors.background;
 
     // ── Primary tokens ───────────────────────────────────────────────────────
-    const Color primary   = AppColors.primary;
-    const Color onPrimary = Color(0xFFFFFFFF); // putih — kontras di atas Vivid Blue
+    const Color primary = AppColors.primaryBlue;
+    const Color onPrimary = AppColors.blueOnPrimary;
 
     // primary container: tinted version of primary untuk chip/badge selected state
     final Color primaryContainer = isDark
-        ? AppColors.surfaceContainerHighDark
-        : const Color(0xFFD6E0FF);
-    final Color onPrimaryContainer = isDark ? AppColors.onSurfaceDark : AppColors.onSurface;
+        ? AppColors.bluePrimaryContainerDark
+        : AppColors.bluePrimaryContainer;
+    final Color onPrimaryContainer = isDark
+        ? AppColors.blueOnPrimaryContainerDark
+        : AppColors.blueOnPrimaryContainer;
+    final Color secondary =
+        isDark ? AppColors.blueSecondaryDark : AppColors.blueSecondary;
+    final Color onSecondary =
+        isDark ? AppColors.blueOnSecondaryDark : AppColors.blueOnSecondary;
 
     // ── ColorScheme ──────────────────────────────────────────────────────────
     final colorScheme = ColorScheme(
@@ -89,11 +91,10 @@ class AppTheme {
       onPrimary: onPrimary,
       primaryContainer: primaryContainer,
       onPrimaryContainer: onPrimaryContainer,
-      // secondary: pakai primary dengan opacity untuk passive states
-      secondary: primary,
-      onSecondary: onPrimary,
-      secondaryContainer: primaryContainer,
-      onSecondaryContainer: onPrimaryContainer,
+      secondary: secondary,
+      onSecondary: onSecondary,
+      secondaryContainer: secondary,
+      onSecondaryContainer: onSecondary,
       tertiary: primary,
       error: AppColors.formError,
       onError: const Color(0xFFFFFFFF),
@@ -141,8 +142,8 @@ class AppTheme {
       ),
 
       cardTheme: CardThemeData(
-        color: surfaceContainer,
-        elevation: 1,
+        color: surface,
+        elevation: 0,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
@@ -183,7 +184,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: surfaceContainer,
           foregroundColor: onSurface,
-          elevation: 1,
+          elevation: 0,
           minimumSize: const Size(double.infinity, 48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(pillRadius),
@@ -204,7 +205,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(pillRadius),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(pillRadius),
@@ -232,7 +233,7 @@ class AppTheme {
         backgroundColor: surfaceContainerHigh,
         elevation: 3,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(cardRadius)),
         ),
       ),
 

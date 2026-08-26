@@ -10,6 +10,7 @@ Gunakan panduan ini sebagai standar visual utama saat membuat atau memodifikasi 
 ## Implementation Rule (WAJIB DIIKUTI)
 
 - **DILARANG KERAS** menuliskan `Color(0xFF...)` atau literal hex baru di dalam file widget/screen manapun.
+- **DILARANG KERAS** menuliskan angka radius hardcoded (seperti `10`, `12`, `15`, `16`, `20`, `25`, `28`, `30`) secara ad-hoc. Selalu gunakan konstanta `AppTheme.*Radius`.
 - **DILARANG KERAS** menggunakan konstanta warna statis Material seperti `Colors.white`, `Colors.black`, `Colors.transparent` secara langsung.
 - Selalu gunakan referensi tema: `Theme.of(context).colorScheme.*` atau konstanta dari `lib/core/theme/app_colors.dart`.
 - Semua pemanggilan dialog **WAJIB** melalui `DialogHelper` (`lib/core/components/dialogs/dialog_helper.dart`).
@@ -36,10 +37,14 @@ Gunakan konstanta ini secara konsisten — **jangan hardcode angka radius**.
 
 | Constant | Value | Kapan Dipakai |
 |----------|-------|---------------|
-| `AppTheme.pillRadius` | `999.0` | Button, chip, input field, nav indicator |
-| `AppTheme.cardRadius` | `24.0` | Card, container utama, dialog |
+| `AppTheme.pillRadius` | `999.0` | Button, chip, input field, nav indicator, badge pill |
+| `AppTheme.cardRadius` | `24.0` | Card, container utama, dialog, top corner bottom sheet, InkWell ripple pada card |
 | `AppTheme.rowRadius` | `16.0` | Sheet row, list tile decoration, inner container |
 | `AppTheme.snackbarRadius` | `4.0` | Snackbar saja |
+
+> **PENTING (InkWell pada Card)**: Semua `InkWell` di dalam atau di atas `Card`/`AppCard` **WAJIB** menyertakan `borderRadius: BorderRadius.circular(AppTheme.cardRadius)` agar efek ripple presisi mengikuti lekukan 24dp kartu.
+
+> **PENTING (Bottom Sheet)**: Sudut atas modal bottom sheet diseragamkan ke `AppTheme.cardRadius` (`24.0dp`).
 
 ```dart
 Container(
@@ -124,6 +129,7 @@ Selalu gunakan `DialogHelper.showConfirmDialog()`, `DialogHelper.showErrorDialog
 - Radius: `AppTheme.cardRadius` (24dp).
 - Color: `colorScheme.surfaceContainer` — **bukan** `Colors.white`.
 - Elevation: 1 (sudah di-set di `CardThemeData`).
+- **Card Header & Titles**: Judul riwayat/tabel data (misal: "Riwayat Bobot Harian") diletakkan **di dalam** `AppCard`, bukan teks mengambang di luar kartu. Hindari icon dekoratif tambahan di header kartu kecuali diminta.
 
 ### 3. Buttons
 - **FilledButton**: CTA primer, pill, full-width, min 48dp.
@@ -137,3 +143,39 @@ Selalu gunakan `DialogHelper.showConfirmDialog()`, `DialogHelper.showErrorDialog
 - Jangan pakai `AppColors.*OnPrimary` — sudah dihapus.
 - Gunakan pastel inline: green `#A3E6BE`, amber `#FFD580`, red `#FF9A9A`.
 - Lihat contoh di [`report_summary_header.dart`](file:///Users/nurkolis/IdeaProjects/chickin-flutter-app/lib/features/reporting/presentation/widgets/report_summary_header.dart).
+
+### 6. AppBar & Header Standards
+- Gunakan [`AppHeader`](file:///Users/nurkolis/IdeaProjects/chickin-flutter-app/lib/core/components/header/app_header.dart) sebagai satu-satunya standar top bar aplikasi.
+- Tombol back (`leading`) dan icon actions di AppBar **TIDAK BOLEH** dibungkus container/shadow buatan.
+- Gunakan `IconButton` standar dengan icon `size: 24` (`color: colorScheme.onSurface`).
+- Efek hover dan splash circular ditangani secara native oleh `IconButton`.
+
+### 7. Charts & Growth Lists
+- **Label Sumbu Y**: Selalu tampilkan satuan gram yang jelas dan terformat (misal `1,000 g`), dengan `reservedSize: 56` agar angka tidak terpotong.
+- **Urutan Riwayat Harian**: Tampilkan data riwayat penimbangan harian secara **ascending** (Hari 1 / DOC teratas, bertambah ke bawah hingga hari terakhir), disertai badge pertambahan bobot harian (`+X g`).
+
+### 8. Icon Badges & Circular Wrappers
+- Semua pembungkus icon pendukung (pada header card, list tile, riwayat recording, info card) **WAJIB** menggunakan bentuk lingkaran:
+  ```dart
+  Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      shape: BoxShape.circle,
+    ),
+    child: Icon(..., color: Theme.of(context).colorScheme.primary, size: 20),
+  )
+  ```
+- Hindari penggunaan rounded rectangle yang tidak konsisten untuk icon wrapper.
+
+### 9. Dynamic Chart & Trend Metric Coloring
+- Pada grafik perkembangan (misal: Bobot Ayam harian / metrik tren):
+  - **Garis & Gradien Dinamis**:
+    - **Hijau (`AppColors.success`)** jika terjadi kenaikan dibanding pencatatan sebelumnya (`diff > 0`).
+    - **Merah (`AppColors.error`)** jika terjadi penurunan atau tidak ada kenaikan/stagnan (`diff <= 0`).
+  - **Delta Pill Badge**:
+    - Tampilkan chip delta dengan icon panah: e.g. `▲ +50 g` (Hijau) atau `▼ -10 g` / `▼ 0 g` (Merah).
+
+### 10. Flutter Layout Constraints & IntrinsicHeight Guard
+- Di dalam widget `IntrinsicHeight`, **DILARANG** menggunakan `Row(crossAxisAlignment: CrossAxisAlignment.baseline)` bersamaan dengan `Spacer()` atau `Expanded()`, karena akan memicu crash `computeDryBaseline` pada `RenderPositionedBox`. Gunakan `CrossAxisAlignment.center` atau `CrossAxisAlignment.end`.
+

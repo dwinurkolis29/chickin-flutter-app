@@ -13,28 +13,13 @@ class CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: cs.primary.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: cs.onSurface,
-        ),
+    return IconButton(
+      icon: Icon(
+        icon,
+        size: 24,
+        color: cs.onSurface,
       ),
+      onPressed: onTap,
     );
   }
 }

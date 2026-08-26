@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 /// A consistent, beautifully designed error state widget for the application.
 ///
@@ -69,7 +70,7 @@ class AppErrorState extends StatelessWidget {
                 backgroundColor: cs.error,
                 foregroundColor: cs.onError,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

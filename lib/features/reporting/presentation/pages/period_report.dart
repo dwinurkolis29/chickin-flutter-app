@@ -4,6 +4,7 @@ import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/export/domain/usecases/export_period_csv.dart';
 import 'package:recording_app/features/export/domain/usecases/export_period_excel.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
@@ -127,7 +128,7 @@ class PeriodHeaderSection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         boxShadow: [
           BoxShadow(
             color: cs.primary.withValues(alpha: 0.07),

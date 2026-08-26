@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/buttons/circle_icon_button.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -26,11 +25,11 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       centerTitle: true,
       leading: !isHome && Navigator.canPop(context)
-          ? Center(
-              child: CircleIconButton(
-                icon: Icons.chevron_left,
-                onTap: () => Navigator.maybePop(context),
-              ),
+          ? IconButton(
+              icon: const Icon(Icons.chevron_left, size: 24),
+              color: cs.onSurface,
+              tooltip: 'Kembali',
+              onPressed: () => Navigator.maybePop(context),
             )
           : null,
       title: Text(

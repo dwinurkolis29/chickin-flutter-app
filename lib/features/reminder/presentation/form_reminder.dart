@@ -6,6 +6,7 @@ import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/services/reminder_local_service.dart';
 import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
 import 'package:intl/intl.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 /// Form untuk tambah dan edit reminder.
 /// Jika [editReminder] diisi, form berjalan di mode edit.
@@ -302,7 +303,7 @@ class _FormReminderState extends State<FormReminder> {
                     backgroundColor: cs.primary,
                     foregroundColor: cs.onPrimary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                     ),
                   ),
                   onPressed: _isLoading ? null : _save,

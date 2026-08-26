@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
-import 'package:recording_app/core/theme/theme_controller.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/theme/app_theme_option.dart';
 import 'package:recording_app/core/services/storage_service.dart';
@@ -21,7 +20,6 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeController()),
         // AuthService — single source of truth untuk semua auth state.
         // Semua controller bergantung langsung ke instance ini via ProxyProvider.
         ChangeNotifierProvider(create: (_) => AuthService()),
@@ -88,15 +86,11 @@ class MainApp extends StatelessWidget {
 
 
       ],
-      child: Consumer<ThemeController>(
-        builder: (context, themeController, _) {
-          return MaterialApp(
-            theme: AppTheme.build(AppThemeOption.light),
-            darkTheme: AppTheme.build(AppThemeOption.dark),
-            themeMode: themeController.themeMode,
-            home: const AppChecker(),
-          );
-        },
+      child: MaterialApp(
+        theme: AppTheme.build(AppThemeOption.light),
+        darkTheme: AppTheme.build(AppThemeOption.dark),
+        themeMode: ThemeMode.system,
+        home: const AppChecker(),
       ),
     );
   }

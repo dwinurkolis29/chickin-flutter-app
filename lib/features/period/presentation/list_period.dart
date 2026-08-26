@@ -14,6 +14,7 @@ import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 
 class PeriodListScreen extends StatefulWidget {
+  final bool isTab;
   final String farmName;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onSeeAllTap;
@@ -21,6 +22,7 @@ class PeriodListScreen extends StatefulWidget {
 
   const PeriodListScreen({
     super.key,
+    this.isTab = false,
     this.farmName = 'Kandang Utama',
     this.onNotificationTap,
     this.onSeeAllTap,
@@ -47,10 +49,7 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const AppHeader(title: 'Periode'),
-      floatingActionButton: const CreatePeriodButton(),
-      body: SafeArea(
+    final body = SafeArea(
             child: Consumer<PeriodController>(
               builder: (context, controller, child) {
             if (controller.isLoading) {
@@ -128,7 +127,14 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
             );
               },
             ),
-          ),
+          );
+
+    if (widget.isTab) return body;
+
+    return Scaffold(
+      appBar: const AppHeader(title: 'Periode'),
+      floatingActionButton: const CreatePeriodButton(),
+      body: body,
     );
   }
 }
