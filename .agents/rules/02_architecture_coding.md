@@ -45,3 +45,21 @@
 - **Flexible Input Toggle**: Form input boleh menyediakan opsi fleksibilitas satuan untuk kenyamanan pengguna (misal: Sak vs Kg pada pakan, Gram vs Kg pada bobot), namun payload yang dikirim ke database/service **WAJIB** ternormalisasi ke satuan baku (misal: Sak dan Gram).
 - **Sanity Guards**: Terapkan validator domain real-time (misal: `RecordingValidator`) untuk mencegah angka tidak wajar, outlier ekstrim, atau salah ketik (typo).
 
+## 8. Period Lifecycle & Senior Farmer UX Standards
+
+- **Auto-Activation vs Draft**:
+  - Jika belum ada periode aktif, pembuatan periode baru **otomatis langsung aktif** (`isActive = true`).
+  - Jika sudah ada periode yang sedang aktif berjalan, pembuatan periode baru **otomatis disimpan sebagai Draft** (`isActive = false`), DILARANG melempar exception/error.
+- **Single Active Period Constraint**:
+  - Hanya 1 periode yang boleh berstatus aktif dalam satu waktu.
+  - Untuk mengaktifkan periode draft, peternak wajib menutup panen periode aktif yang sedang berjalan terlebih dahulu.
+- **Editable Active & Draft Periods**:
+  - Periode Aktif dan Draft **dapat diedit** datanya (Nama Periode, Kapasitas DOC, Tanggal DOC Masuk).
+  - Sisa ayam, umur hari, dan FCR terkalkulasi ulang secara dinamis tanpa merusak integritas catatan harian (recording).
+  - Periode yang sudah **Selesai Panen** (`endDate != null`) terkunci permanen (*read-only*).
+- **Senior Farmer Form Simplicity**:
+  - Hindari form yang membebani peternak berusia lanjut dengan format desimal rumit (misal: "Bobot Awal DOC").
+  - Otomatis gunakan standar industri (misal: `0.04 kg` / 40 gram) di balik layar.
+  - Form pembuatan periode cukup berfokus pada 3 input esensial: **Nama Periode**, **Tanggal DOC Masuk**, dan **Jumlah DOC (Ekor)**.
+
+

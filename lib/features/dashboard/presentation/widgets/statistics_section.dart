@@ -4,6 +4,7 @@ import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/features/recording/presentation/pages/chicken_weight_screen.dart';
+import 'package:recording_app/features/reporting/presentation/pages/fcr_monitoring_screen.dart';
 
 class StatisticsSection extends StatelessWidget {
   final double fcr;
@@ -47,6 +48,14 @@ class StatisticsSection extends StatelessWidget {
                     label: 'FCR',
                     value: '$fcr',
                     unit: 'Ratio',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FCRMonitoringScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -268,12 +277,14 @@ class _InfoCard extends StatelessWidget {
   final String label;
   final String value;
   final String unit;
+  final VoidCallback? onTap;
 
   const _InfoCard({
     required this.icon,
     required this.label,
     required this.value,
     required this.unit,
+    this.onTap,
   });
 
   @override
@@ -281,7 +292,7 @@ class _InfoCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return AppCard(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,6 +322,12 @@ class _InfoCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (onTap != null)
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -342,6 +359,17 @@ class _InfoCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: onTap != null
+          ? InkWell(
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+              onTap: onTap,
+              child: content,
+            )
+          : content,
     );
   }
 }

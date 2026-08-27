@@ -90,14 +90,17 @@ class PeriodController extends ChangeNotifier {
   // BUSINESS LOGIC
   // ============================================================================
 
-  /// Create Period: Defaults to draft (isActive = false, no endDate).
+  /// Create Period:
+  /// - Jika belum ada periode aktif: otomatis langsung aktif (`isActive = true`).
+  /// - Jika sudah ada periode aktif: otomatis disimpan sebagai draft (`isActive = false`).
   Future<void> createPeriod(PeriodData period) async {
     final hasActive = _periods.any((p) => p.isActive);
-    if (hasActive) {
-      throw Exception('Cannot create: There is already an active period.');
-    }
+    final shouldBeActive = !hasActive;
 
-    final newPeriod = period.copyWith(isActive: false, createdAt: DateTime.now());
+    final newPeriod = period.copyWith(
+      isActive: shouldBeActive,
+      createdAt: DateTime.now(),
+    );
     await _firebaseService.createPeriod(newPeriod);
   }
 
@@ -106,16 +109,16 @@ class PeriodController extends ChangeNotifier {
   Future<void> activatePeriod(String periodId) async {
     final period = _periods.firstWhere(
           (p) => p.id == periodId,
-      orElse: () => throw Exception('Period not found'),
+      orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
     if (period.isActive) {
-      throw Exception('Cannot activate: Period is already active.');
+      throw Exception('Periode ini sudah dalam keadaan aktif.');
     }
 
     final hasActive = _periods.any((p) => p.isActive);
     if (hasActive) {
-      throw Exception('Cannot activate: Another period is already active.');
+      throw Exception('Tidak dapat mengaktifkan: Ada periode lain yang sedang berjalan. Silakan tutup panen periode aktif terlebih dahulu.');
     }
 
     // Clear endDate so it no longer appears as closed
@@ -131,11 +134,11 @@ class PeriodController extends ChangeNotifier {
   Future<void> closePeriod(String periodId) async {
     final period = _periods.firstWhere(
           (p) => p.id == periodId,
-      orElse: () => throw Exception('Period not found'),
+      orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
     if (!period.isActive) {
-      throw Exception('Cannot close: Period is not active.');
+      throw Exception('Tidak dapat menutup: Periode tidak sedang aktif.');
     }
 
     // Fetch recordings sekali untuk kalkulasi snapshot
@@ -171,7 +174,7 @@ class PeriodController extends ChangeNotifier {
   Future<void> deletePeriod(String periodId) async {
     final period = _periods.firstWhere(
           (p) => p.id == periodId,
-      orElse: () => throw Exception('Period not found'),
+      orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
     final isDraft = !period.isActive && period.endDate == null;
@@ -181,7 +184,7 @@ class PeriodController extends ChangeNotifier {
       final hasRecordings = await recordingsStream.first.then((list) => list.isNotEmpty);
 
       if (hasRecordings) {
-        throw Exception('Cannot delete period: It contains recordings.');
+        throw Exception('Tidak dapat menghapus periode: Periode sudah memiliki rekaman harian.');
       }
     }
 
@@ -189,22 +192,27 @@ class PeriodController extends ChangeNotifier {
       final updatedPeriod = period.copyWith(isDeleted: true);
       await _firebaseService.updatePeriod(periodId, updatedPeriod);
     } catch (e) {
-      throw Exception('Failed to delete period: $e');
+      throw Exception('Gagal menghapus periode: $e');
     }
   }
 
-  /// Update Period Details: Only allowed for draft periods (not active, no endDate).
+  /// Update Period Details: Diizinkan untuk periode draft atau periode aktif (sebelum ditutup panen).
+  /// Periode yang sudah selesai panen (endDate != null) terkunci demi integritas laporan.
   Future<void> updatePeriodDetails(String periodId, PeriodData updatedData) async {
     final period = _periods.firstWhere(
           (p) => p.id == periodId,
-      orElse: () => throw Exception('Period not found'),
+          orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
-    final isDraft = !period.isActive && period.endDate == null;
-    if (!isDraft) {
-      throw Exception('Cannot edit: Only draft periods can be modified.');
+    final isClosed = !period.isActive && period.endDate != null;
+    if (isClosed) {
+      throw Exception('Tidak dapat mengubah data: Periode ini sudah selesai panen.');
     }
 
-    await _firebaseService.updatePeriod(periodId, updatedData);
+    final newPeriodData = updatedData.copyWith(
+      isActive: period.isActive,
+    );
+
+    await _firebaseService.updatePeriod(periodId, newPeriodData);
   }
 }

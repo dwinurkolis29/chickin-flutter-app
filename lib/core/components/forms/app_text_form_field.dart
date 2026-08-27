@@ -10,6 +10,7 @@ class AppTextFormField extends StatelessWidget {
     this.focusNode,
     required this.labelText,
     this.hintText,
+    this.helperText,
     this.prefixIcon,
     this.suffixIcon,
     this.suffixText,
@@ -31,6 +32,7 @@ class AppTextFormField extends StatelessWidget {
   final FocusNode? focusNode;
   final String labelText;
   final String? hintText;
+  final String? helperText;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final String? suffixText;
@@ -68,6 +70,7 @@ class AppTextFormField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
+        helperText: helperText,
         prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
         suffixIcon: suffixIcon,
         suffixText: suffixText,

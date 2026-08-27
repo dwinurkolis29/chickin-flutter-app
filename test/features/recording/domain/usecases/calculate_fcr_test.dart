@@ -238,31 +238,40 @@ void main() {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // CalculateFCR.getWeekAgeRange
+  // CalculateFCR.executeDaily
   // ─────────────────────────────────────────────────────────────────────────
-  group('CalculateFCR.getWeekAgeRange', () {
-    test('minggu 1 → "1-7 hari"', () {
-      expect(useCase.getWeekAgeRange(1), '1-7 hari');
+  group('CalculateFCR.executeDaily', () {
+    test('recordings kosong → return []', () {
+      expect(useCase.executeDaily([], 1000), isEmpty);
     });
 
-    test('minggu 2 → "8-14 hari"', () {
-      expect(useCase.getWeekAgeRange(2), '8-14 hari');
+    test('initialCapacity = 0 → return []', () {
+      final recordings = [rec(day: 1, avgWeightGram: 180, feedSack: 1)];
+      expect(useCase.executeDaily(recordings, 0), isEmpty);
     });
 
-    test('minggu 3 → "15-21 hari"', () {
-      expect(useCase.getWeekAgeRange(3), '15-21 hari');
-    });
+    test('menghitung FCR kumulatif per hari dengan benar', () {
+      // Hari 1: 1 sak (50kg), mati 2, bobot 180g -> sisa 998, biomass = 998 * 0.18 = 179.64kg, FCR = 50 / 179.64 = 0.28
+      // Hari 2: 1 sak (total 100kg), mati 3 (total 5), bobot 220g -> sisa 995, biomass = 995 * 0.22 = 218.9kg, FCR = 100 / 218.9 = 0.46
+      final recordings = [
+        rec(day: 1, avgWeightGram: 180, feedSack: 1, mortality: 2),
+        rec(day: 2, avgWeightGram: 220, feedSack: 1, mortality: 3),
+      ];
 
-    test('minggu 4 → "22-28 hari"', () {
-      expect(useCase.getWeekAgeRange(4), '22-28 hari');
-    });
+      final result = useCase.executeDaily(recordings, 1000);
 
-    test('minggu 5 → "29-35 hari"', () {
-      expect(useCase.getWeekAgeRange(5), '29-35 hari');
-    });
+      expect(result.length, 2);
+      expect(result[0].day, 1);
+      expect(result[0].dailyFeedKg, 50.0);
+      expect(result[0].cumulativeFeedKg, 50.0);
+      expect(result[0].sisaAyam, 998);
+      expect(result[0].fcr, 0.28);
 
-    test('minggu 6 → "36-42 hari"', () {
-      expect(useCase.getWeekAgeRange(6), '36-42 hari');
+      expect(result[1].day, 2);
+      expect(result[1].dailyFeedKg, 50.0);
+      expect(result[1].cumulativeFeedKg, 100.0);
+      expect(result[1].sisaAyam, 995);
+      expect(result[1].fcr, 0.46);
     });
   });
 }

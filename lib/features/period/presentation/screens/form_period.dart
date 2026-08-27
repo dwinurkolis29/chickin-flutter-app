@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/header/app_header.dart';
-import 'package:recording_app/core/components/forms/app_text_form_field.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/forms/app_text_form_field.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import '../../data/models/period_data.dart';
 import '../controllers/period_controller.dart';
-import '../../../../core/theme/app_theme.dart';
 
+/// Screen form untuk membuat atau mengedit periode/siklus pemeliharaan ayam.
+/// Didesain bersih dan ramah untuk peternak lanjut usia.
 class FormPeriod extends StatefulWidget {
   final PeriodData? period;
 
@@ -23,15 +27,9 @@ class _FormPeriodState extends State<FormPeriod> {
 
   late TextEditingController _nameController;
   late TextEditingController _capacityController;
-  late TextEditingController _weightController;
 
+  late DateTime _startDate;
   bool _isLoading = false;
-
-  /// Reflects active state for the activate switch (draft/closed periods)
-  late bool _isActiveSwitchValue;
-
-  /// Reflects open/close state for the close switch (active periods)
-  late bool _closePeriodSwitch;
 
   bool get _isEditing => widget.period != null;
 
@@ -40,26 +38,33 @@ class _FormPeriodState extends State<FormPeriod> {
     super.initState();
     _nameController = TextEditingController(text: widget.period?.name ?? '');
     _capacityController = TextEditingController(
-      text: widget.period?.initialCapacity.toString() ?? '',
+      text: widget.period != null && widget.period!.initialCapacity > 0
+          ? widget.period!.initialCapacity.toString()
+          : '',
     );
-    _weightController = TextEditingController(
-      text: widget.period?.initialWeight.toString() ?? '0.4',
-    );
-    _isActiveSwitchValue = widget.period?.isActive ?? false;
-    // Close switch ON = period is open/active
-    _closePeriodSwitch = widget.period?.isActive ?? false;
-
-    if (!_isEditing) {
-      // Logic tour lama dihapus karena sudah dikelola di Dashboard/List
-    }
+    _startDate = widget.period?.startDate ?? DateTime.now();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _capacityController.dispose();
-    _weightController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickStartDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+      helpText: 'PILIH TANGGAL DOC MASUK',
+      confirmText: 'PILIH',
+      cancelText: 'BATAL',
+    );
+    if (picked != null) {
+      setState(() => _startDate = picked);
+    }
   }
 
   Future<void> _submitForm() async {
@@ -74,8 +79,8 @@ class _FormPeriodState extends State<FormPeriod> {
         id: widget.period?.id ?? '',
         name: _nameController.text.trim(),
         initialCapacity: int.tryParse(_capacityController.text.trim()) ?? 0,
-        initialWeight: double.tryParse(_weightController.text.trim()) ?? 0.4,
-        startDate: widget.period?.startDate ?? DateTime.now(),
+        initialWeight: widget.period?.initialWeight ?? 0.04,
+        startDate: _startDate,
         createdAt: widget.period?.createdAt ?? DateTime.now(),
         isActive: widget.period?.isActive ?? false,
         isDeleted: widget.period?.isDeleted ?? false,
@@ -88,15 +93,26 @@ class _FormPeriodState extends State<FormPeriod> {
           Navigator.pop(context, true);
         }
       } else {
+        final hasActive = controller.periods.any((p) => p.isActive);
         await controller.createPeriod(periodData);
         if (mounted) {
-          AppSnackbar.showSuccess(context, 'Periode berhasil dibuat');
+          if (hasActive) {
+            AppSnackbar.showSuccess(
+              context,
+              'Periode baru disimpan sebagai Draft (karena ada periode yang sedang aktif)',
+            );
+          } else {
+            AppSnackbar.showSuccess(
+              context,
+              'Periode baru berhasil dibuat dan langsung Aktif',
+            );
+          }
           Navigator.pop(context, true);
         }
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.showError(context, e.toString());
+        AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
       }
     } finally {
       if (mounted) {
@@ -111,21 +127,19 @@ class _FormPeriodState extends State<FormPeriod> {
     DialogHelper.showConfirm(
       context,
       'Hapus Periode',
-      'Apakah Anda yakin ingin menghapus periode ini? Periode yang sudah memiliki record tidak dapat dihapus.',
+      'Apakah Anda yakin ingin menghapus periode "${widget.period!.name}"? Periode yang sudah memiliki rekaman harian tidak dapat dihapus.',
       isDestructive: true,
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          await context.read<PeriodController>().deletePeriod(
-            widget.period!.id,
-          );
+          await context.read<PeriodController>().deletePeriod(widget.period!.id);
           if (mounted) {
             AppSnackbar.showSuccess(context, 'Periode berhasil dihapus');
             Navigator.pop(context, true);
           }
         } catch (e) {
           if (mounted) {
-            AppSnackbar.showError(context, e.toString());
+            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
           }
         } finally {
           if (mounted) setState(() => _isLoading = false);
@@ -134,7 +148,6 @@ class _FormPeriodState extends State<FormPeriod> {
     );
   }
 
-  /// Activate or reactivate a period (works for both draft and previously closed)
   Future<void> _activatePeriod() async {
     if (widget.period == null) return;
 
@@ -145,21 +158,18 @@ class _FormPeriodState extends State<FormPeriod> {
       'Aktifkan Periode',
       isReopening
           ? 'Periode ini sebelumnya sudah ditutup. Apakah Anda yakin ingin mengaktifkannya kembali? Hanya satu periode yang bisa aktif dalam satu waktu.'
-          : 'Apakah Anda yakin ingin mengaktifkan periode ini? Hanya satu periode yang bisa aktif dalam satu waktu.',
+          : 'Aktifkan periode "${widget.period!.name}" sekarang? Data recording harian dan dashboard akan langsung terhubung ke periode ini.',
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          await context.read<PeriodController>().activatePeriod(
-            widget.period!.id,
-          );
+          await context.read<PeriodController>().activatePeriod(widget.period!.id);
           if (mounted) {
             AppSnackbar.showSuccess(context, 'Periode berhasil diaktifkan');
             Navigator.pop(context, true);
           }
         } catch (e) {
           if (mounted) {
-            AppSnackbar.showError(context, e.toString());
-            setState(() => _isActiveSwitchValue = false);
+            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
           }
         } finally {
           if (mounted) setState(() => _isLoading = false);
@@ -173,21 +183,20 @@ class _FormPeriodState extends State<FormPeriod> {
 
     DialogHelper.showConfirm(
       context,
-      'Tutup Periode',
-      'Apakah Anda yakin ingin menutup periode ini? Periode yang sudah ditutup tidak bisa diaktifkan kembali.',
+      'Tutup Siklus (Selesai Panen)',
+      'Apakah seluruh ayam pada periode ini sudah selesai dipanen? Laporan akhir performa (FCR, IP, Mortalitas) akan dikalkulasi secara otomatis.',
       isDestructive: true,
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
           await context.read<PeriodController>().closePeriod(widget.period!.id);
           if (mounted) {
-            AppSnackbar.showSuccess(context, 'Periode berhasil ditutup');
+            AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan dibuat');
             Navigator.pop(context, true);
           }
         } catch (e) {
           if (mounted) {
-            AppSnackbar.showError(context, e.toString());
-            setState(() => _closePeriodSwitch = true); // revert on failure
+            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
           }
         } finally {
           if (mounted) setState(() => _isLoading = false);
@@ -198,15 +207,12 @@ class _FormPeriodState extends State<FormPeriod> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final dateFmt = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
 
-    // Show activate switch for non-active periods (both draft and closed)
-    final bool showActivateSwitch =
-        _isEditing && !(widget.period?.isActive ?? false);
-    // Show close switch only when currently active
-    final bool showCloseSwitch =
-        _isEditing && (widget.period?.isActive ?? false);
+    final bool showActivateOption = _isEditing && !(widget.period?.isActive ?? false);
+    final bool isCurrentlyActive = _isEditing && (widget.period?.isActive ?? false);
 
     return Scaffold(
       appBar: AppHeader(
@@ -215,197 +221,344 @@ class _FormPeriodState extends State<FormPeriod> {
           if (_isEditing)
             IconButton(
               icon: Icon(
-                Icons.delete_outline,
-                color: Theme.of(context).colorScheme.error,
+                Icons.delete_outline_rounded,
+                color: cs.error,
               ),
+              tooltip: 'Hapus Periode',
               onPressed: _isLoading ? null : _deletePeriod,
             ),
         ],
       ),
       body: SafeArea(
         top: false,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              AppTextFormField(
-                controller: _nameController,
-                labelText: 'Nama Periode',
-                prefixIcon: Icons.file_present,
-                hintText: 'Misal: Batch 1 2024',
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty)
-                    return 'Nama wajib diisi';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              AppTextFormField(
-                controller: _capacityController,
-                labelText: 'Kapasitas Awal (Ekor)',
-                prefixIcon: Icons.reduce_capacity,
-                hintText: 'Misal: 5000',
-                keyboardType: TextInputType.number,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty)
-                    return 'Kapasitas wajib diisi';
-                  if (int.tryParse(val.trim()) == null) return 'Harus angka';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              AppTextFormField(
-                controller: _weightController,
-                labelText: 'Bobot Awal (Kg)',
-                prefixIcon: Icons.line_weight,
-                hintText: 'Misal: 0.4',
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty)
-                    return 'Bobot wajib diisi';
-                  if (double.tryParse(val.trim()) == null) return 'Harus angka';
-                  return null;
-                },
-              ),
-
-              // --- Activate Switch (draft or closed periods) ---
-              if (showActivateSwitch) ...[
-                const SizedBox(height: 16),
-                _StatusSwitch(
-                  label: 'Aktifkan Periode',
-                  subtitle:
-                      widget.period?.endDate != null
-                          ? 'Periode ini sebelumnya sudah ditutup'
-                          : 'Aktifkan untuk mulai mencatat data periode ini',
-                  value: _isActiveSwitchValue,
-                  isActive: _isActiveSwitchValue,
-                  disabled: _isLoading,
-                  onChanged: (val) {
-                    setState(() => _isActiveSwitchValue = val);
-                    if (val) _activatePeriod();
-                  },
-                ),
-              ],
-
-              // --- Close Switch (active periods only) ---
-              if (showCloseSwitch) ...[
-                const SizedBox(height: 16),
-                _StatusSwitch(
-                  label: 'Status Periode',
-                  subtitle:
-                      _closePeriodSwitch
-                          ? 'Periode sedang aktif'
-                          : 'Periode ditutup',
-                  value: _closePeriodSwitch,
-                  isActive: _closePeriodSwitch,
-                  disabled: _isLoading,
-                  onChanged: (val) {
-                    setState(() => _closePeriodSwitch = val);
-                    if (!val) _closePeriod();
-                  },
-                ),
-              ],
-
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submitForm,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                  ),
-                ),
-                child:
-                    _isLoading
-                        ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              colorScheme.onPrimary,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  if (!_isEditing) ...[
+                    Consumer<PeriodController>(
+                      builder: (context, periodCtrl, _) {
+                        final hasActive = periodCtrl.periods.any((p) => p.isActive);
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: hasActive
+                                ? cs.surfaceContainer
+                                : AppColors.success.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                            border: Border.all(
+                              color: hasActive
+                                  ? cs.outlineVariant
+                                  : AppColors.success.withValues(alpha: 0.3),
                             ),
                           ),
-                        )
-                        : Text(
-                          _isEditing ? 'Simpan Perubahan' : 'Buat Periode',
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onPrimary,
+                          child: Row(
+                            children: [
+                              Icon(
+                                hasActive
+                                    ? Icons.info_outline_rounded
+                                    : Icons.check_circle_outline_rounded,
+                                color: hasActive ? cs.primary : AppColors.success,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  hasActive
+                                      ? 'Saat ini ada periode aktif. Periode baru ini akan otomatis disimpan sebagai DRAFT.'
+                                      : 'Belum ada periode aktif. Periode baru ini akan OTOMATIS LANGSUNG AKTIF.',
+                                  style: tt.bodySmall?.copyWith(
+                                    color: cs.onSurface,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // ── 1. Kartu Informasi Siklus DOC ──────────────────────────
+                  AppCard(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 20, color: cs.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'INFORMASI SIKLUS DOC',
+                                style: tt.labelMedium?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Nama Periode
+                          AppTextFormField(
+                            controller: _nameController,
+                            labelText: 'Nama Periode / Siklus',
+                            prefixIcon: Icons.badge_outlined,
+                            hintText: 'Misal: Periode 1 - 2026',
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) {
+                                return 'Nama periode wajib diisi';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Tanggal DOC Masuk (Interactive DatePicker)
+                          Text(
+                            'Tanggal DOC Masuk',
+                            style: tt.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          InkWell(
+                            onTap: _isLoading ? null : _pickStartDate,
+                            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainer,
+                                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                border: Border.all(color: cs.outlineVariant),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_today_rounded, size: 20, color: cs.primary),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      dateFmt.format(_startDate),
+                                      style: tt.bodyMedium?.copyWith(
+                                        color: cs.onSurface,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(Icons.edit_calendar_rounded, size: 18, color: cs.onSurfaceVariant),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Populasi Awal / Kapasitas DOC
+                          AppTextFormField(
+                            controller: _capacityController,
+                            labelText: 'Jumlah DOC / Populasi Awal (Ekor)',
+                            prefixIcon: Icons.groups_outlined,
+                            hintText: 'Misal: 5000',
+                            keyboardType: TextInputType.number,
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) {
+                                return 'Jumlah DOC wajib diisi';
+                              }
+                              final numVal = int.tryParse(val.trim());
+                              if (numVal == null || numVal <= 0) {
+                                return 'Masukkan jumlah ekor yang valid (> 0)';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── 2. Kartu Status & Pengelolaan Siklus ────────────────────
+                  if (_isEditing)
+                    AppCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.tune_rounded, size: 20, color: cs.primary),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'STATUS SIKLUS TERNAK',
+                                  style: tt.labelMedium?.copyWith(
+                                    color: cs.primary,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            if (isCurrentlyActive) ...[
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                                  border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.check_circle_rounded, color: AppColors.success, size: 22),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Periode Ini Sedang Aktif',
+                                            style: tt.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: cs.onSurface,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Pencatatan harian dan dashboard saat ini mengacu pada periode ini.',
+                                            style: tt.bodySmall?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                              fontSize: 11.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              OutlinedButton.icon(
+                                onPressed: _isLoading ? null : _closePeriod,
+                                icon: Icon(Icons.check_box_outlined, color: cs.error, size: 20),
+                                label: Text(
+                                  'Tutup Siklus (Selesai Panen)',
+                                  style: tt.bodyMedium?.copyWith(
+                                    color: cs.error,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(46),
+                                  side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                  ),
+                                ),
+                              ),
+                            ] else if (showActivateOption) ...[
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceContainer,
+                                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.info_outline_rounded, color: cs.primary, size: 22),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            widget.period?.endDate != null
+                                                ? 'Periode Selesai / Arsip Panen'
+                                                : 'Periode Draft (Belum Aktif)',
+                                            style: tt.bodyMedium?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: cs.onSurface,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Aktifkan periode ini jika Anda ingin mulai mencatat perkembangan harian.',
+                                            style: tt.bodySmall?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                              fontSize: 11.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              FilledButton.tonalIcon(
+                                onPressed: _isLoading ? null : _activatePeriod,
+                                icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
+                                label: const Text('Aktifkan Periode Ini Sekarang'),
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(46),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+
+                  // ── 3. Tombol Submit Form ──────────────────────────────────
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+                            ),
+                          )
+                        : Text(
+                            _isEditing ? 'Simpan Perubahan' : 'Buat Periode Baru',
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: cs.onPrimary,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Reusable status switch dengan visual aktif/nonaktif yang jelas
-class _StatusSwitch extends StatelessWidget {
-  final String label;
-  final String subtitle;
-  final bool value;
-  final bool isActive;
-  final bool disabled;
-  final ValueChanged<bool> onChanged;
-
-  const _StatusSwitch({
-    required this.label,
-    required this.subtitle,
-    required this.value,
-    required this.isActive,
-    required this.disabled,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      decoration: BoxDecoration(
-        color:
-            isActive
-                ? colorScheme.primary.withValues(alpha: 0.07)
-                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        border: Border.all(
-          color: isActive ? colorScheme.primary : colorScheme.outlineVariant,
-          width: isActive ? 1.5 : 1.0,
-        ),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: SwitchListTile(
-        title: Text(
-          label,
-          style: textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: isActive ? colorScheme.primary : colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: textTheme.bodySmall?.copyWith(
-            color:
-                isActive
-                    ? colorScheme.primary.withValues(alpha: 0.75)
-                    : colorScheme.onSurfaceVariant,
-          ),
-        ),
-        value: value,
-        activeColor: colorScheme.primary,
-        inactiveThumbColor: colorScheme.outline,
-        inactiveTrackColor: colorScheme.surfaceContainerHighest,
-        onChanged: disabled ? null : onChanged,
       ),
     );
   }

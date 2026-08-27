@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
@@ -105,9 +106,16 @@ class HomeController extends ChangeNotifier {
   void reload([String? uid]) => onAuthChanged(uid);
 
   List<FCRData> calculateWeeklyFCR(List<RecordingData> recordings) {
-    if (recordings.isEmpty || _initialPopulation == 0) {
+    if (recordings.isEmpty || initialPopulation == 0) {
       return <FCRData>[];
     }
-    return _calculateFCRUseCase.execute(recordings, _initialPopulation);
+    return _calculateFCRUseCase.execute(recordings, initialPopulation);
+  }
+
+  List<DailyFCRData> calculateDailyFCR(List<RecordingData> recordings) {
+    if (recordings.isEmpty || initialPopulation == 0) {
+      return <DailyFCRData>[];
+    }
+    return _calculateFCRUseCase.executeDaily(recordings, initialPopulation);
   }
 }

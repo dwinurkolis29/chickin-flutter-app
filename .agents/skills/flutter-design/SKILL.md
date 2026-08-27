@@ -15,6 +15,8 @@ Gunakan panduan ini sebagai standar visual utama saat membuat atau memodifikasi 
 - Selalu gunakan referensi tema: `Theme.of(context).colorScheme.*` atau konstanta dari `lib/core/theme/app_colors.dart`.
 - Semua pemanggilan dialog **WAJIB** melalui `DialogHelper` (`lib/core/components/dialogs/dialog_helper.dart`).
 - Tetapkan `visualDensity: VisualDensity.standard` agar komponen di Flutter Web tidak gepeng (sudah diset di `AppTheme`).
+- **DILARANG KERAS** menggunakan icon 3D atau emoji 3D di seluruh aplikasi. Gunakan hanya ikon flat Material 3 yang bersih.
+- **Action Button Styling (Tutup Panen / Destructive Actions)**: Gunakan `OutlinedButton.icon` dengan outline border `cs.error.withValues(alpha: 0.6)`, teks tebal, dan background transparan (bukan solid tonal container tebal) agar tampilan tetap bersih dan tidak mendominasi layar.
 - **DILARANG** menggunakan `AppTextTheme` — sudah deprecated. Gunakan `AppTypography` atau `Theme.of(context).textTheme`.
 - **DILARANG** menggunakan `AppColors.info` — token ini sudah dihapus. Gunakan `AppColors.primary` atau `colorScheme.primary`.
 - **DILARANG** menggunakan `AppColors.secondary`, `AppColors.secondaryContainer`, atau token `*OnPrimary` — semua sudah dihapus.

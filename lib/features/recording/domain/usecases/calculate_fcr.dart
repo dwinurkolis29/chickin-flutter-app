@@ -1,3 +1,4 @@
+import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
@@ -83,6 +84,49 @@ class CalculateFCR {
     }
 
     return weeklyFCR;
+  }
+
+  /// Calculate daily FCR data from recordings
+  ///
+  /// [recordings] - List of recording data (treated as immutable)
+  /// [initialCapacity] - Initial chicken population from period data
+  ///
+  /// Returns cumulative FCR metrics per recording day
+  List<DailyFCRData> executeDaily(List<RecordingData> recordings, int initialCapacity) {
+    if (recordings.isEmpty || initialCapacity == 0) return [];
+
+    final sortedRecordings = List<RecordingData>.from(recordings)
+      ..sort((a, b) => a.day.compareTo(b.day));
+
+    final List<DailyFCRData> dailyList = [];
+    int cumulativeDeaths = 0;
+    double cumulativeFeedKg = 0.0;
+
+    for (final rec in sortedRecordings) {
+      final dailyFeedKg = rec.feedSack * 50.0;
+      cumulativeFeedKg += dailyFeedKg;
+      cumulativeDeaths += rec.mortality;
+
+      final remainingChickens = (initialCapacity - cumulativeDeaths).clamp(0, initialCapacity);
+      final avgWeightKg = rec.avgWeightGram / 1000.0;
+      final totalBiomassKg = remainingChickens * avgWeightKg;
+      final fcr = totalBiomassKg > 0 ? cumulativeFeedKg / totalBiomassKg : 0.0;
+
+      dailyList.add(DailyFCRData(
+        day: rec.day,
+        date: rec.createdAt,
+        dailyFeedKg: double.parse(dailyFeedKg.toStringAsFixed(2)),
+        cumulativeFeedKg: double.parse(cumulativeFeedKg.toStringAsFixed(2)),
+        dailyMortality: rec.mortality,
+        cumulativeMortality: cumulativeDeaths,
+        sisaAyam: remainingChickens,
+        avgWeightGram: rec.avgWeightGram,
+        totalBiomassKg: double.parse(totalBiomassKg.toStringAsFixed(2)),
+        fcr: double.parse(fcr.toStringAsFixed(2)),
+      ));
+    }
+
+    return dailyList;
   }
 
   /// Get age range string for a given week

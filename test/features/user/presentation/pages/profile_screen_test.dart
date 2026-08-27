@@ -27,7 +27,6 @@ class _FakeAuthService extends ChangeNotifier implements AuthService {
   @override
   fb.User? get currentUser => _currentUser;
 
-  @override
   String? get uid => _currentUser?.uid;
 
   @override
@@ -48,7 +47,7 @@ class _FakeAuthService extends ChangeNotifier implements AuthService {
 }
 
 class _FakeUserController extends ChangeNotifier implements UserController {
-  UserProfile? _userProfile;
+  final UserProfile? _userProfile;
 
   _FakeUserController({UserProfile? profile}) : _userProfile = profile;
 
@@ -119,7 +118,11 @@ void main() {
       expect(find.text('Periode Pemeliharaan'), findsOneWidget);
       expect(find.text('Data Kandang'), findsOneWidget);
       expect(find.text('Semua Recording'), findsOneWidget);
+      expect(find.text('Monitoring FCR'), findsOneWidget);
       expect(find.text('Pengingat & Alarm'), findsOneWidget);
+
+      // Menu Kamus & Panduan Ternak
+      expect(find.text('Ensiklopedia Broiler'), findsOneWidget);
 
       // Menu Informasi Sistem
       expect(find.text('Tentang Aplikasi'), findsOneWidget);

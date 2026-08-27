@@ -89,3 +89,4 @@ lib/
   - `flutter-design/SKILL.md`
   - `flutter-testing/SKILL.md`
   - `flutter-release/SKILL.md`
+  - `flutter-rumus-broiler/SKILL.md`
