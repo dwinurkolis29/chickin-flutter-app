@@ -179,6 +179,45 @@ void main() {
       expect(find.text('Periode Ini Sedang Aktif'), findsOneWidget);
       expect(find.text('Tutup Siklus (Selesai Panen)'), findsOneWidget);
       expect(find.text('Simpan Perubahan'), findsOneWidget);
+      // Tombol hapus DILARANG muncul pada periode aktif
+      expect(find.text('Hapus Periode Draft'), findsNothing);
+      expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+    });
+
+    testWidgets('menampilkan tombol hapus periode draft di bawah simpan dan menampilkan konfirmasi saat ditekan', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final draftPeriod = PeriodData(
+        id: 'period-draft',
+        name: 'Siklus Draft 2',
+        initialCapacity: 3000,
+        initialWeight: 0.04,
+        startDate: DateTime(2026, 9, 1),
+        createdAt: DateTime(2026, 8, 1),
+        isActive: false,
+      );
+
+      final ctrl = _MockPeriodController(periods: [draftPeriod]);
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        controller: ctrl,
+        period: draftPeriod,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit Periode'), findsOneWidget);
+      expect(find.text('Simpan Perubahan'), findsOneWidget);
+      expect(find.text('Hapus Periode Draft'), findsOneWidget);
+
+      // Tap Hapus Periode Draft
+      await tester.tap(find.text('Hapus Periode Draft'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hapus Periode Draft'), findsWidgets);
+      expect(find.textContaining('Apakah Anda yakin ingin menghapus periode draft "Siklus Draft 2"?'), findsOneWidget);
+      expect(find.text('Ya, Hapus'), findsOneWidget);
     });
   });
 }

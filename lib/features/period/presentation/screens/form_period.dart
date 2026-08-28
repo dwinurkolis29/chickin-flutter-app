@@ -32,6 +32,10 @@ class _FormPeriodState extends State<FormPeriod> {
   bool _isLoading = false;
 
   bool get _isEditing => widget.period != null;
+  bool get _isDraft =>
+      _isEditing &&
+      !(widget.period?.isActive ?? false) &&
+      widget.period?.endDate == null;
 
   @override
   void initState() {
@@ -126,15 +130,16 @@ class _FormPeriodState extends State<FormPeriod> {
 
     DialogHelper.showConfirm(
       context,
-      'Hapus Periode',
-      'Apakah Anda yakin ingin menghapus periode "${widget.period!.name}"? Periode yang sudah memiliki rekaman harian tidak dapat dihapus.',
+      'Hapus Periode Draft',
+      'Apakah Anda yakin ingin menghapus periode draft "${widget.period!.name}"?',
+      confirmText: 'Ya, Hapus',
       isDestructive: true,
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
           await context.read<PeriodController>().deletePeriod(widget.period!.id);
           if (mounted) {
-            AppSnackbar.showSuccess(context, 'Periode berhasil dihapus');
+            AppSnackbar.showSuccess(context, 'Periode draft berhasil dihapus');
             Navigator.pop(context, true);
           }
         } catch (e) {
@@ -217,17 +222,6 @@ class _FormPeriodState extends State<FormPeriod> {
     return Scaffold(
       appBar: AppHeader(
         title: _isEditing ? 'Edit Periode' : 'Buat Periode Baru',
-        actions: [
-          if (_isEditing)
-            IconButton(
-              icon: Icon(
-                Icons.delete_outline_rounded,
-                color: cs.error,
-              ),
-              tooltip: 'Hapus Periode',
-              onPressed: _isLoading ? null : _deletePeriod,
-            ),
-        ],
       ),
       body: SafeArea(
         top: false,
@@ -553,6 +547,30 @@ class _FormPeriodState extends State<FormPeriod> {
                             ),
                           ),
                   ),
+
+                  // ── 4. Tombol Hapus Periode (Khusus Draft) ─────────────────
+                  if (_isDraft) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _deletePeriod,
+                      icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                      label: const Text('Hapus Periode Draft'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                        foregroundColor: AppColors.error,
+                        side: BorderSide(
+                          color: AppColors.error.withValues(alpha: 0.6),
+                        ),
+                        backgroundColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        ),
+                        textStyle: tt.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 32),
                 ],
               ),
