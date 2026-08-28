@@ -28,6 +28,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   // Controllers untuk Kalkulator FCR
   final _fcrFeedController = TextEditingController(text: '1700');
   final _fcrWeightController = TextEditingController(text: '1000');
+  String _fcrUnit = 'kg'; // 'kg' or 'sak'
   double _fcrResult = 1.70;
 
   // Controllers untuk Kalkulator IP
@@ -69,12 +70,13 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   }
 
   void _calculateFcr() {
-    final feed = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
+    final feedInput = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
     final weight = double.tryParse(_fcrWeightController.text.replaceAll(',', '.')) ?? 0;
+    final feedKg = _fcrUnit == 'sak' ? feedInput * 50.0 : feedInput;
 
     setState(() {
-      if (feed > 0 && weight > 0) {
-        _fcrResult = feed / weight;
+      if (feedKg > 0 && weight > 0) {
+        _fcrResult = feedKg / weight;
       } else {
         _fcrResult = 0.0;
       }
@@ -299,10 +301,76 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                 ],
               ),
               const SizedBox(height: 16),
+
+              // Pilihan Satuan Pakan: Kg vs Sak
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Satuan Input Pakan:',
+                    style: tt.labelMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildUnitToggleChip(
+                          label: 'Kg',
+                          isSelected: _fcrUnit == 'kg',
+                          onTap: () {
+                            if (_fcrUnit != 'kg') {
+                              setState(() {
+                                _fcrUnit = 'kg';
+                                final currentVal = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
+                                if (currentVal > 0) {
+                                  _fcrFeedController.text = (currentVal * 50).round().toString();
+                                }
+                                _calculateFcr();
+                              });
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 2),
+                        _buildUnitToggleChip(
+                          label: 'Sak (50 Kg)',
+                          isSelected: _fcrUnit == 'sak',
+                          onTap: () {
+                            if (_fcrUnit != 'sak') {
+                              setState(() {
+                                _fcrUnit = 'sak';
+                                final currentVal = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
+                                if (currentVal > 0) {
+                                  final sakVal = currentVal / 50.0;
+                                  _fcrFeedController.text = sakVal % 1 == 0
+                                      ? sakVal.toInt().toString()
+                                      : sakVal.toStringAsFixed(1);
+                                }
+                                _calculateFcr();
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
               AppTextFormField(
                 controller: _fcrFeedController,
-                labelText: 'Total Pakan (Kg)',
-                helperText: 'Total pakan yang dihabiskan selama masa pemeliharaan',
+                labelText: _fcrUnit == 'sak' ? 'Total Pakan (Sak)' : 'Total Pakan (Kg)',
+                helperText: _fcrUnit == 'sak'
+                    ? '1 Sak = 50 Kg pakan (otomatis dikalikan 50 saat menghitung FCR)'
+                    : 'Total pakan yang dihabiskan selama masa pemeliharaan',
                 helperMaxLines: 2,
                 prefixIcon: Icons.inventory_2_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -742,6 +810,34 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildUnitToggleChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? cs.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+        ),
+        child: Text(
+          label,
+          style: tt.labelSmall?.copyWith(
+            color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -50,6 +50,43 @@ void main() {
       expect(find.text('Sangat Efisien'), findsOneWidget);
     });
 
+    testWidgets('mendukung input pakan dalam satuan Sak (50 Kg) dan Kg', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Satuan Input Pakan:'), findsOneWidget);
+      expect(find.text('Kg'), findsOneWidget);
+      expect(find.text('Sak (50 Kg)'), findsOneWidget);
+
+      // Pindah ke satuan Sak (50 Kg)
+      await tester.tap(find.text('Sak (50 Kg)'));
+      await tester.pumpAndSettle();
+
+      // 1700 kg terkonversi menjadi 34 sak (34 * 50 = 1700 / 1000 = 1.70)
+      expect(find.text('Total Pakan (Sak)'), findsOneWidget);
+      expect(find.text('1.70'), findsOneWidget);
+
+      // Ubah input sak menjadi 30 sak (30 * 50 = 1500 kg / 1000 = 1.50)
+      final sakField = find.widgetWithText(TextFormField, '34');
+      await tester.enterText(sakField, '30');
+      await tester.pumpAndSettle();
+
+      expect(find.text('1.50'), findsOneWidget);
+      expect(find.text('Sangat Efisien'), findsOneWidget);
+
+      // Pindah kembali ke satuan Kg
+      await tester.tap(find.text('Kg'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Total Pakan (Kg)'), findsOneWidget);
+      expect(find.text('1500'), findsOneWidget);
+      expect(find.text('1.50'), findsOneWidget);
+    });
+
     testWidgets('menghitung simulasi IP / EPEF di tab Hitung IP', (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
