@@ -20,55 +20,22 @@ class AccountManagementScreen extends StatefulWidget {
 }
 
 class _AccountManagementScreenState extends State<AccountManagementScreen> {
-  bool _isSendingReset = false;
-  bool _isSendingVerification = false;
-
-  Future<void> _handleSendPasswordReset(String email) async {
-    setState(() => _isSendingReset = true);
-    try {
-      await context.read<AuthService>().sendPasswordResetEmail(email);
-      if (mounted) {
-        AppSnackbar.showSuccess(
-          context,
-          'Tautan reset kata sandi telah dikirim ke $email.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(
-          context,
-          'Gagal mengirim email reset kata sandi: $e',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSendingReset = false);
-      }
-    }
+  void _showEmailVerificationDevelopmentNotice(BuildContext context) {
+    DialogHelper.showInfo(
+      context,
+      'Verifikasi Email (Tahap Pengembangan)',
+      'Fitur pengiriman tautan verifikasi email saat ini masih dalam tahap integrasi dan pengembangan sistem.\n\nAkun peternak Anda tetap aktif dan dapat digunakan dengan lancar untuk seluruh fitur pencatatan dan laporan.',
+      buttonText: 'Saya Mengerti',
+    );
   }
 
-  Future<void> _handleSendEmailVerification() async {
-    setState(() => _isSendingVerification = true);
-    try {
-      await context.read<AuthService>().sendEmailVerification();
-      if (mounted) {
-        AppSnackbar.showSuccess(
-          context,
-          'Tautan verifikasi email telah dikirim. Silakan periksa kotak masuk/spam email Anda.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(
-          context,
-          'Gagal mengirim email verifikasi: $e',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSendingVerification = false);
-      }
-    }
+  void _showPasswordResetDevelopmentNotice(BuildContext context) {
+    DialogHelper.showInfo(
+      context,
+      'Reset Kata Sandi via Email (Tahap Pengembangan)',
+      'Fitur pengiriman tautan reset kata sandi ke email saat ini masih dalam tahap pengembangan.\n\nUntuk mengganti kata sandi akun Anda, silakan gunakan fitur "Ubah Kata Sandi Langsung" di bawah ini yang sudah berfungsi.',
+      buttonText: 'Saya Mengerti',
+    );
   }
 
   void _showChangePasswordDialog(BuildContext context) {
@@ -420,7 +387,6 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     final tt = Theme.of(context).textTheme;
     final user = context.watch<AuthService>().currentUser;
     final email = user?.email ?? 'Tidak ada data email';
-    final isVerified = user?.emailVerified ?? false;
     final uid = user?.uid ?? '-';
 
     return Scaffold(
@@ -477,7 +443,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Kelola kredensial login, verifikasi email, pemulihan kata sandi, dan status akun peternak Anda.',
+                                'Kelola kredensial login, kata sandi, dan status keamanan akun peternak Anda.',
                                 style: tt.bodySmall?.copyWith(
                                   color: cs.onSurfaceVariant,
                                   fontSize: 12,
@@ -553,21 +519,15 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isVerified
-                                      ? AppColors.success.withValues(alpha: 0.12)
-                                      : AppColors.warning.withValues(alpha: 0.12),
+                                  color: AppColors.success.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(
                                     AppTheme.pillRadius,
                                   ),
                                 ),
                                 child: Text(
-                                  isVerified
-                                      ? 'Terverifikasi'
-                                      : 'Belum Verifikasi',
+                                  'Akun Aktif',
                                   style: tt.labelSmall?.copyWith(
-                                    color: isVerified
-                                        ? AppColors.success
-                                        : AppColors.warning,
+                                    color: AppColors.success,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 11,
                                   ),
@@ -575,49 +535,6 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                               ),
                             ],
                           ),
-                          if (!isVerified) ...[
-                            const Divider(height: 20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: _isSendingVerification
-                                    ? null
-                                    : _handleSendEmailVerification,
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppTheme.pillRadius,
-                                    ),
-                                  ),
-                                ),
-                                icon: _isSendingVerification
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.mark_email_read_outlined,
-                                        size: 16,
-                                      ),
-                                label: Text(
-                                  _isSendingVerification
-                                      ? 'Mengirim Tautan...'
-                                      : 'Kirim Tautan Verifikasi Email',
-                                  style: tt.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: cs.primary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                           const Divider(height: 20),
                           Row(
                             children: [
@@ -660,6 +577,58 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                               ),
                             ],
                           ),
+                          const Divider(height: 20),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                            onTap: () => _showEmailVerificationDevelopmentNotice(context),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.mark_email_read_outlined,
+                                    size: 18,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Verifikasi Email Terdaftar',
+                                      style: tt.bodySmall?.copyWith(
+                                        color: cs.onSurface,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: cs.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.pillRadius,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Tahap Pengembangan',
+                                      style: tt.labelSmall?.copyWith(
+                                        color: cs.onSurfaceVariant,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 16,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -693,40 +662,30 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.email_outlined,
+                              Icons.password_rounded,
                               color: cs.primary,
                               size: 20,
                             ),
                           ),
                           title: Text(
-                            'Kirim Link Reset Password ke Email',
+                            'Ubah Kata Sandi Langsung',
                             style: tt.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: cs.onSurface,
                             ),
                           ),
                           subtitle: Text(
-                            'Kirim email resmi Firebase untuk atur ulang kata sandi',
+                            'Ganti kata sandi baru dengan memasukkan kata sandi saat ini',
                             style: tt.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                               fontSize: 11,
                             ),
                           ),
-                          trailing: _isSendingReset
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.chevron_right_rounded,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                          onTap: _isSendingReset
-                              ? null
-                              : () => _handleSendPasswordReset(email),
+                          trailing: Icon(
+                            Icons.chevron_right_rounded,
+                            color: cs.onSurfaceVariant,
+                          ),
+                          onTap: () => _showChangePasswordDialog(context),
                         ),
                         Divider(
                           height: 0,
@@ -743,34 +702,62 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: cs.secondaryContainer,
+                              color: cs.surfaceContainerHighest,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.password_rounded,
-                              color: cs.primary,
+                              Icons.email_outlined,
+                              color: cs.onSurfaceVariant,
                               size: 20,
                             ),
                           ),
-                          title: Text(
-                            'Ubah Kata Sandi Langsung',
-                            style: tt.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: cs.onSurface,
-                            ),
+                          title: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Kirim Link Reset ke Email',
+                                  style: tt.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.onSurface,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.pillRadius,
+                                  ),
+                                ),
+                                child: Text(
+                                  'Tahap Pengembangan',
+                                  style: tt.labelSmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           subtitle: Text(
-                            'Ganti password baru dengan memasukkan kata sandi lama',
+                            'Pengiriman email pemulihan otomatis masih dikembangkan',
                             style: tt.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                               fontSize: 11,
                             ),
                           ),
                           trailing: Icon(
-                            Icons.chevron_right_rounded,
+                            Icons.info_outline_rounded,
+                            size: 18,
                             color: cs.onSurfaceVariant,
                           ),
-                          onTap: () => _showChangePasswordDialog(context),
+                          onTap: () => _showPasswordResetDevelopmentNotice(context),
                         ),
                       ],
                     ),

@@ -12,20 +12,15 @@ class _FakeUser extends Fake implements fb.User {
   final String email;
   @override
   final String uid;
-  @override
-  final bool emailVerified;
 
   _FakeUser({
     required this.email,
     required this.uid,
-    this.emailVerified = false,
   });
 }
 
 class _FakeAuthService extends ChangeNotifier implements AuthService {
   fb.User? _currentUser;
-  bool resetEmailSent = false;
-  bool verificationSent = false;
 
   _FakeAuthService({fb.User? user}) : _currentUser = user;
 
@@ -34,16 +29,6 @@ class _FakeAuthService extends ChangeNotifier implements AuthService {
 
   @override
   bool get isLoggedIn => _currentUser != null;
-
-  @override
-  Future<void> sendPasswordResetEmail(String email) async {
-    resetEmailSent = true;
-  }
-
-  @override
-  Future<void> sendEmailVerification() async {
-    verificationSent = true;
-  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -56,7 +41,6 @@ void main() {
           user: _FakeUser(
             email: 'peternak.jaya@gmail.com',
             uid: 'uid_test_12345678',
-            emailVerified: false,
           ),
         );
 
@@ -70,7 +54,7 @@ void main() {
   }
 
   group('AccountManagementScreen Widget Tests', () {
-    testWidgets('menampilkan panduan keamanan, info email, dan opsi reset password', (tester) async {
+    testWidgets('menampilkan panduan keamanan, info email, dan status tahap pengembangan', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
@@ -78,50 +62,40 @@ void main() {
       expect(find.text('Keamanan & Akses Akun'), findsOneWidget);
       expect(find.text('INFORMASI LOGIN & AKUN'), findsOneWidget);
       expect(find.text('peternak.jaya@gmail.com'), findsOneWidget);
-      expect(find.text('Belum Verifikasi'), findsOneWidget);
-      expect(find.text('Kirim Tautan Verifikasi Email'), findsOneWidget);
+      expect(find.text('Akun Aktif'), findsOneWidget);
+      expect(find.text('Verifikasi Email Terdaftar'), findsOneWidget);
 
       expect(find.text('KEAMANAN KATA SANDI'), findsOneWidget);
-      expect(find.text('Kirim Link Reset Password ke Email'), findsOneWidget);
       expect(find.text('Ubah Kata Sandi Langsung'), findsOneWidget);
+      expect(find.text('Kirim Link Reset ke Email'), findsOneWidget);
+
+      // Status tahap pengembangan
+      expect(find.text('Tahap Pengembangan'), findsNWidgets(2));
 
       expect(find.text('PENGATURAN KRITIS AKUN'), findsOneWidget);
       expect(find.text('Hapus Akun Peternak Permanen'), findsOneWidget);
     });
 
-    testWidgets('menekan kirim link reset password memicu sendPasswordResetEmail', (tester) async {
-      final fakeAuth = _FakeAuthService(
-        user: _FakeUser(
-          email: 'peternak.jaya@gmail.com',
-          uid: 'uid_test_12345678',
-        ),
-      );
-
-      await tester.pumpWidget(createWidgetUnderTest(authService: fakeAuth));
+    testWidgets('mengetuk opsi reset kata sandi email menampilkan dialog informasi tahap pengembangan', (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Kirim Link Reset Password ke Email'));
+      await tester.tap(find.text('Kirim Link Reset ke Email'));
       await tester.pumpAndSettle();
 
-      expect(fakeAuth.resetEmailSent, isTrue);
+      expect(find.text('Reset Kata Sandi via Email (Tahap Pengembangan)'), findsOneWidget);
+      expect(find.text('Saya Mengerti'), findsOneWidget);
     });
 
-    testWidgets('menekan kirim verifikasi email memicu sendEmailVerification', (tester) async {
-      final fakeAuth = _FakeAuthService(
-        user: _FakeUser(
-          email: 'peternak.jaya@gmail.com',
-          uid: 'uid_test_12345678',
-          emailVerified: false,
-        ),
-      );
-
-      await tester.pumpWidget(createWidgetUnderTest(authService: fakeAuth));
+    testWidgets('mengetuk opsi verifikasi email menampilkan dialog informasi tahap pengembangan', (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Kirim Tautan Verifikasi Email'));
+      await tester.tap(find.text('Verifikasi Email Terdaftar'));
       await tester.pumpAndSettle();
 
-      expect(fakeAuth.verificationSent, isTrue);
+      expect(find.text('Verifikasi Email (Tahap Pengembangan)'), findsOneWidget);
+      expect(find.text('Saya Mengerti'), findsOneWidget);
     });
   });
 }
