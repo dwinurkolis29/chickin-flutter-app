@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
@@ -31,14 +30,18 @@ class _FormCageState extends State<FormCage> {
   final TextEditingController _controllerCapacity = TextEditingController();
   final TextEditingController _controllerLocation = TextEditingController();
 
-  bool get isEditing => widget.cageData != null && (widget.cageData!.capacity > 0 || widget.cageData!.type.isNotEmpty);
+  bool get isEditing =>
+      widget.cageData != null &&
+      (widget.cageData!.capacity > 0 || widget.cageData!.type.isNotEmpty);
 
   @override
   void initState() {
     super.initState();
     if (widget.cageData != null) {
       _controllerType.text = widget.cageData!.type;
-      _controllerCapacity.text = widget.cageData!.capacity > 0 ? widget.cageData!.capacity.toString() : '';
+      _controllerCapacity.text = widget.cageData!.capacity > 0
+          ? widget.cageData!.capacity.toString()
+          : '';
       _controllerLocation.text = widget.cageData!.location;
     }
   }
@@ -110,7 +113,7 @@ class _FormCageState extends State<FormCage> {
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -167,117 +170,83 @@ class _FormCageState extends State<FormCage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
-                    // ── 2. Card Input Fields ─────────────────────────
-                    AppCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Field 1: Jenis / Model Kandang
-                            Text(
-                              'Model / Tipe Konstruksi Kandang',
-                              style: tt.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            AppTextFormField(
-                              controller: _controllerType,
-                              focusNode: _focusNodeType,
-                              readOnly: true,
-                              labelText: 'Pilih Tipe Kandang',
-                              hintText: 'Pilih tipe konstruksi',
-                              prefixIcon: Icons.roofing_rounded,
-                              suffixIcon: const Icon(Icons.expand_more_rounded),
-                              validator: (String? value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Tipe konstruksi kandang wajib dipilih.';
-                                }
-                                return null;
-                              },
-                              onTap: () {
-                                DialogHelper.showStringPicker(
-                                  context,
-                                  title: 'Pilih Tipe Konstruksi Kandang',
-                                  options: const [
-                                    'Closed House (Kandang Tertutup Modern)',
-                                    'Open House (Kandang Terbuka Standar)',
-                                    'Semi Closed House',
-                                  ],
-                                  selectedOption: _controllerType.text.isNotEmpty
-                                      ? _controllerType.text
-                                      : null,
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _controllerType.text = selected;
-                                    });
-                                    _focusNodeCapacity.requestFocus();
-                                  },
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Field 2: Kapasitas Tampung DOC
-                            Text(
-                              'Kapasitas Maksimal (Ekor DOC)',
-                              style: tt.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            AppTextFormField(
-                              controller: _controllerCapacity,
-                              focusNode: _focusNodeCapacity,
-                              keyboardType: TextInputType.number,
-                              labelText: 'Kapasitas Tampung (Ekor)',
-                              hintText: 'Contoh: 10000',
-                              prefixIcon: Icons.groups_rounded,
-                              validator: (String? value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Kapasitas kandang wajib diisi.';
-                                }
-                                final parsed = int.tryParse(value.trim());
-                                if (parsed == null || parsed <= 0) {
-                                  return 'Masukkan angka kapasitas yang valid (misal: 10000).';
-                                }
-                                return null;
-                              },
-                              onEditingComplete: () => _focusNodeLocation.requestFocus(),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Field 3: Lokasi Kandang
-                            Text(
-                              'Alamat & Lokasi Kandang',
-                              style: tt.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            AppTextFormField(
-                              controller: _controllerLocation,
-                              focusNode: _focusNodeLocation,
-                              maxLines: 3,
-                              labelText: 'Alamat Lokasi Kandang',
-                              hintText: 'Contoh: Dusun Krajan RT 02/05, Desa Sukamaju, Kec. Ciawi',
-                              prefixIcon: Icons.location_on_outlined,
-                              validator: (String? value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Alamat lokasi kandang wajib diisi.';
-                                }
-                                return null;
-                              },
-                            ),
+                    // ── 2. Form Input Fields ─────────────────────────
+                    // Field 1: Model / Tipe Konstruksi Kandang
+                    AppTextFormField(
+                      controller: _controllerType,
+                      focusNode: _focusNodeType,
+                      readOnly: true,
+                      labelText: 'Model / Tipe Konstruksi Kandang',
+                      hintText: 'Pilih tipe konstruksi',
+                      prefixIcon: Icons.roofing_rounded,
+                      suffixIcon: const Icon(Icons.expand_more_rounded),
+                      validator: (String? value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Tipe konstruksi kandang wajib dipilih.';
+                        }
+                        return null;
+                      },
+                      onTap: () {
+                        DialogHelper.showStringPicker(
+                          context,
+                          title: 'Pilih Tipe Konstruksi Kandang',
+                          options: const [
+                            'Closed House (Kandang Tertutup Modern)',
+                            'Open House (Kandang Terbuka Standar)',
+                            'Semi Closed House',
                           ],
-                        ),
-                      ),
+                          selectedOption: _controllerType.text.isNotEmpty
+                              ? _controllerType.text
+                              : null,
+                          onSelected: (selected) {
+                            setState(() {
+                              _controllerType.text = selected;
+                            });
+                            _focusNodeCapacity.requestFocus();
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Field 2: Kapasitas Maksimal
+                    AppTextFormField(
+                      controller: _controllerCapacity,
+                      focusNode: _focusNodeCapacity,
+                      keyboardType: TextInputType.number,
+                      labelText: 'Kapasitas Maksimal (Ekor DOC)',
+                      hintText: 'Contoh: 10000',
+                      prefixIcon: Icons.groups_rounded,
+                      validator: (String? value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Kapasitas kandang wajib diisi.';
+                        }
+                        final parsed = int.tryParse(value.trim());
+                        if (parsed == null || parsed <= 0) {
+                          return 'Masukkan angka kapasitas yang valid (misal: 10000).';
+                        }
+                        return null;
+                      },
+                      onEditingComplete: () => _focusNodeLocation.requestFocus(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Field 3: Lokasi Kandang
+                    AppTextFormField(
+                      controller: _controllerLocation,
+                      focusNode: _focusNodeLocation,
+                      maxLines: 3,
+                      labelText: 'Alamat & Lokasi Kandang',
+                      hintText: 'Contoh: Dusun Krajan RT 02/05, Desa Sukamaju, Kec. Ciawi',
+                      prefixIcon: Icons.location_on_outlined,
+                      validator: (String? value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Alamat lokasi kandang wajib diisi.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 28),
 
@@ -305,7 +274,9 @@ class _FormCageState extends State<FormCage> {
                       label: Text(
                         _isLoading
                             ? 'Menyimpan...'
-                            : (isEditing ? 'Simpan Perubahan' : 'Tambah Kandang Baru'),
+                            : (isEditing
+                                ? 'Simpan Perubahan'
+                                : 'Tambah Kandang Baru'),
                         style: tt.labelLarge?.copyWith(
                           color: cs.onPrimary,
                           fontWeight: FontWeight.w700,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
-import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
@@ -139,10 +138,10 @@ class _FormUserState extends State<FormUser> {
                 : Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 720),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                        child: Form(
-                          key: _formKey,
+                      child: Form(
+                        key: _formKey,
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -199,110 +198,69 @@ class _FormUserState extends State<FormUser> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
 
-                              // ── 2. Card Input Fields ───────────────────────
-                              AppCard(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Field Nama
-                                      Text(
-                                        'Nama Lengkap Peternak',
-                                        style: tt.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: cs.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      AppTextFormField(
-                                        controller: _nameController,
-                                        labelText: 'Nama Lengkap',
-                                        hintText: 'Contoh: H. Ahmad Supriyadi',
-                                        prefixIcon: Icons.person_outline_rounded,
-                                        validator: (value) {
-                                          if (value == null || value.trim().isEmpty) {
-                                            return 'Nama lengkap wajib diisi.';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                      const SizedBox(height: 16),
+                              // ── 2. Form Input Fields ───────────────────────
+                              // Field Nama Lengkap
+                              AppTextFormField(
+                                controller: _nameController,
+                                labelText: 'Nama Lengkap Peternak',
+                                hintText: 'Contoh: H. Ahmad Supriyadi',
+                                prefixIcon: Icons.person_outline_rounded,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Nama lengkap wajib diisi.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
 
-                                      // Field Email (Read Only)
-                                      Text(
-                                        'Email Akun Terdaftar',
-                                        style: tt.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: cs.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      AppTextFormField(
-                                        readOnly: true,
-                                        initialValue: userEmail.isNotEmpty
-                                            ? userEmail
-                                            : 'Tidak ada email',
-                                        labelText: 'Email Akun',
-                                        prefixIcon: Icons.mail_outline_rounded,
-                                      ),
-                                      const SizedBox(height: 16),
+                              // Field Email (Read Only)
+                              AppTextFormField(
+                                readOnly: true,
+                                initialValue: userEmail.isNotEmpty
+                                    ? userEmail
+                                    : 'Tidak ada email',
+                                labelText: 'Email Akun Terdaftar',
+                                prefixIcon: Icons.mail_outline_rounded,
+                              ),
+                              const SizedBox(height: 16),
 
-                                      // Field Nomor Telepon
-                                      Text(
-                                        'Nomor HP / WhatsApp Aktif',
-                                        style: tt.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: cs.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      AppTextFormField(
-                                        controller: _phoneController,
-                                        keyboardType: TextInputType.phone,
-                                        labelText: 'Nomor WhatsApp / HP',
-                                        hintText: 'Contoh: 081234567890',
-                                        prefixIcon: Icons.phone_outlined,
-                                        validator: (value) {
-                                          if (value == null || value.trim().isEmpty) {
-                                            return 'Nomor telepon wajib diisi.';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                      const SizedBox(height: 16),
+                              // Field Nomor Telepon
+                              AppTextFormField(
+                                controller: _phoneController,
+                                keyboardType: TextInputType.phone,
+                                labelText: 'Nomor HP / WhatsApp Aktif',
+                                hintText: 'Contoh: 081234567890',
+                                prefixIcon: Icons.phone_outlined,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Nomor telepon wajib diisi.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
 
-                                      // Field Alamat
-                                      Text(
-                                        'Alamat Domisili Peternak',
-                                        style: tt.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: cs.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      AppTextFormField(
-                                        controller: _addressController,
-                                        maxLines: 3,
-                                        labelText: 'Alamat Domisili',
-                                        hintText: 'Contoh: Dusun Krajan RT 01/02, Desa Sukamaju, Kec. Ciawi',
-                                        prefixIcon: Icons.location_on_outlined,
-                                        validator: (value) {
-                                          if (value == null || value.trim().isEmpty) {
-                                            return 'Alamat domisili wajib diisi.';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              // Field Alamat Domisili
+                              AppTextFormField(
+                                controller: _addressController,
+                                maxLines: 3,
+                                labelText: 'Alamat Domisili Peternak',
+                                hintText:
+                                    'Contoh: Dusun Krajan RT 01/02, Desa Sukamaju, Kec. Ciawi',
+                                prefixIcon: Icons.location_on_outlined,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Alamat domisili wajib diisi.';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 28),
 
-                              // ── 3. Tombol Simpan (Besar & Mudah Ditekan) ────
+                              // ── 3. Tombol Simpan ───────────────────────────
                               FilledButton.icon(
                                 style: FilledButton.styleFrom(
                                   minimumSize: const Size.fromHeight(52),
