@@ -119,6 +119,7 @@ void main() {
       expect(find.text('Data Kandang'), findsOneWidget);
       expect(find.text('Semua Recording'), findsOneWidget);
       expect(find.text('Monitoring FCR'), findsOneWidget);
+      expect(find.text('Laporan Periode Panen'), findsOneWidget);
       expect(find.text('Pengingat & Alarm'), findsNothing);
 
       // Menu Kamus & Panduan Ternak

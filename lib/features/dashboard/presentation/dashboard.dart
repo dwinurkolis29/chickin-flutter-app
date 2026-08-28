@@ -236,8 +236,8 @@ class _DashboardState extends State<Dashboard> {
               // Laporan
               _navItem(
                 index: _kLaporan,
-                activeIcon: Icons.bar_chart,
-                inactiveIcon: Icons.bar_chart_outlined,
+                activeIcon: Icons.assessment_rounded,
+                inactiveIcon: Icons.assessment_outlined,
                 label: 'Laporan',
               ),
               // Profil
