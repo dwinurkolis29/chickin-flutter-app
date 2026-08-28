@@ -375,10 +375,12 @@ class _DashboardContentState extends State<DashboardContent>
                     }
 
                     if (recordings.isEmpty) {
-                      return const AppEmptyState(
-                        icon: Icons.inbox_outlined,
-                        message: 'Belum ada data recording',
-                        subtitle: 'Klik tombol + untuk menambah data',
+                      return AppEmptyState(
+                        icon: Icons.assignment_outlined,
+                        message: 'Belum Ada Data Recording',
+                        subtitle: 'Mulai catat konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
+                        actionLabel: 'Tambah Recording',
+                        onAction: _navigateToAddRecord,
                       );
                     }
 
