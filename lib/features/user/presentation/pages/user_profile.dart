@@ -106,24 +106,6 @@ class _UserState extends State<User> {
     );
   }
 
-  Future<void> _resetPassword() async {
-    final authService = context.read<AuthService>();
-    final email = authService.currentUser?.email;
-    if (email == null) return;
-    try {
-      await authService.sendPasswordResetEmail(email);
-      if (mounted) {
-        AppSnackbar.showSuccess(
-          context,
-          'Tautan reset kata sandi telah dikirim ke email $email.',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(context, 'Gagal mengirim email reset: $e');
-      }
-    }
-  }
 
   String _initials(String? displayName) {
     final name = (displayName ?? '').trim();
@@ -347,81 +329,6 @@ class _UserState extends State<User> {
                                           : 'Belum diisi',
                                     ),
                                   ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // ── 3. Keamanan Akun (Reset Password) ────────────
-                            Padding(
-                              padding: const EdgeInsets.only(left: 4, bottom: 8),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.security_rounded,
-                                    size: 18,
-                                    color: cs.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Keamanan Akun',
-                                    style: tt.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: cs.onSurface,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            AppCard(
-                              child: InkWell(
-                                onTap: _resetPassword,
-                                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: cs.secondaryContainer,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.lock_reset_rounded,
-                                          color: cs.primary,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Reset Kata Sandi',
-                                              style: tt.bodyMedium?.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                                color: cs.onSurface,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              'Kirim tautan ubah kata sandi ke email Anda',
-                                              style: tt.bodySmall?.copyWith(
-                                                color: cs.onSurfaceVariant,
-                                                fontSize: 11,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.chevron_right_rounded,
-                                        color: cs.onSurfaceVariant,
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ),
                             ),

@@ -1,24 +1,30 @@
-import 'package:recording_app/core/auth/auth_service.dart';
-import 'package:provider/provider.dart';
-import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:recording_app/core/components/cards/app_card.dart';
+import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
-import 'package:recording_app/features/user/data/models/user_data.dart';
-import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/user/data/models/user_data.dart';
 
+/// Form Pengisian & Pengeditan Profil Peternak yang ramah bagi peternak senior.
 class FormUser extends StatefulWidget {
-  const FormUser({super.key});
+  final UserProfile? userProfile;
+  final FirebaseService? firebaseService;
+
+  const FormUser({super.key, this.userProfile, this.firebaseService});
 
   @override
   State<FormUser> createState() => _FormUserState();
 }
 
 class _FormUserState extends State<FormUser> {
-  // Deklarasi objek FirebaseService
-  final FirebaseService _firebaseService = FirebaseService();
+  FirebaseService? _firebaseService;
+  FirebaseService get _service =>
+      _firebaseService ??= widget.firebaseService ?? FirebaseService();
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -39,19 +45,22 @@ class _FormUserState extends State<FormUser> {
   @override
   void initState() {
     super.initState();
-    // Memuat data pengguna ketika halaman pertama kali dibuka
-    _loadUserData();
+    if (widget.userProfile != null) {
+      _nameController.text = widget.userProfile!.name;
+      _phoneController.text = widget.userProfile!.phone;
+      _addressController.text = widget.userProfile!.address;
+      _isLoading = false;
+    } else {
+      _loadUserData();
+    }
   }
 
-  // Fungsi untuk memuat data pengguna
   Future<void> _loadUserData() async {
     try {
       final user = context.read<AuthService>().currentUser;
       if (user != null) {
-        // Memuat data profil pengguna/peternak
-        final userProfile = await _firebaseService.getUserProfile();
+        final userProfile = await _service.getUserProfile();
         if (mounted) {
-          // Memperbarui state dengan data pengguna
           setState(() {
             _nameController.text = userProfile.name;
             _phoneController.text = userProfile.phone;
@@ -61,17 +70,17 @@ class _FormUserState extends State<FormUser> {
         }
       } else {
         setState(() {
-          // Menampilkan pesan jika pengguna belum login
-          _errorMessage = 'Pengguna tidak login';
+          _errorMessage = 'Pengguna tidak terautentikasi';
           _isLoading = false;
         });
       }
     } catch (e) {
-      setState(() {
-        // Menampilkan pesan jika terjadi kesalahan saat memuat data
-        _errorMessage = 'Gagal memuat data: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Gagal memuat data: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -89,11 +98,11 @@ class _FormUserState extends State<FormUser> {
         address: _addressController.text.trim(),
       );
 
-      await _firebaseService.updateUserProfile(updatedProfile);
+      await _service.updateUserProfile(updatedProfile);
 
       if (mounted) {
-        AppSnackbar.showSuccess(context, 'Profil berhasil diperbarui');
-        Navigator.pop(context);
+        AppSnackbar.showSuccess(context, 'Data profil berhasil diperbarui');
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -110,122 +119,225 @@ class _FormUserState extends State<FormUser> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final userEmail = context.watch<AuthService>().currentUser?.email ?? '';
 
     return Scaffold(
-      appBar: const AppHeader(title: 'Edit Profil'),
+      backgroundColor: cs.surface,
+      appBar: const AppHeader(title: 'Edit Profil Peternak'),
       body: SafeArea(
         top: false,
-        child:
-            _isLoading
-                // Menampilkan indikator loading jika sedang memuat
-                ? const Center(child: CircularProgressIndicator())
-                // Menampilkan pesan kesalahan jika ada
-                : _errorMessage.isNotEmpty
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator(color: cs.primary))
+            : _errorMessage.isNotEmpty
                 ? AppErrorState(
                     message: 'Gagal memuat data pengguna',
                     subtitle: _errorMessage,
                     onRetry: () => _loadUserData(),
                   )
-                : SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 30),
-                        // Name Field
-                        AppTextFormField(
-                          controller: _nameController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Nama tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                          labelText: "Nama",
-                          prefixIcon: Icons.person,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Email Field (from Firebase Auth)
-                        AppTextFormField(
-                          // set hanya bisa di baca untuk textfield
-                          readOnly: true,
-                          // menampilkan email dari Firebase Auth
-                          initialValue:
-                              context.read<AuthService>().currentUser?.email ?? 'Tidak ada data',
-                          labelText: "Email",
-                          prefixIcon: Icons.email_outlined,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Phone Field
-                        AppTextFormField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Nomor telepon tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                          labelText: "Nomor Telepon",
-                          prefixIcon: Icons.phone,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Address Field
-                        AppTextFormField(
-                          controller: _addressController,
-                          maxLines: 2,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Alamat tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                          labelText: "Alamat",
-                          prefixIcon: Icons.location_on_outlined,
-                        ),
-                        const SizedBox(height: 30),
-
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(50),
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                            ),
-                          ),
-                          onPressed: _isSaving ? null : _handleUpdate,
-                          child:
-                              _isSaving
-                                  ? SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        colorScheme.onPrimary,
+                : Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // ── 1. Guide Card Ramah Lansia ─────────────────
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: cs.primary.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.cardRadius,
+                                  ),
+                                  border: Border.all(
+                                    color: cs.primary.withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: cs.primary.withValues(alpha: 0.12),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.person_pin_circle_rounded,
+                                        size: 24,
+                                        color: cs.primary,
                                       ),
                                     ),
-                                  )
-                                  : Text(
-                                    "Simpan",
-                                    style: textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.onPrimary,
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Informasi Akun Peternak',
+                                            style: tt.titleSmall?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: cs.onSurface,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Pastikan nama lengkap, nomor telepon, dan domisili Anda diisi dengan benar untuk kemudahan kontak peternakan.',
+                                            style: tt.bodySmall?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                              height: 1.35,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // ── 2. Card Input Fields ───────────────────────
+                              AppCard(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Field Nama
+                                      Text(
+                                        'Nama Lengkap Peternak',
+                                        style: tt.labelMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      AppTextFormField(
+                                        controller: _nameController,
+                                        labelText: 'Nama Lengkap',
+                                        hintText: 'Contoh: H. Ahmad Supriyadi',
+                                        prefixIcon: Icons.person_outline_rounded,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'Nama lengkap wajib diisi.';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      // Field Email (Read Only)
+                                      Text(
+                                        'Email Akun Terdaftar',
+                                        style: tt.labelMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      AppTextFormField(
+                                        readOnly: true,
+                                        initialValue: userEmail.isNotEmpty
+                                            ? userEmail
+                                            : 'Tidak ada email',
+                                        labelText: 'Email Akun',
+                                        prefixIcon: Icons.mail_outline_rounded,
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      // Field Nomor Telepon
+                                      Text(
+                                        'Nomor HP / WhatsApp Aktif',
+                                        style: tt.labelMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      AppTextFormField(
+                                        controller: _phoneController,
+                                        keyboardType: TextInputType.phone,
+                                        labelText: 'Nomor WhatsApp / HP',
+                                        hintText: 'Contoh: 081234567890',
+                                        prefixIcon: Icons.phone_outlined,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'Nomor telepon wajib diisi.';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      // Field Alamat
+                                      Text(
+                                        'Alamat Domisili Peternak',
+                                        style: tt.labelMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      AppTextFormField(
+                                        controller: _addressController,
+                                        maxLines: 3,
+                                        labelText: 'Alamat Domisili',
+                                        hintText: 'Contoh: Dusun Krajan RT 01/02, Desa Sukamaju, Kec. Ciawi',
+                                        prefixIcon: Icons.location_on_outlined,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'Alamat domisili wajib diisi.';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+
+                              // ── 3. Tombol Simpan (Besar & Mudah Ditekan) ────
+                              FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(52),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppTheme.pillRadius,
                                     ),
                                   ),
+                                ),
+                                onPressed: _isSaving ? null : _handleUpdate,
+                                icon: _isSaving
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.check_circle_outline_rounded),
+                                label: Text(
+                                  _isSaving ? 'Menyimpan...' : 'Simpan Perubahan',
+                                  style: tt.labelLarge?.copyWith(
+                                    color: cs.onPrimary,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 50),
-                      ],
+                      ),
                     ),
                   ),
-                ),
       ),
     );
   }

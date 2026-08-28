@@ -120,36 +120,8 @@ void main() {
       expect(find.text('slamet.broiler@gmail.com'), findsOneWidget);
       expect(find.text('Desa Sukamaju, RT 02/05'), findsOneWidget);
 
-      // 3. Keamanan Akun
-      expect(find.text('Keamanan Akun'), findsOneWidget);
-      expect(find.text('Reset Kata Sandi'), findsOneWidget);
-
-      // 4. Tombol Utama
+      // 3. Tombol Utama
       expect(find.text('Ubah Data Profil'), findsOneWidget);
-    });
-
-    testWidgets('menekan Reset Kata Sandi memicu sendPasswordResetEmail', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final fakeAuth = _FakeAuthService(
-        user: _FakeUser(
-          displayName: 'Pak Slamet',
-          email: 'slamet.broiler@gmail.com',
-        ),
-      );
-
-      await tester.pumpWidget(createWidgetUnderTest(authService: fakeAuth));
-      await tester.pump();
-
-      // Tap Reset Kata Sandi
-      await tester.ensureVisible(find.text('Reset Kata Sandi'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reset Kata Sandi'));
-      await tester.pumpAndSettle();
-
-      expect(fakeAuth.passwordResetSent, isTrue);
     });
   });
 }
