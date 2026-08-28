@@ -199,3 +199,39 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
   3. **Kesimpulan & Saran Periode Berikutnya** (Rekomendasi tindakan konkret pakan, brooding, sanitasi).
   4. **Ringkasan Data Produksi** (Total pakan sak/kg, total panen kg, ADG, durasi).
   5. **Export Cepat** (Tombol Excel & CSV langsung di header laporan).
+
+### 13. Form Design & Margin Consistency Standards
+- Seluruh form utama (`FormRecording`, `FormCage`, `FormUser`) diseragamkan dengan spesifikasi visual:
+  - **Outer Padding**: `const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0)` pada `SingleChildScrollView` dengan pembatas lebar `maxWidth: 640`.
+  - **Hero Guidance Card**:
+    ```dart
+    Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.secondaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+      ),
+      child: Row(...),
+    )
+    ```
+  - **Section Header Style**:
+    ```dart
+    Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        'SECTION_NAME',
+        style: tt.labelSmall?.copyWith(
+          color: cs.primary,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+        ),
+      ),
+    )
+    ```
+  - **Field Spacing**: `const SizedBox(height: 14)` antar field dalam satu section, `const SizedBox(height: 20)` antar section.
+  - **Single Label Invariant**: Cukup isi `labelText` pada `AppTextFormField`, jangan pasang `Text(...)` manual di atasnya.
+
+### 14. Profil Saya vs Profil Kandang Visual Hierarchy
+- **Profil Saya**: Avatar Bulat 92dp (`CircleAvatar` + Edit Icon) + Hero Nama & Status + List Kontak & Domisili + Full-Width Pill CTA (50dp).
+- **Profil Kandang**: Banner Landscape 190dp (`BorderRadius.circular(AppTheme.cardRadius)` + Overlay Ganti Foto) + Hero Card Kapasitas Tampung DOC (`headlineMedium` 32sp) + Spesifikasi Bangunan/Lokasi + Full-Width Pill CTA (50dp).

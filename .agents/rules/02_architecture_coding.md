@@ -89,3 +89,26 @@
 - **ADG Harian**: Riwayat kenaikan bobot harian (Daily ADG) terintegrasi langsung di dalam screen Pertumbuhan Bobot Ayam (`ChickenWeightScreen`) di bawah kurva bobot; DILARANG membuat screen terpisah untuk ADG.
 - **Depresiasi Reminder Manual**: Fitur alarm / reminder manual dihapus dari UI dan penyimpanan lokal; infrastruktur `NotificationService` hanya dipakai untuk notifikasi otomatis masa depan.
 - **Penghapusan Detail Report Screen**: Screen `DetailPeriodReport` dihapus karena seluruh kesimpulan dan export data sudah langsung tersedia pada `PeriodReportPage`.
+
+## 12. Form Architecture & Senior Farmer UX Standards
+
+- **Single Explicit Label (Anti Teks Tumpang Tindih)**:
+  - Cukup gunakan satu `labelText` yang jelas dan deskriptif di dalam `AppTextFormField` (misal: `labelText: 'Model / Tipe Konstruksi Kandang'`).
+  - **DILARANG** menambahkan `Text(...)` manual tepat di atas `AppTextFormField` yang membuat teks bertumpuk atau redundan dengan floating outline label Material 3.
+- **Struktur & Hierarki Form Terpadu**:
+  - Seluruh form pengisian/pengeditan di aplikasi (`FormRecording`, `FormCage`, `FormUser`) **WAJIB** mengikuti hierarki 4-tahap yang konsisten:
+    1. **Hero Guidance Card**: Banner instruksi ramah lansia di bagian atas (`cs.secondaryContainer (50% alpha)` + border `cs.primary (15% alpha)` + ikon bulat di sisi kiri).
+    2. **Uppercase Category Section Headers**: Header sub-bagian berwarna primer dengan spasi huruf rapi (`tt.labelSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.bold, letterSpacing: 0.8)`).
+    3. **Form Fields**: Field-field input yang sejajar rapi dengan padding luar `EdgeInsets.symmetric(horizontal: 20, vertical: 16)` tanpa pembungkus ekstra yang membuat indent ganda.
+    4. **Tombol Aksi Utama (CTA)**: `FilledButton.icon` berbentuk pill full-width (tinggi 50–52dp) di bagian bawah.
+- **Konsistensi Margin & Card Zero Margin**:
+  - `AppCard` wajib menggunakan `margin: margin ?? EdgeInsets.zero` untuk mencegah margin 4px liar dari default `Card` Flutter.
+  - Semua elemen form (Guidance Card, Section Header, Input Field, Preview Card, dan Tombol) harus berbagi batas margin horizontal yang sama persis.
+
+## 13. Profil Peternak vs Profil Fasilitas Kandang
+
+- **Diferensiasi Identitas Visual**:
+  - **Profil Saya (`user_profile.dart`)**: Berfokus pada persona peternak, kontak, dan domisili (Avatar bulat besar 92dp + nama peternak + badge aktif + kartu kontak WA/email/alamat + tombol Ubah Profil). Fitur reset password ditiadakan selama masa pengembangan.
+  - **Profil Kandang (`cage_profile.dart`)**: Berfokus pada aset fisik dan kapasitas fasilitas (Cover foto landscape 190dp tampak kandang + Hero Card Kapasitas Maksimal 32sp bold + kartu spesifikasi konstruksi Closed/Open House & lokasi + tombol Ubah Spesifikasi).
+- **Aksesibilitas Peternak Senior**:
+  - Font ukuran terbaca, kontras warna tinggi, teks bahasa Indonesia yang jelas dan tidak teknis, serta tombol pill besar (min 48–52dp) sehingga mudah ditekan tanpa perlu mencari icon kecil.
