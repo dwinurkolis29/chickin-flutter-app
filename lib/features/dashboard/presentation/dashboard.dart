@@ -284,6 +284,42 @@ class _DashboardContentState extends State<DashboardContent>
     });
   }
 
+  Future<void> _navigateToAddRecord() async {
+    final firebaseService = FirebaseService();
+    final cageData = await firebaseService.getCage();
+
+    if (cageData.capacity == 0 || cageData.type.isEmpty) {
+      if (!mounted) return;
+      final shouldNavigate = await DialogHelper.showConfirm(
+        context,
+        'Data Kandang Belum Diisi',
+        'Anda harus mengisi data kandang terlebih dahulu sebelum menambah recording.\n\nApakah Anda ingin mengisi data kandang sekarang?',
+        confirmText: 'Isi Sekarang',
+        cancelText: 'Nanti',
+      );
+
+      if (shouldNavigate == true && mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const FormCage()),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FormRecording()),
+    );
+
+    if (result == true && mounted) {
+      final controller = context.read<HomeController>();
+      controller.refreshStreams();
+      AppSnackbar.showSuccess(context, 'Data berhasil ditambahkan');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);

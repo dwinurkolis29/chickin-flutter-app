@@ -131,7 +131,9 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
     return Scaffold(
       appBar: const AppHeader(title: 'Periode Pemeliharaan'),
       floatingActionButton: const CreatePeriodButton(),
-      body: body,
+      body: SafeArea(
+        child: body,
+      ),
     );
   }
 }

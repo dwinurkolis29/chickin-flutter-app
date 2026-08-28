@@ -89,8 +89,9 @@ class CageController extends ChangeNotifier {
       if (imageFile == null) return;
 
       final File? croppedFile = await ImagePickerHelper.cropImage(
-        imageFile: imageFile, 
-        aspectRatio: null // Free crop ratio
+        imageFile: imageFile,
+        aspectRatio: CropAspectRatioPreset.ratio16x9,
+        lockAspectRatio: false,
       );
       if (croppedFile == null) return; // User canceled crop
 

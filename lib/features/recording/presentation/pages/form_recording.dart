@@ -300,7 +300,6 @@ class _FormRecordingState extends State<FormRecording> {
       backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Tambah Recording'),
       body: SafeArea(
-        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),

@@ -106,7 +106,6 @@ class _FormCageState extends State<FormCage> {
         title: isEditing ? 'Edit Spesifikasi Kandang' : 'Tambah Data Kandang',
       ),
       body: SafeArea(
-        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),

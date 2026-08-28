@@ -39,21 +39,23 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
 
     return Scaffold(
       appBar: const AppHeader(title: 'Pertumbuhan Bobot Ayam'),
-      body: widget.recordings != null
-          ? _buildContent(context, widget.recordings!)
-          : StreamBuilder<List<RecordingData>>(
-              stream: controller.recordingsStream,
-              builder: (context, snapshot) {
-                if (controller.isLoadingPeriod ||
-                    (snapshot.connectionState == ConnectionState.waiting &&
-                        !snapshot.hasData)) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: SafeArea(
+        child: widget.recordings != null
+            ? _buildContent(context, widget.recordings!)
+            : StreamBuilder<List<RecordingData>>(
+                stream: controller.recordingsStream,
+                builder: (context, snapshot) {
+                  if (controller.isLoadingPeriod ||
+                      (snapshot.connectionState == ConnectionState.waiting &&
+                          !snapshot.hasData)) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                final recordings = snapshot.data ?? [];
-                return _buildContent(context, recordings);
-              },
-            ),
+                  final recordings = snapshot.data ?? [];
+                  return _buildContent(context, recordings);
+                },
+              ),
+      ),
     );
   }
 

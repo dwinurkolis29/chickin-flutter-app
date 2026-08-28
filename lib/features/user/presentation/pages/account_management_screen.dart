@@ -287,7 +287,6 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Kelola Akun'),
       body: SafeArea(
-        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),

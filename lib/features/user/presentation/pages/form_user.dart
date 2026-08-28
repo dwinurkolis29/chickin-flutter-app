@@ -126,7 +126,6 @@ class _FormUserState extends State<FormUser> {
       backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Edit Profil Peternak'),
       body: SafeArea(
-        top: false,
         child: _isLoading
             ? Center(child: CircularProgressIndicator(color: cs.primary))
             : _errorMessage.isNotEmpty

@@ -37,7 +37,6 @@ class _PeriodReportPageView extends StatelessWidget {
 
     if (isTab) {
       return SafeArea(
-        top: false,
         child: _buildBody(context, controller),
       );
     }
@@ -48,7 +47,6 @@ class _PeriodReportPageView extends StatelessWidget {
         title: 'Laporan',
       ),
       body: SafeArea(
-        top: false,
         child: _buildBody(context, controller),
       ),
     );

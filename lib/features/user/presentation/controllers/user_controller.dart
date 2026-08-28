@@ -66,8 +66,10 @@ class UserController extends ChangeNotifier {
       if (imageFile == null) return; // User canceled
 
       final File? croppedFile = await ImagePickerHelper.cropImage(
-        imageFile: imageFile, 
-        aspectRatio: CropAspectRatioPreset.square
+        imageFile: imageFile,
+        aspectRatio: CropAspectRatioPreset.square,
+        cropStyle: CropStyle.circle,
+        lockAspectRatio: true,
       );
       if (croppedFile == null) return; // User canceled crop
 

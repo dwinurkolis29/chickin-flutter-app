@@ -49,8 +49,9 @@ class _DetailRecordingState extends State<DetailRecording> {
       appBar: AppHeader(
         title: widget.readOnly ? 'Laporan Recording' : 'Semua Recording',
       ),
-      body: Builder(
-        builder: (context) {
+      body: SafeArea(
+        child: Builder(
+          builder: (context) {
           if (widget.recordings != null) {
             if (widget.recordings!.isEmpty) {
               return const AppEmptyState(
@@ -127,7 +128,8 @@ class _DetailRecordingState extends State<DetailRecording> {
           );
         },
       ),
-    );
+    ),
+  );
   }
 }
 

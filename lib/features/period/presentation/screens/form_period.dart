@@ -224,7 +224,6 @@ class _FormPeriodState extends State<FormPeriod> {
         title: _isEditing ? 'Edit Periode' : 'Buat Periode Baru',
       ),
       body: SafeArea(
-        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
