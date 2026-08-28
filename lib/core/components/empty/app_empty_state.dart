@@ -38,6 +38,8 @@ class AppEmptyState extends StatelessWidget {
     if (resolvedAction == null && actionLabel != null && onAction != null) {
       resolvedAction = FilledButton.icon(
         style: FilledButton.styleFrom(
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.pillRadius),
           ),
@@ -47,10 +49,15 @@ class AppEmptyState extends StatelessWidget {
           ),
         ),
         onPressed: onAction,
-        icon: Icon(actionIcon ?? Icons.add_rounded, size: compact ? 18 : 20),
+        icon: Icon(
+          actionIcon ?? Icons.add_rounded,
+          size: compact ? 18 : 20,
+          color: cs.onPrimary,
+        ),
         label: Text(
           actionLabel!,
           style: (compact ? tt.labelMedium : tt.labelLarge)?.copyWith(
+            color: cs.onPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),

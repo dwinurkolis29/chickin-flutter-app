@@ -321,57 +321,23 @@ class _DashboardContentState extends State<DashboardContent>
               const DashboardGreeting(),
               Expanded(
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inbox_outlined,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada data recording',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Klik tombol di bawah untuk membuat periode pertama',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const PeriodListScreen(),
-                            ),
-                          ).then((_) {
-                            if (mounted) {
-                              context.read<HomeController>().loadActivePeriod();
-                            }
-                          });
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('Buat Periode Baru'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
+                  child: AppEmptyState(
+                    icon: Icons.calendar_today_outlined,
+                    message: 'Belum Ada Periode Aktif',
+                    subtitle: 'Mulai siklus pemeliharaan baru untuk mencatat populasi DOC, konsumsi pakan, dan bobot ayam.',
+                    actionLabel: 'Buat Periode Baru',
+                    onAction: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FormPeriod(),
                         ),
-                      ),
-                    ],
+                      ).then((_) {
+                        if (mounted) {
+                          context.read<HomeController>().loadActivePeriod();
+                        }
+                      });
+                    },
                   ),
                 ),
               ),
