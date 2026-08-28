@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import '../../data/models/period_data.dart';
+import '../screens/form_period.dart';
 import 'period_card.dart';
 
 enum PeriodFilterType { all, active, closed, draft }
@@ -106,15 +107,27 @@ class _PeriodListSectionState extends State<PeriodListSection> {
         if (filteredPeriods.isEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: cs.surfaceContainer,
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
             ),
             child: AppEmptyState(
-              icon: Icons.layers_outlined,
-              message: _getEmptyMessage(),
+              icon: _getEmptyIcon(),
+              message: _getEmptyTitle(),
+              subtitle: _getEmptySubtitle(),
               compact: true,
+              actionLabel: (_selectedFilter == PeriodFilterType.all ||
+                      _selectedFilter == PeriodFilterType.active)
+                  ? 'Mulai Siklus Baru'
+                  : null,
+              onAction: (_selectedFilter == PeriodFilterType.all ||
+                      _selectedFilter == PeriodFilterType.active)
+                  ? () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FormPeriod()),
+                      )
+                  : null,
             ),
           )
         else
@@ -158,16 +171,41 @@ class _PeriodListSectionState extends State<PeriodListSection> {
     );
   }
 
-  String _getEmptyMessage() {
+  IconData _getEmptyIcon() {
     switch (_selectedFilter) {
       case PeriodFilterType.all:
-        return 'Belum ada data periode';
       case PeriodFilterType.active:
-        return 'Tidak ada periode yang sedang aktif';
+        return Icons.calendar_today_outlined;
       case PeriodFilterType.closed:
-        return 'Belum ada riwayat periode yang selesai';
+        return Icons.task_alt_outlined;
       case PeriodFilterType.draft:
-        return 'Tidak ada periode berstatus draft';
+        return Icons.edit_note_outlined;
+    }
+  }
+
+  String _getEmptyTitle() {
+    switch (_selectedFilter) {
+      case PeriodFilterType.all:
+        return 'Belum Ada Data Periode';
+      case PeriodFilterType.active:
+        return 'Tidak Ada Periode Aktif';
+      case PeriodFilterType.closed:
+        return 'Belum Ada Periode Selesai';
+      case PeriodFilterType.draft:
+        return 'Tidak Ada Draft Periode';
+    }
+  }
+
+  String _getEmptySubtitle() {
+    switch (_selectedFilter) {
+      case PeriodFilterType.all:
+        return 'Mulai siklus pemeliharaan baru untuk mencatat populasi DOC, pakan harian, dan monitoring bobot ayam.';
+      case PeriodFilterType.active:
+        return 'Saat ini tidak ada siklus ayam yang sedang berlangsung. Buat periode baru untuk memulai pencatatan.';
+      case PeriodFilterType.closed:
+        return 'Riwayat siklus yang telah selesai dipanen beserta ringkasan performa FCR & IP akan tersimpan di sini.';
+      case PeriodFilterType.draft:
+        return 'Rencana siklus pemeliharaan yang belum dimulai akan tersimpan di sini sebagai draft.';
     }
   }
 }

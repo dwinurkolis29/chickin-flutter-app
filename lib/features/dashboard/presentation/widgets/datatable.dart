@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
+import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
@@ -107,7 +108,7 @@ class ChickenDataTable extends StatelessWidget {
           if (latestList.isEmpty)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
                 color: cs.surfaceContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
@@ -115,31 +116,11 @@ class ChickenDataTable extends StatelessWidget {
                   color: cs.outlineVariant.withValues(alpha: 0.3),
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.assignment_outlined,
-                    size: 36,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Belum Ada Data Recording',
-                    style: tt.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Data harian ayam akan muncul di sini',
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
+              child: const AppEmptyState(
+                icon: Icons.assignment_outlined,
+                message: 'Belum Ada Data Recording',
+                subtitle: 'Data harian populasi, pakan, dan bobot ayam akan muncul di sini.',
+                compact: true,
               ),
             )
           else ...[

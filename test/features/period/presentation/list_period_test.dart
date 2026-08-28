@@ -74,7 +74,7 @@ void main() {
 
       expect(find.text('Periode Pemeliharaan'), findsOneWidget);
       expect(find.text('Belum Ada Siklus Aktif'), findsOneWidget);
-      expect(find.text('Mulai Siklus Baru'), findsOneWidget);
+      expect(find.text('Mulai Siklus Baru'), findsWidgets);
       expect(find.text('Buat Periode Baru'), findsOneWidget);
     });
 

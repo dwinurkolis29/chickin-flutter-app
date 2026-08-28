@@ -83,7 +83,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Daftar Akun Peternak'), findsOneWidget);
-      expect(find.text('Mulai Bersama Chickin'), findsOneWidget);
+      expect(find.text('Mulai Bersama BroilerKu'), findsOneWidget);
       expect(find.text('DATA DIRI & KANDANG'), findsOneWidget);
 
       expect(find.text('Nama Lengkap Peternak'), findsOneWidget);

@@ -81,7 +81,7 @@ void main() {
       await tester.pumpWidget(createTestWidget(ctrl));
       await tester.pumpAndSettle();
 
-      expect(find.text('Belum ada periode yang selesai dipanen'), findsOneWidget);
+      expect(find.text('Belum Ada Periode Panen'), findsOneWidget);
     });
 
     testWidgets('menampilkan error state saat terjadi kegagalan muat data', (tester) async {

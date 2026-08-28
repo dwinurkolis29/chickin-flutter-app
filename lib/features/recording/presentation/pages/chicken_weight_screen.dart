@@ -68,11 +68,14 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
       ..sort((a, b) => a.day.compareTo(b.day));
 
     if (validRecordings.isEmpty) {
-      return const AppEmptyState(
-        icon: Icons.show_chart_rounded,
-        message: 'Belum Ada Data Bobot',
+      return AppEmptyState(
+        icon: Icons.scale_outlined,
+        message: 'Belum Ada Data Penimbangan',
         subtitle:
-            'Data grafik pertumbuhan bobot akan muncul secara otomatis setelah Anda mengisi penimbangan bobot ayam pada catatan harian.',
+            'Grafik dan statistik pertumbuhan ADG akan muncul otomatis setelah Anda mencatat rata-rata bobot ayam pada catatan recording harian.',
+        actionLabel: 'Kembali ke Catatan',
+        actionIcon: Icons.arrow_back_rounded,
+        onAction: () => Navigator.pop(context),
       );
     }
 

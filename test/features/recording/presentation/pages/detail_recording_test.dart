@@ -44,7 +44,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(AppEmptyState), findsOneWidget);
-      expect(find.text('Belum ada data recording'), findsOneWidget);
+      expect(find.text('Belum Ada Data Recording'), findsOneWidget);
     });
 
     testWidgets('menampilkan daftar kartu recording harian dengan metrik yang jelas', (tester) async {

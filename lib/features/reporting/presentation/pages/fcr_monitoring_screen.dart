@@ -10,6 +10,7 @@ import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/fcr_datacard.dart';
+import 'package:recording_app/features/period/presentation/screens/form_period.dart';
 import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
@@ -41,10 +42,15 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
             }
 
             if (controller.activePeriodId == null) {
-              return const AppEmptyState(
+              return AppEmptyState(
                 icon: Icons.calendar_today_outlined,
-                message: 'Tidak ada periode aktif',
-                subtitle: 'Buat atau pilih periode terlebih dahulu untuk memantau FCR.',
+                message: 'Tidak Ada Periode Aktif',
+                subtitle: 'Buat atau pilih periode pemeliharaan terlebih dahulu untuk mulai memantau efisiensi pakan (FCR).',
+                actionLabel: 'Mulai Periode Baru',
+                onAction: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FormPeriod()),
+                ),
               );
             }
 
@@ -66,10 +72,13 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
 
                 final recordings = snapshot.data ?? <RecordingData>[];
                 if (recordings.isEmpty) {
-                  return const AppEmptyState(
-                    icon: Icons.scale_outlined,
-                    message: 'Belum ada data recording',
-                    subtitle: 'Tambahkan data recording harian untuk melihat kalkulasi FCR.',
+                  return AppEmptyState(
+                    icon: Icons.analytics_outlined,
+                    message: 'Belum Ada Data Recording',
+                    subtitle: 'Tambahkan data konsumsi pakan dan bobot harian untuk melihat kalkulasi nilai FCR.',
+                    actionLabel: 'Kembali ke Dashboard',
+                    actionIcon: Icons.arrow_back_rounded,
+                    onAction: () => Navigator.pop(context),
                   );
                 }
 

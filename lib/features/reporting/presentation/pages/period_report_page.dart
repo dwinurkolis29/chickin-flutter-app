@@ -69,8 +69,10 @@ class _PeriodReportPageView extends StatelessWidget {
 
     if (controller.closedPeriods.isEmpty) {
       return const AppEmptyState(
-        icon: Icons.bar_chart_outlined,
-        message: 'Belum ada periode yang selesai dipanen',
+        icon: Icons.assignment_turned_in_outlined,
+        message: 'Belum Ada Periode Panen',
+        subtitle:
+            'Laporan performa akhir, kalkulasi Indeks Performa (IP), FCR Panen, dan HPP akan terbentuk otomatis setelah siklus pemeliharaan ayam diselesaikan.',
       );
     }
 
@@ -81,7 +83,8 @@ class _PeriodReportPageView extends StatelessWidget {
     if (controller.report == null) {
       return const AppEmptyState(
         icon: Icons.bar_chart_outlined,
-        message: 'Belum ada data laporan untuk periode ini',
+        message: 'Belum Ada Data Laporan',
+        subtitle: 'Data ringkasan panen untuk siklus ini belum tersedia.',
       );
     }
 

@@ -80,7 +80,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Monitoring FCR'), findsOneWidget);
-      expect(find.text('Tidak ada periode aktif'), findsOneWidget);
+      expect(find.text('Tidak Ada Periode Aktif'), findsOneWidget);
     });
 
     testWidgets('menampilkan empty state jika recordings kosong', (tester) async {
@@ -93,7 +93,7 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest(ctrl));
       await tester.pumpAndSettle();
 
-      expect(find.text('Belum ada data recording'), findsOneWidget);
+      expect(find.text('Belum Ada Data Recording'), findsOneWidget);
     });
 
     testWidgets('menampilkan hero summary card dan tab harian secara default', (tester) async {

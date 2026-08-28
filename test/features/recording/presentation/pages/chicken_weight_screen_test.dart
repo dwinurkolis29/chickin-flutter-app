@@ -45,7 +45,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AppEmptyState), findsOneWidget);
-      expect(find.text('Belum Ada Data Bobot'), findsOneWidget);
+      expect(find.text('Belum Ada Data Penimbangan'), findsOneWidget);
     });
 
     testWidgets('menampilkan metrik pertumbuhan dan kurva grafik jika ada data', (tester) async {

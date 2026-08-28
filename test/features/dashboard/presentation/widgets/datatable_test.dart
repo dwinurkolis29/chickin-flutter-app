@@ -30,7 +30,7 @@ void main() {
 
       expect(find.text('Recording Data'), findsOneWidget);
       expect(find.text('Belum Ada Data Recording'), findsOneWidget);
-      expect(find.text('Data harian ayam akan muncul di sini'), findsOneWidget);
+      expect(find.text('Data harian populasi, pakan, dan bobot ayam akan muncul di sini.'), findsOneWidget);
     });
 
     testWidgets('menampilkan maksimal 7 data terakhir diurutkan dari hari terbaru', (tester) async {

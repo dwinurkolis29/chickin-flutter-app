@@ -140,7 +140,7 @@ class _SignupState extends State<Signup> {
                   const SizedBox(height: 12),
 
                   Text(
-                    'Mulai Bersama Chickin',
+                    'Mulai Bersama BroilerKu',
                     style: tt.headlineSmall?.copyWith(
                       color: cs.onSurface,
                       fontWeight: FontWeight.w900,

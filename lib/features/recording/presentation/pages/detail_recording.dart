@@ -13,6 +13,7 @@ import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/period/presentation/screens/form_period.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/recording_validator.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
@@ -53,8 +54,9 @@ class _DetailRecordingState extends State<DetailRecording> {
           if (widget.recordings != null) {
             if (widget.recordings!.isEmpty) {
               return const AppEmptyState(
-                icon: Icons.inbox_outlined,
-                message: 'Belum ada data recording',
+                icon: Icons.assignment_outlined,
+                message: 'Belum Ada Data Recording',
+                subtitle: 'Riwayat catatan harian pemeliharaan akan ditampilkan di sini.',
               );
             }
             return _RecordingListView(
@@ -72,23 +74,14 @@ class _DetailRecordingState extends State<DetailRecording> {
           }
 
           if (controller.recordingsStream == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Tidak ada periode aktif',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+            return AppEmptyState(
+              icon: Icons.calendar_today_outlined,
+              message: 'Tidak Ada Periode Aktif',
+              subtitle: 'Buat atau aktifkan siklus pemeliharaan terlebih dahulu untuk mulai mencatat harian.',
+              actionLabel: 'Buat Periode Baru',
+              onAction: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FormPeriod()),
               ),
             );
           }
@@ -114,9 +107,14 @@ class _DetailRecordingState extends State<DetailRecording> {
               final recordings = snapshot.data ?? <RecordingData>[];
 
               if (recordings.isEmpty) {
-                return const AppEmptyState(
-                  icon: Icons.inbox_outlined,
-                  message: 'Belum ada data recording',
+                return AppEmptyState(
+                  icon: Icons.assignment_outlined,
+                  message: 'Belum Ada Catatan Harian',
+                  subtitle: 'Mulai input konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
+                  actionLabel: widget.readOnly ? null : 'Isi Catatan Hari Ini',
+                  onAction: widget.readOnly
+                      ? null
+                      : () => Navigator.pop(context),
                 );
               }
 
