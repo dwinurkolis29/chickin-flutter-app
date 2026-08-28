@@ -1,16 +1,19 @@
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
-import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
-import 'package:recording_app/features/user/presentation/pages/form_user.dart';
-import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
-import 'package:provider/provider.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:recording_app/features/user/presentation/pages/form_user.dart';
 
+/// Halaman Profil Saya (Peternak) yang berfokus pada identitas pribadi,
+/// kontak yang mudah dibaca, dan keamanan akun.
 class User extends StatefulWidget {
   const User({super.key});
 
@@ -23,7 +26,9 @@ class _UserState extends State<User> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserController>().loadUserData();
+      if (mounted) {
+        context.read<UserController>().loadUserData();
+      }
     });
   }
 
@@ -35,7 +40,9 @@ class _UserState extends State<User> {
       context,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppTheme.cardRadius),
+        ),
       ),
       builder: SafeArea(
         child: Padding(
@@ -54,8 +61,16 @@ class _UserState extends State<User> {
                 ),
               ),
               ListTile(
-                leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
-                title: Text('Galeri', style: Theme.of(context).textTheme.bodyMedium),
+                leading: Icon(
+                  Icons.photo_library_outlined,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  'Pilih dari Galeri',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   controller.handleProfileImageUpload(ImageSource.gallery);
@@ -69,8 +84,16 @@ class _UserState extends State<User> {
                 color: Theme.of(context).colorScheme.outlineVariant,
               ),
               ListTile(
-                leading: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
-                title: Text('Kamera', style: Theme.of(context).textTheme.bodyMedium),
+                leading: Icon(
+                  Icons.camera_alt_outlined,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  'Ambil Foto Kamera',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   controller.handleProfileImageUpload(ImageSource.camera);
@@ -92,7 +115,7 @@ class _UserState extends State<User> {
       if (mounted) {
         AppSnackbar.showSuccess(
           context,
-          'Link reset password telah dikirim ke email Anda.',
+          'Tautan reset kata sandi telah dikirim ke email $email.',
         );
       }
     } catch (e) {
@@ -102,268 +125,398 @@ class _UserState extends State<User> {
     }
   }
 
+  String _initials(String? displayName) {
+    final name = (displayName ?? '').trim();
+    if (name.isEmpty) return '?';
+    final parts = name.split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    final chars = name.characters;
+    if (chars.length >= 2) {
+      return name.substring(0, 2).toUpperCase();
+    }
+    return name[0].toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final authService = context.watch<AuthService>();
     final controller = context.watch<UserController>();
     final isLoading = controller.isLoading;
     final errorMessage = controller.errorMessage ?? '';
     final userProfile = controller.userProfile;
+    final userEmail = authService.currentUser?.email ?? '';
 
     return Scaffold(
-      // surface = AppColors.background (light) / M3 dark default (dark)
-      backgroundColor: colorScheme.surface,
+      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Profil Saya'),
-      body:
-          isLoading
-              ? Center(
-                child: CircularProgressIndicator(color: colorScheme.primary),
-              )
-              : errorMessage.isNotEmpty
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(color: cs.primary),
+            )
+          : errorMessage.isNotEmpty
               ? AppErrorState(
-                  message: 'Gagal memuat profil',
+                  message: 'Gagal memuat profil peternak',
                   subtitle: errorMessage,
                   onRetry: () => controller.loadUserData(),
                 )
               : SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // ── Profile Header ──
-                      _Card(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FormUser(),
-                            ),
-                          );
-                        },
-                        child: Row(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 42,
-                                  backgroundColor: colorScheme.primary
-                                      .withValues(alpha: 0.12),
-                                  backgroundImage:
-                                      userProfile?.avatarUrl != null
-                                          ? NetworkImage(
-                                            userProfile!.avatarUrl!,
-                                          )
-                                          : null,
-                                  child:
-                                      userProfile?.avatarUrl == null
-                                          ? Icon(
-                                            Icons.person,
-                                            size: 48,
-                                            color: colorScheme.primary,
-                                          )
-                                          : null,
+                            // ── 1. Hero Avatar & Identity Card ────────────────
+                            AppCard(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 24,
                                 ),
-                                if (controller.isUploadingAvatar)
-                                  Positioned.fill(
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.black38,
+                                child: Column(
+                                  children: [
+                                    // Avatar besar dengan tombol ganti foto
+                                    Stack(
+                                      alignment: Alignment.bottomRight,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: cs.secondaryContainer,
+                                          ),
+                                          child: CircleAvatar(
+                                            radius: 46,
+                                            backgroundColor: cs.surface,
+                                            backgroundImage: userProfile?.avatarUrl != null
+                                                ? NetworkImage(userProfile!.avatarUrl!)
+                                                : null,
+                                            child: userProfile?.avatarUrl == null
+                                                ? Text(
+                                                    _initials(userProfile?.name ?? authService.currentUser?.displayName),
+                                                    style: tt.headlineMedium?.copyWith(
+                                                      color: cs.primary,
+                                                      fontWeight: FontWeight.w800,
+                                                    ),
+                                                  )
+                                                : null,
+                                          ),
+                                        ),
+                                        if (controller.isUploadingAvatar)
+                                          Positioned.fill(
+                                            child: Container(
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.black45,
+                                              ),
+                                              child: const Center(
+                                                child: CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                  strokeWidth: 2.5,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        Material(
+                                          color: cs.primary,
+                                          shape: const CircleBorder(),
+                                          elevation: 2,
+                                          child: InkWell(
+                                            customBorder: const CircleBorder(),
+                                            onTap: controller.isUploadingAvatar
+                                                ? null
+                                                : () => _showImageSourceBottomSheet(
+                                                      context,
+                                                      controller,
+                                                    ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8),
+                                              child: Icon(
+                                                Icons.camera_alt_rounded,
+                                                size: 18,
+                                                color: cs.onPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+
+                                    // Nama Peternak
+                                    Text(
+                                      userProfile?.name.isNotEmpty == true
+                                          ? userProfile!.name
+                                          : (authService.currentUser?.displayName ?? 'Peternak Broiler'),
+                                      style: tt.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: cs.onSurface,
                                       ),
-                                      child: const Center(
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // Badge Status Akun
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success.withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(
+                                          AppTheme.pillRadius,
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap:
-                                        controller.isUploadingAvatar
-                                            ? null
-                                            : () => _showImageSourceBottomSheet(
-                                              context,
-                                              controller,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_rounded,
+                                            size: 14,
+                                            color: AppColors.success,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'Peternak Terdaftar Aktif',
+                                            style: tt.labelMedium?.copyWith(
+                                              color: AppColors.success,
+                                              fontWeight: FontWeight.w700,
                                             ),
-                                    child: CircleAvatar(
-                                      radius: 14,
-                                      backgroundColor: colorScheme.primary,
-                                      child: Icon(
-                                        Icons.edit,
-                                        size: 16,
-                                        color: colorScheme.onPrimary,
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            const SizedBox(height: 16),
+
+                            // ── 2. Informasi Kontak Peternak ──────────────────
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4, bottom: 8),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    userProfile?.name ?? 'Tidak ada data',
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: colorScheme.onSurface,
-                                    ),
+                                  Icon(
+                                    Icons.badge_outlined,
+                                    size: 18,
+                                    color: cs.primary,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Peternak',
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.secondary,
+                                    'Informasi Kontak & Domisili',
+                                    style: tt.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: cs.onSurface,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            Icon(
-                              Icons.chevron_right,
-                              color: colorScheme.onSurfaceVariant,
+                            AppCard(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    _ContactTile(
+                                      icon: Icons.phone_outlined,
+                                      label: 'Nomor Kontak / WhatsApp',
+                                      value: userProfile?.phone.isNotEmpty == true
+                                          ? userProfile!.phone
+                                          : 'Belum diisi',
+                                    ),
+                                    const Divider(height: 20),
+                                    _ContactTile(
+                                      icon: Icons.mail_outline_rounded,
+                                      label: 'Email Akun',
+                                      value: userEmail.isNotEmpty ? userEmail : 'Belum diisi',
+                                    ),
+                                    const Divider(height: 20),
+                                    _ContactTile(
+                                      icon: Icons.location_on_outlined,
+                                      label: 'Alamat Domisili',
+                                      value: userProfile?.address.isNotEmpty == true
+                                          ? userProfile!.address
+                                          : 'Belum diisi',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // ── 3. Keamanan Akun (Reset Password) ────────────
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4, bottom: 8),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.security_rounded,
+                                    size: 18,
+                                    color: cs.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Keamanan Akun',
+                                    style: tt.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: cs.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            AppCard(
+                              child: InkWell(
+                                onTap: _resetPassword,
+                                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: cs.secondaryContainer,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.lock_reset_rounded,
+                                          color: cs.primary,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Reset Kata Sandi',
+                                              style: tt.bodyMedium?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: cs.onSurface,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Kirim tautan ubah kata sandi ke email Anda',
+                                              style: tt.bodySmall?.copyWith(
+                                                color: cs.onSurfaceVariant,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // ── 4. Tombol Utama (Ubah Data Profil) ────────────
+                            FilledButton.icon(
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const FormUser(),
+                                  ),
+                                );
+                                if (result == true && mounted) {
+                                  context.read<UserController>().loadUserData();
+                                }
+                              },
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.pillRadius,
+                                  ),
+                                ),
+                              ),
+                              icon: const Icon(Icons.edit_outlined),
+                              label: Text(
+                                'Ubah Data Profil',
+                                style: tt.labelLarge?.copyWith(
+                                  color: cs.onPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
-
-                      const SizedBox(height: 12),
-
-                      // ── Contact Info ──
-                      _Card(
-                        child: Column(
-                          children: [
-                            _InfoRow(
-                              icon: Icons.phone_outlined,
-                              value: userProfile?.phone ?? 'Tidak ada data',
-                            ),
-                            Divider(
-                              height: 20,
-                              color: colorScheme.outlineVariant,
-                            ),
-                            _InfoRow(
-                              icon: Icons.mail_outline,
-                              value:
-                                  authService.currentUser?.email ?? 'Tidak ada data',
-                            ),
-                            Divider(
-                              height: 20,
-                              color: colorScheme.outlineVariant,
-                            ),
-                            _InfoRow(
-                              icon: Icons.location_on_outlined,
-                              value: userProfile?.address ?? 'Tidak ada data',
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ── Reset Password ──
-                      _Card(
-                        onTap: _resetPassword,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: colorScheme.primary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.lock_reset_outlined,
-                                color: colorScheme.primary,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              'Reset Password',
-                              style: textTheme.bodyLarge?.copyWith(
-                                color: colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const Spacer(),
-                            Icon(
-                              Icons.chevron_right,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
     );
   }
 }
 
-// ── Shared card wrapper ──────────────────────────────────────────────────────
-
-class _Card extends StatelessWidget {
-  final Widget child;
-  final VoidCallback? onTap;
-
-  const _Card({required this.child, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isInteractive = onTap != null;
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child:
-          isInteractive
-              ? InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 20,
-                  ),
-                  child: SizedBox(width: double.infinity, child: child),
-                ),
-              )
-              : Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
-                ),
-                child: SizedBox(width: double.infinity, child: child),
-              ),
-    );
-  }
-}
-
-// ── Info row ─────────────────────────────────────────────────────────────────
-
-class _InfoRow extends StatelessWidget {
+class _ContactTile extends StatelessWidget {
   final IconData icon;
+  final String label;
   final String value;
 
-  const _InfoRow({required this.icon, required this.value});
+  const _ContactTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: colorScheme.primary, size: 22),
-        const SizedBox(width: 16),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: cs.secondaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: cs.primary, size: 20),
+        ),
+        const SizedBox(width: 14),
         Expanded(
-          child: Text(
-            value,
-            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: tt.bodyMedium?.copyWith(
+                  color: cs.onSurface,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ),
       ],
