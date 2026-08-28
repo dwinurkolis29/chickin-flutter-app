@@ -214,6 +214,7 @@ class DialogHelper {
     required Widget builder,
     bool isScrollControlled = true,
     bool useSafeArea = true,
+    bool isDismissible = true,
     Color? backgroundColor,
     ShapeBorder? shape,
   }) {
@@ -221,6 +222,7 @@ class DialogHelper {
       context: context,
       isScrollControlled: isScrollControlled,
       useSafeArea: useSafeArea,
+      isDismissible: isDismissible,
       backgroundColor: backgroundColor,
       shape: shape ??
           const RoundedRectangleBorder(

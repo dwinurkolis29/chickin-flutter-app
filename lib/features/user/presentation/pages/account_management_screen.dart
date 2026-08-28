@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
+import 'package:recording_app/core/components/dialogs/app_form_bottom_sheet.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
@@ -45,172 +46,121 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     final formKey = GlobalKey<FormState>();
     bool isSaving = false;
 
-    DialogHelper.showBottomSheet(
-      context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppTheme.cardRadius),
-        ),
-      ),
-      builder: StatefulBuilder(
-        builder: (dialogContext, setModalState) {
-          final cs = Theme.of(dialogContext).colorScheme;
-          final tt = Theme.of(dialogContext).textTheme;
+    AppFormBottomSheet.show(
+      context: context,
+      title: 'Ubah Kata Sandi Langsung',
+      subtitle: 'Masukkan kata sandi saat ini dan tentukan kata sandi baru akun Anda:',
+      icon: Icons.lock_reset_rounded,
+      builder: (dialogContext, setModalState) {
+        final cs = Theme.of(dialogContext).colorScheme;
+        final tt = Theme.of(dialogContext).textTheme;
 
-          return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 12,
-                bottom: MediaQuery.of(dialogContext).viewInsets.bottom + 24,
+        return Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextFormField(
+                controller: currentPasswordController,
+                obscureText: true,
+                labelText: 'Kata Sandi Saat Ini',
+                prefixIcon: Icons.lock_outline_rounded,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Kata sandi saat ini wajib diisi.';
+                  }
+                  return null;
+                },
               ),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: cs.outlineVariant,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
+              const SizedBox(height: 14),
+              AppTextFormField(
+                controller: newPasswordController,
+                obscureText: true,
+                labelText: 'Kata Sandi Baru (Min. 6 Karakter)',
+                prefixIcon: Icons.key_rounded,
+                validator: (v) {
+                  if (v == null || v.length < 6) {
+                    return 'Kata sandi baru minimal 6 karakter.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 14),
+              AppTextFormField(
+                controller: confirmPasswordController,
+                obscureText: true,
+                labelText: 'Ulangi Kata Sandi Baru',
+                prefixIcon: Icons.check_rounded,
+                validator: (v) {
+                  if (v != newPasswordController.text) {
+                    return 'Konfirmasi kata sandi tidak cocok.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.pillRadius,
                     ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: cs.secondaryContainer,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.lock_reset_rounded,
-                            color: cs.primary,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Ubah Kata Sandi Langsung',
-                          style: tt.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    AppTextFormField(
-                      controller: currentPasswordController,
-                      obscureText: true,
-                      labelText: 'Kata Sandi Saat Ini',
-                      prefixIcon: Icons.lock_outline_rounded,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Kata sandi saat ini wajib diisi.';
+                  ),
+                ),
+                onPressed: isSaving
+                    ? null
+                    : () async {
+                        if (!formKey.currentState!.validate()) return;
+                        setModalState(() => isSaving = true);
+                        final res = await context
+                            .read<AuthService>()
+                            .changePassword(
+                              currentPassword:
+                                  currentPasswordController.text.trim(),
+                              newPassword:
+                                  newPasswordController.text.trim(),
+                            );
+                        setModalState(() => isSaving = false);
+                        if (context.mounted) {
+                          Navigator.pop(dialogContext);
+                          if (res.success) {
+                            AppSnackbar.showSuccess(
+                              context,
+                              'Kata sandi berhasil diperbarui.',
+                            );
+                          } else {
+                            AppSnackbar.showError(
+                              context,
+                              res.errorMessage ??
+                                  'Gagal mengubah kata sandi.',
+                            );
+                          }
                         }
-                        return null;
                       },
-                    ),
-                    const SizedBox(height: 14),
-                    AppTextFormField(
-                      controller: newPasswordController,
-                      obscureText: true,
-                      labelText: 'Kata Sandi Baru (Min. 6 Karakter)',
-                      prefixIcon: Icons.key_rounded,
-                      validator: (v) {
-                        if (v == null || v.length < 6) {
-                          return 'Kata sandi baru minimal 6 karakter.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    AppTextFormField(
-                      controller: confirmPasswordController,
-                      obscureText: true,
-                      labelText: 'Ulangi Kata Sandi Baru',
-                      prefixIcon: Icons.check_rounded,
-                      validator: (v) {
-                        if (v != newPasswordController.text) {
-                          return 'Konfirmasi kata sandi tidak cocok.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.pillRadius,
-                          ),
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
                         ),
-                      ),
-                      onPressed: isSaving
-                          ? null
-                          : () async {
-                              if (!formKey.currentState!.validate()) return;
-                              setModalState(() => isSaving = true);
-                              final res = await context
-                                  .read<AuthService>()
-                                  .changePassword(
-                                    currentPassword:
-                                        currentPasswordController.text.trim(),
-                                    newPassword:
-                                        newPasswordController.text.trim(),
-                                  );
-                              setModalState(() => isSaving = false);
-                              if (context.mounted) {
-                                Navigator.pop(dialogContext);
-                                if (res.success) {
-                                  AppSnackbar.showSuccess(
-                                    context,
-                                    'Kata sandi berhasil diperbarui.',
-                                  );
-                                } else {
-                                  AppSnackbar.showError(
-                                    context,
-                                    res.errorMessage ??
-                                        'Gagal mengubah kata sandi.',
-                                  );
-                                }
-                              }
-                            },
-                      icon: isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.check_circle_outline_rounded),
-                      label: Text(
-                        isSaving ? 'Menyimpan...' : 'Simpan Kata Sandi Baru',
-                        style: tt.labelLarge?.copyWith(
-                          color: cs.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                      )
+                    : const Icon(Icons.check_circle_outline_rounded),
+                label: Text(
+                  isSaving ? 'Menyimpan...' : 'Simpan Kata Sandi Baru',
+                  style: tt.labelLarge?.copyWith(
+                    color: cs.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -221,7 +171,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       context,
       'Hapus Akun Peternak?',
       'Seluruh data siklus pemeliharaan, kandang, dan catatan harian yang terkait dengan akun ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.',
-      confirmText: 'Ya, Hapus Akun',
+      confirmText: 'Ya, Lanjut Hapus',
       isDestructive: true,
       onConfirm: () {
         // Form password confirmation dialog
@@ -237,147 +187,91 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     final formKey = GlobalKey<FormState>();
     bool isDeleting = false;
 
-    DialogHelper.showBottomSheet(
-      context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppTheme.cardRadius),
-        ),
-      ),
-      builder: StatefulBuilder(
-        builder: (dialogContext, setModalState) {
-          final cs = Theme.of(dialogContext).colorScheme;
-          final tt = Theme.of(dialogContext).textTheme;
+    AppFormBottomSheet.show(
+      context: context,
+      title: 'Konfirmasi Kata Sandi',
+      subtitle: 'Masukkan kata sandi akun Anda untuk mengonfirmasi penghapusan permanen.',
+      icon: Icons.delete_forever_rounded,
+      iconColor: AppColors.error,
+      iconBackgroundColor: AppColors.error.withValues(alpha: 0.12),
+      titleColor: AppColors.error,
+      builder: (dialogContext, setModalState) {
+        final tt = Theme.of(dialogContext).textTheme;
 
-          return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 12,
-                bottom: MediaQuery.of(dialogContext).viewInsets.bottom + 24,
+        return Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextFormField(
+                controller: passwordController,
+                obscureText: true,
+                labelText: 'Kata Sandi Akun',
+                prefixIcon: Icons.lock_outline_rounded,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Kata sandi wajib diisi.';
+                  }
+                  return null;
+                },
               ),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: cs.outlineVariant,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.pillRadius,
                     ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.delete_forever_rounded,
-                            color: AppColors.error,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Konfirmasi Kata Sandi',
-                          style: tt.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Masukkan kata sandi akun Anda untuk mengonfirmasi penghapusan permanen.',
-                      style: tt.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    AppTextFormField(
-                      controller: passwordController,
-                      obscureText: true,
-                      labelText: 'Kata Sandi Akun',
-                      prefixIcon: Icons.lock_outline_rounded,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Kata sandi wajib diisi.';
+                  ),
+                ),
+                onPressed: isDeleting
+                    ? null
+                    : () async {
+                        if (!formKey.currentState!.validate()) return;
+                        setModalState(() => isDeleting = true);
+                        final res = await context
+                            .read<AuthService>()
+                            .deleteAccount(
+                              password: passwordController.text.trim(),
+                            );
+                        setModalState(() => isDeleting = false);
+                        if (context.mounted) {
+                          Navigator.pop(dialogContext);
+                          if (!res.success) {
+                            AppSnackbar.showError(
+                              context,
+                              res.errorMessage ??
+                                  'Gagal menghapus akun.',
+                            );
+                          }
                         }
-                        return null;
                       },
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.pillRadius,
-                          ),
-                        ),
-                      ),
-                      onPressed: isDeleting
-                          ? null
-                          : () async {
-                              if (!formKey.currentState!.validate()) return;
-                              setModalState(() => isDeleting = true);
-                              final res = await context
-                                  .read<AuthService>()
-                                  .deleteAccount(
-                                    password: passwordController.text.trim(),
-                                  );
-                              setModalState(() => isDeleting = false);
-                              if (context.mounted) {
-                                Navigator.pop(dialogContext);
-                                if (!res.success) {
-                                  AppSnackbar.showError(
-                                    context,
-                                    res.errorMessage ??
-                                        'Gagal menghapus akun.',
-                                  );
-                                }
-                              }
-                            },
-                      icon: isDeleting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.delete_forever_rounded),
-                      label: Text(
-                        isDeleting ? 'Menghapus Akun...' : 'Hapus Akun Permanen',
-                        style: tt.labelLarge?.copyWith(
+                icon: isDeleting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                    ),
-                  ],
+                      )
+                    : const Icon(Icons.delete_forever_rounded),
+                label: Text(
+                  isDeleting ? 'Menghapus Akun...' : 'Hapus Akun Permanen',
+                  style: tt.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

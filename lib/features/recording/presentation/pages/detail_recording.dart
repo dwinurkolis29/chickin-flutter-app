@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
+import 'package:recording_app/core/components/dialogs/app_form_bottom_sheet.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
@@ -214,24 +215,29 @@ class _RecordingListViewState extends State<_RecordingListView> {
   }
 
   void _showEditSheet(BuildContext context, RecordingData recording) {
-    DialogHelper.showBottomSheet(
-      context,
-      builder: _EditRecordingSheet(
-        recording: recording,
-        allRecordings: widget.recordings,
-        onSave: (updated) async {
-          try {
-            await widget.controller.updateRecording(updated);
-            if (context.mounted) {
-              AppSnackbar.showSuccess(context, 'Data berhasil diperbarui');
+    AppFormBottomSheet.show(
+      context: context,
+      title: 'Edit Recording',
+      subtitle: 'Sesuaikan catatan umur, pakan, bobot, atau kematian ayam hari ke-${recording.day}:',
+      icon: Icons.edit_note_rounded,
+      builder: (sheetContext, setModalState) {
+        return _EditRecordingSheet(
+          recording: recording,
+          allRecordings: widget.recordings,
+          onSave: (updated) async {
+            try {
+              await widget.controller.updateRecording(updated);
+              if (context.mounted) {
+                AppSnackbar.showSuccess(context, 'Data berhasil diperbarui');
+              }
+            } catch (e) {
+              if (context.mounted) {
+                AppSnackbar.showError(context, 'Gagal memperbarui data: $e');
+              }
             }
-          } catch (e) {
-            if (context.mounted) {
-              AppSnackbar.showError(context, 'Gagal memperbarui data: $e');
-            }
-          }
-        },
-      ),
+          },
+        );
+      },
     );
   }
 
@@ -934,48 +940,15 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final padding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + padding),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: cs.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Edit Recording',
-                    style: tt.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              AppTextFormField(
-                controller: _ctrlDay,
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppTextFormField(
+            controller: _ctrlDay,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 labelText: 'Umur Ayam (Hari)',
@@ -1061,10 +1034,8 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
+        );
+      }
 
   Widget _buildUnitToggle({
     required String currentUnit,
