@@ -124,12 +124,36 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
 
 ## Component Standards
 
-### 1. Dialogs (Pola Terpadu "Tentang Aplikasi")
-- Selalu gunakan `DialogHelper.*` (`showError`, `showInfo`, `showSuccess`, `showConfirm`, `showAbout`, `showPeriodPicker`, `showStringPicker`, `showClosePeriodHarvest`).
-- Struktur visual dialog:
-  - Header Row: Icon di dalam kontainer membulat (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, `AppColors.success.withValues(alpha: 0.12)`) + Teks judul tebal `tt.titleMedium`.
-  - Body: `tt.bodyMedium` dengan warna `cs.onSurfaceVariant` dan line height 1.4.
-  - Action Buttons: Berbentuk pill (`AppTheme.pillRadius`) dengan `FilledButton` untuk aksi konfirmasi dan `TextButton` untuk batal/tutup.
+### 1. Dialogs & AppFormBottomSheet Standards
+- **Dialogs**: Selalu gunakan `DialogHelper.*` (`showError`, `showInfo`, `showSuccess`, `showConfirm`, `showAbout`, `showPeriodPicker`, `showStringPicker`).
+  - Struktur visual dialog:
+    - Header Row: Icon di dalam kontainer bulat (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, `AppColors.success.withValues(alpha: 0.12)`) + Teks judul tebal `tt.titleMedium`.
+    - Body: `tt.bodyMedium` dengan warna `cs.onSurfaceVariant` dan line height 1.4.
+    - Action Buttons: Berbentuk pill (`AppTheme.pillRadius`) dengan `FilledButton` untuk aksi konfirmasi dan `TextButton` untuk batal/tutup.
+- **AppFormBottomSheet (Mobile-First Form Modal)**:
+  - Seluruh form input pop-up wajib menggunakan `AppFormBottomSheet.show()` ([app_form_bottom_sheet.dart](file:///Users/nurkolis/IdeaProjects/chickin-flutter-app/lib/core/components/dialogs/app_form_bottom_sheet.dart)):
+    ```dart
+    AppFormBottomSheet.show(
+      context: context,
+      title: 'Judul Form',
+      subtitle: 'Deskripsi bantuan penjelasan form...',
+      icon: Icons.inventory_2_outlined,
+      builder: (sheetContext, setModalState) {
+        return Form(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextFormField(...),
+              const SizedBox(height: 20),
+              FilledButton.icon(...), // Pill CTA 50dp
+            ],
+          ),
+        );
+      },
+    );
+    ```
+  - Komponen ini otomatis menangani drag handle bar (36x4dp), header icon bulat, subtitle bantuan, dan dynamic keyboard avoidance (`viewInsets.bottom + 24`).
 
 ### 2. Cards & Containers
 - Radius: `AppTheme.cardRadius` (24dp).

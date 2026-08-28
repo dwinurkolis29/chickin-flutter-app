@@ -62,13 +62,19 @@
   - Otomatis gunakan standar industri (misal: `0.04 kg` / 40 gram) di balik layar.
   - Form pembuatan periode cukup berfokus pada 3 input esensial: **Nama Periode**, **Tanggal DOC Masuk**, dan **Jumlah DOC (Ekor)**.
 
-## 9. Dialog Standards (Pola "Tentang Aplikasi")
+## 9. Dialog & Form Bottom Sheet Standards
 
-- Seluruh dialog di aplikasi (`BaseDialog`, `ConfirmDialog`, `ErrorDialog`, `PeriodPickerDialog`, `StringPickerDialog`, dan dialog form interaktif) **WAJIB** mengikuti standar visual terpadu:
-  1. **Header Icon Badge**: Baris judul dengan icon bertema di dalam kontainer berlatar kontras lembut (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, atau `AppColors.success.withValues(alpha: 0.12)`) dengan sudut membulat (`AppTheme.cardRadius`).
+- **Dialog Informasi vs Form Bottom Sheet**:
+  - **BaseDialog / ConfirmDialog**: Digunakan **hanya** untuk konfirmasi singkat, alert peringatan, atau pesan informasi (tanpa input teks panjang).
+  - **AppFormBottomSheet (`lib/core/components/dialogs/app_form_bottom_sheet.dart`)**: **WAJIB** digunakan untuk semua form interaktif pop-up (seperti Tutup Panen, Edit Recording, Ubah Kata Sandi, dan Konfirmasi Kata Sandi Hapus Akun).
+  - **DILARANG** menggunakan dialog melayang di tengah layar (`showDialog` / `BaseDialog`) untuk form input karena rentan terpotong oleh keyboard virtual dan sulit dijangkau jempol satu tangan.
+- **Standar Visual Dialog & Sheet**:
+  1. **Header Icon Badge**: Baris judul dengan icon bertema di dalam kontainer bulat (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, atau `AppColors.success.withValues(alpha: 0.12)`).
   2. **Judul Tebal**: Teks judul `tt.titleMedium` tebal (`FontWeight.bold`, `cs.onSurface`).
   3. **Tombol Pill**: Tombol aksi berbentuk pill (`AppTheme.pillRadius`) dengan `FilledButton` untuk aksi konfirmasi utama dan `TextButton` untuk batal/tutup.
-  4. Seluruh pemanggilan dialog **WAJIB** melalui `DialogHelper`.
+  4. Seluruh pemanggilan dialog **WAJIB** melalui `DialogHelper` atau `AppFormBottomSheet.show()`.
+- **Transparansi Status Fitur (Tahap Pengembangan)**:
+  - Jika suatu fitur backend/integrasi email masih dalam tahap pengembangan (misal: verifikasi email atau kirim link reset password via email), aplikasi **WAJIB** secara transparan menampilkan label `(Tahap Pengembangan)` dan memberikan dialog edukasi yang ramah (`DialogHelper.showInfo`), sambil tetap menyediakan alternatif langsung yang sudah berfungsi (seperti Ubah Kata Sandi Langsung).
 
 ## 10. Alur Tutup Panen & Desain Laporan (*Conclusion-First*)
 
