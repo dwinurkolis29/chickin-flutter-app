@@ -8,7 +8,7 @@ import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 
-/// Form Pengisian & Pengeditan Data Kandang yang ramah bagi peternak senior.
+/// Form Pengisian & Pengeditan Data Kandang yang konsisten dengan desain Form Recording.
 class FormCage extends StatefulWidget {
   final CageData? cageData;
 
@@ -109,31 +109,33 @@ class _FormCageState extends State<FormCage> {
         top: false,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
+            constraints: const BoxConstraints(maxWidth: 640),
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 16.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── 1. Guide Card Ramah Lansia ───────────────────
+                    // ── 1. Hero Guidance Card ────────────────────────
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: 0.08),
+                        color: cs.secondaryContainer.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(
                           AppTheme.cardRadius,
                         ),
                         border: Border.all(
-                          color: cs.primary.withValues(alpha: 0.2),
+                          color: cs.primary.withValues(alpha: 0.15),
                         ),
                       ),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: cs.primary.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
@@ -144,7 +146,7 @@ class _FormCageState extends State<FormCage> {
                               color: cs.primary,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,16 +154,16 @@ class _FormCageState extends State<FormCage> {
                                 Text(
                                   'Spesifikasi Fisik Kandang',
                                   style: tt.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.bold,
                                     color: cs.onSurface,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 2),
                                 Text(
                                   'Tentukan tipe konstruksi ventilasi dan daya tampung maksimal bibit DOC untuk akurasi monitoring kepadatan ayam.',
                                   style: tt.bodySmall?.copyWith(
                                     color: cs.onSurfaceVariant,
-                                    height: 1.35,
+                                    fontSize: 12,
                                   ),
                                 ),
                               ],
@@ -170,10 +172,20 @@ class _FormCageState extends State<FormCage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
-                    // ── 2. Form Input Fields ─────────────────────────
-                    // Field 1: Model / Tipe Konstruksi Kandang
+                    // ── 2. Section Spesifikasi & Kapasitas ────────────
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'SPESIFIKASI & KAPASITAS',
+                        style: tt.labelSmall?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
                     AppTextFormField(
                       controller: _controllerType,
                       focusNode: _focusNodeType,
@@ -209,9 +221,7 @@ class _FormCageState extends State<FormCage> {
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
-
-                    // Field 2: Kapasitas Maksimal
+                    const SizedBox(height: 14),
                     AppTextFormField(
                       controller: _controllerCapacity,
                       focusNode: _focusNodeCapacity,
@@ -231,9 +241,20 @@ class _FormCageState extends State<FormCage> {
                       },
                       onEditingComplete: () => _focusNodeLocation.requestFocus(),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                    // Field 3: Lokasi Kandang
+                    // ── 3. Section Lokasi Kandang ────────────────────
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'LOKASI KANDANG',
+                        style: tt.labelSmall?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
                     AppTextFormField(
                       controller: _controllerLocation,
                       focusNode: _focusNodeLocation,
@@ -250,7 +271,7 @@ class _FormCageState extends State<FormCage> {
                     ),
                     const SizedBox(height: 28),
 
-                    // ── 3. Tombol Simpan ─────────────────────────────
+                    // ── 4. Tombol Simpan ─────────────────────────────
                     FilledButton.icon(
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(52),
@@ -284,6 +305,7 @@ class _FormCageState extends State<FormCage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),

@@ -20,7 +20,7 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final card = Card(
-      margin: margin,
+      margin: margin ?? EdgeInsets.zero,
       color: Theme.of(context).colorScheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(

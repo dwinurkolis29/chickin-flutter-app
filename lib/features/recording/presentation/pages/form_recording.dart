@@ -316,57 +316,41 @@ class _FormRecordingState extends State<FormRecording> {
                   children: [
                     // ── 1. Hero Guidance Card ────────────────────────────────
                     _buildGuidanceCard(context),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // ── 2. Card Umur & Mortalitas ───────────────────────────
-                    AppCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'WAKTU & KEMATIAN',
-                              style: tt.labelSmall?.copyWith(
-                                color: cs.primary,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildUmurField(context),
-                            const SizedBox(height: 14),
-                            _buildMatiField(context),
-                          ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'WAKTU & KEMATIAN',
+                        style: tt.labelSmall?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    _buildUmurField(context),
+                    const SizedBox(height: 14),
+                    _buildMatiField(context),
+                    const SizedBox(height: 20),
 
                     // ── 3. Card Pakan & Bobot ───────────────────────────────
-                    AppCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'PAKAN & PENIMBANGAN',
-                              style: tt.labelSmall?.copyWith(
-                                color: cs.primary,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildPakanField(context),
-                            const SizedBox(height: 14),
-                            _buildBeratField(context),
-                          ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'PAKAN & PENIMBANGAN',
+                        style: tt.labelSmall?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    _buildPakanField(context),
+                    const SizedBox(height: 14),
+                    _buildBeratField(context),
+                    const SizedBox(height: 20),
 
                     // ── 4. Live Conversion Preview ──────────────────────────
                     _buildLivePreviewCard(context),
