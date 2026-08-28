@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/theme/app_theme_option.dart';
+import 'package:recording_app/core/theme/theme_controller.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
 import 'package:recording_app/features/user/presentation/pages/profile_screen.dart';
@@ -70,10 +71,48 @@ class _FakeUserController extends ChangeNotifier implements UserController {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _FakeThemeController extends ChangeNotifier implements ThemeController {
+  String _currentMode = 'light';
+
+  @override
+  ThemeMode get themeMode => _currentMode == 'dark'
+      ? ThemeMode.dark
+      : _currentMode == 'system'
+          ? ThemeMode.system
+          : ThemeMode.light;
+
+  @override
+  String get currentThemeKey => _currentMode;
+
+  @override
+  String get themeModeName => _currentMode == 'dark'
+      ? 'Tema Gelap'
+      : _currentMode == 'system'
+          ? 'Sesuai Sistem'
+          : 'Tema Terang';
+
+  @override
+  Future<void> setThemeMode(String mode) async {
+    final lower = mode.toLowerCase();
+    if (lower.contains('gelap') || lower == 'dark') {
+      _currentMode = 'dark';
+    } else if (lower.contains('sistem') || lower == 'system') {
+      _currentMode = 'system';
+    } else {
+      _currentMode = 'light';
+    }
+    notifyListeners();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   Widget createWidgetUnderTest({
     _FakeAuthService? authService,
     _FakeUserController? userController,
+    _FakeThemeController? themeController,
   }) {
     final fakeAuth = authService ??
         _FakeAuthService(
@@ -86,11 +125,13 @@ void main() {
         _FakeUserController(
           profile: const UserProfile(name: 'Budi Peternak'),
         );
+    final fakeTheme = themeController ?? _FakeThemeController();
 
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthService>.value(value: fakeAuth),
         ChangeNotifierProvider<UserController>.value(value: fakeUser),
+        ChangeNotifierProvider<ThemeController>.value(value: fakeTheme),
       ],
       child: MaterialApp(
         theme: AppTheme.build(AppThemeOption.light),
@@ -182,6 +223,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(authService._signOutCalled, isTrue);
+    });
+
+    testWidgets('menampilkan menu Tema Aplikasi dan dapat mengubah tema ke Tema Gelap', (tester) async {
+      final themeCtrl = _FakeThemeController();
+
+      await tester.pumpWidget(createWidgetUnderTest(themeController: themeCtrl));
+      await tester.pump();
+
+      // Ensure menu Tema Aplikasi is visible
+      await tester.ensureVisible(find.text('Tema Aplikasi'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PENGATURAN & APLIKASI'), findsOneWidget);
+      expect(find.text('Tema Terang'), findsWidgets);
+
+      // Open bottom sheet
+      await tester.tap(find.text('Tema Aplikasi'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pilih Tema Aplikasi'), findsOneWidget);
+      expect(find.text('Tema Terang'), findsWidgets);
+      expect(find.text('Tema Gelap'), findsOneWidget);
+      expect(find.text('Sesuai Sistem'), findsOneWidget);
+
+      // Select Tema Gelap
+      await tester.tap(find.text('Tema Gelap'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pilih Tema Aplikasi'), findsNothing);
+      expect(themeCtrl.currentThemeKey, equals('dark'));
+      expect(themeCtrl.themeModeName, equals('Tema Gelap'));
     });
   });
 }

@@ -6,40 +6,53 @@ class ThemeController extends ChangeNotifier {
   final Box _box = Hive.box('settings');
 
   ThemeMode get themeMode {
-    final value = _box.get(_themeKey, defaultValue: 'system');
+    final value = _box.get(_themeKey, defaultValue: 'light');
     switch (value) {
-      case 'light':
-        return ThemeMode.light;
       case 'dark':
         return ThemeMode.dark;
-      default:
+      case 'system':
         return ThemeMode.system;
+      case 'light':
+      default:
+        return ThemeMode.light;
     }
   }
 
+  String get currentThemeKey {
+    return _box.get(_themeKey, defaultValue: 'light');
+  }
+
   String get themeModeName {
-    final value = _box.get(_themeKey, defaultValue: 'system');
+    final value = _box.get(_themeKey, defaultValue: 'light');
     switch (value) {
-      case 'light':
-        return 'Terang';
       case 'dark':
-        return 'Gelap';
+        return 'Tema Gelap';
+      case 'system':
+        return 'Sesuai Sistem';
+      case 'light':
       default:
-        return 'Mengikuti Sistem';
+        return 'Tema Terang';
     }
   }
 
   Future<void> setThemeMode(String mode) async {
     String modeValue;
-    switch (mode) {
-      case 'Terang':
-        modeValue = 'light';
-        break;
-      case 'Gelap':
+    switch (mode.toLowerCase()) {
+      case 'dark':
+      case 'gelap':
+      case 'tema gelap':
         modeValue = 'dark';
         break;
-      default:
+      case 'system':
+      case 'sesuai sistem':
+      case 'mengikuti sistem':
         modeValue = 'system';
+        break;
+      case 'light':
+      case 'terang':
+      case 'tema terang':
+      default:
+        modeValue = 'light';
     }
     await _box.put(_themeKey, modeValue);
     notifyListeners();

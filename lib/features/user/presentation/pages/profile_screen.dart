@@ -5,6 +5,7 @@ import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/core/theme/theme_controller.dart';
 import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart';
 import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:recording_app/features/recording/presentation/pages/chicken_weight_screen.dart';
@@ -59,6 +60,202 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onConfirm: () async {
         await context.read<AuthService>().signOut();
       },
+    );
+  }
+
+  void _showThemeSelectionDialog(BuildContext context) {
+    final themeCtrl = context.read<ThemeController>();
+    final currentKey = themeCtrl.currentThemeKey;
+
+    DialogHelper.showBottomSheet(
+      context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppTheme.cardRadius),
+        ),
+      ),
+      builder: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.palette_outlined,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pilih Tema Aplikasi',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Sesuaikan kenyamanan visual layar Anda',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Divider(
+                height: 1,
+                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 8),
+              _buildThemeOptionTile(
+                context,
+                title: 'Tema Terang',
+                subtitle: 'Tampilan bersih dan cerah (Default)',
+                icon: Icons.light_mode_rounded,
+                isSelected: currentKey == 'light',
+                onTap: () {
+                  themeCtrl.setThemeMode('light');
+                  Navigator.pop(context);
+                },
+              ),
+              _buildThemeOptionTile(
+                context,
+                title: 'Tema Gelap',
+                subtitle: 'Tampilan gelap nyaman untuk malam hari',
+                icon: Icons.dark_mode_rounded,
+                isSelected: currentKey == 'dark',
+                onTap: () {
+                  themeCtrl.setThemeMode('dark');
+                  Navigator.pop(context);
+                },
+              ),
+              _buildThemeOptionTile(
+                context,
+                title: 'Sesuai Sistem',
+                subtitle: 'Mengikuti pengaturan bawaan perangkat HP',
+                icon: Icons.brightness_auto_rounded,
+                isSelected: currentKey == 'system',
+                onTap: () {
+                  themeCtrl.setThemeMode('system');
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOptionTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: isSelected
+            ? cs.primary.withValues(alpha: 0.08)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? cs.primary
+                        : cs.surfaceContainerHigh,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: tt.bodyLarge?.copyWith(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: isSelected ? cs.primary : cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: cs.primary,
+                    size: 22,
+                  )
+                else
+                  Icon(
+                    Icons.radio_button_unchecked_rounded,
+                    color: cs.outlineVariant,
+                    size: 22,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -192,9 +389,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
 
-              // ── 2. Group Akun & Profil ──────────────────────────────────────
+              // ── 2. Group Akun & Keamanan ───────────────────────────────────
               _MenuGroup(
-                label: 'PENGATURAN AKUN',
+                label: 'AKUN & KEAMANAN',
                 items: [
                   _MenuItemData(
                     icon: Icons.person_outline_rounded,
@@ -220,19 +417,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── 3. Group Manajemen Peternakan ───────────────────────────────
+              // ── 3. Group Kandang & Periode Ternak ───────────────────────────
               _MenuGroup(
-                label: 'MANAJEMEN PETERNAKAN',
+                label: 'KANDANG & SIKLUS TERNAK',
                 items: [
                   _MenuItemData(
-                    icon: Icons.show_chart_rounded,
-                    title: 'Pertumbuhan Bobot Ayam',
-                    subtitle: 'Grafik lengkap penimbangan harian & kurva ADG',
+                    icon: Icons.warehouse_outlined,
+                    title: 'Data Kandang',
+                    subtitle: 'Kapasitas, tipe & spesifikasi kandang',
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const ChickenWeightScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const CageProfile()),
                     ),
                   ),
                   _MenuItemData(
@@ -246,15 +441,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  _MenuItemData(
-                    icon: Icons.warehouse_outlined,
-                    title: 'Data Kandang',
-                    subtitle: 'Kapasitas, tipe & spesifikasi kandang',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const CageProfile()),
-                    ),
-                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ── 4. Group Catatan & Monitoring Harian ─────────────────────────
+              _MenuGroup(
+                label: 'CATATAN & MONITORING HARIAN',
+                items: [
                   _MenuItemData(
                     icon: Icons.assignment_outlined,
                     title: 'Semua Recording',
@@ -278,6 +472,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   _MenuItemData(
+                    icon: Icons.show_chart_rounded,
+                    title: 'Pertumbuhan Bobot Ayam',
+                    subtitle: 'Grafik lengkap penimbangan harian & kurva ADG',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ChickenWeightScreen(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ── 5. Group Laporan & Analisis Panen ───────────────────────────
+              _MenuGroup(
+                label: 'LAPORAN & ANALISIS PANEN',
+                items: [
+                  _MenuItemData(
                     icon: Icons.assessment_outlined,
                     title: 'Laporan Periode Panen',
                     subtitle: 'Kesimpulan performa, skor IP, FCR & export panen',
@@ -292,9 +505,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── 4. Group Kamus & Panduan Ternak ─────────────────────────────
+              // ── 6. Group Kamus & Panduan Ternak ─────────────────────────────
               _MenuGroup(
-                label: 'KAMUS & PANDUAN TERNAK',
+                label: 'ALAT & PANDUAN TERNAK',
                 items: [
                   _MenuItemData(
                     icon: Icons.calculate_outlined,
@@ -324,10 +537,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── 5. Group Informasi Sistem ────────────────────────────────────
+              // ── 7. Group Pengaturan & Tampilan ──────────────────────────────
               _MenuGroup(
-                label: 'INFORMASI SISTEM',
+                label: 'PENGATURAN & APLIKASI',
                 items: [
+                  _MenuItemData(
+                    icon: Icons.palette_outlined,
+                    title: 'Tema Aplikasi',
+                    subtitle: 'Pilih tema terang, gelap, atau sesuai sistem',
+                    trailingBadge: context.watch<ThemeController>().themeModeName,
+                    onTap: () => _showThemeSelectionDialog(context),
+                  ),
                   _MenuItemData(
                     icon: Icons.info_outline_rounded,
                     title: 'Tentang Aplikasi',

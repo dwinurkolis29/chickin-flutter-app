@@ -11,6 +11,7 @@ import 'package:recording_app/features/dashboard/presentation/controllers/home_c
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
+import 'package:recording_app/core/theme/theme_controller.dart';
 import 'app_checker.dart';
 
 class MainApp extends StatelessWidget {
@@ -23,6 +24,7 @@ class MainApp extends StatelessWidget {
         // AuthService — single source of truth untuk semua auth state.
         // Semua controller bergantung langsung ke instance ini via ProxyProvider.
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeController()),
 
         ChangeNotifierProxyProvider<AuthService, UserController>(
           create:
@@ -83,14 +85,16 @@ class MainApp extends StatelessWidget {
             return controller;
           },
         ),
-
-
       ],
-      child: MaterialApp(
-        theme: AppTheme.build(AppThemeOption.light),
-        darkTheme: AppTheme.build(AppThemeOption.dark),
-        themeMode: ThemeMode.system,
-        home: const AppChecker(),
+      child: Consumer<ThemeController>(
+        builder: (context, themeController, _) {
+          return MaterialApp(
+            theme: AppTheme.build(AppThemeOption.light),
+            darkTheme: AppTheme.build(AppThemeOption.dark),
+            themeMode: themeController.themeMode,
+            home: const AppChecker(),
+          );
+        },
       ),
     );
   }
