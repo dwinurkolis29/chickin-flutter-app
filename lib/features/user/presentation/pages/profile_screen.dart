@@ -299,7 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuItemData(
                     icon: Icons.calculate_outlined,
                     title: 'Kalkulator Cepat',
-                    subtitle: 'Simulasi FCR, Indeks Performa (IP) & estimasi pakan',
+                    subtitle: 'Simulasi FCR, Indeks Performa (IP) & HPP Panen',
                     trailingBadge: 'Alat',
                     onTap: () => Navigator.push(
                       context,

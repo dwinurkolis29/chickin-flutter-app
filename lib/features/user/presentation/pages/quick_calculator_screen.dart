@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 
-/// Screen mandiri untuk simulasi kalkulator cepat formula broiler (FCR, IP/EPEF, dan Estimasi Pakan).
+/// Screen mandiri untuk simulasi kalkulator cepat formula broiler (FCR, IP/EPEF, dan HPP).
 /// Didesain bersih, interaktif, dan mudah digunakan oleh peternak dewasa hingga lanjut usia.
 class QuickCalculatorScreen extends StatefulWidget {
   const QuickCalculatorScreen({super.key});
@@ -18,6 +19,12 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  final NumberFormat _currencyFmt = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ',
+    decimalDigits: 0,
+  );
+
   // Controllers untuk Kalkulator FCR
   final _fcrFeedController = TextEditingController(text: '1700');
   final _fcrWeightController = TextEditingController(text: '1000');
@@ -28,14 +35,14 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   final _ipAvgWeightController = TextEditingController(text: '1.80');
   final _ipAgeController = TextEditingController(text: '35');
   final _ipFcrController = TextEditingController(text: '1.65');
-  double _ipResult = 298.83;
+  double _ipResult = 299.22;
 
-  // Controllers untuk Estimasi Kebutuhan Pakan
-  final _estDocController = TextEditingController(text: '3000');
-  final _estTargetBwController = TextEditingController(text: '1.80');
-  final _estTargetFcrController = TextEditingController(text: '1.65');
-  double _estTotalFeedKg = 8910.0;
-  int _estTotalFeedSacks = 179;
+  // Controllers untuk Kalkulator HPP
+  final _hppCostController = TextEditingController(text: '95000000');
+  final _hppWeightController = TextEditingController(text: '5000');
+  final _hppSellingPriceController = TextEditingController(text: '21000');
+  double _hppResult = 19000.0;
+  double _hppMarginResult = 2000.0;
 
   @override
   void initState() {
@@ -43,7 +50,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     _tabController = TabController(length: 3, vsync: this);
     _calculateFcr();
     _calculateIp();
-    _calculateFeedEstimate();
+    _calculateHpp();
   }
 
   @override
@@ -55,9 +62,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     _ipAvgWeightController.dispose();
     _ipAgeController.dispose();
     _ipFcrController.dispose();
-    _estDocController.dispose();
-    _estTargetBwController.dispose();
-    _estTargetFcrController.dispose();
+    _hppCostController.dispose();
+    _hppWeightController.dispose();
+    _hppSellingPriceController.dispose();
     super.dispose();
   }
 
@@ -89,15 +96,32 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     });
   }
 
-  void _calculateFeedEstimate() {
-    final doc = int.tryParse(_estDocController.text.trim()) ?? 0;
-    final targetBw = double.tryParse(_estTargetBwController.text.replaceAll(',', '.')) ?? 0;
-    final targetFcr = double.tryParse(_estTargetFcrController.text.replaceAll(',', '.')) ?? 0;
+  void _calculateHpp() {
+    final cost = double.tryParse(
+          _hppCostController.text.replaceAll('.', '').replaceAll(',', ''),
+        ) ??
+        0;
+    final weight = double.tryParse(
+          _hppWeightController.text.replaceAll('.', '').replaceAll(',', ''),
+        ) ??
+        0;
+    final sellingPrice = double.tryParse(
+          _hppSellingPriceController.text.replaceAll('.', '').replaceAll(',', ''),
+        ) ??
+        0;
 
     setState(() {
-      final totalBiomass = doc * targetBw;
-      _estTotalFeedKg = totalBiomass * targetFcr;
-      _estTotalFeedSacks = (_estTotalFeedKg / 50).ceil();
+      if (cost > 0 && weight > 0) {
+        _hppResult = cost / weight;
+      } else {
+        _hppResult = 0.0;
+      }
+
+      if (_hppResult > 0 && sellingPrice > 0) {
+        _hppMarginResult = sellingPrice - _hppResult;
+      } else {
+        _hppMarginResult = 0.0;
+      }
     });
   }
 
@@ -141,7 +165,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                     tabs: const [
                       Tab(text: 'Hitung FCR'),
                       Tab(text: 'Hitung IP'),
-                      Tab(text: 'Kebutuhan Pakan'),
+                      Tab(text: 'Hitung HPP'),
                     ],
                   ),
                 ),
@@ -153,7 +177,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                     children: [
                       _buildFcrTab(context),
                       _buildIpTab(context),
-                      _buildFeedEstimateTab(context),
+                      _buildHppTab(context),
                     ],
                   ),
                 ),
@@ -501,92 +525,129 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     );
   }
 
-  // ── Tab 3: Feed Requirement Estimate ────────────────────────────────────────
+  // ── Tab 3: HPP Calculator ───────────────────────────────────────────────────
 
-  Widget _buildFeedEstimateTab(BuildContext context) {
+  Widget _buildHppTab(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+
+    Color hppColor;
+    String hppStatus;
+    String hppDesc;
+
+    if (_hppResult <= 0) {
+      hppColor = cs.onSurfaceVariant;
+      hppStatus = 'Masukkan Data';
+      hppDesc = 'Isi total biaya produksi dan total bobot panen untuk menghitung.';
+    } else if (_hppResult <= 17500) {
+      hppColor = AppColors.success;
+      hppStatus = 'Sangat Hemat / Efisiensi Tinggi';
+      hppDesc = 'Biaya pokok produksi sangat kompetitif, potensi keuntungan sangat besar.';
+    } else if (_hppResult <= 20000) {
+      hppColor = cs.primary;
+      hppStatus = 'Normal / Kompetitif Pasar';
+      hppDesc = 'HPP berada di rentang standar rata-rata peternak broiler mandiri.';
+    } else if (_hppResult <= 22000) {
+      hppColor = AppColors.warning;
+      hppStatus = 'Cukup Tinggi / Waspada';
+      hppDesc = 'HPP agak tinggi. Perhatikan efisiensi pakan, mortalitas, dan biaya OVK.';
+    } else {
+      hppColor = AppColors.error;
+      hppStatus = 'Sangat Tinggi / Rawan Rugi';
+      hppDesc = 'HPP melebihi rata-rata pasar. Segera evaluasi FCR dan manajemen pemeliharaan.';
+    }
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Kartu Hasil Live Estimasi Pakan
+        // Kartu Hasil Live HPP
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.1),
+            color: hppColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+            border: Border.all(color: hppColor.withValues(alpha: 0.3)),
           ),
           child: Column(
             children: [
               Text(
-                'ESTIMASI KEBUTUHAN PAKAN',
+                'HARGA POKOK PRODUKSI (HPP)',
                 style: tt.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
-                  color: cs.primary,
+                  color: hppColor,
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        '${_estTotalFeedKg.round()} Kg',
-                        style: tt.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.primary,
-                        ),
-                      ),
-                      Text(
-                        'Total Kilogram',
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    height: 36,
-                    width: 1,
-                    color: cs.outlineVariant,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        '$_estTotalFeedSacks Sak',
-                        style: tt.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: cs.primary,
-                        ),
-                      ),
-                      Text(
-                        'Sak (50 Kg)',
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
-                'Estimasi total pakan yang harus disiapkan peternak hingga masa panen.',
+                _hppResult > 0 ? '${_currencyFmt.format(_hppResult.round())} / kg' : '-',
+                style: tt.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: hppColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: hppColor,
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                ),
+                child: Text(
+                  hppStatus,
+                  style: tt.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                hppDesc,
                 textAlign: TextAlign.center,
                 style: tt.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
               ),
+              if (_hppMarginResult != 0 && _hppResult > 0) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: (_hppMarginResult >= 0 ? AppColors.success : AppColors.error)
+                        .withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _hppMarginResult >= 0
+                            ? Icons.trending_up_rounded
+                            : Icons.trending_down_rounded,
+                        size: 18,
+                        color: _hppMarginResult >= 0 ? AppColors.success : AppColors.error,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _hppMarginResult >= 0
+                            ? 'Estimasi Margin Untung: +${_currencyFmt.format(_hppMarginResult.round())} / kg'
+                            : 'Estimasi Potensi Rugi: ${_currencyFmt.format(_hppMarginResult.round())} / kg',
+                        style: tt.labelMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _hppMarginResult >= 0 ? AppColors.success : AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 16),
 
-        // Form Input Estimasi
+        // Form Input HPP
         AppCard(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -597,7 +658,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                   Icon(Icons.tune_rounded, size: 20, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'TARGET POPULASI & PANEN',
+                    'INPUT BIAYA & HASIL PANEN',
                     style: tt.labelMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
@@ -608,27 +669,55 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               ),
               const SizedBox(height: 16),
               AppTextFormField(
-                controller: _estDocController,
-                labelText: 'Jumlah DOC / Populasi Awal (Ekor)',
-                prefixIcon: Icons.pets_outlined,
+                controller: _hppCostController,
+                labelText: 'Total Biaya Produksi (Rp)',
+                prefixIcon: Icons.account_balance_wallet_outlined,
+                helperText: 'Termasuk DOC, Pakan, OVK, Listrik & Tenaga Kerja',
                 keyboardType: TextInputType.number,
-                onChanged: (_) => _calculateFeedEstimate(),
+                onChanged: (_) => _calculateHpp(),
               ),
               const SizedBox(height: 14),
               AppTextFormField(
-                controller: _estTargetBwController,
-                labelText: 'Target Bobot Panen (Kg/ekor)',
+                controller: _hppWeightController,
+                labelText: 'Total Bobot Panen Terjual (Kg)',
                 prefixIcon: Icons.scale_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (_) => _calculateFeedEstimate(),
+                onChanged: (_) => _calculateHpp(),
               ),
               const SizedBox(height: 14),
               AppTextFormField(
-                controller: _estTargetFcrController,
-                labelText: 'Target FCR',
-                prefixIcon: Icons.speed_rounded,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (_) => _calculateFeedEstimate(),
+                controller: _hppSellingPriceController,
+                labelText: 'Estimasi Harga Jual Pasar (Rp/kg) (Opsional)',
+                prefixIcon: Icons.monetization_on_outlined,
+                helperText: 'Untuk menghitung perkiraan selisih keuntungan modal',
+                keyboardType: TextInputType.number,
+                onChanged: (_) => _calculateHpp(),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Catatan Rumus Praktis
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.lightbulb_outline_rounded, color: cs.primary, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Rumus: HPP = Total Biaya Produksi (Rp) ÷ Total Bobot Panen (Kg). HPP menunjukkan titik impas (Break Even Point / BEP) modal peternak per kg ayam hidup.',
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
               ),
             ],
           ),

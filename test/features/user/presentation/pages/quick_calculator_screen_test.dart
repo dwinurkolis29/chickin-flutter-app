@@ -24,7 +24,7 @@ void main() {
       expect(find.text('Kalkulator Cepat'), findsOneWidget);
       expect(find.text('Hitung FCR'), findsOneWidget);
       expect(find.text('Hitung IP'), findsOneWidget);
-      expect(find.text('Kebutuhan Pakan'), findsOneWidget);
+      expect(find.text('Hitung HPP'), findsOneWidget);
 
       // Default FCR Tab: 1700 / 1000 = 1.70
       expect(find.text('NILAI FCR SIMULASI'), findsOneWidget);
@@ -81,7 +81,7 @@ void main() {
       expect(find.text('Baik / Standar'), findsOneWidget);
     });
 
-    testWidgets('menghitung estimasi kebutuhan pakan di tab Kebutuhan Pakan', (tester) async {
+    testWidgets('menghitung simulasi HPP di tab Hitung HPP', (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -89,14 +89,25 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      // Switch ke tab Kebutuhan Pakan
-      await tester.tap(find.text('Kebutuhan Pakan'));
+      // Switch ke tab Hitung HPP
+      await tester.tap(find.text('Hitung HPP'));
       await tester.pumpAndSettle();
 
-      expect(find.text('ESTIMASI KEBUTUHAN PAKAN'), findsOneWidget);
-      // Default: 3000 * 1.80 * 1.65 = 8910 kg -> 179 Sak
-      expect(find.text('8910 Kg'), findsOneWidget);
-      expect(find.text('179 Sak'), findsOneWidget);
+      expect(find.text('HARGA POKOK PRODUKSI (HPP)'), findsOneWidget);
+      // Default: Rp 95.000.000 / 5000 kg = Rp 19.000 / kg
+      expect(find.text('Rp 19.000 / kg'), findsOneWidget);
+      expect(find.text('Normal / Kompetitif Pasar'), findsOneWidget);
+      expect(find.text('Estimasi Margin Untung: +Rp 2.000 / kg'), findsOneWidget);
+
+      // Ubah biaya produksi ke 80000000
+      final costField = find.widgetWithText(TextFormField, '95000000');
+      await tester.enterText(costField, '80000000');
+      await tester.pumpAndSettle();
+
+      // Rp 80.000.000 / 5000 kg = Rp 16.000 / kg
+      expect(find.text('Rp 16.000 / kg'), findsOneWidget);
+      expect(find.text('Sangat Hemat / Efisiensi Tinggi'), findsOneWidget);
+      expect(find.text('Estimasi Margin Untung: +Rp 5.000 / kg'), findsOneWidget);
     });
   });
 }
