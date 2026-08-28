@@ -177,15 +177,6 @@ class ReportSummaryHeader extends StatelessWidget {
                     onError: (err) => AppSnackbar.showError(context, err),
                   ),
                 ),
-                const SizedBox(width: 6),
-                _QuickExportButton(
-                  icon: Icons.description_outlined,
-                  tooltip: 'Export CSV',
-                  isLoading: controller.isExporting,
-                  onTap: () => controller.exportCsv(
-                    onError: (err) => AppSnackbar.showError(context, err),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 2),

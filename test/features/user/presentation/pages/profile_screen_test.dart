@@ -124,6 +124,7 @@ void main() {
       expect(find.text('Pengingat & Alarm'), findsNothing);
 
       // Menu Kamus & Panduan Ternak
+      expect(find.text('Kalkulator Cepat'), findsOneWidget);
       expect(find.text('Ensiklopedia Broiler'), findsOneWidget);
 
       // Menu Informasi Sistem

@@ -13,7 +13,7 @@ void main() {
   }
 
   group('BroilerEncyclopediaScreen Widget Tests', () {
-    testWidgets('menampilkan header, banner, search field, dan kalkulator simulasi', (tester) async {
+    testWidgets('menampilkan header, banner, search field, dan filter kategori', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
@@ -28,34 +28,6 @@ void main() {
       expect(find.text('Semua Istilah'), findsOneWidget);
       expect(find.text('Pakan & FCR'), findsOneWidget);
       expect(find.text('Performa & IP'), findsOneWidget);
-
-      // Kalkulator Simulasi
-      expect(find.text('Simulasi Hitung Cepat'), findsOneWidget);
-      expect(find.text('1. Hitung FCR'), findsOneWidget);
-      expect(find.text('2. Hitung IP (Performa)'), findsOneWidget);
-    });
-
-    testWidgets('menghitung simulasi FCR dan IP dengan benar', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
-
-      // Default FCR: 1700 / 1000 = 1.70
-      expect(find.text('1.70'), findsOneWidget);
-
-      // Ubah input pakan ke 1500
-      final pakanField = find.widgetWithText(TextField, '1700');
-      await tester.enterText(pakanField, '1500');
-      await tester.pump();
-
-      // 1500 / 1000 = 1.50
-      expect(find.text('1.50'), findsOneWidget);
-
-      // Switch ke tab Hitung IP
-      await tester.tap(find.text('2. Hitung IP (Performa)'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Hasil Indeks Prestasi (IP):'), findsOneWidget);
-      expect(find.text('Daya Hidup (%)'), findsOneWidget);
     });
 
     testWidgets('pencarian istilah menyaring item ensiklopedia', (tester) async {

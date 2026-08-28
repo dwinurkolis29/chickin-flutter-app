@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
-import 'package:recording_app/features/export/domain/usecases/export_period_csv.dart';
 import 'package:recording_app/features/export/domain/usecases/export_period_excel.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
@@ -156,13 +155,6 @@ class ReportingController extends ChangeNotifier {
   /// TIDAK pakai [_report] yang ada di UI — data bisa tidak lengkap (recordings=[]).
   ///
   /// [onError] dipanggil kalau ada kegagalan di mana saja dalam flow.
-  Future<void> exportCsv({required void Function(String) onError}) async {
-    await _runExport(
-      onError: onError,
-      doExport: (report) => ExportPeriodCsv().execute(report),
-    );
-  }
-
   Future<void> exportExcel({required void Function(String) onError}) async {
     await _runExport(
       onError: onError,

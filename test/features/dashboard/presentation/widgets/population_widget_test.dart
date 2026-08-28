@@ -35,9 +35,9 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Judul Card & Icon Chicken
+      // Judul Card
       expect(find.text('Populasi Ayam'), findsOneWidget);
-      expect(find.byIcon(Icons.flutter_dash), findsOneWidget);
+      expect(find.byIcon(Icons.flutter_dash), findsNothing);
       expect(find.text('Ayam Hidup'), findsOneWidget);
       expect(find.text('Ekor'), findsOneWidget);
 

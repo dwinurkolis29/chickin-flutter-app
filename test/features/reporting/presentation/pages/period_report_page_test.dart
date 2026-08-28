@@ -23,7 +23,6 @@ class _MockReportingController extends ReportingController {
   final bool _mockLoading;
   final String? _mockError;
   bool exportExcelCalled = false;
-  bool exportCsvCalled = false;
 
   _MockReportingController({
     List<PeriodData>? closedPeriods,
@@ -57,11 +56,6 @@ class _MockReportingController extends ReportingController {
   @override
   Future<void> exportExcel({required void Function(String) onError}) async {
     exportExcelCalled = true;
-  }
-
-  @override
-  Future<void> exportCsv({required void Function(String) onError}) async {
-    exportCsvCalled = true;
   }
 }
 
@@ -179,8 +173,8 @@ void main() {
       expect(find.text('311'), findsOneWidget);
       expect(find.text('Baik / Standar'), findsOneWidget);
 
-      // 2. Verifikasi 4 Indikator Utama
-      expect(find.text('Indikator Utama Panen'), findsOneWidget);
+      // 2. Verifikasi 4 Indikator Utama (tanpa header 'Indikator Utama Panen')
+      expect(find.text('Indikator Utama Panen'), findsNothing);
       expect(find.text('FCR Panen'), findsWidgets);
       expect(find.text('Daya Hidup'), findsWidgets);
       expect(find.text('Ayam Dipanen'), findsOneWidget);
@@ -200,7 +194,7 @@ void main() {
       expect(find.text('17.460 kg'), findsOneWidget);
     });
 
-    testWidgets('tombol quick export Excel dan CSV memanggil controller export', (tester) async {
+    testWidgets('tombol quick export Excel memanggil controller export dan CSV tidak tampil', (tester) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -248,12 +242,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(ctrl.exportExcelCalled, isTrue);
 
-      // Tap CSV export icon
+      // CSV export icon must NOT be present
       final csvBtn = find.byIcon(Icons.description_outlined);
-      expect(csvBtn, findsOneWidget);
-      await tester.tap(csvBtn);
-      await tester.pumpAndSettle();
-      expect(ctrl.exportCsvCalled, isTrue);
+      expect(csvBtn, findsNothing);
     });
   });
 }

@@ -45,7 +45,7 @@ class _PeriodReportPageView extends StatelessWidget {
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: const AppHeader(
-        title: 'Laporan Periode',
+        title: 'Laporan',
       ),
       body: SafeArea(
         top: false,

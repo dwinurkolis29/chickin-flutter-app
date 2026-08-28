@@ -127,22 +127,9 @@ class _PopulationSectionState extends State<PopulationSection>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header: Icon + Judul + Status Badge ───────────────────────
+              // ── Header: Judul + Status Badge ──────────────────────────────
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: cs.secondaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.flutter_dash,
-                      size: 18,
-                      color: cs.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -43,26 +43,7 @@ class KeyMetricsGrid extends StatelessWidget {
         ? ((displayHarvested / initialPopulation) * 100).toStringAsFixed(0)
         : '0';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: Row(
-            children: [
-              Icon(Icons.dashboard_outlined, size: 18, color: cs.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Indikator Utama Panen',
-                style: tt.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-        GridView.count(
+    return GridView.count(
           crossAxisCount: 2,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
@@ -116,9 +97,7 @@ class KeyMetricsGrid extends StatelessWidget {
               icon: Icons.fitness_center_rounded,
             ),
           ],
-        ),
-      ],
-    );
+        );
   }
 }
 

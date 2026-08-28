@@ -14,6 +14,7 @@ import 'package:recording_app/features/reporting/presentation/pages/period_repor
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
 import 'package:recording_app/features/user/presentation/pages/account_management_screen.dart';
 import 'package:recording_app/features/user/presentation/pages/broiler_encyclopedia_screen.dart';
+import 'package:recording_app/features/user/presentation/pages/quick_calculator_screen.dart';
 import 'package:recording_app/features/user/presentation/pages/user_profile.dart';
 
 /// Halaman Profil Pengguna & Pusat Pengaturan Manajemen Peternakan.
@@ -295,6 +296,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _MenuGroup(
                 label: 'KAMUS & PANDUAN TERNAK',
                 items: [
+                  _MenuItemData(
+                    icon: Icons.calculate_outlined,
+                    title: 'Kalkulator Cepat',
+                    subtitle: 'Simulasi FCR, Indeks Performa (IP) & estimasi pakan',
+                    trailingBadge: 'Alat',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const QuickCalculatorScreen(),
+                      ),
+                    ),
+                  ),
                   _MenuItemData(
                     icon: Icons.menu_book_rounded,
                     title: 'Ensiklopedia Broiler',
