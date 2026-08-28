@@ -11,6 +11,7 @@ class AppTextFormField extends StatelessWidget {
     required this.labelText,
     this.hintText,
     this.helperText,
+    this.helperMaxLines = 3,
     this.prefixIcon,
     this.suffixIcon,
     this.suffixText,
@@ -33,6 +34,7 @@ class AppTextFormField extends StatelessWidget {
   final String labelText;
   final String? hintText;
   final String? helperText;
+  final int? helperMaxLines;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final String? suffixText;
@@ -71,6 +73,7 @@ class AppTextFormField extends StatelessWidget {
         labelText: labelText,
         hintText: hintText,
         helperText: helperText,
+        helperMaxLines: helperMaxLines,
         prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
         suffixIcon: suffixIcon,
         suffixText: suffixText,

@@ -289,7 +289,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                   Icon(Icons.tune_rounded, size: 20, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'INPUT DATA SIMULASI FCR',
+                    'DATA SIMULASI FCR',
                     style: tt.labelMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
@@ -301,7 +301,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               const SizedBox(height: 16),
               AppTextFormField(
                 controller: _fcrFeedController,
-                labelText: 'Total Pakan Dihabiskan (Kg)',
+                labelText: 'Total Pakan (Kg)',
+                helperText: 'Total pakan yang dihabiskan selama masa pemeliharaan',
+                helperMaxLines: 2,
                 prefixIcon: Icons.inventory_2_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _calculateFcr(),
@@ -309,7 +311,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               const SizedBox(height: 14),
               AppTextFormField(
                 controller: _fcrWeightController,
-                labelText: 'Total Bobot Ayam Hidup (Kg)',
+                labelText: 'Total Bobot Panen (Kg)',
+                helperText: 'Total bobot timbangan ayam hidup hasil panen',
+                helperMaxLines: 2,
                 prefixIcon: Icons.scale_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _calculateFcr(),
@@ -343,6 +347,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
             ],
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -451,7 +456,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                   Icon(Icons.tune_rounded, size: 20, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'INPUT PARAMETER PANEN',
+                    'PARAMETER PANEN',
                     style: tt.labelMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
@@ -463,7 +468,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               const SizedBox(height: 16),
               AppTextFormField(
                 controller: _ipLivabilityController,
-                labelText: 'Daya Hidup / Livability (%)',
+                labelText: 'Daya Hidup (%)',
+                helperText: 'Persentase ayam yang bertahan hidup hingga masa panen',
+                helperMaxLines: 2,
                 prefixIcon: Icons.favorite_outline_rounded,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _calculateIp(),
@@ -471,7 +478,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               const SizedBox(height: 14),
               AppTextFormField(
                 controller: _ipAvgWeightController,
-                labelText: 'Bobot Rata-rata Panen (Kg/ekor)',
+                labelText: 'Bobot Rata-rata (Kg/ekor)',
+                helperText: 'Rata-rata bobot timbangan per ekor ayam saat panen',
+                helperMaxLines: 2,
                 prefixIcon: Icons.scale_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _calculateIp(),
@@ -480,6 +489,8 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               AppTextFormField(
                 controller: _ipAgeController,
                 labelText: 'Umur Panen (Hari)',
+                helperText: 'Lama masa pemeliharaan ayam sejak DOC chick-in',
+                helperMaxLines: 2,
                 prefixIcon: Icons.calendar_today_outlined,
                 keyboardType: TextInputType.number,
                 onChanged: (_) => _calculateIp(),
@@ -488,6 +499,8 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               AppTextFormField(
                 controller: _ipFcrController,
                 labelText: 'FCR Panen',
+                helperText: 'Rasio konversi pakan akhir saat panen',
+                helperMaxLines: 2,
                 prefixIcon: Icons.speed_rounded,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _calculateIp(),
@@ -521,6 +534,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
             ],
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -658,7 +672,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                   Icon(Icons.tune_rounded, size: 20, color: cs.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'INPUT BIAYA & HASIL PANEN',
+                    'BIAYA & HASIL PANEN',
                     style: tt.labelMedium?.copyWith(
                       color: cs.primary,
                       fontWeight: FontWeight.bold,
@@ -670,16 +684,19 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               const SizedBox(height: 16),
               AppTextFormField(
                 controller: _hppCostController,
-                labelText: 'Total Biaya Produksi (Rp)',
+                labelText: 'Total Biaya (Rp)',
+                helperText: 'Mencakup biaya DOC, pakan, OVK, listrik, sekam, dan tenaga kerja',
+                helperMaxLines: 3,
                 prefixIcon: Icons.account_balance_wallet_outlined,
-                helperText: 'Termasuk DOC, Pakan, OVK, Listrik & Tenaga Kerja',
                 keyboardType: TextInputType.number,
                 onChanged: (_) => _calculateHpp(),
               ),
               const SizedBox(height: 14),
               AppTextFormField(
                 controller: _hppWeightController,
-                labelText: 'Total Bobot Panen Terjual (Kg)',
+                labelText: 'Total Bobot Panen (Kg)',
+                helperText: 'Total kilogram seluruh ayam hidup yang ditimbang dan terjual',
+                helperMaxLines: 2,
                 prefixIcon: Icons.scale_outlined,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _calculateHpp(),
@@ -687,9 +704,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               const SizedBox(height: 14),
               AppTextFormField(
                 controller: _hppSellingPriceController,
-                labelText: 'Estimasi Harga Jual Pasar (Rp/kg) (Opsional)',
+                labelText: 'Harga Jual Pasar (Rp/kg)',
+                helperText: 'Opsional: untuk menghitung perkiraan selisih keuntungan terhadap modal',
+                helperMaxLines: 3,
                 prefixIcon: Icons.monetization_on_outlined,
-                helperText: 'Untuk menghitung perkiraan selisih keuntungan modal',
                 keyboardType: TextInputType.number,
                 onChanged: (_) => _calculateHpp(),
               ),
@@ -722,6 +740,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
             ],
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }
