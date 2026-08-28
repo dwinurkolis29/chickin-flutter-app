@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
-import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
 
+/// Screen Registrasi Akun Peternak baru berdesain bersih, terstruktur, dan mudah digunakan.
 class Signup extends StatefulWidget {
   const Signup({super.key});
 
@@ -15,7 +17,7 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  final GlobalKey<FormState> _formKey = GlobalKey();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final FocusNode _focusNodeUsername = FocusNode();
   final FocusNode _focusNodeEmail = FocusNode();
@@ -29,15 +31,14 @@ class _SignupState extends State<Signup> {
   final TextEditingController _controllerPhone = TextEditingController();
   final TextEditingController _controllerAddress = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
-  final TextEditingController _controllerConFirmPassword =
-      TextEditingController();
+  final TextEditingController _controllerConfirmPassword = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
-  // ─── Logic tidak diubah ──────────────────────────────────────────────────────
-  void signup() async {
+  // ─── Proses Registrasi Akun ────────────────────────────────────────────────
+  Future<void> _handleSignup() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isLoading = true);
@@ -50,275 +51,337 @@ class _SignupState extends State<Signup> {
       );
 
       final result = await context.read<AuthService>().signUp(
-        email: _controllerEmail.text.trim(),
-        password: _controllerPassword.text,
-        profile: profile,
-      );
+            email: _controllerEmail.text.trim(),
+            password: _controllerPassword.text,
+            profile: profile,
+          );
 
       if (!mounted) return;
 
       if (result.success) {
-        AppSnackbar.showSuccess(context, 'Registrasi Sukses');
+        AppSnackbar.showSuccess(context, 'Akun peternak berhasil didaftarkan.');
         _formKey.currentState?.reset();
-        Navigator.pop(context, {'email': _controllerEmail.text.trim()});
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context, {'email': _controllerEmail.text.trim()});
+        }
       } else {
         DialogHelper.showError(
           context,
-          'Registrasi Gagal',
-          result.errorMessage ?? 'Terjadi kesalahan yang tidak terduga',
+          'Pendaftaran Gagal',
+          result.errorMessage ?? 'Gagal membuat akun. Silakan periksa kembali data Anda.',
         );
+      }
+    } catch (e) {
+      if (mounted) {
+        DialogHelper.showError(context, 'Terjadi Kesalahan', 'Gagal memproses pendaftaran: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // ─── Build ───────────────────────────────────────────────────────────────────
+  // ─── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final bool busy = _isLoading;
 
-    final Color primaryColor = scheme.primary;
-
     return Scaffold(
-      backgroundColor: scheme.surface,
+      backgroundColor: cs.surface,
+      appBar: AppBar(
+        backgroundColor: cs.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
+          onPressed: busy ? null : () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Daftar Akun Peternak',
+          style: tt.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: cs.onSurface,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 60),
-
-                // ── Logo ──
-                Container(
-                  width: 72,
-                  height: 72,
-                  child: ClipOval(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // ── Logo Kecil & Headline ──
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: cs.outlineVariant.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(10),
                     child: Image.asset(
                       'assets/logos/logo.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // ── Headline ──
-                Text(
-                  'Buat akun\nAplikasi Recording Anda',
-                  textAlign: TextAlign.center,
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: scheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // ── Username ──
-                _buildField(
-                  controller: _controllerUsername,
-                  focusNode: _focusNodeUsername,
-                  hint: 'Nama Pengguna',
-                  icon: Icons.person_outline,
-                  keyboardType: TextInputType.name,
-                  enabled: !busy,
-                  onEditingComplete: () => _focusNodeEmail.requestFocus(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Masukkan username.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // ── Email ──
-                _buildField(
-                  controller: _controllerEmail,
-                  focusNode: _focusNodeEmail,
-                  hint: 'Email',
-                  icon: Icons.mail_outline,
-                  keyboardType: TextInputType.emailAddress,
-                  enabled: !busy,
-                  onEditingComplete: () => _focusNodePhone.requestFocus(),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Email tidak boleh kosong';
-                    }
-                    final emailRegex = RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    );
-                    if (!emailRegex.hasMatch(value.trim())) {
-                      return 'Format email tidak valid';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // ── Phone ──
-                _buildField(
-                  controller: _controllerPhone,
-                  focusNode: _focusNodePhone,
-                  hint: 'Nomor Telepon',
-                  icon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
-                  enabled: !busy,
-                  onEditingComplete: () => _focusNodeAddress.requestFocus(),
-                ),
-                const SizedBox(height: 12),
-
-                // ── Address ──
-                _buildField(
-                  controller: _controllerAddress,
-                  focusNode: _focusNodeAddress,
-                  hint: 'Alamat',
-                  icon: Icons.location_on_outlined,
-                  keyboardType: TextInputType.streetAddress,
-                  enabled: !busy,
-                  onEditingComplete: () => _focusNodePassword.requestFocus(),
-                ),
-                const SizedBox(height: 12),
-
-                // ── Password ──
-                _buildField(
-                  controller: _controllerPassword,
-                  focusNode: _focusNodePassword,
-                  hint: 'Kata Sandi',
-                  icon: Icons.lock_outline,
-                  obscureText: _obscurePassword,
-                  enabled: !busy,
-                  onEditingComplete:
-                      () => _focusNodeConfirmPassword.requestFocus(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
-                    ),
-                    onPressed:
-                        () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password tidak boleh kosong.';
-                    }
-                    if (value.length < 8) {
-                      return 'Password minimal 8 karakter.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // ── Confirm Password ──
-                _buildField(
-                  controller: _controllerConFirmPassword,
-                  focusNode: _focusNodeConfirmPassword,
-                  hint: 'Konfirmasi Password',
-                  icon: Icons.lock_outline,
-                  obscureText: _obscureConfirmPassword,
-                  enabled: !busy,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
-                    ),
-                    onPressed:
-                        () => setState(
-                          () =>
-                              _obscureConfirmPassword =
-                                  !_obscureConfirmPassword,
-                        ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password tidak boleh kosong.';
-                    }
-                    if (value != _controllerPassword.text) {
-                      return 'Password tidak cocok.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
-
-                // ── Register Button ──
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: scheme.onPrimary,
-                      disabledBackgroundColor: primaryColor.withValues(
-                        alpha: 0.6,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.flutter_dash,
+                        size: 32,
+                        color: cs.primary,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                      ),
-                      elevation: 0,
                     ),
-                    onPressed: busy ? null : signup,
-                    child:
-                        _isLoading
-                            ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  scheme.onPrimary,
+                  ),
+                  const SizedBox(height: 12),
+
+                  Text(
+                    'Mulai Bersama Chickin',
+                    style: tt.headlineSmall?.copyWith(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Isi formulir di bawah untuk membuat akun peternak baru',
+                    textAlign: TextAlign.center,
+                    style: tt.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontSize: 13.5,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Form Card ──
+                  AppCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.person_add_outlined, color: cs.primary, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                'DATA DIRI & KANDANG',
+                                style: tt.labelMedium?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
                                 ),
                               ),
-                            )
-                            : Text(
-                              'Daftar',
-                              style: textTheme.bodyLarge?.copyWith(
-                                color: scheme.onPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                  ),
-                ),
-                const SizedBox(height: 20),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
 
-                // ── Footer ──
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Sudah punya akun? ',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                          // 1. Nama Lengkap
+                          AppTextFormField(
+                            controller: _controllerUsername,
+                            focusNode: _focusNodeUsername,
+                            labelText: 'Nama Lengkap Peternak',
+                            hintText: 'Contoh: Budi Santoso',
+                            prefixIcon: Icons.person_outline_rounded,
+                            keyboardType: TextInputType.name,
+                            enabled: !busy,
+                            onEditingComplete: () => _focusNodeEmail.requestFocus(),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Nama lengkap wajib diisi';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 2. Email
+                          AppTextFormField(
+                            controller: _controllerEmail,
+                            focusNode: _focusNodeEmail,
+                            labelText: 'Alamat Email',
+                            hintText: 'nama@peternak.com',
+                            prefixIcon: Icons.mail_outline_rounded,
+                            keyboardType: TextInputType.emailAddress,
+                            enabled: !busy,
+                            onEditingComplete: () => _focusNodePhone.requestFocus(),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Email wajib diisi';
+                              }
+                              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              if (!emailRegex.hasMatch(value.trim())) {
+                                return 'Format email tidak valid (contoh: budi@gmail.com)';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 3. Nomor WhatsApp / Telepon
+                          AppTextFormField(
+                            controller: _controllerPhone,
+                            focusNode: _focusNodePhone,
+                            labelText: 'Nomor WhatsApp / HP (Opsional)',
+                            hintText: 'Contoh: 081234567890',
+                            prefixIcon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            enabled: !busy,
+                            onEditingComplete: () => _focusNodeAddress.requestFocus(),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 4. Alamat Kandang
+                          AppTextFormField(
+                            controller: _controllerAddress,
+                            focusNode: _focusNodeAddress,
+                            labelText: 'Alamat / Lokasi Kandang (Opsional)',
+                            hintText: 'Contoh: Desa Sukamaju, Subang',
+                            prefixIcon: Icons.location_on_outlined,
+                            keyboardType: TextInputType.streetAddress,
+                            enabled: !busy,
+                            onEditingComplete: () => _focusNodePassword.requestFocus(),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 5. Kata Sandi
+                          AppTextFormField(
+                            controller: _controllerPassword,
+                            focusNode: _focusNodePassword,
+                            labelText: 'Kata Sandi',
+                            hintText: 'Minimal 8 karakter',
+                            prefixIcon: Icons.lock_outline_rounded,
+                            obscureText: _obscurePassword,
+                            enabled: !busy,
+                            onEditingComplete: () => _focusNodeConfirmPassword.requestFocus(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Kata sandi wajib diisi';
+                              }
+                              if (value.length < 8) {
+                                return 'Kata sandi minimal 8 karakter';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+
+                          // 6. Konfirmasi Kata Sandi
+                          AppTextFormField(
+                            controller: _controllerConfirmPassword,
+                            focusNode: _focusNodeConfirmPassword,
+                            labelText: 'Konfirmasi Kata Sandi',
+                            hintText: 'Ulangi kata sandi Anda',
+                            prefixIcon: Icons.lock_outline_rounded,
+                            obscureText: _obscureConfirmPassword,
+                            enabled: !busy,
+                            onEditingComplete: _handleSignup,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              onPressed: () => setState(
+                                  () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Konfirmasi kata sandi wajib diisi';
+                              }
+                              if (value != _controllerPassword.text) {
+                                return 'Konfirmasi kata sandi tidak cocok';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Tombol Daftar Sekarang
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: cs.primary,
+                                foregroundColor: cs.onPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: busy ? null : _handleSignup,
+                              child: _isLoading
+                                  ? SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+                                      ),
+                                    )
+                                  : Text(
+                                      'Daftar Sekarang',
+                                      style: tt.titleSmall?.copyWith(
+                                        color: cs.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: busy ? null : () => Navigator.pop(context),
-                      child: Text(
-                        'Masuk',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: scheme.primary,
-                          fontWeight: FontWeight.w700,
-                          decoration: TextDecoration.underline,
-                          decorationColor: scheme.primary,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Navigasi Sudah Punya Akun ──
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Sudah punya akun peternak? ',
+                        style: tt.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-              ],
+                      GestureDetector(
+                        onTap: busy ? null : () => Navigator.pop(context),
+                        child: Text(
+                          'Masuk di Sini',
+                          style: tt.bodyMedium?.copyWith(
+                            color: cs.primary,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                            decorationColor: cs.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         ),
@@ -326,34 +389,6 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  // ─── Reusable Field Builder ──────────────────────────────────────────────────
-  Widget _buildField({
-    required TextEditingController controller,
-    FocusNode? focusNode,
-    required String hint,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    bool obscureText = false,
-    bool enabled = true,
-    Widget? suffixIcon,
-    String? Function(String?)? validator,
-    VoidCallback? onEditingComplete,
-  }) {
-    return AppTextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      labelText: hint,
-      obscureText: obscureText,
-      enabled: enabled,
-      keyboardType: keyboardType,
-      onEditingComplete: onEditingComplete,
-      validator: validator,
-      prefixIcon: icon,
-      suffixIcon: suffixIcon,
-    );
-  }
-
-  // ─── Dispose ─────────────────────────────────────────────────────────────────
   @override
   void dispose() {
     _focusNodeUsername.dispose();
@@ -368,7 +403,7 @@ class _SignupState extends State<Signup> {
     _controllerPhone.dispose();
     _controllerAddress.dispose();
     _controllerPassword.dispose();
-    _controllerConFirmPassword.dispose();
+    _controllerConfirmPassword.dispose();
 
     super.dispose();
   }
