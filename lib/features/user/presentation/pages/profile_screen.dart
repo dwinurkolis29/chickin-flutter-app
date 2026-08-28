@@ -12,6 +12,7 @@ import 'package:recording_app/features/recording/presentation/pages/detail_recor
 import 'package:recording_app/features/reporting/presentation/pages/fcr_monitoring_screen.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
+import 'package:recording_app/features/user/presentation/pages/account_management_screen.dart';
 import 'package:recording_app/features/user/presentation/pages/broiler_encyclopedia_screen.dart';
 import 'package:recording_app/features/user/presentation/pages/user_profile.dart';
 
@@ -197,10 +198,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuItemData(
                     icon: Icons.person_outline_rounded,
                     title: 'Edit Profil',
-                    subtitle: 'Ubah nama, foto profil & informasi akun',
+                    subtitle: 'Ubah nama, foto profil & kontak peternak',
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const User()),
+                    ),
+                  ),
+                  _MenuItemData(
+                    icon: Icons.manage_accounts_outlined,
+                    title: 'Kelola Akun',
+                    subtitle: 'Keamanan kata sandi & status akun terdaftar',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AccountManagementScreen(),
+                      ),
                     ),
                   ),
                 ],

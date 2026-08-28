@@ -112,6 +112,7 @@ void main() {
 
       // Menu Pengaturan Akun
       expect(find.text('Edit Profil'), findsOneWidget);
+      expect(find.text('Kelola Akun'), findsOneWidget);
 
       // Menu Manajemen Peternakan
       expect(find.text('Pertumbuhan Bobot Ayam'), findsOneWidget);

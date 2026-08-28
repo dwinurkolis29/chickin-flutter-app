@@ -124,6 +124,72 @@ class AuthService extends ChangeNotifier {
     await _auth.sendPasswordResetEmail(email: email.trim());
   }
 
+  /// Kirim email verifikasi ke pengguna aktif.
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  /// Reload status pengguna dari Firebase Auth (cek status verifikasi email).
+  Future<void> reloadUser() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await user.reload();
+      notifyListeners();
+    }
+  }
+
+  /// Ubah password langsung dengan verifikasi kata sandi saat ini.
+  Future<AuthResult> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null || user.email == null) {
+      return AuthResult.failure('Pengguna belum login.');
+    }
+
+    try {
+      final cred = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(cred);
+      await user.updatePassword(newPassword);
+      notifyListeners();
+      return AuthResult.success(user);
+    } on FirebaseAuthException catch (e) {
+      return AuthResult.failure(_mapFirebaseError(e));
+    } catch (e) {
+      return AuthResult.failure('Gagal mengubah kata sandi: $e');
+    }
+  }
+
+  /// Hapus akun permanen dengan konfirmasi kata sandi.
+  Future<AuthResult> deleteAccount({required String password}) async {
+    final user = _auth.currentUser;
+    if (user == null || user.email == null) {
+      return AuthResult.failure('Pengguna belum login.');
+    }
+
+    try {
+      final cred = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(cred);
+      await user.delete();
+      notifyListeners();
+      return AuthResult.success(user);
+    } on FirebaseAuthException catch (e) {
+      return AuthResult.failure(_mapFirebaseError(e));
+    } catch (e) {
+      return AuthResult.failure('Gagal menghapus akun: $e');
+    }
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
