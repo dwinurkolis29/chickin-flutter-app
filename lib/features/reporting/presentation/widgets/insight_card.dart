@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
-/// Menampilkan daftar insight sebagai bullet list dengan icon.
-/// Insight dihasilkan oleh InsightGenerator saat periode ditutup.
+/// Menampilkan kesimpulan dan saran konkret untuk periode pemeliharaan berikutnya.
 class InsightCard extends StatelessWidget {
   final List<String> insights;
 
@@ -14,6 +14,12 @@ class InsightCard extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      color: cs.surfaceContainerLowest,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -21,25 +27,44 @@ class InsightCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.lightbulb_outline_rounded, size: 18, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Insight',
-                  style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: cs.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.lightbulb_outline_rounded,
+                    size: 18,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Kesimpulan & Saran Periode Berikutnya',
+                    style: tt.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             if (insights.isEmpty)
-              Text(
-                'Tidak ada insight tersedia untuk periode ini.',
-                style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  'Siklus pemeliharaan berjalan lancar. Pertahankan SOP pemberian pakan dan brooding pada periode selanjutnya.',
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
               )
             else
-              ...insights.map((text) => _InsightRow(text: text)),
+              ...insights.map((text) => _InsightTile(text: text)),
           ],
         ),
       ),
@@ -47,50 +72,67 @@ class InsightCard extends StatelessWidget {
   }
 }
 
-class _InsightRow extends StatelessWidget {
+class _InsightTile extends StatelessWidget {
   final String text;
-  const _InsightRow({required this.text});
+  const _InsightTile({required this.text});
 
-  static IconData _iconFor(String text) {
+  static bool _isPositive(String text) {
     final lower = text.toLowerCase();
-    if (lower.contains('baik') || lower.contains('optimal') || lower.contains('rendah')) {
-      return Icons.check_circle_outline_rounded;
-    }
-    if (lower.contains('tinggi') || lower.contains('evaluasi') || lower.contains('perlu')) {
-      return Icons.warning_amber_rounded;
-    }
-    return Icons.info_outline_rounded;
+    return lower.contains('baik') ||
+        lower.contains('optimal') ||
+        lower.contains('rendah') ||
+        lower.contains('istimewa') ||
+        lower.contains('tercapai');
   }
 
-  static Color _colorFor(BuildContext context, String text) {
+  static bool _isWarning(String text) {
     final lower = text.toLowerCase();
-    if (lower.contains('baik') || lower.contains('optimal') || lower.contains('rendah')) {
-      return AppColors.success;
-    }
-    if (lower.contains('tinggi') || lower.contains('evaluasi') || lower.contains('perlu')) {
-      return AppColors.warning;
-    }
-    return Theme.of(context).colorScheme.primary;
+    return lower.contains('tinggi') ||
+        lower.contains('evaluasi') ||
+        lower.contains('perlu') ||
+        lower.contains('kurang') ||
+        lower.contains('lambat');
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final color = _colorFor(context, text);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+    final isPos = _isPositive(text);
+    final isWarn = _isWarning(text);
+
+    final Color accentColor = isPos
+        ? AppColors.success
+        : (isWarn ? AppColors.warning : cs.primary);
+
+    final IconData icon = isPos
+        ? Icons.check_circle_rounded
+        : (isWarn ? Icons.warning_amber_rounded : Icons.info_outline_rounded);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.25),
+          width: 1,
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(_iconFor(text), size: 16, color: color),
-          const SizedBox(width: 8),
+          Icon(icon, size: 18, color: accentColor),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: tt.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                height: 1.4,
+                color: cs.onSurface,
+                height: 1.35,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

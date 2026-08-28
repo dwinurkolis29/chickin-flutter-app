@@ -7,7 +7,9 @@ import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/recording/data/models/daily_adg_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/domain/usecases/calculate_adg.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 
 /// Screen visualisasi lengkap grafik pertumbuhan bobot ayam harian dari Hari 1 hingga hari terakhir pengisian.
@@ -119,8 +121,9 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
           ),
           const SizedBox(height: 20),
 
-          // ── 3. Tabel Riwayat Penimbangan Bobot Harian ─────────────────────
+          // ── 3. Riwayat Kenaikan Bobot Harian ─────────────────────────────
           _buildHistorySection(
+            context: context,
             cs: cs,
             tt: tt,
             validRecordings: validRecordings,
@@ -465,163 +468,191 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
     );
   }
 
-  /// Riwayat penimbangan harian per baris dalam format list (ascending: Hari 1 teratas).
+  /// Riwayat kenaikan bobot harian dalam format kartu simpel & mudah dibaca (terbaru di atas).
   Widget _buildHistorySection({
+    required BuildContext context,
     required ColorScheme cs,
     required TextTheme tt,
     required List<RecordingData> validRecordings,
   }) {
-    final numberFmt = NumberFormat('#,###');
-    final dateFmt = DateFormat('dd MMM yyyy');
+    final dailyAdgList = CalculateADG().executeDaily(validRecordings);
+    final reversedList = dailyAdgList.reversed.toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'RIWAYAT KENAIKAN BOBOT',
+              style: tt.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+                color: cs.primary,
+              ),
+            ),
+            Text(
+              '${dailyAdgList.length} Hari Catatan',
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: reversedList.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            final item = reversedList[index];
+            return _buildDailyCard(context, item);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDailyCard(BuildContext context, DailyADGData item) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+    final dateFmt = DateFormat('d MMM yyyy', 'id_ID');
+
+    final String statusLabel;
+    final Color statusColor;
+    final Color statusBg;
+
+    if (item.status == 'Optimal') {
+      statusLabel = 'Bagus';
+      statusColor = AppColors.success;
+      statusBg = AppColors.success.withValues(alpha: 0.12);
+    } else if (item.status == 'Standar') {
+      statusLabel = 'Normal';
+      statusColor = cs.primary;
+      statusBg = cs.primary.withValues(alpha: 0.1);
+    } else {
+      statusLabel = 'Kurang';
+      statusColor = AppColors.warning;
+      statusBg = AppColors.warning.withValues(alpha: 0.15);
+    }
 
     return AppCard(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Baris 1: Hari & Badge Status
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Riwayat Bobot Harian',
-                  style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Total ${validRecordings.length} data penimbangan tercatat',
-                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Divider(
-            height: 1,
-            color: cs.outlineVariant.withValues(alpha: 0.3),
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: validRecordings.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
-              color: cs.outlineVariant.withValues(alpha: 0.3),
-            ),
-            itemBuilder: (context, index) {
-              // Urutan tampil ascending dari hari 1 s.d. hari terakhir
-              final recording = validRecordings[index];
-              final int? prevWeight =
-                  index > 0 ? validRecordings[index - 1].avgWeightGram : null;
-              final int? diff =
-                  prevWeight != null ? recording.avgWeightGram - prevWeight : null;
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
+                Row(
                   children: [
-                    // Badge Hari
                     Container(
-                      width: 54,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: cs.secondaryContainer,
-                        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                        color: cs.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                       ),
-                      child: Center(
-                        child: Text(
-                          'H-${recording.day}',
-                          style: tt.labelMedium?.copyWith(
-                            color: cs.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      child: Text(
+                        'HARI ${item.day}',
+                        style: tt.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: cs.onSurface,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 8),
+                    Text(
+                      dateFmt.format(item.date),
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusBg,
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: tt.labelSmall?.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
 
-                    // Detail Bobot dan Tanggal
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            // Baris 2: Kenaikan & Bobot
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kenaikan Bobot',
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
                         children: [
+                          Icon(Icons.trending_up_rounded, size: 20, color: statusColor),
+                          const SizedBox(width: 4),
                           Text(
-                            '${numberFmt.format(recording.avgWeightGram)} Gram',
-                            style: tt.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            dateFmt.format(recording.createdAt),
-                            style: tt.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                              fontSize: 11,
+                            '+${item.dailyGainGram.toStringAsFixed(0)} g/hari',
+                            style: tt.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: statusColor,
+                              fontSize: 18,
                             ),
                           ),
                         ],
                       ),
-                    ),
-
-                    // Kenaikan vs Hari Sebelumnya
-                    if (diff != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: diff >= 0
-                              ? AppColors.success.withValues(alpha: 0.1)
-                              : AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              diff >= 0
-                                  ? Icons.arrow_upward_rounded
-                                  : Icons.arrow_downward_rounded,
-                              size: 12,
-                              color: diff >= 0 ? AppColors.success : AppColors.error,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${diff >= 0 ? '+' : ''}$diff g',
-                              style: tt.labelSmall?.copyWith(
-                                color: diff >= 0 ? AppColors.success : AppColors.error,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                        ),
-                        child: Text(
-                          'Awal (DOC)',
-                          style: tt.labelSmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Bobot Timbang',
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
                         ),
                       ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        '${numFmt.format(item.weightGram)} gram',
+                        style: tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: cs.onSurface,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

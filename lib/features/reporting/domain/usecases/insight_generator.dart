@@ -1,9 +1,6 @@
 import 'package:recording_app/features/reporting/domain/usecases/summary_calculator.dart';
 
 /// Generates human-readable insights dari [PeriodSnapshot].
-///
-/// Future-ready: saat ini menghasilkan insight dasar berdasarkan threshold.
-/// Tambahkan rule baru di sini tanpa menyentuh layer lain.
 class InsightGenerator {
   // FCR threshold (referensi standar industri broiler)
   static const double _goodFcrMax = 1.8;
@@ -17,6 +14,28 @@ class InsightGenerator {
     final List<String> insights = [];
 
     if (initialPopulation <= 0) return insights;
+
+    // ── Harvest Summary insight ──────────────────────────────────────────────
+    if (snapshot.harvestedChicks != null && snapshot.harvestedWeightKg != null) {
+      final avgKg = snapshot.avgHarvestWeightKg ?? 0.0;
+      insights.add(
+        'Panen tercatat: ${snapshot.harvestedChicks} ekor (${snapshot.harvestedWeightKg!.toStringAsFixed(1)} kg) • Rata-rata ${avgKg.toStringAsFixed(2)} kg/ekor',
+      );
+    }
+
+    // ── IP (Indeks Performa) insight ─────────────────────────────────────────
+    if (snapshot.ipScore != null && snapshot.ipScore! > 0) {
+      final ip = snapshot.ipScore!;
+      if (ip >= 400) {
+        insights.add('Indeks Performa Istimewa (IP ${ip.toStringAsFixed(0)}) — efisiensi panen sangat tinggi');
+      } else if (ip >= 350) {
+        insights.add('Indeks Performa Sangat Baik (IP ${ip.toStringAsFixed(0)}) — performa panen optimal');
+      } else if (ip >= 300) {
+        insights.add('Indeks Performa Baik (IP ${ip.toStringAsFixed(0)}) — standar broiler tercapai');
+      } else {
+        insights.add('Indeks Performa Kurang (IP ${ip.toStringAsFixed(0)}) — evaluasi FCR dan durasi panen');
+      }
+    }
 
     // ── FCR insight ──────────────────────────────────────────────────────────
     if (snapshot.finalFCR > 0) {

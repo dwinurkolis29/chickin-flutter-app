@@ -63,5 +63,39 @@ void main() {
       expect(find.text('Sisa Ayam Hidup'), findsNWidgets(2));
       expect(find.text('Rumus: Total Pakan (kg) ÷ Total Bobot (kg) = FCR'), findsNWidgets(2));
     });
+
+    testWidgets('menampilkan tombol Lihat semua FCR jika showViewAllLink true', (tester) async {
+      bool viewAllCalled = false;
+      final sampleFCR = [
+        FCRData(
+          mingguKe: 1,
+          fcr: 1.65,
+          totalPakan: 500,
+          beratAyam: 303,
+          sisaAyam: 2980,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.build(AppThemeOption.light),
+          home: Scaffold(
+            body: FCRDataCard(
+              fcrData: sampleFCR,
+              showViewAllLink: true,
+              onViewAll: () => viewAllCalled = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lihat semua FCR'), findsOneWidget);
+
+      await tester.tap(find.text('Lihat semua FCR'));
+      await tester.pumpAndSettle();
+
+      expect(viewAllCalled, isTrue);
+    });
   });
 }

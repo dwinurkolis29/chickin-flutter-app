@@ -43,6 +43,10 @@ class BuildRealtimeReportUseCase {
       feedPerBird: analytics.feedPerBird,
       survivalRate: analytics.survivalRate,
       durationDays: snapshot.durationDays,
+      harvestedChicks: snapshot.harvestedChicks,
+      harvestedWeightKg: snapshot.harvestedWeightKg,
+      avgHarvestWeightKg: snapshot.avgHarvestWeightKg,
+      ipScore: snapshot.ipScore,
     );
   }
 }

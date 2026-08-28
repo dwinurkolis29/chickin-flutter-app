@@ -80,9 +80,9 @@ class NotificationService {
 
     // Android notification details
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'reminder_channel', // channel ID
-      'Reminders', // channel name
-      channelDescription: 'Channel for reminder notifications',
+      'broiler_notification_channel', // channel ID
+      'Notifikasi BroilerKu', // channel name
+      channelDescription: 'Channel notifikasi otomatis BroilerKu',
       importance: Importance.high,
       priority: Priority.high,
       showWhen: true,
@@ -106,7 +106,6 @@ class NotificationService {
     // Guard: jangan schedule jika waktu sudah lewat
     final now = tz.TZDateTime.now(tz.local);
     if (scheduledTZDate.isBefore(now)) {
-
       return;
     }
 
@@ -120,20 +119,16 @@ class NotificationService {
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       payload: payload,
     );
-
-
   }
 
   // Cancel a specific notification
   Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
-
   }
 
   // Cancel all notifications
   Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
-
   }
 
   // Get pending notifications (for debugging)
@@ -151,9 +146,9 @@ class NotificationService {
     String? payload,
   }) async {
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'reminder_channel',
-      'Reminders',
-      channelDescription: 'Channel for reminder notifications',
+      'broiler_notification_channel',
+      'Notifikasi BroilerKu',
+      channelDescription: 'Channel notifikasi otomatis BroilerKu',
       importance: Importance.high,
       priority: Priority.high,
     );

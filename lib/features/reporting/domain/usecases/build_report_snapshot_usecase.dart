@@ -56,6 +56,10 @@ class BuildReportSnapshotUseCase {
       feedPerBird: analytics.feedPerBird,
       survivalRate: analytics.survivalRate,
       durationDays: snapshot.durationDays,
+      harvestedChicks: s.harvestedChicks,
+      harvestedWeightKg: s.harvestedWeightKg,
+      avgHarvestWeightKg: s.avgHarvestWeightKg,
+      ipScore: s.ipScore,
     );
   }
 

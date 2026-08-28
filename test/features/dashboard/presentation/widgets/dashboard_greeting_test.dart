@@ -23,8 +23,7 @@ class _FakeUser extends Fake implements fb.User {
   _FakeUser({
     required this.displayName,
     required this.email,
-    this.photoURL,
-  });
+  }) : photoURL = null;
 }
 
 class _FakeAuthService extends ChangeNotifier implements AuthService {
@@ -36,7 +35,7 @@ class _FakeAuthService extends ChangeNotifier implements AuthService {
   fb.User? get currentUser => _currentUser;
 
   @override
-  String? get uid => _currentUser?.uid;
+  String? get currentUid => _currentUser?.uid;
 
   @override
   bool get isLoggedIn => _currentUser != null;

@@ -137,7 +137,7 @@ class _PopulationSectionState extends State<PopulationSection>
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.pets_rounded,
+                      Icons.flutter_dash,
                       size: 18,
                       color: cs.primary,
                     ),

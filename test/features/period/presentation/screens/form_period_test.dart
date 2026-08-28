@@ -55,7 +55,11 @@ class _MockPeriodController extends PeriodController {
   }
 
   @override
-  Future<void> closePeriod(String periodId) async {
+  Future<void> closePeriod(
+    String periodId, {
+    int? harvestedChicks,
+    double? harvestedWeightKg,
+  }) async {
     lastClosedPeriodId = periodId;
   }
 

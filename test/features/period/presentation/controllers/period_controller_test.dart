@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
 class _FakeFirebaseService extends Fake implements FirebaseService {
   final List<PeriodData> createdPeriods = [];
@@ -21,6 +22,11 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
   @override
   Future<void> updatePeriod(String periodId, PeriodData period, [String? uid]) async {
     updatedPeriods.add(period);
+  }
+
+  @override
+  Future<List<RecordingData>> getRecordingsOnce(String periodId, [String? uid]) async {
+    return [];
   }
 }
 
@@ -160,6 +166,39 @@ void main() {
         () => controller.activatePeriod('draft-1'),
         throwsA(predicate((e) => e.toString().contains('Ada periode lain yang sedang berjalan'))),
       );
+    });
+  });
+
+  group('PeriodController.closePeriod', () {
+    test('menutup periode dengan data panen riil menyimpan summary panen & IP', () async {
+      final fakeFirebase = _FakeFirebaseService();
+      final controller = PeriodController(firebaseService: fakeFirebase);
+
+      final activePeriod = PeriodData(
+        id: 'active-1',
+        name: 'Batch Siap Panen',
+        initialCapacity: 10000,
+        initialWeight: 0.04,
+        startDate: DateTime.now().subtract(const Duration(days: 35)),
+        createdAt: DateTime.now().subtract(const Duration(days: 35)),
+        isActive: true,
+      );
+      controller.periods.add(activePeriod);
+
+      await controller.closePeriod(
+        'active-1',
+        harvestedChicks: 9700,
+        harvestedWeightKg: 17460.0,
+      );
+
+      expect(fakeFirebase.updatedPeriods.length, 1);
+      final updated = fakeFirebase.updatedPeriods.first;
+      expect(updated.isActive, isFalse);
+      expect(updated.endDate, isNotNull);
+      expect(updated.summary, isNotNull);
+      expect(updated.summary!.harvestedChicks, equals(9700));
+      expect(updated.summary!.harvestedWeightKg, equals(17460.0));
+      expect(updated.summary!.avgHarvestWeightKg, closeTo(1.80, 0.01));
     });
   });
 }

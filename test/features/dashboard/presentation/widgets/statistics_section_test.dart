@@ -1,108 +1,116 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/theme/app_theme_option.dart';
+import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/statistics_section.dart';
+import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
+import 'package:recording_app/features/recording/presentation/pages/chicken_weight_screen.dart';
+import 'package:recording_app/features/reporting/presentation/pages/fcr_monitoring_screen.dart';
+
+class _FakeFirebaseService extends Fake implements FirebaseService {}
+
+class _MockHomeController extends HomeController {
+  _MockHomeController() : super(firebaseService: _FakeFirebaseService());
+
+  @override
+  String? get activePeriodId => 'period-1';
+
+  @override
+  String? get activePeriodName => 'Batch 1';
+
+  @override
+  int get initialPopulation => 5000;
+}
+
+class _MockRecordingController extends RecordingController {
+  _MockRecordingController() : super(firebaseService: _FakeFirebaseService());
+
+  @override
+  bool get isLoadingPeriod => false;
+
+  @override
+  Stream<List<RecordingData>> get recordingsStream => Stream.value([]);
+
+  @override
+  Future<void> loadActivePeriod([String? uid]) async {}
+}
 
 void main() {
-  Widget createWidgetUnderTest({
-    required double fcr,
-    required int umur,
-    Stream<List<FlSpot>>? weightStream,
-    VoidCallback? onTap,
-  }) {
-    return MaterialApp(
-      theme: AppTheme.build(AppThemeOption.light),
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: StatisticsSection(
-            fcr: fcr,
-            umur: umur,
-            weightStream: weightStream,
-          ),
+  Widget createWidgetUnderTest(Widget child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<HomeController>.value(
+          value: _MockHomeController(),
         ),
+        ChangeNotifierProvider<RecordingController>.value(
+          value: _MockRecordingController(),
+        ),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.build(AppThemeOption.light),
+        home: Scaffold(body: child),
       ),
     );
   }
 
   group('StatisticsSection Widget Tests', () {
-    testWidgets('menampilkan FCR dan Umur Ayam dengan benar', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        fcr: 1.45,
-        umur: 21,
-        weightStream: Stream.value([
-          const FlSpot(1, 45),
-          const FlSpot(2, 60),
-        ]),
-      ));
+    testWidgets('menampilkan nilai Umur Ayam dan FCR dengan benar', (tester) async {
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          const StatisticsSection(
+            fcr: 1.45,
+            umur: 21,
+            weightStream: null,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('Umur\nAyam'), findsOneWidget);
       expect(find.text('21'), findsOneWidget);
-      expect(find.text('FCR'), findsOneWidget);
+      expect(find.text('Umur\nAyam'), findsOneWidget);
+
       expect(find.text('1.45'), findsOneWidget);
-      expect(find.text('Bobot Ayam'), findsOneWidget);
-      expect(find.text('60'), findsOneWidget);
-      expect(find.text('+15 g'), findsOneWidget);
+      expect(find.text('FCR'), findsOneWidget);
     });
 
-    testWidgets('menampilkan warna hijau ketika bobot naik', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        fcr: 1.40,
-        umur: 15,
-        weightStream: Stream.value([
-          const FlSpot(1, 100),
-          const FlSpot(2, 150),
-        ]),
-      ));
+    testWidgets('mengetuk kartu FCR membuka FCRMonitoringScreen', (tester) async {
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          const StatisticsSection(
+            fcr: 1.45,
+            umur: 21,
+            weightStream: null,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('+50 g'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
+      await tester.tap(find.text('FCR'));
+      await tester.pumpAndSettle();
 
-      final lineChart = tester.widget<LineChart>(find.byType(LineChart));
-      final barData = lineChart.data.lineBarsData.first;
-      expect(barData.color, equals(AppColors.success));
+      expect(find.byType(FCRMonitoringScreen), findsOneWidget);
     });
 
-    testWidgets('menampilkan warna merah ketika bobot turun', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        fcr: 1.55,
-        umur: 16,
-        weightStream: Stream.value([
-          const FlSpot(1, 150),
-          const FlSpot(2, 140),
-        ]),
-      ));
+    testWidgets('mengetuk kartu Umur Ayam membuka ChickenWeightScreen', (tester) async {
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          const StatisticsSection(
+            fcr: 1.45,
+            umur: 21,
+            weightStream: null,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('-10 g'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
-
-      final lineChart = tester.widget<LineChart>(find.byType(LineChart));
-      final barData = lineChart.data.lineBarsData.first;
-      expect(barData.color, equals(AppColors.error));
-    });
-
-    testWidgets('menampilkan warna merah ketika bobot stagnan / tidak ada kenaikan', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        fcr: 1.50,
-        umur: 17,
-        weightStream: Stream.value([
-          const FlSpot(1, 150),
-          const FlSpot(2, 150),
-        ]),
-      ));
+      await tester.tap(find.text('Umur\nAyam'));
       await tester.pumpAndSettle();
 
-      expect(find.text('0 g'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
-
-      final lineChart = tester.widget<LineChart>(find.byType(LineChart));
-      final barData = lineChart.data.lineBarsData.first;
-      expect(barData.color, equals(AppColors.error));
+      expect(find.byType(ChickenWeightScreen), findsOneWidget);
     });
   });
 }

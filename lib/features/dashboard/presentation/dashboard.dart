@@ -21,7 +21,6 @@ import 'package:recording_app/features/dashboard/presentation/controllers/home_c
 import 'package:recording_app/features/user/presentation/pages/profile_screen.dart';
 import 'package:recording_app/features/reporting/presentation/pages/period_report_page.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
-import 'package:recording_app/features/reminder/presentation/widgets/reminder_badge_icon.dart';
 import 'widgets/fcr_datacard.dart';
 import 'widgets/dashboard_greeting.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
@@ -164,8 +163,6 @@ class _DashboardState extends State<Dashboard> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // AppHeader muncul di semua tab nav (Home, Periode, Laporan, Profil).
-      // Badge reminder tampil di semua tab nav dan hilang ketika masuk halaman detail.
       appBar: AppHeader(
         title: switch (_selectedIndex) {
           _kHome    => 'BroilerKu',
@@ -175,7 +172,6 @@ class _DashboardState extends State<Dashboard> {
           _         => 'BroilerKu',
         },
         isHome: true,
-        actions: const [ReminderBadgeIcon()],
       ),
       body: SafeArea(
         bottom: false,
@@ -461,7 +457,10 @@ class _DashboardContentState extends State<DashboardContent>
                           ),
                         ),
                         const SizedBox(height: 10),
-                        FCRDataCard(fcrData: fcrResults),
+                        FCRDataCard(
+                          fcrData: fcrResults,
+                          showViewAllLink: true,
+                        ),
                         const SizedBox(height: 80),
                       ],
                     );

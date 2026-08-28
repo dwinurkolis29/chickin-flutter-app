@@ -204,16 +204,44 @@ void main() {
       });
     });
 
-    group('single recording', () {
-      test('hanya 1 recording → metrics tetap dihitung', () {
+    group('harvest data inputs — penutupan panen riil', () {
+      test('menggunakan data panen riil 9.700 ekor & 17.460 kg menghitung bobot rata-rata & IP', () {
+        final start = DateTime(2026, 7, 1);
+        final end = DateTime(2026, 8, 5); // 35 hari
+        final p = PeriodData(
+          id: 'p-harvest',
+          name: 'Batch Panen 10k',
+          initialCapacity: 10000,
+          initialWeight: 0.04,
+          startDate: start,
+          endDate: end,
+          createdAt: start,
+        );
+
         final recordings = [
-          rec(day: 35, avgWeightGram: 2150, feedSack: 64, mortality: 18),
+          rec(day: 1, avgWeightGram: 180, feedSack: 20, mortality: 50),
+          rec(day: 35, avgWeightGram: 1750, feedSack: 540, mortality: 250),
         ];
-        final result = calculator.execute(period(), recordings);
-        expect(result.totalFeedKg, 64 * 50.0);
-        expect(result.totalMortality, 18);
-        expect(result.finalPopulation, 982);
-        expect(result.finalAvgWeightGram, 2150);
+
+        final result = calculator.execute(
+          p,
+          recordings,
+          harvestedChicks: 9700,
+          harvestedWeightKg: 17460.0,
+        );
+
+        expect(result.harvestedChicks, 9700);
+        expect(result.harvestedWeightKg, 17460.0);
+        expect(result.avgHarvestWeightKg, closeTo(1.80, 0.01));
+        expect(result.finalPopulation, 9700);
+        expect(result.finalBiomassKg, 17460.0);
+        expect(result.totalFeedKg, 560 * 50.0); // 28.000 kg
+        // FCR aktual panen: 28.000 / 17.460 = 1.6036
+        expect(result.finalFCR, closeTo(1.6036, 0.01));
+        // IP: (97.0 * 1.80 * 100) / (35 * 1.6036) ~ 311.0
+        expect(result.ipScore, isNotNull);
+        expect(result.ipScore!, greaterThan(300));
+        expect(result.ipScore!, lessThan(330));
       });
     });
   });

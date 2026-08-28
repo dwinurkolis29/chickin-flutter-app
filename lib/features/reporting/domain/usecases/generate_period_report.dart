@@ -2,10 +2,6 @@ import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
 /// Immutable value object holding all computed metrics for a period report.
-///
-/// Dihasilkan oleh:
-/// - [BuildReportSnapshotUseCase] → untuk periode closed (pakai PeriodSummary)
-/// - [BuildRealtimeReportUseCase] → untuk periode aktif atau data lama
 class PeriodReport {
   final PeriodData period;
   final List<RecordingData> recordings;
@@ -28,6 +24,12 @@ class PeriodReport {
   final double feedPerBird;
   final double survivalRate;
 
+  // Harvest Data & IP (Indeks Performa)
+  final int? harvestedChicks;
+  final double? harvestedWeightKg;
+  final double? avgHarvestWeightKg;
+  final double? ipScore;
+
   // Meta
   final int durationDays;
 
@@ -47,5 +49,9 @@ class PeriodReport {
     required this.feedPerBird,
     required this.survivalRate,
     required this.durationDays,
+    this.harvestedChicks,
+    this.harvestedWeightKg,
+    this.avgHarvestWeightKg,
+    this.ipScore,
   });
 }

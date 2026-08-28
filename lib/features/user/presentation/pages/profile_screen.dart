@@ -9,7 +9,6 @@ import 'package:recording_app/features/cage/presentation/pages/cage_profile.dart
 import 'package:recording_app/features/period/presentation/list_period.dart';
 import 'package:recording_app/features/recording/presentation/pages/chicken_weight_screen.dart';
 import 'package:recording_app/features/recording/presentation/pages/detail_recording.dart';
-import 'package:recording_app/features/reminder/presentation/reminder.dart';
 import 'package:recording_app/features/reporting/presentation/pages/fcr_monitoring_screen.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
 import 'package:recording_app/features/user/presentation/pages/broiler_encyclopedia_screen.dart';
@@ -61,82 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showAboutDialog(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        ),
-        backgroundColor: cs.surface,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: cs.secondaryContainer,
-                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              ),
-              child: Icon(Icons.egg_outlined, color: cs.primary, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Chickin BroilerKu',
-              style: tt.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: cs.onSurface,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Aplikasi Manajemen Peternakan Ayam Broiler untuk pencatatan harian, perhitungan FCR otomatis, reminder pakan, dan analisis performa.',
-              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.verified_outlined, size: 16, color: cs.primary),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Versi 1.0.0 • Production Ready',
-                    style: tt.labelSmall?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            style: TextButton.styleFrom(
-              foregroundColor: cs.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-              ),
-            ),
-            child: const Text('Tutup'),
-          ),
-        ],
-      ),
-    );
+    DialogHelper.showAbout(context);
   }
 
   @override
@@ -337,15 +261,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       MaterialPageRoute(
                         builder: (_) => const FCRMonitoringScreen(),
                       ),
-                    ),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.alarm_outlined,
-                    title: 'Pengingat & Alarm',
-                    subtitle: 'Jadwal brooding, pakan & perlakuan harian',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const Reminder()),
                     ),
                   ),
                 ],

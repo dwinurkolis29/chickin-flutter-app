@@ -1,58 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'base_dialog.dart';
 
-/// Error/Info dialog for displaying messages to the user
+/// Dialog Error, Peringatan, atau Informasi dengan styling konsisten Material 3.
 class ErrorDialog extends StatelessWidget {
   final String title;
   final String message;
   final bool showIcon;
   final IconData? icon;
   final Color? iconColor;
+  final Color? iconBackgroundColor;
+  final String buttonText;
 
   const ErrorDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.message,
-    this.showIcon = false,
+    this.showIcon = true,
     this.icon,
     this.iconColor,
-  }) : super(key: key);
+    this.iconBackgroundColor,
+    this.buttonText = 'Tutup',
+  });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final defaultIcon = icon ?? Icons.error_outline_rounded;
+    final defaultIconColor = iconColor ?? AppColors.error;
+    final defaultIconBg = iconBackgroundColor ??
+        (defaultIconColor == AppColors.error
+            ? AppColors.error.withValues(alpha: 0.12)
+            : cs.secondaryContainer);
+
     return BaseDialog(
       title: title,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showIcon) ...[
-            Icon(
-              icon ?? Icons.error_outline,
-              size: 48,
-              color: iconColor ?? Colors.red,
-            ),
-            const SizedBox(height: 16),
-          ],
-          Text(message),
-        ],
+      icon: showIcon ? defaultIcon : null,
+      iconColor: showIcon ? defaultIconColor : null,
+      iconBackgroundColor: showIcon ? defaultIconBg : null,
+      content: Text(
+        message,
+        style: tt.bodyMedium?.copyWith(
+          color: cs.onSurfaceVariant,
+          height: 1.4,
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Tutup'),
+          style: TextButton.styleFrom(
+            foregroundColor: cs.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          child: Text(buttonText),
         ),
       ],
     );
   }
 
-  /// Show error dialog
+  /// Menampilkan dialog error/info
   static Future<void> show({
     required BuildContext context,
     required String title,
     required String message,
-    bool showIcon = false,
+    bool showIcon = true,
     IconData? icon,
     Color? iconColor,
+    Color? iconBackgroundColor,
+    String buttonText = 'Tutup',
   }) {
     return showDialog(
       context: context,
@@ -62,6 +83,8 @@ class ErrorDialog extends StatelessWidget {
         showIcon: showIcon,
         icon: icon,
         iconColor: iconColor,
+        iconBackgroundColor: iconBackgroundColor,
+        buttonText: buttonText,
       ),
     );
   }

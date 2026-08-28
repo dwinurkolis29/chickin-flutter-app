@@ -328,25 +328,25 @@ class _ActivePeriodContentCard extends StatelessWidget {
     );
   }
 
-  void _confirmClosePeriod(BuildContext context) {
-    DialogHelper.showConfirm(
-      context,
-      'Tutup Siklus (Selesai Panen)',
-      'Apakah pemeliharaan pada periode "${period.name}" sudah selesai dipanen? Laporan akhir performa peternakan akan dikalkulasi secara otomatis.',
-      isDestructive: true,
-      onConfirm: () async {
-        try {
-          await context.read<PeriodController>().closePeriod(period.id);
-          if (context.mounted) {
-            AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan siap');
-          }
-        } catch (e) {
-          if (context.mounted) {
-            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
-          }
-        }
-      },
-    );
+  Future<void> _confirmClosePeriod(BuildContext context) async {
+    final result = await DialogHelper.showClosePeriodHarvest(context, period);
+    if (result == null) return;
+
+    if (!context.mounted) return;
+    try {
+      await context.read<PeriodController>().closePeriod(
+        period.id,
+        harvestedChicks: result.harvestedChicks,
+        harvestedWeightKg: result.harvestedWeightKg,
+      );
+      if (context.mounted) {
+        AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan panen siap');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+      }
+    }
   }
 }
 

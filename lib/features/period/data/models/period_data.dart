@@ -118,6 +118,10 @@ class PeriodSummary {
   final double avgDailyGain;
   final List<WeeklyFCR> weeklyFCR;
   final List<String> insights;
+  final int? harvestedChicks;
+  final double? harvestedWeightKg;
+  final double? avgHarvestWeightKg;
+  final double? ipScore;
 
   const PeriodSummary({
     this.totalFeedKg = 0.0,
@@ -128,6 +132,10 @@ class PeriodSummary {
     this.avgDailyGain = 0.0,
     this.weeklyFCR = const [],
     this.insights = const [],
+    this.harvestedChicks,
+    this.harvestedWeightKg,
+    this.avgHarvestWeightKg,
+    this.ipScore,
   });
 
   factory PeriodSummary.fromJson(Map<String, dynamic>? json) {
@@ -150,6 +158,10 @@ class PeriodSummary {
           ?.map((e) => e.toString())
           .toList() ??
           [],
+      harvestedChicks: asIntOrNull(json, 'harvestedChicks'),
+      harvestedWeightKg: asDoubleOrNull(json, 'harvestedWeightKg'),
+      avgHarvestWeightKg: asDoubleOrNull(json, 'avgHarvestWeightKg'),
+      ipScore: asDoubleOrNull(json, 'ipScore'),
     );
   }
 
@@ -162,6 +174,10 @@ class PeriodSummary {
     'avgDailyGain': avgDailyGain,
     'weeklyFCR': weeklyFCR.map((e) => e.toJson()).toList(),
     'insights': insights,
+    if (harvestedChicks != null) 'harvestedChicks': harvestedChicks,
+    if (harvestedWeightKg != null) 'harvestedWeightKg': harvestedWeightKg,
+    if (avgHarvestWeightKg != null) 'avgHarvestWeightKg': avgHarvestWeightKg,
+    if (ipScore != null) 'ipScore': ipScore,
   };
 
   PeriodSummary copyWith({
@@ -173,6 +189,10 @@ class PeriodSummary {
     double? avgDailyGain,
     List<WeeklyFCR>? weeklyFCR,
     List<String>? insights,
+    int? harvestedChicks,
+    double? harvestedWeightKg,
+    double? avgHarvestWeightKg,
+    double? ipScore,
   }) {
     return PeriodSummary(
       totalFeedKg: totalFeedKg ?? this.totalFeedKg,
@@ -183,6 +203,10 @@ class PeriodSummary {
       avgDailyGain: avgDailyGain ?? this.avgDailyGain,
       weeklyFCR: weeklyFCR ?? this.weeklyFCR,
       insights: insights ?? this.insights,
+      harvestedChicks: harvestedChicks ?? this.harvestedChicks,
+      harvestedWeightKg: harvestedWeightKg ?? this.harvestedWeightKg,
+      avgHarvestWeightKg: avgHarvestWeightKg ?? this.avgHarvestWeightKg,
+      ipScore: ipScore ?? this.ipScore,
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
-import 'package:recording_app/features/reminder/data/models/reminder_data.dart';
 import '../../features/recording/data/models/recording_data.dart';
 import '../../features/user/data/models/user_data.dart';
 
@@ -379,57 +378,6 @@ class FirebaseService {
           .update(data);
     } catch (e) {
       throw Exception('Failed to update recording: $e');
-    }
-  }
-
-  // ============================================================================
-  // REMINDER METHODS (optional - bisa di users/{uid}/reminders)
-  // ============================================================================
-
-  /// Add reminder
-  Future<void> addReminder(ReminderData reminder, [String? uid]) async {
-    try {
-      final userId = uid ?? _currentUid;
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('reminders')
-          .add(reminder.toJson());
-    } catch (e) {
-      throw Exception('Failed to add reminder: $e');
-    }
-  }
-
-  /// Delete reminder
-  Future<void> deleteReminder(String reminderId, [String? uid]) async {
-    try {
-      final userId = uid ?? _currentUid;
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('reminders')
-          .doc(reminderId)
-          .delete();
-    } catch (e) {
-      throw Exception('Failed to delete reminder: $e');
-    }
-  }
-
-  /// Get reminders stream
-  Stream<List<ReminderData>> getReminderStream([String? uid]) {
-    try {
-      final userId = uid ?? _currentUid;
-      return _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('reminders')
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => ReminderData.fromJson(doc.data()))
-              .toList());
-    } catch (e) {
-      throw Exception('Failed to get reminder stream: $e');
     }
   }
 }

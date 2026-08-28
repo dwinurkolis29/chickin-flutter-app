@@ -4,15 +4,20 @@ import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
+import 'package:recording_app/features/reporting/presentation/pages/fcr_monitoring_screen.dart';
 
 class FCRDataCard extends StatelessWidget {
   final List<FCRData> fcrData;
   final int maxWeeks;
+  final bool showViewAllLink;
+  final VoidCallback? onViewAll;
 
   const FCRDataCard({
     super.key,
     required this.fcrData,
     this.maxWeeks = 5,
+    this.showViewAllLink = false,
+    this.onViewAll,
   });
 
   _FCRStatus _getStatus(double fcr) {
@@ -39,7 +44,7 @@ class FCRDataCard extends StatelessWidget {
               ),
             ),
           )
-        else
+        else ...[
           ...fcrData.map((data) {
             final status = _getStatus(data.fcr);
             return _WeekCard(
@@ -50,7 +55,77 @@ class FCRDataCard extends StatelessWidget {
               textTheme: textTheme,
             );
           }),
+          if (showViewAllLink) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: _ViewAllFCRButton(
+                onTap: onViewAll ??
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FCRMonitoringScreen(),
+                        ),
+                      );
+                    },
+              ),
+            ),
+          ],
+        ],
       ],
+    );
+  }
+}
+
+class _ViewAllFCRButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _ViewAllFCRButton({required this.onTap});
+
+  @override
+  State<_ViewAllFCRButton> createState() => _ViewAllFCRButtonState();
+}
+
+class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          decoration: BoxDecoration(
+            color: _isHovered
+                ? cs.primary.withValues(alpha: 0.12)
+                : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+            border: Border.all(
+              color: _isHovered
+                  ? cs.primary.withValues(alpha: 0.5)
+                  : cs.outlineVariant.withValues(alpha: 0.6),
+            ),
+          ),
+          child: Text(
+            'Lihat semua FCR',
+            style: tt.labelMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.9),
+              letterSpacing: 0.2,
+              decoration: _isHovered ? TextDecoration.underline : TextDecoration.none,
+              decorationColor: cs.primary,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

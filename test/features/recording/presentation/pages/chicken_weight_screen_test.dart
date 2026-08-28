@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
@@ -12,6 +13,10 @@ import 'package:recording_app/features/recording/presentation/pages/chicken_weig
 class _FakeFirebaseService extends Fake implements FirebaseService {}
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('id_ID', null);
+  });
+
   Widget createWidgetUnderTest({
     List<RecordingData>? recordings,
     RecordingController? controller,
@@ -37,7 +42,7 @@ void main() {
   group('ChickenWeightScreen', () {
     testWidgets('menampilkan AppEmptyState jika list recording kosong', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest(recordings: []));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.byType(AppEmptyState), findsOneWidget);
       expect(find.text('Belum Ada Data Bobot'), findsOneWidget);
@@ -76,7 +81,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       await tester.pumpWidget(createWidgetUnderTest(recordings: sampleRecordings));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Memastikan judul AppHeader tampil
       expect(find.text('Pertumbuhan Bobot Ayam'), findsOneWidget);
@@ -91,11 +96,13 @@ void main() {
       expect(find.text('Umur 1 s.d. 14 Hari (Satuan Gram)'), findsOneWidget);
 
       // Memastikan riwayat penimbangan harian tampil
-      expect(find.text('Riwayat Bobot Harian'), findsOneWidget);
-      expect(find.text('Total 3 data penimbangan tercatat'), findsOneWidget);
-      expect(find.text('H-14'), findsOneWidget);
-      expect(find.text('H-7'), findsOneWidget);
-      expect(find.text('H-1'), findsOneWidget);
+      expect(find.text('RIWAYAT KENAIKAN BOBOT'), findsOneWidget);
+      expect(find.text('3 Hari Catatan'), findsOneWidget);
+      expect(find.text('HARI 14'), findsOneWidget);
+      expect(find.text('HARI 7'), findsOneWidget);
+      expect(find.text('HARI 1'), findsOneWidget);
+      expect(find.text('Kenaikan Bobot'), findsWidgets);
+      expect(find.text('Bobot Timbang'), findsWidgets);
     });
   });
 }

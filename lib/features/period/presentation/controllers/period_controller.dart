@@ -130,10 +130,14 @@ class PeriodController extends ChangeNotifier {
     await _firebaseService.updatePeriod(periodId, updatedPeriod);
   }
 
-  /// Close Period: ambil recordings, kalkulasi summary + weeklyFCR + insights, simpan ke Firebase.
-  Future<void> closePeriod(String periodId) async {
+  /// Close Period: ambil recordings, kalkulasi summary + weeklyFCR + insights + panen riil, simpan ke Firebase.
+  Future<void> closePeriod(
+    String periodId, {
+    int? harvestedChicks,
+    double? harvestedWeightKg,
+  }) async {
     final period = _periods.firstWhere(
-          (p) => p.id == periodId,
+      (p) => p.id == periodId,
       orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
@@ -146,7 +150,12 @@ class PeriodController extends ChangeNotifier {
 
     // Kalkulasi snapshot
     final closingPeriod = period.copyWith(endDate: DateTime.now());
-    final snapshot = _summaryCalculator.execute(closingPeriod, recordings);
+    final snapshot = _summaryCalculator.execute(
+      closingPeriod,
+      recordings,
+      harvestedChicks: harvestedChicks,
+      harvestedWeightKg: harvestedWeightKg,
+    );
     final insights = _insightGenerator.execute(snapshot, period.initialCapacity);
 
     // Susun PeriodSummary dari snapshot
@@ -159,6 +168,10 @@ class PeriodController extends ChangeNotifier {
       avgDailyGain: snapshot.avgDailyGain,
       weeklyFCR: snapshot.weeklyFCR,
       insights: insights,
+      harvestedChicks: snapshot.harvestedChicks,
+      harvestedWeightKg: snapshot.harvestedWeightKg,
+      avgHarvestWeightKg: snapshot.avgHarvestWeightKg,
+      ipScore: snapshot.ipScore,
     );
 
     final updatedPeriod = period.copyWith(

@@ -58,9 +58,19 @@ int asInt(Map<String, dynamic>? json, String key, {int defaultValue = 0}) {
   return toInt(json[key]);
 }
 
+int? asIntOrNull(Map<String, dynamic>? json, String key) {
+  if (json == null || !json.containsKey(key) || json[key] == null) return null;
+  return toInt(json[key]);
+}
+
 double asDouble(Map<String, dynamic>? json, String key,
     {double defaultValue = 0.0}) {
   if (json == null || !json.containsKey(key)) return defaultValue;
+  return toDouble(json[key]);
+}
+
+double? asDoubleOrNull(Map<String, dynamic>? json, String key) {
+  if (json == null || !json.containsKey(key) || json[key] == null) return null;
   return toDouble(json[key]);
 }
 

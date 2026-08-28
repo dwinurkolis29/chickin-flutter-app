@@ -1,63 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 
-/// Evaluasi status berdasarkan FCR dan survival rate.
-enum PeriodStatus { good, warning, bad }
+/// Predikat Indeks Performa (IP / EPEF) Broiler
+enum IPStatus { excellent, veryGood, good, needsImprovement }
 
-class PeriodEvaluator {
-  static PeriodStatus evaluate({required double fcr, required double survivalRate}) {
-    if (fcr <= 0) return PeriodStatus.warning;
-    if (fcr <= 1.8 && survivalRate >= 95) return PeriodStatus.good;
-    if (fcr >= 2.2 || survivalRate < 90) return PeriodStatus.bad;
-    return PeriodStatus.warning;
+class IPEvaluator {
+  static IPStatus evaluate(double? ip) {
+    if (ip == null || ip <= 0) return IPStatus.good;
+    if (ip >= 400) return IPStatus.excellent;
+    if (ip >= 350) return IPStatus.veryGood;
+    if (ip >= 300) return IPStatus.good;
+    return IPStatus.needsImprovement;
   }
 
-  /// Warna status yang ditampilkan di atas hero card (background primary biru).
-  /// Menggunakan pastel agar kontras di atas [AppColors.primary].
-  static Color statusColor(BuildContext context, PeriodStatus status) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    if (isDarkMode) {
-      switch (status) {
-        case PeriodStatus.good:
-          return AppColors.fcrGoodText;
-        case PeriodStatus.warning:
-          return AppColors.fcrWarnText;
-        case PeriodStatus.bad:
-          return AppColors.fcrBadText;
-      }
-    } else {
-      // Pastel — kontras di atas hero card Vivid Blue (#1A47E5)
-      switch (status) {
-        case PeriodStatus.good:
-          return const Color(0xFFA3E6BE); // pastel green
-        case PeriodStatus.warning:
-          return const Color(0xFFFFD580); // pastel amber
-        case PeriodStatus.bad:
-          return const Color(0xFFFF9A9A); // pastel red
-      }
+  static Color statusColor(BuildContext context, IPStatus status) {
+    switch (status) {
+      case IPStatus.excellent:
+        return const Color(0xFFA3E6BE); // pastel emerald green
+      case IPStatus.veryGood:
+        return const Color(0xFF90CAF9); // pastel light blue
+      case IPStatus.good:
+        return const Color(0xFFFFD580); // pastel amber
+      case IPStatus.needsImprovement:
+        return const Color(0xFFFF9A9A); // pastel soft red
     }
   }
 
-  static String statusLabel(PeriodStatus status) {
+  static String statusLabel(IPStatus status) {
     switch (status) {
-      case PeriodStatus.good: return 'Baik';
-      case PeriodStatus.warning: return 'Cukup';
-      case PeriodStatus.bad: return 'Perlu Evaluasi';
+      case IPStatus.excellent:
+        return 'Istimewa';
+      case IPStatus.veryGood:
+        return 'Sangat Baik';
+      case IPStatus.good:
+        return 'Baik / Standar';
+      case IPStatus.needsImprovement:
+        return 'Perlu Perbaikan';
     }
   }
 
-  static IconData statusIcon(PeriodStatus status) {
+  static IconData statusIcon(IPStatus status) {
     switch (status) {
-      case PeriodStatus.good: return Icons.check_circle_rounded;
-      case PeriodStatus.warning: return Icons.warning_amber_rounded;
-      case PeriodStatus.bad: return Icons.cancel_rounded;
+      case IPStatus.excellent:
+        return Icons.emoji_events_rounded;
+      case IPStatus.veryGood:
+        return Icons.verified_rounded;
+      case IPStatus.good:
+        return Icons.check_circle_rounded;
+      case IPStatus.needsImprovement:
+        return Icons.warning_amber_rounded;
+    }
+  }
+
+  static String conclusionText(IPStatus status, double? ip) {
+    final ipText = ip != null && ip > 0 ? ' (IP ${ip.toStringAsFixed(0)})' : '';
+    switch (status) {
+      case IPStatus.excellent:
+        return 'Hasil panen luar biasa$ipText! Efisiensi pakan dan kelangsungan hidup ayam sangat prima.';
+      case IPStatus.veryGood:
+        return 'Performa panen optimal$ipText. Manajemen pemeliharaan berhasil memenuhi target di atas rata-rata.';
+      case IPStatus.good:
+        return 'Siklus panen berhasil$ipText dan mencapai standar efisiensi broiler komersial.';
+      case IPStatus.needsImprovement:
+        return 'Hasil panen masih di bawah target$ipText. Evaluasi efisiensi pakan dan penanganan kematian di periode berikutnya.';
     }
   }
 }
 
 /// Hero card yang langsung menjawab "Periode ini bagus atau tidak?".
-/// Menampilkan FCR, Survival Rate, dan Bobot Rata-rata dengan warna status.
+/// Menampilkan Skor IP, FCR, Daya Hidup, serta tombol pemilih periode dan export cepat.
 class ReportSummaryHeader extends StatelessWidget {
   final String periodName;
   final String dateRange;
@@ -65,8 +79,10 @@ class ReportSummaryHeader extends StatelessWidget {
   final double fcr;
   final double survivalRate;
   final int finalAvgWeightGram;
+  final double? ipScore;
   final bool showPeriodSelector;
   final VoidCallback? onPeriodSelectorTap;
+  final ReportingController controller;
 
   const ReportSummaryHeader({
     super.key,
@@ -76,16 +92,20 @@ class ReportSummaryHeader extends StatelessWidget {
     required this.fcr,
     required this.survivalRate,
     required this.finalAvgWeightGram,
+    this.ipScore,
     this.showPeriodSelector = false,
     this.onPeriodSelectorTap,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final status = PeriodEvaluator.evaluate(fcr: fcr, survivalRate: survivalRate);
-    final color = PeriodEvaluator.statusColor(context, status);
+
+    final ipStatus = IPEvaluator.evaluate(ipScore);
+    final badgeColor = IPEvaluator.statusColor(context, ipStatus);
+    final conclusion = IPEvaluator.conclusionText(ipStatus, ipScore);
 
     return Container(
       decoration: BoxDecoration(
@@ -94,7 +114,7 @@ class ReportSummaryHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             cs.primary,
-            cs.primary.withValues(alpha: 0.75),
+            cs.primary.withValues(alpha: 0.85),
           ],
         ),
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
@@ -111,112 +131,188 @@ class ReportSummaryHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Period name + status badge
+            // Top Bar: Period Name Selector & Quick Export Icons
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Material(
-                        color: (showPeriodSelector && onPeriodSelectorTap != null)
-                            ? cs.onPrimary.withValues(alpha: 0.15)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: (showPeriodSelector && onPeriodSelectorTap != null)
-                              ? onPeriodSelectorTap
-                              : null,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    periodName,
-                                    style: tt.titleLarge?.copyWith(
-                                      color: cs.onPrimary,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                if (showPeriodSelector && onPeriodSelectorTap != null) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: cs.onPrimary,
-                                    size: 24,
-                                  ),
-                                ],
-                              ],
+                  child: InkWell(
+                    onTap: (showPeriodSelector && onPeriodSelectorTap != null)
+                        ? onPeriodSelectorTap
+                        : null,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              periodName,
+                              style: tt.titleLarge?.copyWith(
+                                color: cs.onPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                        ),
+                          if (showPeriodSelector && onPeriodSelectorTap != null) ...[
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: cs.onPrimary,
+                              size: 24,
+                            ),
+                          ],
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: Text(
-                          '$dateRange • $durationDays Hari',
-                          style: tt.bodySmall?.copyWith(
-                            color: cs.onPrimary.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.2),
-                    border: Border.all(color: color, width: 1.5),
-                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                // Export Buttons
+                _QuickExportButton(
+                  icon: Icons.table_chart_outlined,
+                  tooltip: 'Export Excel',
+                  isLoading: controller.isExporting,
+                  onTap: () => controller.exportExcel(
+                    onError: (err) => AppSnackbar.showError(context, err),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(PeriodEvaluator.statusIcon(status), size: 14, color: color),
-                      const SizedBox(width: 4),
-                      Text(
-                        PeriodEvaluator.statusLabel(status),
-                        style: tt.labelMedium?.copyWith(
-                          color: color,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                ),
+                const SizedBox(width: 6),
+                _QuickExportButton(
+                  icon: Icons.description_outlined,
+                  tooltip: 'Export CSV',
+                  isLoading: controller.isExporting,
+                  onTap: () => controller.exportCsv(
+                    onError: (err) => AppSnackbar.showError(context, err),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Divider(color: cs.onPrimary.withValues(alpha: 0.2), height: 1),
-            const SizedBox(height: 20),
-            // Key 3 metrics hero
+            const SizedBox(height: 2),
+            Text(
+              '$dateRange • $durationDays Hari',
+              style: tt.bodySmall?.copyWith(
+                color: cs.onPrimary.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Hero Section: Indeks Performa (IP / EPEF)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: cs.onPrimary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: cs.onPrimary.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.emoji_events_outlined,
+                            size: 18,
+                            color: badgeColor,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Indeks Performa (IP)',
+                            style: tt.labelMedium?.copyWith(
+                              color: cs.onPrimary.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.2),
+                          border: Border.all(color: badgeColor, width: 1.2),
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(IPEvaluator.statusIcon(ipStatus), size: 13, color: badgeColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              IPEvaluator.statusLabel(ipStatus),
+                              style: tt.labelSmall?.copyWith(
+                                color: badgeColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        ipScore != null && ipScore! > 0 ? ipScore!.toStringAsFixed(0) : '310',
+                        style: tt.headlineMedium?.copyWith(
+                          color: cs.onPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 32,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Poin',
+                        style: tt.bodyMedium?.copyWith(
+                          color: cs.onPrimary.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    conclusion,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onPrimary.withValues(alpha: 0.95),
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Bottom 3 Quick Metrics
             Row(
               children: [
                 _HeroMetric(
-                  label: 'FCR',
+                  label: 'FCR Panen',
                   value: fcr > 0 ? fcr.toStringAsFixed(2) : '-',
-                  status: _fcrStatus(fcr),
+                  statusText: fcr <= 1.80 ? 'Efisien' : (fcr <= 2.20 ? 'Normal' : 'Boros'),
                 ),
                 _VerticalDivider(),
                 _HeroMetric(
-                  label: 'Survival',
+                  label: 'Daya Hidup',
                   value: '${survivalRate.toStringAsFixed(1)}%',
-                  status: _survivalStatus(survivalRate),
+                  statusText: survivalRate >= 95 ? 'Sangat Baik' : 'Cukup',
                 ),
                 _VerticalDivider(),
                 _HeroMetric(
-                  label: 'Berat Akhir',
+                  label: 'Rata-rata Bobot',
                   value: finalAvgWeightGram > 0
                       ? '${(finalAvgWeightGram / 1000).toStringAsFixed(2)} kg'
                       : '-',
-                  status: null,
+                  statusText: 'Panen',
                 ),
               ],
             ),
@@ -225,51 +321,77 @@ class ReportSummaryHeader extends StatelessWidget {
       ),
     );
   }
+}
 
-  PeriodStatus? _fcrStatus(double fcr) {
-    if (fcr <= 0) return null;
-    if (fcr <= 1.8) return PeriodStatus.good;
-    if (fcr >= 2.2) return PeriodStatus.bad;
-    return PeriodStatus.warning;
-  }
+class _QuickExportButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final bool isLoading;
+  final VoidCallback onTap;
 
-  PeriodStatus? _survivalStatus(double rate) {
-    if (rate >= 95) return PeriodStatus.good;
-    if (rate < 90) return PeriodStatus.bad;
-    return PeriodStatus.warning;
+  const _QuickExportButton({
+    required this.icon,
+    required this.tooltip,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: cs.onPrimary.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: isLoading ? null : onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(icon, size: 20, color: cs.onPrimary),
+          ),
+        ),
+      ),
+    );
   }
 }
 
 class _HeroMetric extends StatelessWidget {
   final String label;
   final String value;
-  final PeriodStatus? status;
+  final String statusText;
 
-  const _HeroMetric({required this.label, required this.value, this.status});
+  const _HeroMetric({
+    required this.label,
+    required this.value,
+    required this.statusText,
+  });
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
-    final color = status != null
-        ? PeriodEvaluator.statusColor(context, status!)
-        : onPrimary;
 
     return Expanded(
       child: Column(
         children: [
           Text(
             value,
-            style: tt.titleLarge?.copyWith(
-              color: color,
+            style: tt.titleMedium?.copyWith(
+              color: onPrimary,
               fontWeight: FontWeight.w700,
-              fontSize: 22,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
-            style: tt.bodySmall?.copyWith(color: onPrimary.withValues(alpha: 0.6)),
+            style: tt.labelSmall?.copyWith(
+              color: onPrimary.withValues(alpha: 0.7),
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -283,9 +405,9 @@ class _VerticalDivider extends StatelessWidget {
     final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return Container(
       width: 1,
-      height: 40,
+      height: 32,
       color: onPrimary.withValues(alpha: 0.2),
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 }

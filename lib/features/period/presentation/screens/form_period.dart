@@ -181,28 +181,28 @@ class _FormPeriodState extends State<FormPeriod> {
   Future<void> _closePeriod() async {
     if (widget.period == null) return;
 
-    DialogHelper.showConfirm(
-      context,
-      'Tutup Siklus (Selesai Panen)',
-      'Apakah seluruh ayam pada periode ini sudah selesai dipanen? Laporan akhir performa (FCR, IP, Mortalitas) akan dikalkulasi secara otomatis.',
-      isDestructive: true,
-      onConfirm: () async {
-        setState(() => _isLoading = true);
-        try {
-          await context.read<PeriodController>().closePeriod(widget.period!.id);
-          if (mounted) {
-            AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan dibuat');
-            Navigator.pop(context, true);
-          }
-        } catch (e) {
-          if (mounted) {
-            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
-          }
-        } finally {
-          if (mounted) setState(() => _isLoading = false);
-        }
-      },
-    );
+    final result = await DialogHelper.showClosePeriodHarvest(context, widget.period!);
+    if (result == null) return;
+
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    try {
+      await context.read<PeriodController>().closePeriod(
+        widget.period!.id,
+        harvestedChicks: result.harvestedChicks,
+        harvestedWeightKg: result.harvestedWeightKg,
+      );
+      if (mounted) {
+        AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan dibuat');
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override

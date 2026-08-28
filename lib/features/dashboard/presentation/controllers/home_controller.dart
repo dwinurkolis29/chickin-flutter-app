@@ -2,20 +2,25 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/recording/data/models/daily_adg_data.dart';
 import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/domain/usecases/calculate_adg.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
 
 class HomeController extends ChangeNotifier {
   final FirebaseService _firebaseService;
   final CalculateFCR _calculateFCRUseCase;
+  final CalculateADG _calculateADGUseCase;
   
   HomeController({
     required FirebaseService firebaseService,
     CalculateFCR? calculateFCRUseCase,
+    CalculateADG? calculateADGUseCase,
   })  : _firebaseService = firebaseService,
-        _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR();
+        _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR(),
+        _calculateADGUseCase = calculateADGUseCase ?? CalculateADG();
 
   String? _activePeriodId;
   String? _activePeriodName;
@@ -117,5 +122,12 @@ class HomeController extends ChangeNotifier {
       return <DailyFCRData>[];
     }
     return _calculateFCRUseCase.executeDaily(recordings, initialPopulation);
+  }
+
+  List<DailyADGData> calculateDailyADG(List<RecordingData> recordings, [double initialWeightKg = 0.04]) {
+    if (recordings.isEmpty) {
+      return <DailyADGData>[];
+    }
+    return _calculateADGUseCase.executeDaily(recordings, initialWeightKg: initialWeightKg);
   }
 }
