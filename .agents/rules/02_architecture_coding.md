@@ -19,7 +19,7 @@
 ## 3. Safe Data Conversion
 
 - **Mandatory**: Always use `safe_convert.dart` (`lib/core/models/safe_convert.dart`) for JSON and Firestore document parsing.
-- Available helpers: `asString`, `asInt`, `asDouble`, `asBool`.
+- Available helpers: `asString`, `asInt`, `asIntOrNull`, `asDouble`, `asDoubleOrNull`, `asBool`.
 - **Never** perform direct forced cast (`map['field'] as int`) or force unwrap (`map['field']!`) on remote/untrusted payloads to prevent runtime crashes.
 
 ## 4. UI & Design Guidelines
@@ -62,4 +62,30 @@
   - Otomatis gunakan standar industri (misal: `0.04 kg` / 40 gram) di balik layar.
   - Form pembuatan periode cukup berfokus pada 3 input esensial: **Nama Periode**, **Tanggal DOC Masuk**, dan **Jumlah DOC (Ekor)**.
 
+## 9. Dialog Standards (Pola "Tentang Aplikasi")
 
+- Seluruh dialog di aplikasi (`BaseDialog`, `ConfirmDialog`, `ErrorDialog`, `PeriodPickerDialog`, `StringPickerDialog`, dan dialog form interaktif) **WAJIB** mengikuti standar visual terpadu:
+  1. **Header Icon Badge**: Baris judul dengan icon bertema di dalam kontainer berlatar kontras lembut (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, atau `AppColors.success.withValues(alpha: 0.12)`) dengan sudut membulat (`AppTheme.cardRadius`).
+  2. **Judul Tebal**: Teks judul `tt.titleMedium` tebal (`FontWeight.bold`, `cs.onSurface`).
+  3. **Tombol Pill**: Tombol aksi berbentuk pill (`AppTheme.pillRadius`) dengan `FilledButton` untuk aksi konfirmasi utama dan `TextButton` untuk batal/tutup.
+  4. Seluruh pemanggilan dialog **WAJIB** melalui `DialogHelper`.
+
+## 10. Alur Tutup Panen & Desain Laporan (*Conclusion-First*)
+
+- **Interaksi Tutup Periode Panen**:
+  - Saat menutup periode panen, aplikasi menanyakan data panen riil secara interaktif: **Ayam Dipanen (ekor)** dan **Total Bobot Panen (kg)** beserta *live preview* kalkulasi rata-rata bobot panen ($kg/ekor$).
+  - Data panen bersifat opsional (jika kosong, kalkulasi laporan memakai estimasi recording harian).
+  - Sistem mengkalkulasi derived metrics: **FCR Panen Aktual** dan **Indeks Performa (IP / EPEF)**.
+- **Layar Laporan Periode (*Conclusion-First*)**:
+  - Tampilan laporan berfokus pada kesimpulan hasil dan bahasa non-teknis yang mudah dimengerti peternak senior.
+  - **Hero Card Indeks Performa (IP)**: Angka IP besar dengan badge status (*Istimewa* $\ge 400$, *Sangat Baik* 350–399, *Baik* 300–349, *Perlu Perbaikan* <300) dan kesimpulan kalimat dalam bahasa Indonesia sehari-hari.
+  - **4 Kartu Indikator Utama**: FCR, Daya Hidup, Ayam Dipanen, dan Rata-rata Bobot Panen. Label teks wajib menggunakan `Expanded` dan `TextOverflow.ellipsis` agar tidak terjadi *pixel overflow* pada layar sempit.
+  - **Kesimpulan & Saran Periode Berikutnya**: Rekomendasi konkret tindakan (pakan, brooding, biosekuriti) untuk siklus selanjutnya.
+  - **Ringkasan Data Produksi**: Kartu ringkas total konsumsi pakan (kg & sak), total bobot daging panen, ADG harian, konsumsi pakan per ekor, dan lama durasi siklus.
+  - **Export Cepat**: Tombol Export Excel & CSV disematkan langsung di header laporan utama tanpa butuh screen detail terpisah.
+
+## 11. Konsolidasi Layar & Depresiasi Fitur
+
+- **ADG Harian**: Riwayat kenaikan bobot harian (Daily ADG) terintegrasi langsung di dalam screen Pertumbuhan Bobot Ayam (`ChickenWeightScreen`) di bawah kurva bobot; DILARANG membuat screen terpisah untuk ADG.
+- **Depresiasi Reminder Manual**: Fitur alarm / reminder manual dihapus dari UI dan penyimpanan lokal; infrastruktur `NotificationService` hanya dipakai untuk notifikasi otomatis masa depan.
+- **Penghapusan Detail Report Screen**: Screen `DetailPeriodReport` dihapus karena seluruh kesimpulan dan export data sudah langsung tersedia pada `PeriodReportPage`.

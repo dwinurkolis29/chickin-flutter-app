@@ -124,8 +124,12 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
 
 ## Component Standards
 
-### 1. Dialogs
-Selalu gunakan `DialogHelper.showConfirmDialog()`, `DialogHelper.showErrorDialog()`, dll. Jangan `showDialog` mentah.
+### 1. Dialogs (Pola Terpadu "Tentang Aplikasi")
+- Selalu gunakan `DialogHelper.*` (`showError`, `showInfo`, `showSuccess`, `showConfirm`, `showAbout`, `showPeriodPicker`, `showStringPicker`, `showClosePeriodHarvest`).
+- Struktur visual dialog:
+  - Header Row: Icon di dalam kontainer membulat (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, `AppColors.success.withValues(alpha: 0.12)`) + Teks judul tebal `tt.titleMedium`.
+  - Body: `tt.bodyMedium` dengan warna `cs.onSurfaceVariant` dan line height 1.4.
+  - Action Buttons: Berbentuk pill (`AppTheme.pillRadius`) dengan `FilledButton` untuk aksi konfirmasi dan `TextButton` untuk batal/tutup.
 
 ### 2. Cards & Containers
 - Radius: `AppTheme.cardRadius` (24dp).
@@ -143,7 +147,7 @@ Selalu gunakan `DialogHelper.showConfirmDialog()`, `DialogHelper.showErrorDialog
 
 ### 5. Status Badge di atas Hero Card (Primary Background)
 - Jangan pakai `AppColors.*OnPrimary` — sudah dihapus.
-- Gunakan pastel inline: green `#A3E6BE`, amber `#FFD580`, red `#FF9A9A`.
+- Gunakan pastel inline: green `#A3E6BE` (Istimewa / Baik), blue `#90CAF9` (Sangat Baik), amber `#FFD580` (Standar), red `#FF9A9A` (Perlu Perbaikan).
 - Lihat contoh di [`report_summary_header.dart`](file:///Users/nurkolis/IdeaProjects/chickin-flutter-app/lib/features/reporting/presentation/widgets/report_summary_header.dart).
 
 ### 6. AppBar & Header Standards
@@ -181,3 +185,17 @@ Selalu gunakan `DialogHelper.showConfirmDialog()`, `DialogHelper.showErrorDialog
 ### 10. Flutter Layout Constraints & IntrinsicHeight Guard
 - Di dalam widget `IntrinsicHeight`, **DILARANG** menggunakan `Row(crossAxisAlignment: CrossAxisAlignment.baseline)` bersamaan dengan `Spacer()` atau `Expanded()`, karena akan memicu crash `computeDryBaseline` pada `RenderPositionedBox`. Gunakan `CrossAxisAlignment.center` atau `CrossAxisAlignment.end`.
 
+### 11. Responsive Multi-Column Grid Cards (Anti Pixel Overflow)
+- Pada kartu metrik 2-kolom (`GridView.count` / `KeyMetricsGrid`), ruang horizontal sangat terbatas (~150–170px):
+  - Selalu bungkus teks label dengan `Expanded` dan `TextOverflow.ellipsis`.
+  - Gunakan teks badge ringkas (misal: `Bagus`, `96%`, `1800 g`) alih-alih kalimat panjang.
+  - Terapkan `childAspectRatio: 1.38`–`1.4` agar kartu memiliki ruang vertikal yang lega di semua resolusi perangkat.
+
+### 12. Layar Laporan Periode (*Conclusion-First* untuk Peternak Senior)
+- Tampilan laporan mengutamakan kesimpulan performa (untung/efisien vs perlu evaluasi), bukan tabel angka teknis yang membingungkan.
+- Komponen wajib:
+  1. **Hero Indeks Performa (IP / EPEF)** dengan skor besar, predikat warna, dan kalimat evaluasi bahasa Indonesia sehari-hari.
+  2. **4 Kartu Indikator Kunci** (FCR Panen, Daya Hidup, Ayam Dipanen, Rata-rata Bobot).
+  3. **Kesimpulan & Saran Periode Berikutnya** (Rekomendasi tindakan konkret pakan, brooding, sanitasi).
+  4. **Ringkasan Data Produksi** (Total pakan sak/kg, total panen kg, ADG, durasi).
+  5. **Export Cepat** (Tombol Excel & CSV langsung di header laporan).
