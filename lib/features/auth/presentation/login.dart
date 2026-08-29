@@ -221,7 +221,7 @@ class _LoginState extends State<Login> {
                   const SizedBox(height: 16),
 
                   Text(
-                    'Chickin BroilerKu',
+                    'BroilerKu',
                     style: tt.headlineMedium?.copyWith(
                       color: cs.onSurface,
                       fontWeight: FontWeight.w900,

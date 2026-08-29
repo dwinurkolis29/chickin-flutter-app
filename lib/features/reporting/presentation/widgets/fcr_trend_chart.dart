@@ -25,8 +25,19 @@ class FCRTrendChart extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.trending_up_rounded, size: 18, color: cs.primary),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: cs.secondaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.trending_up_rounded,
+                    size: 18,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Text(
                   'Tren FCR Mingguan',
                   style: tt.titleSmall?.copyWith(

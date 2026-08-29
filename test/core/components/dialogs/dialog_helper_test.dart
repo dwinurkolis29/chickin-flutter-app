@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/theme/app_theme_option.dart';
@@ -157,14 +158,14 @@ void main() {
       await tester.tap(find.text('Buka Dialog'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Chickin BroilerKu'), findsOneWidget);
+      expect(find.text('BroilerKu'), findsOneWidget);
       expect(find.textContaining('Aplikasi Manajemen Peternakan'), findsOneWidget);
       expect(find.text('Versi 1.0.0 • Production Ready'), findsOneWidget);
       expect(find.byIcon(Icons.egg_outlined), findsOneWidget);
 
       await tester.tap(find.text('Tutup'));
       await tester.pumpAndSettle();
-      expect(find.text('Chickin BroilerKu'), findsNothing);
+      expect(find.text('BroilerKu'), findsNothing);
     });
 
     testWidgets('showPeriodPicker memilih periode yang diklik', (tester) async {
@@ -240,6 +241,57 @@ void main() {
 
       expect(selectedOption, equals('Vitamin / Suplemen'));
       expect(find.text('Pilih Kategori'), findsNothing);
+    });
+
+    testWidgets('showImageSourcePicker menampilkan bottom sheet dan mengembalikan ImageSource.gallery', (tester) async {
+      ImageSource? pickedSource;
+
+      await tester.pumpWidget(
+        createTestWidget((context) async {
+          pickedSource = await DialogHelper.showImageSourcePicker(
+            context,
+            title: 'Pilih Foto Profil',
+          );
+        }),
+      );
+
+      await tester.tap(find.text('Buka Dialog'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pilih Foto Profil'), findsOneWidget);
+      expect(find.text('Pilih dari Galeri'), findsOneWidget);
+      expect(find.text('Ambil Foto Kamera'), findsOneWidget);
+      expect(find.text('Batal'), findsOneWidget);
+
+      await tester.tap(find.text('Pilih dari Galeri'));
+      await tester.pumpAndSettle();
+
+      expect(pickedSource, equals(ImageSource.gallery));
+      expect(find.text('Pilih dari Galeri'), findsNothing);
+    });
+
+    testWidgets('showImageSourcePicker mengembalikan ImageSource.camera saat memilih kamera', (tester) async {
+      ImageSource? pickedSource;
+
+      await tester.pumpWidget(
+        createTestWidget((context) async {
+          pickedSource = await DialogHelper.showImageSourcePicker(
+            context,
+            title: 'Pilih Foto Kandang',
+          );
+        }),
+      );
+
+      await tester.tap(find.text('Buka Dialog'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pilih Foto Kandang'), findsOneWidget);
+
+      await tester.tap(find.text('Ambil Foto Kamera'));
+      await tester.pumpAndSettle();
+
+      expect(pickedSource, equals(ImageSource.camera));
+      expect(find.text('Ambil Foto Kamera'), findsNothing);
     });
   });
 }

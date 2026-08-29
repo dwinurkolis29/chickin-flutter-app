@@ -39,14 +39,6 @@ class StatisticsSection extends StatelessWidget {
                     label: 'Umur\nAyam',
                     value: '$umur',
                     unit: 'Hari',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ChickenWeightScreen(),
-                        ),
-                      );
-                    },
                   ),
                 ),
                 const SizedBox(height: 8),

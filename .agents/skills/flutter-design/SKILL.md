@@ -259,3 +259,18 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
 ### 14. Profil Saya vs Profil Kandang Visual Hierarchy
 - **Profil Saya**: Avatar Bulat 92dp (`CircleAvatar` + Edit Icon) + Hero Nama & Status + List Kontak & Domisili + Full-Width Pill CTA (50dp).
 - **Profil Kandang**: Banner Landscape 190dp (`BorderRadius.circular(AppTheme.cardRadius)` + Overlay Ganti Foto) + Hero Card Kapasitas Tampung DOC (`headlineMedium` 32sp) + Spesifikasi Bangunan/Lokasi + Full-Width Pill CTA (50dp).
+
+### 15. Image Source Picker Bottom Sheet Standards
+- Seluruh alur pemilihan gambar (foto profil peternak, foto fasilitas kandang) **WAJIB** menggunakan `DialogHelper.showImageSourcePicker()` yang memanggil [image_source_picker_bottom_sheet.dart](file:///Users/nurkolis/IdeaProjects/chickin-flutter-app/lib/core/components/dialogs/image_source_picker_bottom_sheet.dart):
+  - **Drag Handle Bar**: Bar 36x4dp di tengah atas.
+  - **Header**: Ikon melingkar `Icons.add_a_photo_outlined` + Judul + Subtitle deskriptif + Tombol tutup (X).
+  - **2 Kartu Opsi Deskriptif**: Kartu berbingkai (`AppTheme.rowRadius = 16.0`) dengan ikon melingkar, teks judul tebal, deskripsi panduan, chevron kanan, serta efek sentuh hover & splash ripple.
+  - **Tombol Batal**: Outlined button berbentuk pill (`AppTheme.pillRadius = 999.0`).
+
+### 16. Tombol Submit & Primary CTA Conventions
+- Tombol simpan data/submit pada form utama (`FormRecording`, `FormCage`, `FormUser`) diseragamkan dengan teks langsung yang jelas (`FilledButton(child: Text('Simpan Data Catatan'))`) tanpa leading icon redundan.
+- Leading icon pada tombol hanya diperkenankan untuk aksi diferensiasi penting (misal: `FilledButton.icon` pada `Ubah Data Profil`).
+
+### 17. Shimmer Skeleton Loading Redesign Standards
+- Skeleton loader wajib merefleksikan layout M3 terbaru dari screen tujuan (`DashboardSkeleton`, `ReportSkeleton`, `PeriodCardSkeleton`, `TableSkeleton`) dengan kartu `AppTheme.cardRadius = 24.0`, badge bulat, dan warna tema `surfaceContainerHighest` / `surfaceContainerHigh`.
+

@@ -616,9 +616,10 @@ class _FormRecordingState extends State<FormRecording> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.check_circle_outline_rounded, size: 18, color: cs.primary),
                 const SizedBox(width: 8),
@@ -631,9 +632,9 @@ class _FormRecordingState extends State<FormRecording> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
@@ -648,6 +649,11 @@ class _FormRecordingState extends State<FormRecording> {
                       icon: Icons.calendar_month_outlined,
                     ),
                   ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: cs.outlineVariant.withValues(alpha: 0.4),
+                  ),
                   Expanded(
                     child: _buildPreviewItem(
                       context,
@@ -661,7 +667,7 @@ class _FormRecordingState extends State<FormRecording> {
             ),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
@@ -675,6 +681,11 @@ class _FormRecordingState extends State<FormRecording> {
                       value: weight,
                       icon: Icons.scale_outlined,
                     ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: cs.outlineVariant.withValues(alpha: 0.4),
                   ),
                   Expanded(
                     child: _buildPreviewItem(
@@ -704,37 +715,43 @@ class _FormRecordingState extends State<FormRecording> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: isAlert ? AppColors.warning : cs.primary,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: tt.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontSize: 10,
-                ),
-              ),
-              Text(
-                value,
-                style: tt.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isAlert ? AppColors.warning : cs.onSurface,
-                  fontSize: 12,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: isAlert
+                ? AppColors.warning.withValues(alpha: 0.12)
+                : cs.primary.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
           ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: isAlert ? AppColors.warning : cs.primary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: tt.labelSmall?.copyWith(
+            color: cs.onSurfaceVariant,
+            fontSize: 11,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: tt.bodySmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: isAlert ? AppColors.warning : cs.onSurface,
+            fontSize: 12,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -764,20 +781,13 @@ class _FormRecordingState extends State<FormRecording> {
                 valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
               ),
             )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.save_rounded, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Simpan Data Recording',
-                  style: tt.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: cs.onPrimary,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
+          : Text(
+              'Simpan Data Recording',
+              style: tt.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.onPrimary,
+                fontSize: 15,
+              ),
             ),
     );
   }

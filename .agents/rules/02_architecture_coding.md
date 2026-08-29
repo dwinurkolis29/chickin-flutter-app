@@ -53,6 +53,7 @@
 - **Single Active Period Constraint**:
   - Hanya 1 periode yang boleh berstatus aktif dalam satu waktu.
   - Untuk mengaktifkan periode draft, peternak wajib menutup panen periode aktif yang sedang berjalan terlebih dahulu.
+  - Ketika masih ada periode yang aktif, tombol **'Aktifkan Periode Ini Sekarang'** pada form/detail draft periode **WAJIB disembunyikan** dari UI dan digantikan dengan banner status edukatif berikon gembok (`Icons.lock_outline_rounded`).
 - **Editable Active & Draft Periods**:
   - Periode Aktif dan Draft **dapat diedit** datanya (Nama Periode, Kapasitas DOC, Tanggal DOC Masuk).
   - Sisa ayam, umur hari, dan FCR terkalkulasi ulang secara dinamis tanpa merusak integritas catatan harian (recording).
@@ -68,6 +69,7 @@
   - **BaseDialog / ConfirmDialog**: Digunakan **hanya** untuk konfirmasi singkat, alert peringatan, atau pesan informasi (tanpa input teks panjang).
   - **AppFormBottomSheet (`lib/core/components/dialogs/app_form_bottom_sheet.dart`)**: **WAJIB** digunakan untuk semua form interaktif pop-up (seperti Tutup Panen, Edit Recording, Ubah Kata Sandi, dan Konfirmasi Kata Sandi Hapus Akun).
   - **DILARANG** menggunakan dialog melayang di tengah layar (`showDialog` / `BaseDialog`) untuk form input karena rentan terpotong oleh keyboard virtual dan sulit dijangkau jempol satu tangan.
+- **Image Source Picker Modal**: Pemilihan gambar dari Galeri atau Kamera wajib memanggil `DialogHelper.showImageSourcePicker()` (`lib/core/components/dialogs/image_source_picker_bottom_sheet.dart`).
 - **Standar Visual Dialog & Sheet**:
   1. **Header Icon Badge**: Baris judul dengan icon bertema di dalam kontainer bulat (`cs.secondaryContainer`, `AppColors.error.withValues(alpha: 0.12)`, atau `AppColors.success.withValues(alpha: 0.12)`).
   2. **Judul Tebal**: Teks judul `tt.titleMedium` tebal (`FontWeight.bold`, `cs.onSurface`).
@@ -85,6 +87,7 @@
 - **Layar Laporan Periode (*Conclusion-First*)**:
   - Tampilan laporan berfokus pada kesimpulan hasil dan bahasa non-teknis yang mudah dimengerti peternak senior.
   - **Hero Card Indeks Performa (IP)**: Angka IP besar dengan badge status (*Istimewa* $\ge 400$, *Sangat Baik* 350–399, *Baik* 300–349, *Perlu Perbaikan* <300) dan kesimpulan kalimat dalam bahasa Indonesia sehari-hari.
+  - **Kalkulasi IP Riil**: Perhitungan Indeks Performa (IP / PEF) wajib dihitung secara dinamis dari umur panen riil (`sorted.last.day`) dan metrik panen/recording aktual, DILARANG menggunakan angka fallback tiruan (hardcoded).
   - **4 Kartu Indikator Utama**: FCR, Daya Hidup, Ayam Dipanen, dan Rata-rata Bobot Panen. Label teks wajib menggunakan `Expanded` dan `TextOverflow.ellipsis` agar tidak terjadi *pixel overflow* pada layar sempit.
   - **Kesimpulan & Saran Periode Berikutnya**: Rekomendasi konkret tindakan (pakan, brooding, biosekuriti) untuk siklus selanjutnya.
   - **Ringkasan Data Produksi**: Kartu ringkas total konsumsi pakan (kg & sak), total bobot daging panen, ADG harian, konsumsi pakan per ekor, dan lama durasi siklus.

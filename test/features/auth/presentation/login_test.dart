@@ -92,7 +92,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Branding
-      expect(find.text('Chickin BroilerKu'), findsOneWidget);
+      expect(find.text('BroilerKu'), findsOneWidget);
       expect(find.text('Aplikasi Pencatatan & Manajemen Peternakan Broiler'), findsOneWidget);
 
       // Form Card

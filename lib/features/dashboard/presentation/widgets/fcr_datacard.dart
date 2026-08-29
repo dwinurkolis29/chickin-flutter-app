@@ -98,30 +98,66 @@ class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? cs.primary.withValues(alpha: 0.12)
-                : cs.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-            border: Border.all(
-              color: _isHovered
-                  ? cs.primary.withValues(alpha: 0.5)
-                  : cs.outlineVariant.withValues(alpha: 0.6),
+      child: Material(
+        color: _isHovered
+            ? cs.primary.withValues(alpha: 0.12)
+            : cs.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+          hoverColor: Colors.transparent,
+          splashColor: cs.primary.withValues(alpha: 0.15),
+          highlightColor: cs.primary.withValues(alpha: 0.08),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+              border: Border.all(
+                color: _isHovered
+                    ? cs.primary
+                    : cs.outlineVariant.withValues(alpha: 0.6),
+                width: _isHovered ? 1.5 : 1.0,
+              ),
+              boxShadow: _isHovered
+                  ? [
+                      BoxShadow(
+                        color: cs.primary.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
-          ),
-          child: Text(
-            'Lihat semua FCR',
-            style: tt.labelMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.9),
-              letterSpacing: 0.2,
-              decoration: _isHovered ? TextDecoration.underline : TextDecoration.none,
-              decorationColor: cs.primary,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.analytics_outlined,
+                  size: 18,
+                  color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.85),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Lihat semua FCR',
+                  style: tt.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.9),
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                AnimatedSlide(
+                  offset: _isHovered ? const Offset(0.2, 0) : Offset.zero,
+                  duration: const Duration(milliseconds: 180),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

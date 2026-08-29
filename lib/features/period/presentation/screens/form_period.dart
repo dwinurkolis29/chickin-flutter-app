@@ -461,53 +461,79 @@ class _FormPeriodState extends State<FormPeriod> {
                                 ),
                               ),
                             ] else if (showActivateOption) ...[
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainer,
-                                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.info_outline_rounded, color: cs.primary, size: 22),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            widget.period?.endDate != null
-                                                ? 'Periode Selesai / Arsip Panen'
-                                                : 'Periode Draft (Belum Aktif)',
-                                            style: tt.bodyMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: cs.onSurface,
+                              Builder(
+                                builder: (context) {
+                                  final hasActivePeriod = context
+                                      .watch<PeriodController>()
+                                      .periods
+                                      .any((p) => p.isActive && p.id != widget.period?.id);
+
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: cs.surfaceContainer,
+                                          borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              hasActivePeriod
+                                                  ? Icons.lock_outline_rounded
+                                                  : Icons.info_outline_rounded,
+                                              color: cs.primary,
+                                              size: 22,
                                             ),
-                                          ),
-                                          Text(
-                                            'Aktifkan periode ini jika Anda ingin mulai mencatat perkembangan harian.',
-                                            style: tt.bodySmall?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                              fontSize: 11.5,
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    widget.period?.endDate != null
+                                                        ? 'Periode Selesai / Arsip Panen'
+                                                        : 'Periode Draft (Belum Aktif)',
+                                                    style: tt.bodyMedium?.copyWith(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: cs.onSurface,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    hasActivePeriod
+                                                        ? 'Tidak dapat mengaktifkan periode ini karena masih ada siklus pemeliharaan yang sedang aktif. Selesaikan panen pada periode aktif terlebih dahulu.'
+                                                        : 'Aktifkan periode ini jika Anda ingin mulai mencatat perkembangan harian.',
+                                                    style: tt.bodySmall?.copyWith(
+                                                      color: cs.onSurfaceVariant,
+                                                      fontSize: 11.5,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              FilledButton.tonalIcon(
-                                onPressed: _isLoading ? null : _activatePeriod,
-                                icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
-                                label: const Text('Aktifkan Periode Ini Sekarang'),
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(46),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                                  ),
-                                ),
+                                      if (!hasActivePeriod) ...[
+                                        const SizedBox(height: 14),
+                                        FilledButton.tonal(
+                                          onPressed: _isLoading ? null : _activatePeriod,
+                                          style: FilledButton.styleFrom(
+                                            minimumSize: const Size.fromHeight(46),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Aktifkan Periode Ini Sekarang',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  );
+                                },
                               ),
                             ],
                           ],

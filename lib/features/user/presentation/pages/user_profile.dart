@@ -6,7 +6,6 @@ import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
-import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/user/presentation/controllers/user_controller.dart';
@@ -32,78 +31,18 @@ class _UserState extends State<User> {
     });
   }
 
-  void _showImageSourceBottomSheet(
+  Future<void> _showImageSourceBottomSheet(
     BuildContext context,
     UserController controller,
-  ) {
-    DialogHelper.showBottomSheet(
+  ) async {
+    final source = await DialogHelper.showImageSourcePicker(
       context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppTheme.cardRadius),
-        ),
-      ),
-      builder: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.photo_library_outlined,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Pilih dari Galeri',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  controller.handleProfileImageUpload(ImageSource.gallery);
-                },
-              ),
-              Divider(
-                height: 0,
-                thickness: 0.5,
-                indent: 16,
-                endIndent: 16,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.camera_alt_outlined,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Ambil Foto Kamera',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  controller.handleProfileImageUpload(ImageSource.camera);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: 'Pilih Foto Profil',
+      subtitle: 'Pilih gambar dari galeri atau ambil foto baru dengan kamera:',
     );
+    if (source != null) {
+      controller.handleProfileImageUpload(source);
+    }
   }
 
 

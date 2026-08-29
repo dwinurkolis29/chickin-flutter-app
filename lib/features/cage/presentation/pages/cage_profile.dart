@@ -32,78 +32,18 @@ class _CageProfileState extends State<CageProfile> {
     });
   }
 
-  void _showImageSourceBottomSheet(
+  Future<void> _showImageSourceBottomSheet(
     BuildContext context,
     CageController controller,
-  ) {
-    DialogHelper.showBottomSheet(
+  ) async {
+    final source = await DialogHelper.showImageSourcePicker(
       context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppTheme.cardRadius),
-        ),
-      ),
-      builder: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.photo_library_outlined,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Pilih dari Galeri',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  controller.handleCageImageUpload(ImageSource.gallery);
-                },
-              ),
-              Divider(
-                height: 0,
-                thickness: 0.5,
-                indent: 16,
-                endIndent: 16,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.camera_alt_outlined,
-                  color: AppColors.primary,
-                ),
-                title: Text(
-                  'Ambil Foto Kamera',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  controller.handleCageImageUpload(ImageSource.camera);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: 'Pilih Foto Kandang',
+      subtitle: 'Pilih gambar dari galeri atau ambil foto baru dengan kamera:',
     );
+    if (source != null) {
+      controller.handleCageImageUpload(source);
+    }
   }
 
   @override

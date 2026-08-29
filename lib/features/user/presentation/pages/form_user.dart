@@ -279,7 +279,7 @@ class _FormUserState extends State<FormUser> {
                               const SizedBox(height: 28),
 
                               // ── 4. Tombol Simpan ───────────────────────────
-                              FilledButton.icon(
+                              FilledButton(
                                 style: FilledButton.styleFrom(
                                   minimumSize: const Size.fromHeight(52),
                                   shape: RoundedRectangleBorder(
@@ -289,24 +289,25 @@ class _FormUserState extends State<FormUser> {
                                   ),
                                 ),
                                 onPressed: _isSaving ? null : _handleUpdate,
-                                icon: _isSaving
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
+                                child: _isSaving
+                                    ? SizedBox(
+                                        height: 22,
+                                        width: 22,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          color: Colors.white,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            cs.onPrimary,
+                                          ),
                                         ),
                                       )
-                                    : const Icon(Icons.check_circle_outline_rounded),
-                                label: Text(
-                                  _isSaving ? 'Menyimpan...' : 'Simpan Perubahan',
-                                  style: tt.labelLarge?.copyWith(
-                                    color: cs.onPrimary,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                                    : Text(
+                                        'Simpan Perubahan',
+                                        style: tt.labelLarge?.copyWith(
+                                          color: cs.onPrimary,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                        ),
+                                      ),
                               ),
                               const SizedBox(height: 40),
                             ],

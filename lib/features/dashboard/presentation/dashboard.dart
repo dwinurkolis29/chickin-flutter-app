@@ -347,7 +347,7 @@ class _DashboardContentState extends State<DashboardContent>
         }
 
         if (controller.isLoadingPeriod) {
-          return const ReportSkeleton();
+          return const DashboardSkeleton();
         }
 
         if (controller.activePeriodId == null) {

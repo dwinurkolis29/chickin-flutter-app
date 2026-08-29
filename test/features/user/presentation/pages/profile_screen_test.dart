@@ -189,7 +189,7 @@ void main() {
       await tester.tap(find.text('Tentang Aplikasi'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Chickin BroilerKu'), findsOneWidget);
+      expect(find.text('BroilerKu'), findsOneWidget);
       expect(find.text('Versi 1.0.0 • Production Ready'), findsOneWidget);
       expect(find.text('Tutup'), findsOneWidget);
 

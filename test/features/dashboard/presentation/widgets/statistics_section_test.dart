@@ -95,7 +95,7 @@ void main() {
       expect(find.byType(FCRMonitoringScreen), findsOneWidget);
     });
 
-    testWidgets('mengetuk kartu Umur Ayam membuka ChickenWeightScreen', (tester) async {
+    testWidgets('kartu Umur Ayam tidak membuka layar baru saat diketuk (non-navigable)', (tester) async {
       await tester.pumpWidget(
         createWidgetUnderTest(
           const StatisticsSection(
@@ -110,7 +110,7 @@ void main() {
       await tester.tap(find.text('Umur\nAyam'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ChickenWeightScreen), findsOneWidget);
+      expect(find.byType(ChickenWeightScreen), findsNothing);
     });
   });
 }

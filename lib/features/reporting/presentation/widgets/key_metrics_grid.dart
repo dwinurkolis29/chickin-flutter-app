@@ -31,7 +31,6 @@ class KeyMetricsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     final fmt = NumberFormat('#,###', 'id_ID');
 
     final displayHarvested = harvestedChicks ?? finalPopulation;

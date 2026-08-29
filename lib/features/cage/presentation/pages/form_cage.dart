@@ -271,7 +271,7 @@ class _FormCageState extends State<FormCage> {
                     const SizedBox(height: 28),
 
                     // ── 4. Tombol Simpan ─────────────────────────────
-                    FilledButton.icon(
+                    FilledButton(
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(52),
                         shape: RoundedRectangleBorder(
@@ -281,28 +281,27 @@ class _FormCageState extends State<FormCage> {
                         ),
                       ),
                       onPressed: _isLoading ? null : _submitData,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
+                      child: _isLoading
+                          ? SizedBox(
+                              width: 22,
+                              height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
-                                color: Colors.white,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  cs.onPrimary,
+                                ),
                               ),
                             )
-                          : const Icon(Icons.check_circle_outline_rounded),
-                      label: Text(
-                        _isLoading
-                            ? 'Menyimpan...'
-                            : (isEditing
-                                ? 'Simpan Perubahan'
-                                : 'Tambah Kandang Baru'),
-                        style: tt.labelLarge?.copyWith(
-                          color: cs.onPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
+                          : Text(
+                              isEditing
+                                  ? 'Simpan Perubahan'
+                                  : 'Tambah Kandang Baru',
+                              style: tt.labelLarge?.copyWith(
+                                color: cs.onPrimary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                     const SizedBox(height: 40),
                   ],

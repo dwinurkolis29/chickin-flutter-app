@@ -551,7 +551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuItemData(
                     icon: Icons.info_outline_rounded,
                     title: 'Tentang Aplikasi',
-                    subtitle: 'Chickin BroilerKu v1.0.0',
+                    subtitle: 'BroilerKu v1.0.0',
                     trailingBadge: 'v1.0.0',
                     onTap: () => _showAboutDialog(context),
                   ),

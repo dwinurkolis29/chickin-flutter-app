@@ -54,8 +54,11 @@ class SummaryCalculator {
   }) {
     final initialPopulation = period.initialCapacity;
     final endDate = period.endDate ?? DateTime.now();
-    final durationDays =
+    final calendarDurationDays =
         endDate.difference(period.startDate).inDays.clamp(1, 9999);
+    final durationDays = (recordings.isNotEmpty && recordings.map((r) => r.day).reduce((a, b) => a > b ? a : b) > 0)
+        ? recordings.map((r) => r.day).reduce((a, b) => a > b ? a : b)
+        : calendarDurationDays;
 
     if (recordings.isEmpty) {
       final finalPop = harvestedChicks ?? initialPopulation;

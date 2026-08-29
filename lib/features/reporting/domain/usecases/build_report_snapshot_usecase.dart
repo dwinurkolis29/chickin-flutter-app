@@ -40,6 +40,12 @@ class BuildReportSnapshotUseCase {
     final weightGainKg =
         (s.finalBiomass - initBiomass).clamp(0.0, double.infinity);
 
+    final computedIP = (s.ipScore != null && s.ipScore! > 0)
+        ? s.ipScore
+        : (snapshot.durationDays > 0 && s.finalFCR > 0 && analytics.survivalRate > 0 && snapshot.finalAvgWeightGram > 0
+            ? ((analytics.survivalRate * (snapshot.finalAvgWeightGram / 1000.0) * 100.0) / (snapshot.durationDays * s.finalFCR))
+            : null);
+
     return PeriodReport(
       period: period,
       recordings: const [],
@@ -59,7 +65,7 @@ class BuildReportSnapshotUseCase {
       harvestedChicks: s.harvestedChicks,
       harvestedWeightKg: s.harvestedWeightKg,
       avgHarvestWeightKg: s.avgHarvestWeightKg,
-      ipScore: s.ipScore,
+      ipScore: computedIP,
     );
   }
 

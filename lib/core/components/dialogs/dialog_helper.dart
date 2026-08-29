@@ -6,11 +6,25 @@ import 'confirm_dialog.dart';
 import 'error_dialog.dart';
 import 'period_picker_dialog.dart';
 import 'string_picker_dialog.dart';
+import 'image_source_picker_bottom_sheet.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/widgets/close_period_harvest_dialog.dart';
 
 /// Helper terpusat untuk menampilkan dialog dan modal dengan standar visual aplikasi.
 class DialogHelper {
+  /// Menampilkan modal bottom sheet interaktif pemilih sumber foto (Galeri / Kamera)
+  static Future<ImageSource?> showImageSourcePicker(
+    BuildContext context, {
+    String title = 'Pilih Sumber Foto',
+    String? subtitle,
+  }) {
+    return ImageSourcePickerBottomSheet.show(
+      context: context,
+      title: title,
+      subtitle: subtitle,
+    );
+  }
   /// Menampilkan dialog Error
   static Future<void> showError(
     BuildContext context,
@@ -143,7 +157,7 @@ class DialogHelper {
   /// Menampilkan dialog Tentang Aplikasi
   static Future<void> showAbout(
     BuildContext context, {
-    String appName = 'Chickin BroilerKu',
+    String appName = 'BroilerKu',
     String version = 'Versi 1.0.0 • Production Ready',
     String description =
         'Aplikasi Manajemen Peternakan Ayam Broiler untuk pencatatan harian, perhitungan FCR otomatis, grafik pertumbuhan bobot, dan analisis performa.',

@@ -219,5 +219,68 @@ void main() {
       expect(find.textContaining('Apakah Anda yakin ingin menghapus periode draft "Siklus Draft 2"?'), findsOneWidget);
       expect(find.text('Ya, Hapus'), findsOneWidget);
     });
+
+    testWidgets('sembunyikan tombol aktifkan periode jika masih ada periode lain yang aktif', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final activePeriod = PeriodData(
+        id: 'period-active',
+        name: 'Siklus Aktif 1',
+        initialCapacity: 4000,
+        initialWeight: 0.04,
+        startDate: DateTime(2026, 8, 1),
+        createdAt: DateTime(2026, 8, 1),
+        isActive: true,
+      );
+
+      final draftPeriod = PeriodData(
+        id: 'period-draft',
+        name: 'Siklus Draft 2',
+        initialCapacity: 3000,
+        initialWeight: 0.04,
+        startDate: DateTime(2026, 9, 1),
+        createdAt: DateTime(2026, 8, 1),
+        isActive: false,
+      );
+
+      final ctrl = _MockPeriodController(periods: [activePeriod, draftPeriod]);
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        controller: ctrl,
+        period: draftPeriod,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tidak dapat mengaktifkan periode ini karena masih ada siklus pemeliharaan yang sedang aktif. Selesaikan panen pada periode aktif terlebih dahulu.'), findsOneWidget);
+      expect(find.text('Aktifkan Periode Ini Sekarang'), findsNothing);
+    });
+
+    testWidgets('tampilkan tombol aktifkan periode jika tidak ada periode lain yang aktif', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final draftPeriod = PeriodData(
+        id: 'period-draft',
+        name: 'Siklus Draft 2',
+        initialCapacity: 3000,
+        initialWeight: 0.04,
+        startDate: DateTime(2026, 9, 1),
+        createdAt: DateTime(2026, 8, 1),
+        isActive: false,
+      );
+
+      final ctrl = _MockPeriodController(periods: [draftPeriod]);
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        controller: ctrl,
+        period: draftPeriod,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aktifkan Periode Ini Sekarang'), findsOneWidget);
+    });
   });
 }

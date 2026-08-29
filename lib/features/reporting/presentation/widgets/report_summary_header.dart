@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
-import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 
@@ -103,9 +102,15 @@ class ReportSummaryHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final ipStatus = IPEvaluator.evaluate(ipScore);
+    final double resolvedIP = (ipScore != null && ipScore! > 0)
+        ? ipScore!
+        : (durationDays > 0 && fcr > 0 && survivalRate > 0 && finalAvgWeightGram > 0
+            ? ((survivalRate * (finalAvgWeightGram / 1000.0) * 100.0) / (durationDays * fcr))
+            : 0.0);
+
+    final ipStatus = IPEvaluator.evaluate(resolvedIP);
     final badgeColor = IPEvaluator.statusColor(context, ipStatus);
-    final conclusion = IPEvaluator.conclusionText(ipStatus, ipScore);
+    final conclusion = IPEvaluator.conclusionText(ipStatus, resolvedIP);
 
     return Container(
       decoration: BoxDecoration(
@@ -208,12 +213,19 @@ class ReportSummaryHeader extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.emoji_events_outlined,
-                            size: 18,
-                            color: badgeColor,
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: badgeColor.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.emoji_events_outlined,
+                              size: 16,
+                              color: badgeColor,
+                            ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Text(
                             'Indeks Performa (IP)',
                             style: tt.labelMedium?.copyWith(
@@ -253,7 +265,7 @@ class ReportSummaryHeader extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        ipScore != null && ipScore! > 0 ? ipScore!.toStringAsFixed(0) : '310',
+                        resolvedIP > 0 ? resolvedIP.toStringAsFixed(0) : '-',
                         style: tt.headlineMedium?.copyWith(
                           color: cs.onPrimary,
                           fontWeight: FontWeight.w800,
@@ -335,10 +347,10 @@ class _QuickExportButton extends StatelessWidget {
       message: tooltip,
       child: Material(
         color: cs.onPrimary.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(10),
+        shape: const CircleBorder(),
         child: InkWell(
+          customBorder: const CircleBorder(),
           onTap: isLoading ? null : onTap,
-          borderRadius: BorderRadius.circular(10),
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Icon(icon, size: 20, color: cs.onPrimary),
