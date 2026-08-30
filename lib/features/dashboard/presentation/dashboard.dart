@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/features/dashboard/presentation/widgets/statistics_section.dart';
@@ -351,6 +352,13 @@ class _DashboardContentState extends State<DashboardContent>
         }
 
         if (controller.activePeriodId == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            NotificationService().syncDailyRecordingReminder(
+              activePeriod: null,
+              recordings: const [],
+            );
+          });
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -408,6 +416,12 @@ class _DashboardContentState extends State<DashboardContent>
                     final recordings = snapshot.data ?? <RecordingData>[];
                     if (snapshot.hasData && snapshot.data != null) {
                       controller.setCachedRecordings(snapshot.data!);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        NotificationService().syncDailyRecordingReminder(
+                          activePeriod: controller.activePeriod,
+                          recordings: snapshot.data!,
+                        );
+                      });
                     }
 
                     if (recordings.isEmpty) {

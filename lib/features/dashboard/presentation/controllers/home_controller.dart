@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/daily_adg_data.dart';
 import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
@@ -22,6 +23,7 @@ class HomeController extends ChangeNotifier {
         _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR(),
         _calculateADGUseCase = calculateADGUseCase ?? CalculateADG();
 
+  PeriodData? _activePeriod;
   String? _activePeriodId;
   String? _activePeriodName;
   bool _isLoadingPeriod = false;
@@ -30,6 +32,7 @@ class HomeController extends ChangeNotifier {
   Stream<List<FlSpot>>? _weightStream;
   List<RecordingData>? _cachedRecordings;
 
+  PeriodData? get activePeriod => _activePeriod;
   String? get activePeriodId => _activePeriodId;
   String? get activePeriodName => _activePeriodName;
   bool get isLoadingPeriod => _isLoadingPeriod;
@@ -45,6 +48,7 @@ class HomeController extends ChangeNotifier {
   Future<void> loadActivePeriod([String? uid]) async {
     try {
       final activePeriod = await _firebaseService.getActivePeriod(uid);
+      _activePeriod = activePeriod;
       _activePeriodId = activePeriod?.id;
       
       // Load initial population from cage data
@@ -97,6 +101,7 @@ class HomeController extends ChangeNotifier {
 
   /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
   void clear() {
+    _activePeriod = null;
     _activePeriodId = null;
     _activePeriodName = null;
     _initialPopulation = 0;

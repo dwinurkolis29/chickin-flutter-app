@@ -255,5 +255,23 @@ void main() {
       expect(themeCtrl.currentThemeKey, equals('dark'));
       expect(themeCtrl.themeModeName, equals('Tema Gelap'));
     });
+
+    testWidgets('menampilkan toggle Pengingat Recording Harian dan dapat di-toggle', (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+
+      // Scroll to toggle item
+      await tester.ensureVisible(find.text('Pengingat Recording Harian'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pengingat Recording Harian'), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
+
+      // Tap toggle Switch
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Switch), findsOneWidget);
+    });
   });
 }

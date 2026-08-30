@@ -2,11 +2,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/services/storage_service.dart';
 import 'package:recording_app/core/utils/image_picker_helper.dart';
 import 'package:recording_app/features/user/data/models/user_data.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 
 class UserController extends ChangeNotifier {
   final FirebaseService _firebaseService;
@@ -49,6 +48,13 @@ class UserController extends ChangeNotifier {
       _userProfile = profile;
       _isLoading = false;
       notifyListeners();
+
+      // Sinkronisasi FCM device token ke Firestore
+      NotificationService().getFcmToken().then((token) {
+        if (token != null && token.isNotEmpty) {
+          _firebaseService.updateFcmToken(token, user.uid);
+        }
+      }).catchError((_) {});
     } catch (e) {
 
       _errorMessage = 'Gagal memuat data pengguna: $e';

@@ -5,7 +5,6 @@ import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/storage_service.dart';
 import 'package:recording_app/core/utils/image_picker_helper.dart';
-import 'package:image_picker/image_picker.dart';
 
 class CageController extends ChangeNotifier {
   final FirebaseService _firebaseService;

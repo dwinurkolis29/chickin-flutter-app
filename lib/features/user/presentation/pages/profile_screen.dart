@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/theme/theme_controller.dart';
@@ -27,9 +28,12 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isDailyReminderEnabled = true;
+
   @override
   void initState() {
     super.initState();
+    _isDailyReminderEnabled = NotificationService().isDailyReminderEnabled();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserController>().loadUserData();
     });
@@ -542,6 +546,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 label: 'PENGATURAN & APLIKASI',
                 items: [
                   _MenuItemData(
+                    icon: Icons.notifications_active_outlined,
+                    title: 'Pengingat Recording Harian',
+                    subtitle: _isDailyReminderEnabled
+                        ? 'Aktif (Otomatis pukul 19:00 WIB)'
+                        : 'Nonaktif (Pengingat harian dimatikan)',
+                    trailingWidget: Switch.adaptive(
+                      value: _isDailyReminderEnabled,
+                      activeColor: cs.primary,
+                      onChanged: (value) async {
+                        setState(() {
+                          _isDailyReminderEnabled = value;
+                        });
+                        await NotificationService().setDailyReminderEnabled(value);
+                      },
+                    ),
+                    onTap: () async {
+                      final newValue = !_isDailyReminderEnabled;
+                      setState(() {
+                        _isDailyReminderEnabled = newValue;
+                      });
+                      await NotificationService().setDailyReminderEnabled(newValue);
+                    },
+                  ),
+                  _MenuItemData(
                     icon: Icons.palette_outlined,
                     title: 'Tema Aplikasi',
                     subtitle: 'Pilih tema terang, gelap, atau sesuai sistem',
@@ -636,6 +664,7 @@ class _MenuItemData {
   final String subtitle;
   final VoidCallback onTap;
   final String? trailingBadge;
+  final Widget? trailingWidget;
 
   const _MenuItemData({
     required this.icon,
@@ -643,6 +672,7 @@ class _MenuItemData {
     required this.subtitle,
     required this.onTap,
     this.trailingBadge,
+    this.trailingWidget,
   });
 }
 
@@ -733,31 +763,35 @@ class _MenuGroup extends StatelessWidget {
                 ],
               ),
             ),
-            if (item.trailingBadge != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                  border: Border.all(
-                    color: cs.outlineVariant.withValues(alpha: 0.5),
+            if (item.trailingWidget != null) ...[
+              item.trailingWidget!,
+            ] else ...[
+              if (item.trailingBadge != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainer,
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                    border: Border.all(
+                      color: cs.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Text(
+                    item.trailingBadge!,
+                    style: tt.labelSmall?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                child: Text(
-                  item.trailingBadge!,
-                  style: tt.labelSmall?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const SizedBox(width: 6),
+              ],
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
               ),
-              const SizedBox(width: 6),
             ],
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
           ],
         ),
       ),

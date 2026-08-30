@@ -87,6 +87,19 @@ class FirebaseService {
     }
   }
 
+  /// Update FCM registration token untuk notifikasi terarah
+  Future<void> updateFcmToken(String fcmToken, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore.collection('users').doc(userId).update({
+        'profile.fcmToken': fcmToken,
+        'profile.lastTokenUpdate': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      // Abaikan jika dokumen user belum siap
+    }
+  }
+
   // ============================================================================
   // CAGE METHODS
   // ============================================================================
