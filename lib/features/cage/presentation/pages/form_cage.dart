@@ -22,10 +22,12 @@ class _FormCageState extends State<FormCage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   bool _isLoading = false;
 
+  final FocusNode _focusNodeName = FocusNode();
   final FocusNode _focusNodeType = FocusNode();
   final FocusNode _focusNodeCapacity = FocusNode();
   final FocusNode _focusNodeLocation = FocusNode();
 
+  final TextEditingController _controllerName = TextEditingController();
   final TextEditingController _controllerType = TextEditingController();
   final TextEditingController _controllerCapacity = TextEditingController();
   final TextEditingController _controllerLocation = TextEditingController();
@@ -38,19 +40,24 @@ class _FormCageState extends State<FormCage> {
   void initState() {
     super.initState();
     if (widget.cageData != null) {
+      _controllerName.text = widget.cageData!.name;
       _controllerType.text = widget.cageData!.type;
       _controllerCapacity.text = widget.cageData!.capacity > 0
           ? widget.cageData!.capacity.toString()
           : '';
       _controllerLocation.text = widget.cageData!.location;
+    } else {
+      _controllerName.text = 'Kandang Utama';
     }
   }
 
   @override
   void dispose() {
+    _focusNodeName.dispose();
     _focusNodeType.dispose();
     _focusNodeCapacity.dispose();
     _focusNodeLocation.dispose();
+    _controllerName.dispose();
     _controllerType.dispose();
     _controllerCapacity.dispose();
     _controllerLocation.dispose();
@@ -66,6 +73,9 @@ class _FormCageState extends State<FormCage> {
 
     try {
       final cage = CageData(
+        name: _controllerName.text.trim().isNotEmpty
+            ? _controllerName.text.trim()
+            : 'Kandang Utama',
         type: _controllerType.text.trim(),
         capacity: int.tryParse(_controllerCapacity.text.trim()) ?? 0,
         location: _controllerLocation.text.trim(),
@@ -185,6 +195,20 @@ class _FormCageState extends State<FormCage> {
                         ),
                       ),
                     ),
+                    AppTextFormField(
+                      controller: _controllerName,
+                      focusNode: _focusNodeName,
+                      labelText: 'Nama Kandang / Peternakan',
+                      hintText: 'Contoh: Kandang Sumber Rejeki',
+                      prefixIcon: Icons.business_outlined,
+                      validator: (String? value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Nama kandang wajib diisi.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 14),
                     AppTextFormField(
                       controller: _controllerType,
                       focusNode: _focusNodeType,

@@ -53,6 +53,20 @@ service cloud.firestore {
         && 'time' in data && data.time is string;
     }
 
+    // Validasi field transaction: tipe, kategori, dan nominal valid.
+    function isValidTransactionData(data) {
+      return data.keys().hasOnly(['periodId', 'type', 'category', 'amount', 'date', 'notes', 'birdCount', 'weightKg', 'createdAt'])
+        && 'periodId' in data && data.periodId is string
+        && 'type' in data && data.type in ['expense', 'income']
+        && 'category' in data && data.category is string
+        && 'amount' in data && (data.amount is int || data.amount is float) && data.amount >= 0
+        && 'date' in data && data.date is timestamp
+        && 'createdAt' in data && data.createdAt is timestamp
+        && (!('notes' in data) || data.notes is string)
+        && (!('birdCount' in data) || (data.birdCount is int && data.birdCount >= 0))
+        && (!('weightKg' in data) || ((data.weightKg is int || data.weightKg is float) && data.weightKg >= 0));
+    }
+
     // Guard: field createdAt tidak boleh berubah setelah dokumen dibuat.
     function createdAtUnchanged() {
       return request.resource.data.createdAt == resource.data.createdAt;
@@ -95,6 +109,20 @@ service cloud.firestore {
           allow create: if isOwner(userId) && isValidRecordingData(request.resource.data);
 
           allow update: if isOwner(userId) && isValidRecordingData(request.resource.data);
+
+          allow delete: if isOwner(userId);
+        }
+
+        // ── Transactions Subcollection ────────────────────────────────────────
+
+        match /transactions/{transactionId} {
+          allow read: if isOwner(userId);
+
+          allow create: if isOwner(userId) && isValidTransactionData(request.resource.data);
+
+          allow update: if isOwner(userId)
+            && isValidTransactionData(request.resource.data)
+            && createdAtUnchanged();
 
           allow delete: if isOwner(userId);
         }

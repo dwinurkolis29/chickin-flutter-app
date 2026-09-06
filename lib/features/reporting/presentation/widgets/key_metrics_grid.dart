@@ -48,7 +48,7 @@ class KeyMetricsGrid extends StatelessWidget {
           mainAxisSpacing: 10,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.38,
+          childAspectRatio: 1.30,
           children: [
             // Card 1: FCR Panen
             _SimpleMetricCard(
@@ -140,9 +140,10 @@ class _SimpleMetricCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: tt.labelMedium?.copyWith(
+                    style: tt.labelSmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
+                      fontSize: 11,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

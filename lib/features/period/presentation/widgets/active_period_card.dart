@@ -9,6 +9,7 @@ import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
+import 'package:recording_app/features/finance/presentation/pages/finance_list_screen.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
@@ -277,6 +278,25 @@ class _ActivePeriodContentCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Baris 4: Quick Action Buttons
+            FilledButton.tonalIcon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FinanceListScreen(period: period),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
+              label: const Text('Catat & Kelola Keuangan'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(

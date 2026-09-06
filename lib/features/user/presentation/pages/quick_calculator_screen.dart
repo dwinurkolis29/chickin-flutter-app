@@ -9,7 +9,9 @@ import 'package:recording_app/core/theme/app_theme.dart';
 /// Screen mandiri untuk simulasi kalkulator cepat formula broiler (FCR, IP/EPEF, dan HPP).
 /// Didesain bersih, interaktif, dan mudah digunakan oleh peternak dewasa hingga lanjut usia.
 class QuickCalculatorScreen extends StatefulWidget {
-  const QuickCalculatorScreen({super.key});
+  final int initialIndex;
+
+  const QuickCalculatorScreen({super.key, this.initialIndex = 0});
 
   @override
   State<QuickCalculatorScreen> createState() => _QuickCalculatorScreenState();
@@ -48,7 +50,11 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialIndex.clamp(0, 2),
+    );
     _calculateFcr();
     _calculateIp();
     _calculateHpp();

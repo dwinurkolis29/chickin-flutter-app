@@ -23,10 +23,9 @@ class DashboardGreeting extends StatelessWidget {
     return Icons.nights_stay_rounded;
   }
 
-  Color _greetingIconColor(int hour) {
-    if (hour >= 4 && hour < 15) return const Color(0xFFE65100);
-    if (hour >= 15 && hour < 18) return const Color(0xFFF57C00);
-    return const Color(0xFF5C6BC0);
+  Color _greetingIconColor(int hour, ColorScheme cs) {
+    if (hour >= 4 && hour < 18) return AppColors.warning;
+    return cs.primary;
   }
 
   static const List<String> _days = [
@@ -81,7 +80,7 @@ class DashboardGreeting extends StatelessWidget {
     final dateStr = _formatIndonesianDate(now);
     final greeting = _greetingText(now.hour);
     final greetingIcon = _greetingIcon(now.hour);
-    final iconColor = _greetingIconColor(now.hour);
+    final iconColor = _greetingIconColor(now.hour, cs);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),

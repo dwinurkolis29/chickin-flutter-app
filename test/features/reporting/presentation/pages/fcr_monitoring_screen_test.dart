@@ -147,6 +147,11 @@ void main() {
       await tester.ensureVisible(find.text('Hari ke-1'));
       await tester.pumpAndSettle();
       expect(find.text('Hari ke-1'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Kalkulator Cepat (FCR)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Kalkulator Cepat (FCR)'), findsOneWidget);
+      expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
     });
 
     testWidgets('beralih ke tab mingguan saat tab 2 diklik', (tester) async {

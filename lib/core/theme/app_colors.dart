@@ -59,4 +59,13 @@ class AppColors {
   static const Color fcrBadBg = Color(0xFFFCEBEB);
   static const Color fcrBadText = Color(0xFF791F1F);
   static const Color fcrBadBorder = Color(0xFFE24B4A);
+
+  // ── Common utility tokens ─────────────────────────────────────────────────
+  static const Color transparent = Color(0x00000000);
+
+  // ── IP / EPEF pastel badge tokens (Hero Primary Card) ──────────────────────
+  static const Color ipGood = Color(0xFFA3E6BE); // Pastel emerald green
+  static const Color ipVeryGood = Color(0xFF90CAF9); // Pastel light blue
+  static const Color ipStandard = Color(0xFFFFD580); // Pastel amber
+  static const Color ipNeedEval = Color(0xFFFF9A9A); // Pastel soft red
 }

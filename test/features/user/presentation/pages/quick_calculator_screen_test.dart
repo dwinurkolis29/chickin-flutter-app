@@ -146,5 +146,20 @@ void main() {
       expect(find.text('Sangat Hemat / Efisiensi Tinggi'), findsOneWidget);
       expect(find.text('Estimasi Margin Untung: +Rp 5.000 / kg'), findsOneWidget);
     });
+
+    testWidgets('dapat membuka tab IP secara langsung dengan initialIndex 1', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.build(AppThemeOption.light),
+        home: const QuickCalculatorScreen(initialIndex: 1),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('INDEKS PERFORMA (IP / EPEF)'), findsOneWidget);
+      expect(find.text('299.2'), findsOneWidget);
+    });
   });
 }

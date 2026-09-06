@@ -106,7 +106,7 @@ class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
         child: InkWell(
           onTap: widget.onTap,
           borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-          hoverColor: Colors.transparent,
+          hoverColor: AppColors.transparent,
           splashColor: cs.primary.withValues(alpha: 0.15),
           highlightColor: cs.primary.withValues(alpha: 0.08),
           child: AnimatedContainer(
@@ -437,7 +437,7 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
 
                                 // Progress Indicator Bar
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                                   child: LinearProgressIndicator(
                                     value: _barProgress,
                                     minHeight: 8,

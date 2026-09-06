@@ -6,7 +6,10 @@ import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/export/presentation/pages/pdf_preview_page.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
+import 'package:recording_app/features/reporting/domain/usecases/period_comparison_calculator.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/fcr_trend_chart.dart';
 import 'package:recording_app/features/reporting/presentation/widgets/insight_card.dart';
@@ -43,8 +46,21 @@ class _PeriodReportPageView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const AppHeader(
+      appBar: AppHeader(
         title: 'Laporan',
+        actions: [
+          if (controller.closedPeriods.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.calendar_month_outlined),
+              tooltip: 'Pilih Periode',
+              onPressed: () => DialogHelper.showPeriodPicker(
+                context,
+                periods: controller.closedPeriods,
+                selectedPeriodId: controller.selectedPeriodId,
+                onSelected: controller.selectPeriod,
+              ),
+            ),
+        ],
       ),
       body: SafeArea(
         child: _buildBody(context, controller),
@@ -79,10 +95,31 @@ class _PeriodReportPageView extends StatelessWidget {
     }
 
     if (controller.report == null) {
-      return const AppEmptyState(
-        icon: Icons.bar_chart_outlined,
-        message: 'Belum Ada Data Laporan',
-        subtitle: 'Data ringkasan panen untuk siklus ini belum tersedia.',
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppEmptyState(
+                icon: Icons.bar_chart_outlined,
+                message: 'Belum Ada Data Laporan',
+                subtitle: 'Data ringkasan panen untuk siklus ini belum tersedia.',
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => DialogHelper.showPeriodPicker(
+                  context,
+                  periods: controller.closedPeriods,
+                  selectedPeriodId: controller.selectedPeriodId,
+                  onSelected: controller.selectPeriod,
+                ),
+                icon: const Icon(Icons.calendar_month_outlined),
+                label: const Text('Pilih Periode Lain'),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -103,6 +140,8 @@ class _SummaryContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final period = report.period;
     final summary = period.summary;
     final dateFmt = DateFormat('dd MMM yyyy', 'id_ID');
@@ -118,10 +157,96 @@ class _SummaryContent extends StatelessWidget {
       onRefresh: () async => controller.reload(),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 0. TOMBOL PILIH PERIODE
+            Material(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                onTap: () => DialogHelper.showPeriodPicker(
+                  context,
+                  periods: controller.closedPeriods,
+                  selectedPeriodId: controller.selectedPeriodId,
+                  onSelected: controller.selectPeriod,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: cs.secondaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.calendar_month_rounded,
+                          size: 20,
+                          color: cs.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Periode Panen',
+                              style: tt.labelSmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              period.name,
+                              style: tt.titleSmall?.copyWith(
+                                color: cs.onSurface,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer,
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.swap_horiz_rounded,
+                              size: 16,
+                              color: cs.onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Pilih Periode',
+                              style: tt.labelMedium?.copyWith(
+                                color: cs.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
             // 1. HERO SUMMARY (IP / EPEF + Status + Export)
             ReportSummaryHeader(
               periodName: period.name,
@@ -131,7 +256,7 @@ class _SummaryContent extends StatelessWidget {
               survivalRate: report.survivalRate,
               finalAvgWeightGram: report.finalAvgWeightGram,
               ipScore: report.ipScore,
-              showPeriodSelector: controller.closedPeriods.length > 1,
+              showPeriodSelector: true,
               onPeriodSelectorTap: () => DialogHelper.showPeriodPicker(
                 context,
                 periods: controller.closedPeriods,
@@ -173,6 +298,43 @@ class _SummaryContent extends StatelessWidget {
               avgDailyGainGram: report.avgDailyGainGram,
               feedPerBird: report.feedPerBird,
               durationDays: report.durationDays,
+            ),
+            const SizedBox(height: 20),
+
+            // 6. TOMBOL UTAMA PRATINJAU & CETAK LAPORAN PDF
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PdfPreviewPage(
+                      report: report,
+                      finance: controller.financeSummary,
+                      comparison: controller.comparison ??
+                          PeriodComparisonCalculator().execute(
+                            currentReport: report,
+                            currentFinance: controller.financeSummary,
+                          ),
+                      cage: controller.cageData,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              label: Text(
+                'Pratinjau & Cetak Laporan PDF',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),

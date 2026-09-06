@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/export/presentation/pages/pdf_preview_page.dart';
+import 'package:recording_app/features/reporting/domain/usecases/period_comparison_calculator.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 
 /// Predikat Indeks Performa (IP / EPEF) Broiler
@@ -81,6 +82,7 @@ class ReportSummaryHeader extends StatelessWidget {
   final double? ipScore;
   final bool showPeriodSelector;
   final VoidCallback? onPeriodSelectorTap;
+  final VoidCallback? onPdfTap;
   final ReportingController controller;
 
   const ReportSummaryHeader({
@@ -94,6 +96,7 @@ class ReportSummaryHeader extends StatelessWidget {
     this.ipScore,
     this.showPeriodSelector = false,
     this.onPeriodSelectorTap,
+    this.onPdfTap,
     required this.controller,
   });
 
@@ -131,56 +134,69 @@ class ReportSummaryHeader extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Bar: Period Name Selector & Quick Export Icons
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: (showPeriodSelector && onPeriodSelectorTap != null)
-                        ? onPeriodSelectorTap
-                        : null,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              periodName,
-                              style: tt.titleLarge?.copyWith(
-                                color: cs.onPrimary,
-                                fontWeight: FontWeight.w700,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Bar: Period Name Selector & Quick Export Icons
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: (showPeriodSelector && onPeriodSelectorTap != null)
+                            ? onPeriodSelectorTap
+                            : null,
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        splashColor: cs.onPrimary.withValues(alpha: 0.15),
+                        highlightColor: cs.onPrimary.withValues(alpha: 0.08),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  periodName,
+                                  style: tt.titleLarge?.copyWith(
+                                    color: cs.onPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (showPeriodSelector && onPeriodSelectorTap != null) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: cs.onPrimary,
+                                  size: 24,
+                                ),
+                              ],
+                            ],
                           ),
-                          if (showPeriodSelector && onPeriodSelectorTap != null) ...[
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: cs.onPrimary,
-                              size: 24,
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                // Export Buttons
+                // Export PDF Button
                 _QuickExportButton(
-                  icon: Icons.table_chart_outlined,
-                  tooltip: 'Export Excel',
-                  isLoading: controller.isExporting,
-                  onTap: () => controller.exportExcel(
-                    onError: (err) => AppSnackbar.showError(context, err),
-                  ),
+                  icon: Icons.picture_as_pdf_outlined,
+                  tooltip: 'Cetak Laporan PDF',
+                  isLoading: false,
+                  onTap: () {
+                    if (onPdfTap != null) {
+                      onPdfTap!();
+                    } else {
+                      _openPdfPreview(context);
+                    }
+                  },
                 ),
               ],
             ),
@@ -199,7 +215,7 @@ class ReportSummaryHeader extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: cs.onPrimary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                 border: Border.all(
                   color: cs.onPrimary.withValues(alpha: 0.2),
                   width: 1,
@@ -211,32 +227,39 @@ class ReportSummaryHeader extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: badgeColor.withValues(alpha: 0.2),
-                              shape: BoxShape.circle,
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: badgeColor.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.emoji_events_outlined,
+                                size: 16,
+                                color: badgeColor,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.emoji_events_outlined,
-                              size: 16,
-                              color: badgeColor,
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Indeks Performa (IP)',
+                                style: tt.labelMedium?.copyWith(
+                                  color: cs.onPrimary.withValues(alpha: 0.9),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Indeks Performa (IP)',
-                            style: tt.labelMedium?.copyWith(
-                              color: cs.onPrimary.withValues(alpha: 0.9),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.2),
                           border: Border.all(color: badgeColor, width: 1.2),
@@ -320,6 +343,26 @@ class ReportSummaryHeader extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    ),
+  );
+}
+
+  void _openPdfPreview(BuildContext context) {
+    if (controller.report == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PdfPreviewPage(
+          report: controller.report!,
+          finance: controller.financeSummary,
+          comparison: controller.comparison ??
+              PeriodComparisonCalculator().execute(
+                currentReport: controller.report!,
+                currentFinance: controller.financeSummary,
+              ),
+          cage: controller.cageData,
         ),
       ),
     );

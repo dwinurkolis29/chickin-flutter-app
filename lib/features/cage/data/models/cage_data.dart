@@ -2,12 +2,14 @@ import '../../../../core/models/safe_convert.dart';
 
 // model untuk menyimpan data kandang (nested map di users/{uid})
 class CageData {
+  final String name;
   final String type;
   final int capacity;
   final String location;
   final String? imageUrl;
 
   const CageData({
+    this.name = 'Kandang Utama',
     this.type = '',
     this.capacity = 0,
     this.location = '',
@@ -20,6 +22,7 @@ class CageData {
     }
 
     return CageData(
+      name: asString(json, 'name', defaultValue: 'Kandang Utama'),
       type: asString(json, 'type'),
       capacity: asInt(json, 'capacity'),
       location: asString(json, 'location'),
@@ -28,6 +31,7 @@ class CageData {
   }
 
   Map<String, dynamic> toJson() => {
+    'name': name,
     'type': type,
     'capacity': capacity,
     'location': location,
@@ -35,12 +39,14 @@ class CageData {
   };
 
   CageData copyWith({
+    String? name,
     String? type,
     int? capacity,
     String? location,
     String? imageUrl,
   }) {
     return CageData(
+      name: name ?? this.name,
       type: type ?? this.type,
       capacity: capacity ?? this.capacity,
       location: location ?? this.location,
@@ -50,7 +56,7 @@ class CageData {
 
   @override
   String toString() {
-    return 'CageData(type: $type, capacity: $capacity, location: $location, imageUrl: $imageUrl)';
+    return 'CageData(name: $name, type: $type, capacity: $capacity, location: $location, imageUrl: $imageUrl)';
   }
 }
 

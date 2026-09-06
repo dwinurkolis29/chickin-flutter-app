@@ -11,6 +11,7 @@ import 'package:recording_app/features/recording/data/models/daily_adg_data.dart
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_adg.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
+import 'package:recording_app/features/user/presentation/pages/quick_calculator_screen.dart';
 
 /// Screen visualisasi lengkap grafik pertumbuhan bobot ayam harian dari Hari 1 hingga hari terakhir pengisian.
 class ChickenWeightScreen extends StatefulWidget {
@@ -134,6 +135,35 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
             validRecordings: validRecordings,
           ),
           const SizedBox(height: 24),
+
+          // ── 4. Tombol Navigasi ke Kalkulator Cepat ───────────────────────
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(50),
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const QuickCalculatorScreen(initialIndex: 1),
+                ),
+              );
+            },
+            icon: const Icon(Icons.calculate_outlined),
+            label: Text(
+              'Kalkulator Cepat (IP / ADG)',
+              style: tt.labelLarge?.copyWith(
+                color: cs.onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
         ],
       ),
     );

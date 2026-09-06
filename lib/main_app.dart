@@ -9,6 +9,7 @@ import 'package:recording_app/features/user/presentation/controllers/user_contro
 import 'package:recording_app/features/cage/presentation/controllers/cage_controller.dart';
 import 'package:recording_app/features/dashboard/presentation/controllers/home_controller.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
+import 'package:recording_app/features/finance/presentation/controllers/finance_controller.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
 import 'package:recording_app/core/theme/theme_controller.dart';
@@ -71,6 +72,15 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProxyProvider<AuthService, RecordingController>(
           create:
               (_) => RecordingController(firebaseService: FirebaseService()),
+          update: (_, auth, controller) {
+            controller!.onAuthChanged(auth.currentUid);
+            return controller;
+          },
+        ),
+
+        ChangeNotifierProxyProvider<AuthService, FinanceController>(
+          create:
+              (_) => FinanceController(firebaseService: FirebaseService()),
           update: (_, auth, controller) {
             controller!.onAuthChanged(auth.currentUid);
             return controller;

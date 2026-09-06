@@ -14,6 +14,7 @@ import 'package:recording_app/features/period/presentation/screens/form_period.d
 import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/user/presentation/pages/quick_calculator_screen.dart';
 
 /// Screen Monitoring FCR (Harian & Mingguan) untuk peternak mandiri.
 /// Menyajikan kesimpulan kondisi efisiensi pakan yang cepat dan mudah dipahami.
@@ -121,7 +122,36 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
                           else
                             _buildWeeklyView(context, weeklyFcrList),
 
-                          const SizedBox(height: 60),
+                          const SizedBox(height: 24),
+
+                          // ── 4. Tombol Navigasi ke Kalkulator Cepat ────────
+                          FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(50),
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const QuickCalculatorScreen(initialIndex: 0),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.calculate_outlined),
+                            label: Text(
+                              'Kalkulator Cepat (FCR)',
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 48),
                         ],
                       ),
                     ),

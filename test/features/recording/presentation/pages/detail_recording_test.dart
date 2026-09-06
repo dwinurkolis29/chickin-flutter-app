@@ -217,6 +217,19 @@ void main() {
 
       expect(find.text('Laporan Recording'), findsOneWidget);
       expect(find.text('Edit'), findsNothing);
+      expect(find.text('Tambah Recording'), findsNothing);
+    });
+
+    testWidgets('menampilkan floating action button Tambah Recording saat readOnly false', (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest(
+        recordings: [],
+        readOnly: false,
+      ));
+      await tester.pump();
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.text('Tambah Recording'), findsOneWidget);
+      expect(find.byIcon(Icons.add_rounded), findsOneWidget);
     });
   });
 }

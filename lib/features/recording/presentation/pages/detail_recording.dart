@@ -17,6 +17,7 @@ import 'package:recording_app/features/period/presentation/screens/form_period.d
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/recording_validator.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
+import 'package:recording_app/features/recording/presentation/pages/form_recording.dart';
 
 /// Halaman yang menampilkan daftar lengkap catatan recording harian.
 /// Didesain mobile-first dengan kartu interaktif yang mudah dibaca dan diedit oleh peternak.
@@ -49,6 +50,29 @@ class _DetailRecordingState extends State<DetailRecording> {
       appBar: AppHeader(
         title: widget.readOnly ? 'Laporan Recording' : 'Semua Recording',
       ),
+      floatingActionButton: widget.readOnly
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+              ),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text(
+                'Tambah Recording',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const FormRecording(),
+                  ),
+                );
+              },
+            ),
       body: SafeArea(
         child: Builder(
           builder: (context) {

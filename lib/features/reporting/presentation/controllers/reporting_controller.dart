@@ -1,17 +1,23 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
-import 'package:recording_app/features/export/domain/usecases/export_period_excel.dart';
+import 'package:recording_app/features/cage/data/models/cage_data.dart';
+import 'package:recording_app/features/finance/data/models/finance_summary.dart';
+import 'package:recording_app/features/finance/data/models/finance_transaction.dart';
+import 'package:recording_app/features/finance/domain/usecases/calculate_finance_summary.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/reporting/domain/usecases/build_realtime_report_usecase.dart';
 import 'package:recording_app/features/reporting/domain/usecases/build_report_snapshot_usecase.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
+import 'package:recording_app/features/reporting/domain/usecases/period_comparison_calculator.dart';
 
 class ReportingController extends ChangeNotifier {
   final FirebaseService _firebaseService;
   final BuildReportSnapshotUseCase _snapshotUseCase;
   final BuildRealtimeReportUseCase _realtimeUseCase;
+  final CalculateFinanceSummary _calculateFinance;
+  final PeriodComparisonCalculator _comparisonCalculator;
 
   StreamSubscription<List<PeriodData>>? _periodSub;
   String? _currentUid;
@@ -20,11 +26,14 @@ class ReportingController extends ChangeNotifier {
   String? _selectedPeriodId;
   bool _isLoading = false;
   bool _isLoadingRecordings = false;
-  bool _isExporting = false;
   bool _isLoadingRecordingDetail = false;
   List<RecordingData> _recordings = [];
   PeriodReport? _report;
   String? _errorMessage;
+
+  FinanceSummary _financeSummary = const FinanceSummary();
+  PeriodDeltaComparison? _comparison;
+  CageData _cageData = const CageData();
 
   // Lightweight cache: skipping redundant DB fetches when exporting same period twice.
   String? _cachedFullReportPeriodId;
@@ -34,20 +43,26 @@ class ReportingController extends ChangeNotifier {
     required FirebaseService firebaseService,
     BuildReportSnapshotUseCase? snapshotUseCase,
     BuildRealtimeReportUseCase? realtimeUseCase,
+    CalculateFinanceSummary? calculateFinance,
+    PeriodComparisonCalculator? comparisonCalculator,
   })  : _firebaseService = firebaseService,
         _snapshotUseCase = snapshotUseCase ?? BuildReportSnapshotUseCase(),
-        _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase();
+        _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase(),
+        _calculateFinance = calculateFinance ?? CalculateFinanceSummary(),
+        _comparisonCalculator = comparisonCalculator ?? PeriodComparisonCalculator();
 
   // ── Getters ─────────────────────────────────────────────────────────────────
   List<PeriodData> get closedPeriods => _closedPeriods;
   String? get selectedPeriodId => _selectedPeriodId;
   bool get isLoading => _isLoading;
   bool get isLoadingRecordings => _isLoadingRecordings;
-  bool get isExporting => _isExporting;
   bool get isLoadingRecordingDetail => _isLoadingRecordingDetail;
   List<RecordingData> get recordings => _recordings;
   PeriodReport? get report => _report;
   String? get errorMessage => _errorMessage;
+  FinanceSummary get financeSummary => _financeSummary;
+  PeriodDeltaComparison? get comparison => _comparison;
+  CageData get cageData => _cageData;
 
   PeriodData? get selectedPeriod => _closedPeriods
       .where((p) => p.id == _selectedPeriodId)
@@ -69,7 +84,6 @@ class ReportingController extends ChangeNotifier {
     _selectedPeriodId = null;
     _isLoading = true;
     _isLoadingRecordings = false;
-    _isExporting = false;
     _recordings = [];
     _report = null;
     _errorMessage = null;
@@ -129,6 +143,8 @@ class ReportingController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      _cageData = await _firebaseService.getCage(_currentUid);
+
       final bool hasValidSnapshot = period.endDate != null &&
           period.summary != null &&
           period.summary!.finalFCR > 0;
@@ -142,6 +158,60 @@ class ReportingController extends ChangeNotifier {
         _recordings = await _firebaseService.getRecordingsOnce(period.id);
         _report = _realtimeUseCase.execute(period, _recordings);
       }
+
+      // 3. Fetch data keuangan periode ini
+      List<FinanceTransaction> transactions = [];
+      try {
+        transactions = await _firebaseService.getFinanceTransactions(
+          period.id,
+          _currentUid,
+        );
+      } catch (e) {
+        debugPrint('Warning: gagal memuat transaksi keuangan: $e');
+        transactions = [];
+      }
+      _financeSummary = _calculateFinance.execute(
+        transactions: transactions,
+        fallbackHarvestWeightKg:
+            _report?.harvestedWeightKg ?? _report?.totalBiomassKg,
+        fallbackHarvestedChicks:
+            _report?.harvestedChicks ?? _report?.finalPopulation,
+      );
+
+      // 4. Komparasi periode sebelumnya (jika ada)
+      PeriodReport? prevReport;
+      FinanceSummary? prevFinance;
+      final currentIndex = _closedPeriods.indexWhere((p) => p.id == period.id);
+      if (currentIndex != -1 && currentIndex + 1 < _closedPeriods.length) {
+        final prevPeriod = _closedPeriods[currentIndex + 1];
+        prevReport = _snapshotUseCase.execute(prevPeriod);
+        try {
+          final prevTx = await _firebaseService.getFinanceTransactions(
+            prevPeriod.id,
+            _currentUid,
+          );
+          prevFinance = _calculateFinance.execute(
+            transactions: prevTx,
+            fallbackHarvestWeightKg:
+                prevReport.harvestedWeightKg ?? prevReport.totalBiomassKg,
+            fallbackHarvestedChicks:
+                prevReport.harvestedChicks ?? prevReport.finalPopulation,
+          );
+        } catch (_) {
+          prevFinance = const FinanceSummary();
+        }
+      }
+
+      // 5. Kalkulasi komparasi delta & tren 3 periode
+      if (_report != null) {
+        _comparison = _comparisonCalculator.execute(
+          currentReport: _report!,
+          currentFinance: _financeSummary,
+          previousReport: prevReport,
+          previousFinance: prevFinance,
+          recentPeriods: _closedPeriods,
+        );
+      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -149,69 +219,6 @@ class ReportingController extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // ── Export Flow ──────────────────────────────────────────────────────────────
-  /// Selalu fetch recordings dari DB, hitung ulang report, lalu export.
-  /// TIDAK pakai [_report] yang ada di UI — data bisa tidak lengkap (recordings=[]).
-  ///
-  /// [onError] dipanggil kalau ada kegagalan di mana saja dalam flow.
-  Future<void> exportExcel({required void Function(String) onError}) async {
-    await _runExport(
-      onError: onError,
-      doExport: (report) => ExportPeriodExcel().execute(report),
-    );
-  }
-
-  Future<void> _runExport({
-    required void Function(String) onError,
-    required Future<void> Function(PeriodReport) doExport,
-  }) async {
-    if (_isExporting) return; // Cegah double tap.
-
-    _isExporting = true;
-    notifyListeners();
-
-    try {
-      final fullReport = await _buildFullReportForExport();
-
-      if (fullReport == null) {
-        onError('Tidak ada data recording untuk periode ini.');
-        return;
-      }
-
-      await doExport(fullReport);
-    } catch (e) {
-      onError(e.toString());
-    } finally {
-      _isExporting = false;
-      notifyListeners();
-    }
-  }
-
-  /// Fetch recordings dari DB dan generate report ulang dari awal.
-  /// Pakai cache ringan: jika period sama dan cache masih ada, skip fetch.
-  Future<PeriodReport?> _buildFullReportForExport() async {
-    final period = selectedPeriod;
-    if (period == null) return null;
-
-    // Return cache jika period sama.
-    if (_cachedFullReportPeriodId == period.id && _cachedFullReport != null) {
-      return _cachedFullReport;
-    }
-
-    final recordings = await _firebaseService.getRecordingsOnce(period.id);
-
-    if (recordings.isEmpty) return null;
-
-    final fullReport = _realtimeUseCase.execute(period, recordings);
-
-    // Simpan cache.
-    _cachedFullReportPeriodId = period.id;
-    _cachedFullReport = fullReport;
-
-    return fullReport;
-  }
-
   // ── View Recording Detail Flow ────────────────────────────────────────────────
   /// Fetch recordings dari DB lalu panggil [onReady] dengan hasilnya.
   /// Reuses cache yang sama dengan export flow — tidak double fetch jika sudah ada.
@@ -270,7 +277,6 @@ class ReportingController extends ChangeNotifier {
     _selectedPeriodId = null;
     _isLoading = false;
     _isLoadingRecordings = false;
-    _isExporting = false;
     _recordings = [];
     _report = null;
     _errorMessage = null;

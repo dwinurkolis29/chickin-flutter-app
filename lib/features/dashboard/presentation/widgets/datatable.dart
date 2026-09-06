@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 
 /// Card ringkasan 7 data recording terakhir untuk beranda.
@@ -111,7 +112,7 @@ class ChickenDataTable extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
                 color: cs.surfaceContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                 border: Border.all(
                   color: cs.outlineVariant.withValues(alpha: 0.3),
                 ),
@@ -129,7 +130,7 @@ class ChickenDataTable extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.rowRadius),
               ),
               child: Row(
                 children: [
@@ -214,7 +215,7 @@ class ChickenDataTable extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: cs.secondaryContainer.withValues(alpha: 0.7),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                               ),
                               child: Text(
                                 'H-${item.day}',
@@ -293,7 +294,7 @@ class ChickenDataTable extends StatelessWidget {
                               color: hasMortality
                                   ? AppColors.error.withValues(alpha: 0.12)
                                   : AppColors.success.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                             ),
                             child: Text(
                               '${item.mortality} ekor',

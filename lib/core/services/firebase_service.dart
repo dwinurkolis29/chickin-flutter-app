@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
+import 'package:recording_app/features/finance/data/models/finance_transaction.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import '../../features/recording/data/models/recording_data.dart';
 import '../../features/user/data/models/user_data.dart';
@@ -391,6 +392,85 @@ class FirebaseService {
           .update(data);
     } catch (e) {
       throw Exception('Failed to update recording: $e');
+    }
+  }
+
+  // ============================================================================
+  // FINANCE TRANSACTION METHODS
+  // ============================================================================
+
+  /// Create new finance transaction in users/{uid}/periods/{periodId}/transactions
+  Future<String> createFinanceTransaction(FinanceTransaction transaction, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      final docRef = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(transaction.periodId)
+          .collection('transactions')
+          .add(transaction.toJson());
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Failed to create finance transaction: $e');
+    }
+  }
+
+  /// Get finance transactions stream for a period
+  Stream<List<FinanceTransaction>> getFinanceTransactionsStream(String periodId, [String? uid]) {
+    try {
+      final userId = uid ?? _currentUid;
+      return _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId)
+          .collection('transactions')
+          .orderBy('date', descending: true)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => FinanceTransaction.fromJson(doc.data(), docId: doc.id))
+              .toList());
+    } catch (e) {
+      throw Exception('Failed to get finance transactions stream: $e');
+    }
+  }
+
+  /// Get finance transactions list for a period
+  Future<List<FinanceTransaction>> getFinanceTransactions(String periodId, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId)
+          .collection('transactions')
+          .orderBy('date', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => FinanceTransaction.fromJson(doc.data(), docId: doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get finance transactions: $e');
+    }
+  }
+
+  /// Delete finance transaction
+  Future<void> deleteFinanceTransaction(String periodId, String transactionId, [String? uid]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId)
+          .collection('transactions')
+          .doc(transactionId)
+          .delete();
+    } catch (e) {
+      throw Exception('Failed to delete finance transaction: $e');
     }
   }
 }

@@ -115,7 +115,7 @@ class _InsightTile extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.rowRadius),
         border: Border.all(
           color: accentColor.withValues(alpha: 0.25),
           width: 1,

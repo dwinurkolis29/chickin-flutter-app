@@ -310,7 +310,7 @@ class _InfoCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: cs.primary,
-                  size: 18,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 8),

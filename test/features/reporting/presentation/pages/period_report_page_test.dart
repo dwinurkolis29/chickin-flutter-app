@@ -22,7 +22,6 @@ class _MockReportingController extends ReportingController {
   final PeriodReport? _mockReport;
   final bool _mockLoading;
   final String? _mockError;
-  bool exportExcelCalled = false;
 
   _MockReportingController({
     List<PeriodData>? closedPeriods,
@@ -52,11 +51,6 @@ class _MockReportingController extends ReportingController {
 
   @override
   String? get selectedPeriodId => _mockClosedPeriods.isNotEmpty ? _mockClosedPeriods.first.id : null;
-
-  @override
-  Future<void> exportExcel({required void Function(String) onError}) async {
-    exportExcelCalled = true;
-  }
 }
 
 void main() {
@@ -168,7 +162,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Verifikasi Hero Section & Indeks Performa (IP)
-      expect(find.text('Periode Batch Panen 1'), findsOneWidget);
+      expect(find.text('Pilih Periode'), findsWidgets);
+      expect(find.text('Periode Batch Panen 1'), findsNWidgets(2));
       expect(find.text('Indeks Performa (IP)'), findsOneWidget);
       expect(find.text('311'), findsOneWidget);
       expect(find.text('Baik / Standar'), findsOneWidget);
@@ -194,7 +189,7 @@ void main() {
       expect(find.text('17.460 kg'), findsOneWidget);
     });
 
-    testWidgets('tombol quick export Excel memanggil controller export dan CSV tidak tampil', (tester) async {
+    testWidgets('tombol quick export PDF tampil dan Excel/CSV tidak tampil', (tester) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -235,16 +230,13 @@ void main() {
       await tester.pumpWidget(createTestWidget(ctrl));
       await tester.pumpAndSettle();
 
-      // Tap Excel export icon
-      final excelBtn = find.byIcon(Icons.table_chart_outlined);
-      expect(excelBtn, findsOneWidget);
-      await tester.tap(excelBtn);
-      await tester.pumpAndSettle();
-      expect(ctrl.exportExcelCalled, isTrue);
+      // PDF export icon must be present
+      final pdfBtn = find.byIcon(Icons.picture_as_pdf_outlined);
+      expect(pdfBtn, findsWidgets);
 
-      // CSV export icon must NOT be present
-      final csvBtn = find.byIcon(Icons.description_outlined);
-      expect(csvBtn, findsNothing);
+      // Excel and CSV export icons must NOT be present
+      expect(find.byIcon(Icons.table_chart_outlined), findsNothing);
+      expect(find.byIcon(Icons.description_outlined), findsNothing);
     });
   });
 }

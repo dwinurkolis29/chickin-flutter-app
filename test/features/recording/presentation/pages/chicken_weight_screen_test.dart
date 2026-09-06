@@ -103,6 +103,10 @@ void main() {
       expect(find.text('HARI 1'), findsOneWidget);
       expect(find.text('Kenaikan Bobot'), findsWidgets);
       expect(find.text('Bobot Timbang'), findsWidgets);
+
+      // Memastikan tombol navigasi Kalkulator Cepat tampil di paling bawah
+      expect(find.text('Kalkulator Cepat (IP / ADG)'), findsOneWidget);
+      expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
     });
   });
 }

@@ -3,6 +3,7 @@ import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/error/app_error_state.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
@@ -25,6 +26,9 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'widgets/fcr_datacard.dart';
 import 'widgets/dashboard_greeting.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
+import 'package:recording_app/core/components/cards/app_card.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/finance/presentation/pages/finance_list_screen.dart';
 
 // ── Nav index constants ───────────────────────────────────────────────────────
 const int _kHome = 0;
@@ -64,6 +68,7 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _navigateToAddRecord() async {
     final cageData = await _firebaseService.getCage();
+    if (!mounted) return;
 
     if (cageData.capacity == 0 || cageData.type.isEmpty) {
       final shouldNavigate = await DialogHelper.showConfirm(
@@ -123,13 +128,13 @@ class _DashboardState extends State<Dashboard> {
         button: true,
         label: label,
         child: Material(
-          color: Colors.transparent,
+          color: AppColors.transparent,
           child: InkWell(
             onTap: () => _onNavTap(index),
-            hoverColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            splashColor: Colors.transparent,
+            hoverColor: AppColors.transparent,
+            focusColor: AppColors.transparent,
+            highlightColor: AppColors.transparent,
+            splashColor: AppColors.transparent,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -337,7 +342,7 @@ class _DashboardContentState extends State<DashboardContent>
             icon: Icons.lock_outline_rounded,
             message: 'Anda belum login',
             subtitle: 'Silakan login terlebih dahulu',
-            action: ElevatedButton(
+            action: FilledButton(
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const Login()),
@@ -370,17 +375,16 @@ class _DashboardContentState extends State<DashboardContent>
                     message: 'Belum Ada Periode Aktif',
                     subtitle: 'Mulai siklus pemeliharaan baru untuk mencatat populasi DOC, konsumsi pakan, dan bobot ayam.',
                     actionLabel: 'Buat Periode Baru',
-                    onAction: () {
-                      Navigator.push(
+                    onAction: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const FormPeriod(),
                         ),
-                      ).then((_) {
-                        if (mounted) {
-                          context.read<HomeController>().loadActivePeriod();
-                        }
-                      });
+                      );
+                      if (mounted) {
+                        context.read<HomeController>().loadActivePeriod();
+                      }
                     },
                   ),
                 ),
@@ -425,12 +429,20 @@ class _DashboardContentState extends State<DashboardContent>
                     }
 
                     if (recordings.isEmpty) {
-                      return AppEmptyState(
-                        icon: Icons.assignment_outlined,
-                        message: 'Belum Ada Data Recording',
-                        subtitle: 'Mulai catat konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
-                        actionLabel: 'Tambah Recording',
-                        onAction: _navigateToAddRecord,
+                      return Column(
+                        children: [
+                          if (controller.activePeriod != null) ...[
+                            _buildFinanceQuickCard(context, controller),
+                            const SizedBox(height: 16),
+                          ],
+                          AppEmptyState(
+                            icon: Icons.assignment_outlined,
+                            message: 'Belum Ada Data Recording',
+                            subtitle: 'Mulai catat konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
+                            actionLabel: 'Tambah Recording',
+                            onAction: _navigateToAddRecord,
+                          ),
+                        ],
                       );
                     }
 
@@ -458,6 +470,8 @@ class _DashboardContentState extends State<DashboardContent>
                           umur: umur,
                           weightStream: controller.weightStream,
                         ),
+                        const SizedBox(height: 10),
+                        _buildFinanceQuickCard(context, controller),
                         const SizedBox(height: 10),
                         Center(
                           child: ConstrainedBox(
@@ -489,6 +503,81 @@ class _DashboardContentState extends State<DashboardContent>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFinanceQuickCard(
+    BuildContext context,
+    HomeController controller,
+  ) {
+    final activePeriod = controller.activePeriod;
+    if (activePeriod == null) return const SizedBox.shrink();
+
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: AppCard(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FinanceListScreen(period: activePeriod),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.secondaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: cs.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pencatatan Keuangan',
+                          style: tt.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Kelola biaya pakan, DOC, OVK, dan hasil panen',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: cs.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
