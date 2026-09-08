@@ -33,22 +33,25 @@ class _PeriodListSectionState extends State<PeriodListSection> {
     final tt = Theme.of(context).textTheme;
 
     final activeCount = widget.periods.where((p) => p.isActive).length;
-    final closedCount = widget.periods.where((p) => !p.isActive && p.endDate != null).length;
-    final draftCount = widget.periods.where((p) => !p.isActive && p.endDate == null).length;
+    final closedCount =
+        widget.periods.where((p) => !p.isActive && p.endDate != null).length;
+    final draftCount =
+        widget.periods.where((p) => !p.isActive && p.endDate == null).length;
 
     // Filtered list
-    final filteredPeriods = widget.periods.where((p) {
-      switch (_selectedFilter) {
-        case PeriodFilterType.all:
-          return true;
-        case PeriodFilterType.active:
-          return p.isActive;
-        case PeriodFilterType.closed:
-          return !p.isActive && p.endDate != null;
-        case PeriodFilterType.draft:
-          return !p.isActive && p.endDate == null;
-      }
-    }).toList();
+    final filteredPeriods =
+        widget.periods.where((p) {
+          switch (_selectedFilter) {
+            case PeriodFilterType.all:
+              return true;
+            case PeriodFilterType.active:
+              return p.isActive;
+            case PeriodFilterType.closed:
+              return !p.isActive && p.endDate != null;
+            case PeriodFilterType.draft:
+              return !p.isActive && p.endDate == null;
+          }
+        }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,17 +120,19 @@ class _PeriodListSectionState extends State<PeriodListSection> {
               message: _getEmptyTitle(),
               subtitle: _getEmptySubtitle(),
               compact: true,
-              actionLabel: (_selectedFilter == PeriodFilterType.all ||
-                      _selectedFilter == PeriodFilterType.active)
-                  ? 'Mulai Siklus Baru'
-                  : null,
-              onAction: (_selectedFilter == PeriodFilterType.all ||
-                      _selectedFilter == PeriodFilterType.active)
-                  ? () => Navigator.push(
+              actionLabel:
+                  (_selectedFilter == PeriodFilterType.all ||
+                          _selectedFilter == PeriodFilterType.active)
+                      ? 'Mulai Siklus Baru'
+                      : null,
+              onAction:
+                  (_selectedFilter == PeriodFilterType.all ||
+                          _selectedFilter == PeriodFilterType.active)
+                      ? () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const FormPeriod()),
                       )
-                  : null,
+                      : null,
             ),
           )
         else

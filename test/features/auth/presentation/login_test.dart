@@ -52,7 +52,11 @@ class _FakeAuthService extends ChangeNotifier implements AuthService {
     lastEmail = email;
     lastPassword = password;
     if (shouldSucceed) {
-      _currentUser = _FakeUser(displayName: 'Peternak Budi', email: email, uid: 'uid123');
+      _currentUser = _FakeUser(
+        displayName: 'Peternak Budi',
+        email: email,
+        uid: 'uid123',
+      );
       notifyListeners();
       return AuthResult.success(_currentUser!);
     } else {
@@ -83,33 +87,39 @@ void main() {
   }
 
   group('Login Widget Tests', () {
-    testWidgets('menampilkan header branding, form card, tombol masuk, dan tidak ada tombol Google', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan header branding, form card, tombol masuk, dan tidak ada tombol Google',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      // Branding
-      expect(find.text('BroilerKu'), findsOneWidget);
-      expect(find.text('Aplikasi Pencatatan & Manajemen Peternakan Broiler'), findsOneWidget);
+        // Branding
+        expect(find.text('BroilerKu'), findsOneWidget);
+        expect(
+          find.text('Aplikasi Pencatatan & Manajemen Peternakan Broiler'),
+          findsOneWidget,
+        );
 
-      // Form Card
-      expect(find.text('MASUK KE AKUN'), findsOneWidget);
-      expect(find.text('Alamat Email'), findsOneWidget);
-      expect(find.text('Kata Sandi'), findsOneWidget);
-      expect(find.text('Lupa kata sandi?'), findsOneWidget);
-      expect(find.text('Masuk Sekarang'), findsOneWidget);
+        // Form Card
+        expect(find.text('MASUK KE AKUN'), findsOneWidget);
+        expect(find.text('Alamat Email'), findsOneWidget);
+        expect(find.text('Kata Sandi'), findsOneWidget);
+        expect(find.text('Lupa kata sandi?'), findsOneWidget);
+        expect(find.text('Masuk Sekarang'), findsOneWidget);
 
-      // Footer
-      expect(find.text('Belum punya akun peternak? '), findsOneWidget);
-      expect(find.text('Daftar di Sini'), findsOneWidget);
+        // Footer
+        expect(find.text('Belum punya akun peternak? '), findsOneWidget);
+        expect(find.text('Daftar di Sini'), findsOneWidget);
 
-      // Verifikasi tombol Google Sign-In tidak ada
-      expect(find.text('Lanjutkan dengan Google'), findsNothing);
-      expect(find.text('atau'), findsNothing);
-    });
+        // Verifikasi tombol Google Sign-In tidak ada
+        expect(find.text('Lanjutkan dengan Google'), findsNothing);
+        expect(find.text('atau'), findsNothing);
+      },
+    );
 
     testWidgets('validasi form login ketika input kosong', (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
@@ -152,7 +162,9 @@ void main() {
       expect(auth.lastPassword, 'rahasia123');
     });
 
-    testWidgets('menampilkan dialog Lupa Kata Sandi dan mengirim email reset', (tester) async {
+    testWidgets('menampilkan dialog Lupa Kata Sandi dan mengirim email reset', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);

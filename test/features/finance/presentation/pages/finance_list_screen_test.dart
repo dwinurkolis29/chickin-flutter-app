@@ -35,14 +35,14 @@ class _MockFinanceController extends FinanceController {
     FinanceSummary? summary,
     bool isLoading = false,
     String? errorMessage,
-  })  : _mockTransactions = transactions ?? [],
-        _mockSummary = summary ?? const FinanceSummary(),
-        _mockLoading = isLoading,
-        _mockError = errorMessage,
-        super(
-          firebaseService: _FakeFirebaseService(),
-          calculateSummary: CalculateFinanceSummary(),
-        );
+  }) : _mockTransactions = transactions ?? [],
+       _mockSummary = summary ?? const FinanceSummary(),
+       _mockLoading = isLoading,
+       _mockError = errorMessage,
+       super(
+         firebaseService: _FakeFirebaseService(),
+         calculateSummary: CalculateFinanceSummary(),
+       );
 
   @override
   List<FinanceTransaction> get transactions => _mockTransactions;
@@ -88,7 +88,9 @@ void main() {
   }
 
   group('FinanceListScreen Widget Tests', () {
-    testWidgets('menampilkan empty state jika belum ada transaksi', (tester) async {
+    testWidgets('menampilkan empty state jika belum ada transaksi', (
+      tester,
+    ) async {
       final ctrl = _MockFinanceController(transactions: []);
 
       await tester.pumpWidget(createWidgetUnderTest(ctrl));
@@ -101,66 +103,72 @@ void main() {
       expect(find.text('Catat Transaksi'), findsOneWidget);
     });
 
-    testWidgets('menampilkan daftar kartu transaksi dengan AppCard dan nominal rapi', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan daftar kartu transaksi dengan AppCard dan nominal rapi',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final sampleTx = [
-        FinanceTransaction(
-          id: 'tx-1',
-          periodId: 'period-1',
-          type: 'income',
-          category: 'main_harvest',
-          amount: 50000000,
-          date: DateTime(2026, 1, 30),
-          notes: 'Penjualan panen',
-          createdAt: DateTime(2026, 1, 30),
-        ),
-        FinanceTransaction(
-          id: 'tx-2',
-          periodId: 'period-1',
-          type: 'expense',
-          category: 'feed',
-          amount: 30000000,
-          date: DateTime(2026, 1, 10),
-          notes: 'Pakan starter',
-          createdAt: DateTime(2026, 1, 10),
-        ),
-      ];
+        final sampleTx = [
+          FinanceTransaction(
+            id: 'tx-1',
+            periodId: 'period-1',
+            type: 'income',
+            category: 'main_harvest',
+            amount: 50000000,
+            date: DateTime(2026, 1, 30),
+            notes: 'Penjualan panen',
+            createdAt: DateTime(2026, 1, 30),
+          ),
+          FinanceTransaction(
+            id: 'tx-2',
+            periodId: 'period-1',
+            type: 'expense',
+            category: 'feed',
+            amount: 30000000,
+            date: DateTime(2026, 1, 10),
+            notes: 'Pakan starter',
+            createdAt: DateTime(2026, 1, 10),
+          ),
+        ];
 
-      final ctrl = _MockFinanceController(
-        transactions: sampleTx,
-        summary: const FinanceSummary(
-          totalRevenue: 50000000,
-          totalExpense: 30000000,
-          netProfit: 20000000,
-        ),
-      );
+        final ctrl = _MockFinanceController(
+          transactions: sampleTx,
+          summary: const FinanceSummary(
+            totalRevenue: 50000000,
+            totalExpense: 30000000,
+            netProfit: 20000000,
+          ),
+        );
 
-      await tester.pumpWidget(createWidgetUnderTest(ctrl));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createWidgetUnderTest(ctrl));
+        await tester.pumpAndSettle();
 
-      // Memastikan AppCard ter-render untuk setiap transaksi
-      expect(find.byType(AppCard), findsWidgets);
+        // Memastikan AppCard ter-render untuk setiap transaksi
+        expect(find.byType(AppCard), findsWidgets);
 
-      // Verifikasi teks kategori & nominal
-      expect(find.text('Penjualan Utama'), findsOneWidget);
-      expect(find.text('Pakan'), findsOneWidget);
-      expect(find.text('+Rp 50.000.000'), findsOneWidget);
-      expect(find.text('-Rp 30.000.000'), findsOneWidget);
+        // Verifikasi teks kategori & nominal
+        expect(find.text('Penjualan Utama'), findsOneWidget);
+        expect(find.text('Pakan'), findsOneWidget);
+        expect(find.text('+Rp 50.000.000'), findsOneWidget);
+        expect(find.text('-Rp 30.000.000'), findsOneWidget);
 
-      // Verifikasi icon hapus transaksi
-      expect(find.byIcon(Icons.delete_outline_rounded), findsNWidgets(2));
+        // Verifikasi icon hapus & edit transaksi
+        expect(find.byIcon(Icons.delete_outline_rounded), findsNWidgets(2));
+        expect(find.byIcon(Icons.edit_outlined), findsNWidgets(2));
 
-      // Verifikasi Filter Chips & Hero metrics
-      expect(find.text('Semua (2)'), findsOneWidget);
-      expect(find.text('Pengeluaran (1)'), findsOneWidget);
-      expect(find.text('Pemasukan (1)'), findsOneWidget);
-      expect(find.text('ESTIMASI UNTUNG'), findsOneWidget);
-    });
+        // Verifikasi Filter Chips & Hero metrics
+        expect(find.text('Semua (2)'), findsOneWidget);
+        expect(find.text('Pengeluaran (1)'), findsOneWidget);
+        expect(find.text('Pemasukan (1)'), findsOneWidget);
+        expect(find.text('ESTIMASI UNTUNG'), findsOneWidget);
+      },
+    );
 
-    testWidgets('menampilkan transaksi kategori manual kustom dengan benar', (tester) async {
+    testWidgets('menampilkan transaksi kategori manual kustom dengan benar', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -190,8 +198,98 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Sekam'), findsOneWidget);
-      expect(find.text('-Rp 1.200.000'), findsNWidgets(2)); // Muncul di Hero Net Profit dan Kartu Transaksi
+      expect(
+        find.text('-Rp 1.200.000'),
+        findsNWidgets(2),
+      ); // Muncul di Hero Net Profit dan Kartu Transaksi
       expect(find.text('BELUM IMPAS'), findsOneWidget);
+    });
+
+    testWidgets(
+      'menampilkan banner pengingat uang panen belum dicatat saat periode ditutup dan revenue 0',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        final closedPeriod = PeriodData(
+          id: 'period-closed-1',
+          name: 'Batch Closed Test',
+          initialCapacity: 5000,
+          startDate: DateTime(2026, 1, 1),
+          endDate: DateTime(2026, 2, 5), // Periode sudah ditutup
+          isActive: false,
+          createdAt: DateTime(2026, 1, 1),
+          summary: const PeriodSummary(
+            harvestedChicks: 4800,
+            harvestedWeightKg: 9600.0,
+          ),
+        );
+
+        final ctrl = _MockFinanceController(
+          transactions: [],
+          summary: const FinanceSummary(
+            totalRevenue: 0,
+            totalExpense: 25000000,
+            netProfit: -25000000,
+          ),
+        );
+
+        await tester.pumpWidget(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<FinanceController>.value(value: ctrl),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.build(AppThemeOption.light),
+              home: FinanceListScreen(period: closedPeriod),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Uang Penjualan Panen Belum Dicatat'), findsOneWidget);
+        expect(find.text('Catat Uang Panen Sekarang'), findsOneWidget);
+      },
+    );
+
+    testWidgets('menekan tombol Edit membuka FormFinanceScreen mode edit', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final sampleTx = [
+        FinanceTransaction(
+          id: 'tx-1',
+          periodId: 'period-1',
+          type: 'income',
+          category: 'main_harvest',
+          amount: 50000000,
+          date: DateTime(2026, 1, 30),
+          notes: 'Penjualan panen batch 1',
+          createdAt: DateTime(2026, 1, 30),
+        ),
+      ];
+
+      final ctrl = _MockFinanceController(
+        transactions: sampleTx,
+        summary: const FinanceSummary(
+          totalRevenue: 50000000,
+          netProfit: 50000000,
+        ),
+      );
+
+      await tester.pumpWidget(createWidgetUnderTest(ctrl));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit Transaksi (Batch 1 Test)'), findsOneWidget);
+      expect(find.text('Simpan Perubahan'), findsOneWidget);
     });
   });
 }

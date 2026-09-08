@@ -55,7 +55,8 @@ class FinanceTransaction {
   final String id;
   final String periodId;
   final String type; // 'income' | 'expense'
-  final String category; // feed, doc, ovk, operational, main_harvest, reject, atau custom string
+  final String
+  category; // feed, doc, ovk, operational, main_harvest, reject, atau custom string
   final double amount; // Nominal Rp
   final DateTime date;
   final String notes;

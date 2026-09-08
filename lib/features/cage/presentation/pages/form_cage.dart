@@ -42,9 +42,10 @@ class _FormCageState extends State<FormCage> {
     if (widget.cageData != null) {
       _controllerName.text = widget.cageData!.name;
       _controllerType.text = widget.cageData!.type;
-      _controllerCapacity.text = widget.cageData!.capacity > 0
-          ? widget.cageData!.capacity.toString()
-          : '';
+      _controllerCapacity.text =
+          widget.cageData!.capacity > 0
+              ? widget.cageData!.capacity.toString()
+              : '';
       _controllerLocation.text = widget.cageData!.location;
     } else {
       _controllerName.text = 'Kandang Utama';
@@ -73,9 +74,10 @@ class _FormCageState extends State<FormCage> {
 
     try {
       final cage = CageData(
-        name: _controllerName.text.trim().isNotEmpty
-            ? _controllerName.text.trim()
-            : 'Kandang Utama',
+        name:
+            _controllerName.text.trim().isNotEmpty
+                ? _controllerName.text.trim()
+                : 'Kandang Utama',
         type: _controllerType.text.trim(),
         capacity: int.tryParse(_controllerCapacity.text.trim()) ?? 0,
         location: _controllerLocation.text.trim(),
@@ -232,9 +234,10 @@ class _FormCageState extends State<FormCage> {
                             'Open House (Kandang Terbuka Standar)',
                             'Semi Closed House',
                           ],
-                          selectedOption: _controllerType.text.isNotEmpty
-                              ? _controllerType.text
-                              : null,
+                          selectedOption:
+                              _controllerType.text.isNotEmpty
+                                  ? _controllerType.text
+                                  : null,
                           onSelected: (selected) {
                             setState(() {
                               _controllerType.text = selected;
@@ -262,7 +265,8 @@ class _FormCageState extends State<FormCage> {
                         }
                         return null;
                       },
-                      onEditingComplete: () => _focusNodeLocation.requestFocus(),
+                      onEditingComplete:
+                          () => _focusNodeLocation.requestFocus(),
                     ),
                     const SizedBox(height: 20),
 
@@ -283,7 +287,8 @@ class _FormCageState extends State<FormCage> {
                       focusNode: _focusNodeLocation,
                       maxLines: 3,
                       labelText: 'Alamat & Lokasi Kandang',
-                      hintText: 'Contoh: Dusun Krajan RT 02/05, Desa Sukamaju, Kec. Ciawi',
+                      hintText:
+                          'Contoh: Dusun Krajan RT 02/05, Desa Sukamaju, Kec. Ciawi',
                       prefixIcon: Icons.location_on_outlined,
                       validator: (String? value) {
                         if (value == null || value.trim().isEmpty) {
@@ -305,27 +310,28 @@ class _FormCageState extends State<FormCage> {
                         ),
                       ),
                       onPressed: _isLoading ? null : _submitData,
-                      child: _isLoading
-                          ? SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  cs.onPrimary,
+                      child:
+                          _isLoading
+                              ? SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    cs.onPrimary,
+                                  ),
+                                ),
+                              )
+                              : Text(
+                                isEditing
+                                    ? 'Simpan Perubahan'
+                                    : 'Tambah Kandang Baru',
+                                style: tt.labelLarge?.copyWith(
+                                  color: cs.onPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
                                 ),
                               ),
-                            )
-                          : Text(
-                              isEditing
-                                  ? 'Simpan Perubahan'
-                                  : 'Tambah Kandang Baru',
-                              style: tt.labelLarge?.copyWith(
-                                color: cs.onPrimary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
                     ),
                     const SizedBox(height: 40),
                   ],

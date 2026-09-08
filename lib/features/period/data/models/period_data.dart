@@ -37,10 +37,7 @@ class PeriodData {
 
   factory PeriodData.fromJson(Map<String, dynamic>? json, {String? docId}) {
     if (json == null) {
-      return PeriodData(
-        startDate: DateTime.now(),
-        createdAt: DateTime.now(),
-      );
+      return PeriodData(startDate: DateTime.now(), createdAt: DateTime.now());
     }
 
     return PeriodData(
@@ -53,9 +50,10 @@ class PeriodData {
       isActive: asBool(json, 'isActive', defaultValue: true),
       isDeleted: asBool(json, 'isDeleted', defaultValue: false),
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      summary: json['summary'] != null
-          ? PeriodSummary.fromJson(json['summary'] as Map<String, dynamic>)
-          : null,
+      summary:
+          json['summary'] != null
+              ? PeriodSummary.fromJson(json['summary'] as Map<String, dynamic>)
+              : null,
     );
   }
 
@@ -102,6 +100,15 @@ class PeriodData {
       summary: summary is _Undefined ? this.summary : summary as PeriodSummary?,
     );
   }
+
+  /// Periode telah selesai dipanen / ditutup jika tidak aktif dan memiliki endDate
+  bool get isClosed => !isActive && endDate != null;
+
+  /// Jumlah ekor hasil panen akhir dari summary
+  int? get harvestedChicks => summary?.harvestedChicks;
+
+  /// Total bobot kg hasil panen akhir dari summary
+  double? get harvestedWeightKg => summary?.harvestedWeightKg;
 
   @override
   String toString() {
@@ -154,14 +161,16 @@ class PeriodSummary {
       .fold(0.0, (acc, h) => acc + h.weightKg);
 
   /// Total ekor seluruh panen (parsial + akhir)
-  int get totalAllHarvestChicks => harvests.isNotEmpty
-      ? harvests.fold(0, (acc, h) => acc + h.chicks)
-      : (harvestedChicks ?? 0);
+  int get totalAllHarvestChicks =>
+      harvests.isNotEmpty
+          ? harvests.fold(0, (acc, h) => acc + h.chicks)
+          : (harvestedChicks ?? 0);
 
   /// Total bobot kg seluruh panen (parsial + akhir)
-  double get totalAllHarvestWeightKg => harvests.isNotEmpty
-      ? harvests.fold(0.0, (acc, h) => acc + h.weightKg)
-      : (harvestedWeightKg ?? 0.0);
+  double get totalAllHarvestWeightKg =>
+      harvests.isNotEmpty
+          ? harvests.fold(0.0, (acc, h) => acc + h.weightKg)
+          : (harvestedWeightKg ?? 0.0);
 
   /// Daftar panen parsial saja
   List<HarvestRecord> get partialHarvests =>
@@ -179,21 +188,24 @@ class PeriodSummary {
       finalBiomass: asDouble(json, 'finalBiomass'),
       finalFCR: asDouble(json, 'finalFCR'),
       avgDailyGain: asDouble(json, 'avgDailyGain'),
-      weeklyFCR: (json['weeklyFCR'] as List<dynamic>?)
-          ?.map((e) => WeeklyFCR.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      weeklyFCR:
+          (json['weeklyFCR'] as List<dynamic>?)
+              ?.map((e) => WeeklyFCR.fromJson(e as Map<String, dynamic>))
+              .toList() ??
           [],
-      insights: (json['insights'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ??
+      insights:
+          (json['insights'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
           [],
       harvestedChicks: asIntOrNull(json, 'harvestedChicks'),
       harvestedWeightKg: asDoubleOrNull(json, 'harvestedWeightKg'),
       avgHarvestWeightKg: asDoubleOrNull(json, 'avgHarvestWeightKg'),
       ipScore: asDoubleOrNull(json, 'ipScore'),
-      harvests: (json['harvests'] as List<dynamic>?)
-          ?.map((e) => HarvestRecord.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      harvests:
+          (json['harvests'] as List<dynamic>?)
+              ?.map((e) => HarvestRecord.fromJson(e as Map<String, dynamic>))
+              .toList() ??
           const [],
       weightedHarvestAgeDays: asDoubleOrNull(json, 'weightedHarvestAgeDays'),
     );
@@ -259,34 +271,19 @@ class WeeklyFCR {
   final int week;
   final double fcr;
 
-  const WeeklyFCR({
-    this.week = 0,
-    this.fcr = 0.0,
-  });
+  const WeeklyFCR({this.week = 0, this.fcr = 0.0});
 
   factory WeeklyFCR.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const WeeklyFCR();
     }
 
-    return WeeklyFCR(
-      week: asInt(json, 'week'),
-      fcr: asDouble(json, 'fcr'),
-    );
+    return WeeklyFCR(week: asInt(json, 'week'), fcr: asDouble(json, 'fcr'));
   }
 
-  Map<String, dynamic> toJson() => {
-    'week': week,
-    'fcr': fcr,
-  };
+  Map<String, dynamic> toJson() => {'week': week, 'fcr': fcr};
 
-  WeeklyFCR copyWith({
-    int? week,
-    double? fcr,
-  }) {
-    return WeeklyFCR(
-      week: week ?? this.week,
-      fcr: fcr ?? this.fcr,
-    );
+  WeeklyFCR copyWith({int? week, double? fcr}) {
+    return WeeklyFCR(week: week ?? this.week, fcr: fcr ?? this.fcr);
   }
 }

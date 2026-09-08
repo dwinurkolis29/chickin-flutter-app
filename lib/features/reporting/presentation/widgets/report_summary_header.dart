@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/export/presentation/pages/pdf_preview_page.dart';
 import 'package:recording_app/features/reporting/domain/usecases/period_comparison_calculator.dart';
@@ -19,13 +20,13 @@ class IPEvaluator {
   static Color statusColor(BuildContext context, IPStatus status) {
     switch (status) {
       case IPStatus.excellent:
-        return const Color(0xFFA3E6BE); // pastel emerald green
+        return AppColors.ipGood;
       case IPStatus.veryGood:
-        return const Color(0xFF90CAF9); // pastel light blue
+        return AppColors.ipVeryGood;
       case IPStatus.good:
-        return const Color(0xFFFFD580); // pastel amber
+        return AppColors.ipStandard;
       case IPStatus.needsImprovement:
-        return const Color(0xFFFF9A9A); // pastel soft red
+        return AppColors.ipNeedEval;
     }
   }
 
@@ -105,11 +106,16 @@ class ReportSummaryHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final double resolvedIP = (ipScore != null && ipScore! > 0)
-        ? ipScore!
-        : (durationDays > 0 && fcr > 0 && survivalRate > 0 && finalAvgWeightGram > 0
-            ? ((survivalRate * (finalAvgWeightGram / 1000.0) * 100.0) / (durationDays * fcr))
-            : 0.0);
+    final double resolvedIP =
+        (ipScore != null && ipScore! > 0)
+            ? ipScore!
+            : (durationDays > 0 &&
+                    fcr > 0 &&
+                    survivalRate > 0 &&
+                    finalAvgWeightGram > 0
+                ? ((survivalRate * (finalAvgWeightGram / 1000.0) * 100.0) /
+                    (durationDays * fcr))
+                : 0.0);
 
     final ipStatus = IPEvaluator.evaluate(resolvedIP);
     final badgeColor = IPEvaluator.statusColor(context, ipStatus);
@@ -120,10 +126,7 @@ class ReportSummaryHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            cs.primary,
-            cs.primary.withValues(alpha: 0.85),
-          ],
+          colors: [cs.primary, cs.primary.withValues(alpha: 0.85)],
         ),
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         boxShadow: [
@@ -151,10 +154,13 @@ class ReportSummaryHeader extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: (showPeriodSelector && onPeriodSelectorTap != null)
-                            ? onPeriodSelectorTap
-                            : null,
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        onTap:
+                            (showPeriodSelector && onPeriodSelectorTap != null)
+                                ? onPeriodSelectorTap
+                                : null,
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.pillRadius,
+                        ),
                         splashColor: cs.onPrimary.withValues(alpha: 0.15),
                         highlightColor: cs.onPrimary.withValues(alpha: 0.08),
                         child: Padding(
@@ -171,7 +177,8 @@ class ReportSummaryHeader extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (showPeriodSelector && onPeriodSelectorTap != null) ...[
+                              if (showPeriodSelector &&
+                                  onPeriodSelectorTap != null) ...[
                                 const SizedBox(width: 4),
                                 Icon(
                                   Icons.keyboard_arrow_down_rounded,
@@ -185,185 +192,200 @@ class ReportSummaryHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                // Export PDF Button
-                _QuickExportButton(
-                  icon: Icons.picture_as_pdf_outlined,
-                  tooltip: 'Cetak Laporan PDF',
-                  isLoading: false,
-                  onTap: () {
-                    if (onPdfTap != null) {
-                      onPdfTap!();
-                    } else {
-                      _openPdfPreview(context);
-                    }
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '$dateRange • $durationDays Hari',
-              style: tt.bodySmall?.copyWith(
-                color: cs.onPrimary.withValues(alpha: 0.8),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Hero Section: Indeks Performa (IP / EPEF)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cs.onPrimary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppTheme.rowRadius),
-                border: Border.all(
-                  color: cs.onPrimary.withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: badgeColor.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.emoji_events_outlined,
-                                size: 16,
-                                color: badgeColor,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                'Indeks Performa (IP)',
-                                style: tt.labelMedium?.copyWith(
-                                  color: cs.onPrimary.withValues(alpha: 0.9),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: badgeColor.withValues(alpha: 0.2),
-                          border: Border.all(color: badgeColor, width: 1.2),
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(IPEvaluator.statusIcon(ipStatus), size: 13, color: badgeColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              IPEvaluator.statusLabel(ipStatus),
-                              style: tt.labelSmall?.copyWith(
-                                color: badgeColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        resolvedIP > 0 ? resolvedIP.toStringAsFixed(0) : '-',
-                        style: tt.headlineMedium?.copyWith(
-                          color: cs.onPrimary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 32,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Poin',
-                        style: tt.bodyMedium?.copyWith(
-                          color: cs.onPrimary.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    conclusion,
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onPrimary.withValues(alpha: 0.95),
-                      height: 1.35,
-                    ),
+                  // Export PDF Button
+                  _QuickExportButton(
+                    icon: Icons.picture_as_pdf_outlined,
+                    tooltip: 'Cetak Laporan PDF',
+                    isLoading: false,
+                    onTap: () {
+                      if (onPdfTap != null) {
+                        onPdfTap!();
+                      } else {
+                        _openPdfPreview(context);
+                      }
+                    },
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 2),
+              Text(
+                '$dateRange • $durationDays Hari',
+                style: tt.bodySmall?.copyWith(
+                  color: cs.onPrimary.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(height: 16),
 
-            // Bottom 3 Quick Metrics
-            Row(
-              children: [
-                _HeroMetric(
-                  label: 'FCR Panen',
-                  value: fcr > 0 ? fcr.toStringAsFixed(2) : '-',
-                  statusText: fcr <= 1.80 ? 'Efisien' : (fcr <= 2.20 ? 'Normal' : 'Boros'),
+              // Hero Section: Indeks Performa (IP / EPEF)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: cs.onPrimary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                  border: Border.all(
+                    color: cs.onPrimary.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
-                _VerticalDivider(),
-                _HeroMetric(
-                  label: 'Daya Hidup',
-                  value: '${survivalRate.toStringAsFixed(1)}%',
-                  statusText: survivalRate >= 95 ? 'Sangat Baik' : 'Cukup',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: badgeColor.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.emoji_events_outlined,
+                                  size: 16,
+                                  color: badgeColor,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Indeks Performa (IP)',
+                                  style: tt.labelMedium?.copyWith(
+                                    color: cs.onPrimary.withValues(alpha: 0.9),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withValues(alpha: 0.2),
+                            border: Border.all(color: badgeColor, width: 1.2),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                IPEvaluator.statusIcon(ipStatus),
+                                size: 13,
+                                color: badgeColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                IPEvaluator.statusLabel(ipStatus),
+                                style: tt.labelSmall?.copyWith(
+                                  color: badgeColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          resolvedIP > 0 ? resolvedIP.toStringAsFixed(0) : '-',
+                          style: tt.headlineMedium?.copyWith(
+                            color: cs.onPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Poin',
+                          style: tt.bodyMedium?.copyWith(
+                            color: cs.onPrimary.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      conclusion,
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onPrimary.withValues(alpha: 0.95),
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
                 ),
-                _VerticalDivider(),
-                _HeroMetric(
-                  label: 'Rata-rata Bobot',
-                  value: finalAvgWeightGram > 0
-                      ? '${(finalAvgWeightGram / 1000).toStringAsFixed(2)} kg'
-                      : '-',
-                  statusText: 'Panen',
-                ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 16),
+
+              // Bottom 3 Quick Metrics
+              Row(
+                children: [
+                  _HeroMetric(
+                    label: 'FCR Panen',
+                    value: fcr > 0 ? fcr.toStringAsFixed(2) : '-',
+                    statusText:
+                        fcr <= 1.80
+                            ? 'Efisien'
+                            : (fcr <= 2.20 ? 'Normal' : 'Boros'),
+                  ),
+                  _VerticalDivider(),
+                  _HeroMetric(
+                    label: 'Daya Hidup',
+                    value: '${survivalRate.toStringAsFixed(1)}%',
+                    statusText: survivalRate >= 95 ? 'Sangat Baik' : 'Cukup',
+                  ),
+                  _VerticalDivider(),
+                  _HeroMetric(
+                    label: 'Rata-rata Bobot',
+                    value:
+                        finalAvgWeightGram > 0
+                            ? '${(finalAvgWeightGram / 1000).toStringAsFixed(2)} kg'
+                            : '-',
+                    statusText: 'Panen',
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _openPdfPreview(BuildContext context) {
     if (controller.report == null) return;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PdfPreviewPage(
-          report: controller.report!,
-          finance: controller.financeSummary,
-          comparison: controller.comparison ??
-              PeriodComparisonCalculator().execute(
-                currentReport: controller.report!,
-                currentFinance: controller.financeSummary,
-              ),
-          cage: controller.cageData,
-        ),
+        builder:
+            (_) => PdfPreviewPage(
+              report: controller.report!,
+              finance: controller.financeSummary,
+              comparison:
+                  controller.comparison ??
+                  PeriodComparisonCalculator().execute(
+                    currentReport: controller.report!,
+                    currentFinance: controller.financeSummary,
+                  ),
+              cage: controller.cageData,
+            ),
       ),
     );
   }

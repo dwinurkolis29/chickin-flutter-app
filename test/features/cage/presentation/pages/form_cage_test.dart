@@ -20,7 +20,10 @@ class _FakeCageController extends ChangeNotifier implements CageController {
 }
 
 void main() {
-  Widget createWidgetUnderTest({CageData? initialCage, _FakeCageController? controller}) {
+  Widget createWidgetUnderTest({
+    CageData? initialCage,
+    _FakeCageController? controller,
+  }) {
     final fakeCtrl = controller ?? _FakeCageController();
 
     return ChangeNotifierProvider<CageController>.value(
@@ -33,30 +36,38 @@ void main() {
   }
 
   group('FormCage Widget Tests', () {
-    testWidgets('menampilkan header panduan, field input kandang, dan tombol simpan', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        initialCage: const CageData(
-          type: 'Closed House',
-          capacity: 12000,
-          location: 'Kecamatan Ciawi Blok B',
-        ),
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan header panduan, field input kandang, dan tombol simpan',
+      (tester) async {
+        await tester.pumpWidget(
+          createWidgetUnderTest(
+            initialCage: const CageData(
+              type: 'Closed House',
+              capacity: 12000,
+              location: 'Kecamatan Ciawi Blok B',
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Edit Spesifikasi Kandang'), findsOneWidget);
-      expect(find.text('Spesifikasi Fisik Kandang'), findsOneWidget);
-      expect(find.text('Model / Tipe Konstruksi Kandang'), findsOneWidget);
-      expect(find.text('Kapasitas Maksimal (Ekor DOC)'), findsOneWidget);
-      expect(find.text('Alamat & Lokasi Kandang'), findsOneWidget);
-      expect(find.text('Simpan Perubahan'), findsOneWidget);
-    });
+        expect(find.text('Edit Spesifikasi Kandang'), findsOneWidget);
+        expect(find.text('Spesifikasi Fisik Kandang'), findsOneWidget);
+        expect(find.text('Model / Tipe Konstruksi Kandang'), findsOneWidget);
+        expect(find.text('Kapasitas Maksimal (Ekor DOC)'), findsOneWidget);
+        expect(find.text('Alamat & Lokasi Kandang'), findsOneWidget);
+        expect(find.text('Simpan Perubahan'), findsOneWidget);
+      },
+    );
 
-    testWidgets('mode tambah kandang baru menampilkan judul dan tombol yang sesuai', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'mode tambah kandang baru menampilkan judul dan tombol yang sesuai',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      expect(find.text('Tambah Data Kandang'), findsOneWidget);
-      expect(find.text('Tambah Kandang Baru'), findsOneWidget);
-    });
+        expect(find.text('Tambah Data Kandang'), findsOneWidget);
+        expect(find.text('Tambah Kandang Baru'), findsOneWidget);
+      },
+    );
   });
 }

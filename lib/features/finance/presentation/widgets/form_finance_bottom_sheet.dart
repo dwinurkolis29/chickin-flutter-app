@@ -31,10 +31,7 @@ class FormFinanceBottomSheet extends StatefulWidget {
           'Catat pengeluaran operasional (Pakan, DOC, OVK) atau pemasukan panen secara rapi dan akurat.',
       icon: Icons.account_balance_wallet_outlined,
       builder: (sheetContext, setModalState) {
-        return FormFinanceBottomSheet(
-          periodId: periodId,
-          onSave: onSave,
-        );
+        return FormFinanceBottomSheet(periodId: periodId, onSave: onSave);
       },
     );
   }
@@ -79,10 +76,8 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
   }
 
   void _updatePricePreview() {
-    final rawAmountStr = _amountController.text
-        .replaceAll('.', '')
-        .replaceAll(',', '')
-        .trim();
+    final rawAmountStr =
+        _amountController.text.replaceAll('.', '').replaceAll(',', '').trim();
     final amount = double.tryParse(rawAmountStr) ?? 0.0;
     final weight = double.tryParse(
       _weightController.text.replaceAll(',', '.').trim(),
@@ -127,10 +122,8 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
   }
 
   void _addQuickAmount(int additional) {
-    final rawAmountStr = _amountController.text
-        .replaceAll('.', '')
-        .replaceAll(',', '')
-        .trim();
+    final rawAmountStr =
+        _amountController.text.replaceAll('.', '').replaceAll(',', '').trim();
     final current = int.tryParse(rawAmountStr) ?? 0;
     final updated = current + additional;
     final numFmt = NumberFormat.decimalPattern('id_ID');
@@ -152,10 +145,8 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    final rawAmountStr = _amountController.text
-        .replaceAll('.', '')
-        .replaceAll(',', '')
-        .trim();
+    final rawAmountStr =
+        _amountController.text.replaceAll('.', '').replaceAll(',', '').trim();
     final amount = double.tryParse(rawAmountStr) ?? 0.0;
 
     int? birdCount;
@@ -173,9 +164,10 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
     }
 
     // Resolusi final kategori (jika kustom manual, ambil teks dari controller)
-    final finalCategory = _isCustomInputActive
-        ? _customCategoryController.text.trim()
-        : _category;
+    final finalCategory =
+        _isCustomInputActive
+            ? _customCategoryController.text.trim()
+            : _category;
 
     final tx = FinanceTransaction(
       periodId: widget.periodId,
@@ -217,14 +209,16 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isIncome
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : cs.secondaryContainer.withValues(alpha: 0.45),
+              color:
+                  isIncome
+                      ? AppColors.success.withValues(alpha: 0.1)
+                      : cs.secondaryContainer.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(AppTheme.rowRadius),
               border: Border.all(
-                color: isIncome
-                    ? AppColors.success.withValues(alpha: 0.25)
-                    : cs.primary.withValues(alpha: 0.15),
+                color:
+                    isIncome
+                        ? AppColors.success.withValues(alpha: 0.25)
+                        : cs.primary.withValues(alpha: 0.15),
               ),
             ),
             child: Row(
@@ -232,9 +226,10 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isIncome
-                        ? AppColors.success.withValues(alpha: 0.15)
-                        : cs.primary.withValues(alpha: 0.12),
+                    color:
+                        isIncome
+                            ? AppColors.success.withValues(alpha: 0.15)
+                            : cs.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -330,7 +325,8 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                 _CategoryChip(
                   label: 'Penjualan Utama',
                   icon: Icons.scale_rounded,
-                  isSelected: !_isCustomInputActive && _category == 'main_harvest',
+                  isSelected:
+                      !_isCustomInputActive && _category == 'main_harvest',
                   onTap: () => _selectCategory('main_harvest'),
                 ),
                 _CategoryChip(
@@ -342,13 +338,15 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                 _CategoryChip(
                   label: 'Pupuk / Kohe',
                   icon: Icons.eco_outlined,
-                  isSelected: !_isCustomInputActive && _category == 'Pupuk / Kohe',
+                  isSelected:
+                      !_isCustomInputActive && _category == 'Pupuk / Kohe',
                   onTap: () => _selectCategory('Pupuk / Kohe'),
                 ),
                 _CategoryChip(
                   label: 'Karung Bekas',
                   icon: Icons.inventory_2_outlined,
-                  isSelected: !_isCustomInputActive && _category == 'Karung Bekas',
+                  isSelected:
+                      !_isCustomInputActive && _category == 'Karung Bekas',
                   onTap: () => _selectCategory('Karung Bekas'),
                 ),
               ] else ...[
@@ -385,13 +383,15 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                 _CategoryChip(
                   label: 'Listrik & Air',
                   icon: Icons.bolt_rounded,
-                  isSelected: !_isCustomInputActive && _category == 'Listrik & Air',
+                  isSelected:
+                      !_isCustomInputActive && _category == 'Listrik & Air',
                   onTap: () => _selectCategory('Listrik & Air'),
                 ),
                 _CategoryChip(
                   label: 'Operasional',
                   icon: Icons.engineering_rounded,
-                  isSelected: !_isCustomInputActive && _category == 'operational',
+                  isSelected:
+                      !_isCustomInputActive && _category == 'operational',
                   onTap: () => _selectCategory('operational'),
                 ),
               ],
@@ -412,12 +412,14 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
             AppTextFormField(
               controller: _customCategoryController,
               labelText: 'Nama Kategori Manual',
-              hintText: isIncome
-                  ? 'Contoh: Bonus Kemitraan / Jual Peralatan Bekas'
-                  : 'Contoh: Disinfektan / Gas Pemanas / Sewa Genset',
+              hintText:
+                  isIncome
+                      ? 'Contoh: Bonus Kemitraan / Jual Peralatan Bekas'
+                      : 'Contoh: Disinfektan / Gas Pemanas / Sewa Genset',
               prefixIcon: Icons.edit_note_rounded,
               validator: (val) {
-                if (_isCustomInputActive && (val == null || val.trim().isEmpty)) {
+                if (_isCustomInputActive &&
+                    (val == null || val.trim().isEmpty)) {
                   return 'Ketik nama kategori manual Anda';
                 }
                 return null;
@@ -511,7 +513,8 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                 ),
               ],
             ),
-            if (_calculatedPricePerKg != null && _calculatedPricePerKg! > 0) ...[
+            if (_calculatedPricePerKg != null &&
+                _calculatedPricePerKg! > 0) ...[
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -535,9 +538,7 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                     const SizedBox(width: 8),
                     Text(
                       'Harga Jual Rata-rata:',
-                      style: tt.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                     ),
                     const Spacer(),
                     Text(
@@ -569,10 +570,7 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
               ),
-              child: Text(
-                dateFmt.format(_selectedDate),
-                style: tt.bodyMedium,
-              ),
+              child: Text(dateFmt.format(_selectedDate), style: tt.bodyMedium),
             ),
           ),
           const SizedBox(height: 14),
@@ -581,9 +579,10 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
           AppTextFormField(
             controller: _notesController,
             labelText: 'Catatan / Keterangan (Opsional)',
-            hintText: isIncome
-                ? 'Contoh: Pembeli Bakul Pak Slamet / PT Sumber Unggas'
-                : 'Contoh: Pakan Starter 50 sak dari Toko Tani Makmur',
+            hintText:
+                isIncome
+                    ? 'Contoh: Pembeli Bakul Pak Slamet / PT Sumber Unggas'
+                    : 'Contoh: Pakan Starter 50 sak dari Toko Tani Makmur',
             prefixIcon: Icons.notes_rounded,
           ),
           const SizedBox(height: 24),
@@ -603,9 +602,7 @@ class _FormFinanceBottomSheetState extends State<FormFinanceBottomSheet> {
               child: Text(
                 _isSubmitting
                     ? 'Menyimpan...'
-                    : (isIncome
-                        ? 'Simpan Pemasukan'
-                        : 'Simpan Pengeluaran'),
+                    : (isIncome ? 'Simpan Pemasukan' : 'Simpan Pengeluaran'),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -637,7 +634,8 @@ class _TypeToggleButton extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Material(
-      color: isSelected ? activeColor.withValues(alpha: 0.15) : Colors.transparent,
+      color:
+          isSelected ? activeColor.withValues(alpha: 0.15) : Colors.transparent,
       borderRadius: BorderRadius.circular(AppTheme.pillRadius),
       child: InkWell(
         onTap: onTap,
@@ -707,9 +705,7 @@ class _CategoryChip extends StatelessWidget {
       backgroundColor: cs.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-        side: BorderSide(
-          color: isSelected ? cs.primary : cs.outlineVariant,
-        ),
+        side: BorderSide(color: isSelected ? cs.primary : cs.outlineVariant),
       ),
       showCheckmark: false,
     );
@@ -720,10 +716,7 @@ class _QuickAmountPill extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _QuickAmountPill({
-    required this.label,
-    required this.onTap,
-  });
+  const _QuickAmountPill({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

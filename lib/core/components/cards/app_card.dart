@@ -6,12 +6,7 @@ import '../../theme/app_theme.dart';
 ///
 /// App cards use the surface color, the shared card radius, and no elevation.
 class AppCard extends StatelessWidget {
-  const AppCard({
-    required this.child,
-    super.key,
-    this.padding,
-    this.margin,
-  });
+  const AppCard({required this.child, super.key, this.padding, this.margin});
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -26,12 +21,7 @@ class AppCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
-      child: padding == null
-          ? child
-          : Padding(
-              padding: padding!,
-              child: child,
-            ),
+      child: padding == null ? child : Padding(padding: padding!, child: child),
     );
 
     return card;

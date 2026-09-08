@@ -24,10 +24,7 @@ class StatisticsSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            flex: 3,
-            child: WeightChartCard(weightStream: weightStream),
-          ),
+          Expanded(flex: 3, child: WeightChartCard(weightStream: weightStream)),
           const SizedBox(width: 8),
           Expanded(
             flex: 2,
@@ -71,11 +68,7 @@ class WeightChartCard extends StatelessWidget {
   final Stream<List<FlSpot>>? weightStream;
   final VoidCallback? onTap;
 
-  const WeightChartCard({
-    super.key,
-    required this.weightStream,
-    this.onTap,
-  });
+  const WeightChartCard({super.key, required this.weightStream, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -86,186 +79,191 @@ class WeightChartCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        onTap: onTap ??
+        onTap:
+            onTap ??
             () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const ChickenWeightScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const ChickenWeightScreen()),
               );
             },
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: weightStream == null
-              ? Center(
-                  child: Text(
-                    'Belum ada periode aktif',
-                    style: tt.bodyMedium?.copyWith(
-                      color: cs.onSurfaceVariant,
+          child:
+              weightStream == null
+                  ? Center(
+                    child: Text(
+                      'Belum ada periode aktif',
+                      style: tt.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                )
-              : StreamBuilder<List<FlSpot>>(
-                  stream: weightStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final flSpot = snapshot.data ?? [];
+                  )
+                  : StreamBuilder<List<FlSpot>>(
+                    stream: weightStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final flSpot = snapshot.data ?? [];
 
-                      // Cek apakah data bobot ayam kosong
-                      if (flSpot.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'Data recording belum diisi',
-                            style: tt.bodyMedium?.copyWith(
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        );
-                      }
-
-                      // Ambil data bobot terakhir untuk ditampilkan
-                      final lastWeight = flSpot.last.y;
-                      final isIncreasing = flSpot.length >= 2
-                          ? flSpot.last.y > flSpot[flSpot.length - 2].y
-                          : true;
-                      final chartColor =
-                          isIncreasing ? AppColors.success : AppColors.error;
-                      final diff = flSpot.length >= 2
-                          ? (flSpot.last.y - flSpot[flSpot.length - 2].y).round()
-                          : null;
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: cs.secondaryContainer,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.show_chart,
-                                  color: cs.primary,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Bobot Ayam',
-                                  style: tt.labelMedium,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 18,
-                                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 70,
-                            child: LineChart(
-                              LineChartData(
-                                gridData: const FlGridData(show: false),
-                                titlesData: const FlTitlesData(show: false),
-                                borderData: FlBorderData(show: false),
-                                lineBarsData: [
-                                  LineChartBarData(
-                                    spots: flSpot,
-                                    isCurved: true,
-                                    color: chartColor,
-                                    barWidth: 3.5,
-                                    isStrokeCapRound: true,
-                                    dotData: const FlDotData(show: false),
-                                    belowBarData: BarAreaData(
-                                      show: true,
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          chartColor.withValues(alpha: 0.22),
-                                          chartColor.withValues(alpha: 0.0),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                        // Cek apakah data bobot ayam kosong
+                        if (flSpot.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'Data recording belum diisi',
+                              style: tt.bodyMedium?.copyWith(
+                                color: cs.onSurfaceVariant,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${lastWeight % 1 == 0 ? lastWeight.toInt() : lastWeight}',
-                                style: tt.titleLarge?.copyWith(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: cs.onSurface,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  'Gram',
-                                  style: tt.bodySmall?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                              const Spacer(),
-                              if (diff != null)
+                          );
+                        }
+
+                        // Ambil data bobot terakhir untuk ditampilkan
+                        final lastWeight = flSpot.last.y;
+                        final isIncreasing =
+                            flSpot.length >= 2
+                                ? flSpot.last.y > flSpot[flSpot.length - 2].y
+                                : true;
+                        final chartColor =
+                            isIncreasing ? AppColors.success : AppColors.error;
+                        final diff =
+                            flSpot.length >= 2
+                                ? (flSpot.last.y - flSpot[flSpot.length - 2].y)
+                                    .round()
+                                : null;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
+                                  padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: chartColor.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(
-                                      AppTheme.pillRadius,
-                                    ),
+                                    color: cs.secondaryContainer,
+                                    shape: BoxShape.circle,
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        isIncreasing
-                                            ? Icons.arrow_upward_rounded
-                                            : Icons.arrow_downward_rounded,
-                                        size: 11,
-                                        color: chartColor,
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        '${isIncreasing ? '+' : ''}$diff g',
-                                        style: tt.labelSmall?.copyWith(
-                                          color: chartColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
+                                  child: Icon(
+                                    Icons.show_chart,
+                                    color: cs.primary,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Bobot Ayam',
+                                    style: tt.labelMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 18,
+                                  color: cs.onSurfaceVariant.withValues(
+                                    alpha: 0.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 70,
+                              child: LineChart(
+                                LineChartData(
+                                  gridData: const FlGridData(show: false),
+                                  titlesData: const FlTitlesData(show: false),
+                                  borderData: FlBorderData(show: false),
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      spots: flSpot,
+                                      isCurved: true,
+                                      color: chartColor,
+                                      barWidth: 3.5,
+                                      isStrokeCapRound: true,
+                                      dotData: const FlDotData(show: false),
+                                      belowBarData: BarAreaData(
+                                        show: true,
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            chartColor.withValues(alpha: 0.22),
+                                            chartColor.withValues(alpha: 0.0),
+                                          ],
                                         ),
                                       ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${lastWeight % 1 == 0 ? lastWeight.toInt() : lastWeight}',
+                                  style: tt.titleLarge?.copyWith(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.onSurface,
                                   ),
                                 ),
-                            ],
-                          ),
-                        ],
-                      );
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  },
-                ),
+                                const SizedBox(width: 4),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    'Gram',
+                                    style: tt.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                if (diff != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: chartColor.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.pillRadius,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isIncreasing
+                                              ? Icons.arrow_upward_rounded
+                                              : Icons.arrow_downward_rounded,
+                                          size: 11,
+                                          color: chartColor,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          '${isIncreasing ? '+' : ''}$diff g',
+                                          style: tt.labelSmall?.copyWith(
+                                            color: chartColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
         ),
       ),
     );
@@ -307,11 +305,7 @@ class _InfoCard extends StatelessWidget {
                   color: cs.secondaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  color: cs.primary,
-                  size: 20,
-                ),
+                child: Icon(icon, color: cs.primary, size: 20),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -342,18 +336,16 @@ class _InfoCard extends StatelessWidget {
                   child: Text(
                     value,
                     style: tt.titleLarge?.copyWith(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 4),
               Text(
                 unit,
-                style: tt.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
@@ -363,13 +355,14 @@ class _InfoCard extends StatelessWidget {
 
     return AppCard(
       padding: EdgeInsets.zero,
-      child: onTap != null
-          ? InkWell(
-              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              onTap: onTap,
-              child: content,
-            )
-          : content,
+      child:
+          onTap != null
+              ? InkWell(
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                onTap: onTap,
+                child: content,
+              )
+              : content,
     );
   }
 }

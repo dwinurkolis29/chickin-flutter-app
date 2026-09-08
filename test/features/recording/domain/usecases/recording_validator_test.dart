@@ -17,7 +17,10 @@ void main() {
       });
 
       test('mengembalikan error jika umur > 60 hari', () {
-        expect(RecordingValidator.validateDay('65'), contains('maksimal 60 hari'));
+        expect(
+          RecordingValidator.validateDay('65'),
+          contains('maksimal 60 hari'),
+        );
       });
 
       test('mengembalikan null jika umur valid', () {
@@ -30,7 +33,10 @@ void main() {
     group('validateFeedInput', () {
       test('mengembalikan error jika kosong atau <= 0', () {
         expect(RecordingValidator.validateFeedInput('', 'Sak'), isNotNull);
-        expect(RecordingValidator.validateFeedInput('0', 'Sak'), contains('lebih dari 0'));
+        expect(
+          RecordingValidator.validateFeedInput('0', 'Sak'),
+          contains('lebih dari 0'),
+        );
       });
 
       test('menolak typo sak terlalu besar (> 250 sak)', () {
@@ -55,11 +61,14 @@ void main() {
     });
 
     group('validateWeightInput', () {
-      test('menolak typo gram terlalu kecil (< 25g) dengan saran satuan Kg', () {
-        final err = RecordingValidator.validateWeightInput('1.5', 'Gram');
-        expect(err, contains('terlalu kecil'));
-        expect(err, contains('Apakah satuan Anda Kg'));
-      });
+      test(
+        'menolak typo gram terlalu kecil (< 25g) dengan saran satuan Kg',
+        () {
+          final err = RecordingValidator.validateWeightInput('1.5', 'Gram');
+          expect(err, contains('terlalu kecil'));
+          expect(err, contains('Apakah satuan Anda Kg'));
+        },
+      );
 
       test('menolak typo gram terlalu besar (> 6000g)', () {
         expect(
@@ -68,11 +77,14 @@ void main() {
         );
       });
 
-      test('menolak typo kg terlalu besar (> 6.0 kg) dengan saran satuan Gram', () {
-        final err = RecordingValidator.validateWeightInput('1250', 'Kg');
-        expect(err, contains('terlalu berat'));
-        expect(err, contains('Apakah satuan Anda Gram'));
-      });
+      test(
+        'menolak typo kg terlalu besar (> 6.0 kg) dengan saran satuan Gram',
+        () {
+          final err = RecordingValidator.validateWeightInput('1250', 'Kg');
+          expect(err, contains('terlalu berat'));
+          expect(err, contains('Apakah satuan Anda Gram'));
+        },
+      );
 
       test('menerima input bobot wajar dalam Gram dan Kg', () {
         expect(RecordingValidator.validateWeightInput('1450', 'Gram'), isNull);
@@ -82,7 +94,10 @@ void main() {
 
     group('validateMortality', () {
       test('mengembalikan error jika angka negatif', () {
-        expect(RecordingValidator.validateMortality('-1'), contains('0 atau lebih'));
+        expect(
+          RecordingValidator.validateMortality('-1'),
+          contains('0 atau lebih'),
+        );
       });
 
       test('menerima input angka 0 dan bilangan positif', () {
@@ -112,42 +127,54 @@ void main() {
         expect(anomalies.first.title, 'Mortalitas Melebihi Populasi');
       });
 
-      test('mendeteksi mortalitas massal tinggi > 10% (Non-blocking warning)', () {
-        final newRec = RecordingData(
-          day: 10,
-          avgWeightGram: 300,
-          feedSack: 2,
-          mortality: 150, // 15% dari 1000
-          createdAt: DateTime(2026, 1, 10),
-        );
+      test(
+        'mendeteksi mortalitas massal tinggi > 10% (Non-blocking warning)',
+        () {
+          final newRec = RecordingData(
+            day: 10,
+            avgWeightGram: 300,
+            feedSack: 2,
+            mortality: 150, // 15% dari 1000
+            createdAt: DateTime(2026, 1, 10),
+          );
 
-        final anomalies = RecordingValidator.checkAnomalies(
-          newRecording: newRec,
-          initialPopulation: 1000,
-          existingRecordings: [],
-        );
+          final anomalies = RecordingValidator.checkAnomalies(
+            newRecording: newRec,
+            initialPopulation: 1000,
+            existingRecordings: [],
+          );
 
-        expect(anomalies.any((a) => a.title == 'Mortalitas Tinggi Terdeteksi'), isTrue);
-      });
+          expect(
+            anomalies.any((a) => a.title == 'Mortalitas Tinggi Terdeteksi'),
+            isTrue,
+          );
+        },
+      );
 
-      test('mendeteksi bobot terlalu ringan atau terlalu berat untuk umur ayam', () {
-        // Hari 1 bobot 500g (standar DOC max 75g)
-        final heavyDoc = RecordingData(
-          day: 1,
-          avgWeightGram: 500,
-          feedSack: 1,
-          mortality: 0,
-          createdAt: DateTime(2026, 1, 1),
-        );
+      test(
+        'mendeteksi bobot terlalu ringan atau terlalu berat untuk umur ayam',
+        () {
+          // Hari 1 bobot 500g (standar DOC max 75g)
+          final heavyDoc = RecordingData(
+            day: 1,
+            avgWeightGram: 500,
+            feedSack: 1,
+            mortality: 0,
+            createdAt: DateTime(2026, 1, 1),
+          );
 
-        final anomalies = RecordingValidator.checkAnomalies(
-          newRecording: heavyDoc,
-          initialPopulation: 1000,
-          existingRecordings: [],
-        );
+          final anomalies = RecordingValidator.checkAnomalies(
+            newRecording: heavyDoc,
+            initialPopulation: 1000,
+            existingRecordings: [],
+          );
 
-        expect(anomalies.any((a) => a.title == 'Bobot di Atas Standar'), isTrue);
-      });
+          expect(
+            anomalies.any((a) => a.title == 'Bobot di Atas Standar'),
+            isTrue,
+          );
+        },
+      );
 
       test('mendeteksi penurunan bobot drastis dibanding hari sebelumnya', () {
         final day7 = RecordingData(
@@ -171,7 +198,10 @@ void main() {
           existingRecordings: [day7],
         );
 
-        expect(anomalies.any((a) => a.title == 'Penurunan Bobot Drastis'), isTrue);
+        expect(
+          anomalies.any((a) => a.title == 'Penurunan Bobot Drastis'),
+          isTrue,
+        );
       });
     });
   });

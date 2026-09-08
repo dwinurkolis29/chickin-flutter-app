@@ -53,33 +53,29 @@ class CalculateFinanceSummary {
     }
 
     final totalRevenue = mainHarvestRevenue + rejectRevenue;
-    final totalExpense = feedExpense + docExpense + ovkExpense + operationalExpense;
+    final totalExpense =
+        feedExpense + docExpense + ovkExpense + operationalExpense;
     final netProfit = totalRevenue - totalExpense;
 
-    final effectiveWeightKg = transHarvestWeight > 0
-        ? transHarvestWeight
-        : (fallbackHarvestWeightKg ?? 0.0);
+    final effectiveWeightKg =
+        transHarvestWeight > 0
+            ? transHarvestWeight
+            : (fallbackHarvestWeightKg ?? 0.0);
 
-    final effectiveChicks = transChicksSold > 0
-        ? transChicksSold
-        : (fallbackHarvestedChicks ?? 0);
+    final effectiveChicks =
+        transChicksSold > 0 ? transChicksSold : (fallbackHarvestedChicks ?? 0);
 
-    final double hppPerKg = effectiveWeightKg > 0
-        ? totalExpense / effectiveWeightKg
-        : 0.0;
+    final double hppPerKg =
+        effectiveWeightKg > 0 ? totalExpense / effectiveWeightKg : 0.0;
 
-    final double feedExpensePct = totalExpense > 0
-        ? (feedExpense / totalExpense) * 100.0
-        : 0.0;
-    final double docExpensePct = totalExpense > 0
-        ? (docExpense / totalExpense) * 100.0
-        : 0.0;
-    final double ovkExpensePct = totalExpense > 0
-        ? (ovkExpense / totalExpense) * 100.0
-        : 0.0;
-    final double operationalExpensePct = totalExpense > 0
-        ? (operationalExpense / totalExpense) * 100.0
-        : 0.0;
+    final double feedExpensePct =
+        totalExpense > 0 ? (feedExpense / totalExpense) * 100.0 : 0.0;
+    final double docExpensePct =
+        totalExpense > 0 ? (docExpense / totalExpense) * 100.0 : 0.0;
+    final double ovkExpensePct =
+        totalExpense > 0 ? (ovkExpense / totalExpense) * 100.0 : 0.0;
+    final double operationalExpensePct =
+        totalExpense > 0 ? (operationalExpense / totalExpense) * 100.0 : 0.0;
 
     return FinanceSummary(
       totalRevenue: totalRevenue,

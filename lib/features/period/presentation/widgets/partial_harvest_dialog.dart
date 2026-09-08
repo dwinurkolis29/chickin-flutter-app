@@ -153,8 +153,10 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
-        final ageDay =
-            picked.difference(widget.period.startDate).inDays.clamp(1, 999);
+        final ageDay = picked
+            .difference(widget.period.startDate)
+            .inDays
+            .clamp(1, 999);
         _dayController.text = ageDay.toString();
       });
     }
@@ -184,9 +186,10 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
       avgWeightKg: weight / chicks,
       pricePerKg: pricePerKg,
       totalRevenue: _calculatedRevenue,
-      notes: _notesController.text.trim().isNotEmpty
-          ? _notesController.text.trim()
-          : null,
+      notes:
+          _notesController.text.trim().isNotEmpty
+              ? _notesController.text.trim()
+              : null,
       createdAt: DateTime.now(),
     );
 
@@ -209,7 +212,8 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
       decimalDigits: 0,
     );
 
-    final allSopChecked = _sopVehicleCleaned &&
+    final allSopChecked =
+        _sopVehicleCleaned &&
         _sopPersonnelBoot &&
         _sopHousePartitioned &&
         _sopFeedWithdrawal;
@@ -225,9 +229,10 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
               color: cs.surfaceContainer,
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
               border: Border.all(
-                color: allSopChecked
-                    ? cs.primary.withValues(alpha: 0.3)
-                    : cs.outlineVariant,
+                color:
+                    allSopChecked
+                        ? cs.primary.withValues(alpha: 0.3)
+                        : cs.outlineVariant,
               ),
             ),
             child: Column(
@@ -242,9 +247,10 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: allSopChecked
-                                ? cs.primary.withValues(alpha: 0.15)
-                                : cs.secondaryContainer,
+                            color:
+                                allSopChecked
+                                    ? cs.primary.withValues(alpha: 0.15)
+                                    : cs.secondaryContainer,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -292,8 +298,8 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                   CheckboxListTile(
                     dense: true,
                     value: _sopVehicleCleaned,
-                    onChanged: (v) =>
-                        setState(() => _sopVehicleCleaned = v ?? false),
+                    onChanged:
+                        (v) => setState(() => _sopVehicleCleaned = v ?? false),
                     title: Text(
                       'Desinfeksi roda armada truk & keranjang ayam luar',
                       style: tt.bodySmall,
@@ -303,8 +309,8 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                   CheckboxListTile(
                     dense: true,
                     value: _sopPersonnelBoot,
-                    onChanged: (v) =>
-                        setState(() => _sopPersonnelBoot = v ?? false),
+                    onChanged:
+                        (v) => setState(() => _sopPersonnelBoot = v ?? false),
                     title: Text(
                       'Tim tangkap cuci tangan & gunakan sepatu boot bersih',
                       style: tt.bodySmall,
@@ -314,8 +320,9 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                   CheckboxListTile(
                     dense: true,
                     value: _sopHousePartitioned,
-                    onChanged: (v) =>
-                        setState(() => _sopHousePartitioned = v ?? false),
+                    onChanged:
+                        (v) =>
+                            setState(() => _sopHousePartitioned = v ?? false),
                     title: Text(
                       'Kandang disekat agar ayam sisa tidak panik/menumpuk',
                       style: tt.bodySmall,
@@ -325,8 +332,8 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                   CheckboxListTile(
                     dense: true,
                     value: _sopFeedWithdrawal,
-                    onChanged: (v) =>
-                        setState(() => _sopFeedWithdrawal = v ?? false),
+                    onChanged:
+                        (v) => setState(() => _sopFeedWithdrawal = v ?? false),
                     title: Text(
                       'Puasakan pakan 6–8 jam sebelum tangkap (air tetap jalan)',
                       style: tt.bodySmall,
@@ -351,9 +358,7 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
               children: [
                 Text(
                   'Sisa Ayam Hidup Saat Ini:',
-                  style: tt.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 Text(
                   '${numFmt.format(widget.currentLiveChicks)} ekor',
@@ -382,8 +387,9 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                       filled: true,
                       fillColor: cs.surfaceContainer,
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppTheme.pillRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.pillRadius,
+                        ),
                       ),
                     ),
                     child: Text(
@@ -478,9 +484,7 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                   const SizedBox(width: 8),
                   Text(
                     'Rata-rata Bobot Panen:',
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                   const Spacer(),
                   Text(
@@ -509,15 +513,11 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                   onChanged: (val) => setState(() => _recordIncome = val),
                   title: Text(
                     'Catat Pemasukan ke Buku Kas',
-                    style: tt.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
                     'Otomatis membuat transaksi pemasukan panen di periode ini',
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
                 if (_recordIncome) ...[
@@ -559,10 +559,12 @@ class _PartialHarvestDialogState extends State<PartialHarvestDialog> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color:
-                                  cs.secondaryContainer.withValues(alpha: 0.4),
-                              borderRadius:
-                                  BorderRadius.circular(AppTheme.rowRadius),
+                              color: cs.secondaryContainer.withValues(
+                                alpha: 0.4,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.rowRadius,
+                              ),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

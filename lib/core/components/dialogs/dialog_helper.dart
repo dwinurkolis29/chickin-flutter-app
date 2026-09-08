@@ -26,6 +26,7 @@ class DialogHelper {
       subtitle: subtitle,
     );
   }
+
   /// Menampilkan dialog Error
   static Future<void> showError(
     BuildContext context,
@@ -254,10 +255,12 @@ class DialogHelper {
       useSafeArea: useSafeArea,
       isDismissible: isDismissible,
       backgroundColor: backgroundColor,
-      shape: shape ??
+      shape:
+          shape ??
           const RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(AppTheme.cardRadius)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppTheme.cardRadius),
+            ),
           ),
       builder: (_) => builder,
     );

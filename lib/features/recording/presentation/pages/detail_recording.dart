@@ -50,110 +50,113 @@ class _DetailRecordingState extends State<DetailRecording> {
       appBar: AppHeader(
         title: widget.readOnly ? 'Laporan Recording' : 'Semua Recording',
       ),
-      floatingActionButton: widget.readOnly
-          ? null
-          : FloatingActionButton.extended(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+      floatingActionButton:
+          widget.readOnly
+              ? null
+              : FloatingActionButton.extended(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                ),
+                icon: const Icon(Icons.add_rounded),
+                label: const Text(
+                  'Tambah Recording',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FormRecording()),
+                  );
+                },
               ),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Tambah Recording',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const FormRecording(),
-                  ),
-                );
-              },
-            ),
       body: SafeArea(
         child: Builder(
           builder: (context) {
-          if (widget.recordings != null) {
-            if (widget.recordings!.isEmpty) {
-              return const AppEmptyState(
-                icon: Icons.assignment_outlined,
-                message: 'Belum Ada Data Recording',
-                subtitle: 'Riwayat catatan harian pemeliharaan akan ditampilkan di sini.',
-              );
-            }
-            return _RecordingListView(
-              recordings: widget.recordings!,
-              controller: controller,
-              readOnly: widget.readOnly,
-            );
-          }
-
-          if (controller.isLoadingPeriod) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: TableSkeleton(),
-            );
-          }
-
-          if (controller.recordingsStream == null) {
-            return AppEmptyState(
-              icon: Icons.calendar_today_outlined,
-              message: 'Tidak Ada Periode Aktif',
-              subtitle: 'Buat atau aktifkan siklus pemeliharaan terlebih dahulu untuk mulai mencatat harian.',
-              actionLabel: 'Buat Periode Baru',
-              onAction: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FormPeriod()),
-              ),
-            );
-          }
-
-          return StreamBuilder<List<RecordingData>>(
-            stream: controller.recordingsStream,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: TableSkeleton(),
-                );
-              }
-
-              if (snapshot.hasError) {
-                return AppErrorState(
-                  message: 'Gagal memuat data recording',
-                  subtitle: snapshot.error.toString(),
-                  onRetry: () => controller.loadActivePeriod(),
-                );
-              }
-
-              final recordings = snapshot.data ?? <RecordingData>[];
-
-              if (recordings.isEmpty) {
-                return AppEmptyState(
+            if (widget.recordings != null) {
+              if (widget.recordings!.isEmpty) {
+                return const AppEmptyState(
                   icon: Icons.assignment_outlined,
-                  message: 'Belum Ada Catatan Harian',
-                  subtitle: 'Mulai input konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
-                  actionLabel: widget.readOnly ? null : 'Isi Catatan Hari Ini',
-                  onAction: widget.readOnly
-                      ? null
-                      : () => Navigator.pop(context),
+                  message: 'Belum Ada Data Recording',
+                  subtitle:
+                      'Riwayat catatan harian pemeliharaan akan ditampilkan di sini.',
                 );
               }
-
               return _RecordingListView(
-                recordings: recordings,
+                recordings: widget.recordings!,
                 controller: controller,
                 readOnly: widget.readOnly,
               );
-            },
-          );
-        },
+            }
+
+            if (controller.isLoadingPeriod) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: TableSkeleton(),
+              );
+            }
+
+            if (controller.recordingsStream == null) {
+              return AppEmptyState(
+                icon: Icons.calendar_today_outlined,
+                message: 'Tidak Ada Periode Aktif',
+                subtitle:
+                    'Buat atau aktifkan siklus pemeliharaan terlebih dahulu untuk mulai mencatat harian.',
+                actionLabel: 'Buat Periode Baru',
+                onAction:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FormPeriod()),
+                    ),
+              );
+            }
+
+            return StreamBuilder<List<RecordingData>>(
+              stream: controller.recordingsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: TableSkeleton(),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return AppErrorState(
+                    message: 'Gagal memuat data recording',
+                    subtitle: snapshot.error.toString(),
+                    onRetry: () => controller.loadActivePeriod(),
+                  );
+                }
+
+                final recordings = snapshot.data ?? <RecordingData>[];
+
+                if (recordings.isEmpty) {
+                  return AppEmptyState(
+                    icon: Icons.assignment_outlined,
+                    message: 'Belum Ada Catatan Harian',
+                    subtitle:
+                        'Mulai input konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
+                    actionLabel:
+                        widget.readOnly ? null : 'Isi Catatan Hari Ini',
+                    onAction:
+                        widget.readOnly ? null : () => Navigator.pop(context),
+                  );
+                }
+
+                return _RecordingListView(
+                  recordings: recordings,
+                  controller: controller,
+                  readOnly: widget.readOnly,
+                );
+              },
+            );
+          },
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -195,32 +198,33 @@ class _RecordingListViewState extends State<_RecordingListView> {
     final query = _searchCtrl.text.trim().toLowerCase();
     final searchDay = int.tryParse(query);
 
-    var list = widget.recordings.where((r) {
-      // 1. Filter Search (hari / query)
-      if (query.isNotEmpty) {
-        if (searchDay != null) {
-          if (r.day != searchDay) return false;
-        } else {
-          final dayStr = 'hari ${r.day}';
-          if (!dayStr.contains(query)) return false;
-        }
-      }
+    var list =
+        widget.recordings.where((r) {
+          // 1. Filter Search (hari / query)
+          if (query.isNotEmpty) {
+            if (searchDay != null) {
+              if (r.day != searchDay) return false;
+            } else {
+              final dayStr = 'hari ${r.day}';
+              if (!dayStr.contains(query)) return false;
+            }
+          }
 
-      // 2. Filter Tab / Chip
-      if (_selectedWeekFilter == 1) {
-        if (r.day < 1 || r.day > 7) return false;
-      } else if (_selectedWeekFilter == 2) {
-        if (r.day < 8 || r.day > 14) return false;
-      } else if (_selectedWeekFilter == 3) {
-        if (r.day < 15 || r.day > 21) return false;
-      } else if (_selectedWeekFilter == 4) {
-        if (r.day < 22) return false;
-      } else if (_selectedWeekFilter == -1) {
-        if (r.mortality <= 0) return false;
-      }
+          // 2. Filter Tab / Chip
+          if (_selectedWeekFilter == 1) {
+            if (r.day < 1 || r.day > 7) return false;
+          } else if (_selectedWeekFilter == 2) {
+            if (r.day < 8 || r.day > 14) return false;
+          } else if (_selectedWeekFilter == 3) {
+            if (r.day < 15 || r.day > 21) return false;
+          } else if (_selectedWeekFilter == 4) {
+            if (r.day < 22) return false;
+          } else if (_selectedWeekFilter == -1) {
+            if (r.mortality <= 0) return false;
+          }
 
-      return true;
-    }).toList();
+          return true;
+        }).toList();
 
     // 3. Sorting
     list.sort((a, b) {
@@ -242,7 +246,8 @@ class _RecordingListViewState extends State<_RecordingListView> {
     AppFormBottomSheet.show(
       context: context,
       title: 'Edit Recording',
-      subtitle: 'Sesuaikan catatan umur, pakan, bobot, atau kematian ayam hari ke-${recording.day}:',
+      subtitle:
+          'Sesuaikan catatan umur, pakan, bobot, atau kematian ayam hari ke-${recording.day}:',
       icon: Icons.edit_note_rounded,
       builder: (sheetContext, setModalState) {
         return _EditRecordingSheet(
@@ -298,15 +303,19 @@ class _RecordingListViewState extends State<_RecordingListView> {
                           size: 20,
                           color: cs.primary,
                         ),
-                        suffixIcon: _searchCtrl.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18),
-                                onPressed: () {
-                                  _searchCtrl.clear();
-                                  setState(() {});
-                                },
-                              )
-                            : null,
+                        suffixIcon:
+                            _searchCtrl.text.isNotEmpty
+                                ? IconButton(
+                                  icon: const Icon(
+                                    Icons.clear_rounded,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    _searchCtrl.clear();
+                                    setState(() {});
+                                  },
+                                )
+                                : null,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
@@ -314,17 +323,23 @@ class _RecordingListViewState extends State<_RecordingListView> {
                         filled: true,
                         fillColor: cs.surfaceContainer,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                           borderSide: BorderSide(
                             color: cs.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                           borderSide: BorderSide(color: cs.primary, width: 1.5),
                         ),
                       ),
@@ -339,16 +354,28 @@ class _RecordingListViewState extends State<_RecordingListView> {
                         children: [
                           _buildFilterChip(label: 'Semua', filterValue: 0),
                           const SizedBox(width: 8),
-                          _buildFilterChip(label: 'Minggu 1 (H1-7)', filterValue: 1),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(label: 'Minggu 2 (H8-14)', filterValue: 2),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(label: 'Minggu 3 (H15-21)', filterValue: 3),
-                          const SizedBox(width: 8),
-                          _buildFilterChip(label: 'Minggu 4+ (H22+)', filterValue: 4),
+                          _buildFilterChip(
+                            label: 'Minggu 1 (H1-7)',
+                            filterValue: 1,
+                          ),
                           const SizedBox(width: 8),
                           _buildFilterChip(
-                            label: 'Ada Kematian ⚠️',
+                            label: 'Minggu 2 (H8-14)',
+                            filterValue: 2,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(
+                            label: 'Minggu 3 (H15-21)',
+                            filterValue: 3,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(
+                            label: 'Minggu 4+ (H22+)',
+                            filterValue: 4,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildFilterChip(
+                            label: 'Ada Kematian',
                             filterValue: -1,
                             isWarning: true,
                           ),
@@ -374,7 +401,9 @@ class _RecordingListViewState extends State<_RecordingListView> {
                               _sortDescending = !_sortDescending;
                             });
                           },
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -392,7 +421,9 @@ class _RecordingListViewState extends State<_RecordingListView> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  _sortDescending ? 'Hari Terbaru' : 'Hari Terlama',
+                                  _sortDescending
+                                      ? 'Hari Terbaru'
+                                      : 'Hari Terlama',
                                   style: tt.labelMedium?.copyWith(
                                     color: cs.primary,
                                     fontWeight: FontWeight.w600,
@@ -435,7 +466,9 @@ class _RecordingListViewState extends State<_RecordingListView> {
                           onPressed: _resetFilters,
                           style: OutlinedButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.pillRadius,
+                              ),
                             ),
                           ),
                           child: const Text('Reset Filter'),
@@ -449,20 +482,17 @@ class _RecordingListViewState extends State<_RecordingListView> {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final rec = filtered[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _RecordingDayCard(
-                          recording: rec,
-                          readOnly: widget.readOnly,
-                          onEdit: () => _showEditSheet(context, rec),
-                        ),
-                      );
-                    },
-                    childCount: filtered.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final rec = filtered[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _RecordingDayCard(
+                        recording: rec,
+                        readOnly: widget.readOnly,
+                        onEdit: () => _showEditSheet(context, rec),
+                      ),
+                    );
+                  }, childCount: filtered.length),
                 ),
               ),
           ],
@@ -485,21 +515,24 @@ class _RecordingListViewState extends State<_RecordingListView> {
       selected: isSelected,
       showCheckmark: false,
       labelStyle: tt.labelMedium?.copyWith(
-        color: isSelected
-            ? cs.onPrimary
-            : (isWarning ? AppColors.error : cs.onSurfaceVariant),
+        color:
+            isSelected
+                ? cs.onPrimary
+                : (isWarning ? AppColors.error : cs.onSurfaceVariant),
         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
       ),
-      backgroundColor: isWarning
-          ? AppColors.error.withValues(alpha: 0.08)
-          : cs.surfaceContainer,
+      backgroundColor:
+          isWarning
+              ? AppColors.error.withValues(alpha: 0.08)
+              : cs.surfaceContainer,
       selectedColor: isWarning ? AppColors.error : cs.primary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.pillRadius),
         side: BorderSide(
-          color: isSelected
-              ? (isWarning ? AppColors.error : cs.primary)
-              : cs.outlineVariant.withValues(alpha: 0.5),
+          color:
+              isSelected
+                  ? (isWarning ? AppColors.error : cs.primary)
+                  : cs.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       onSelected: (_) {
@@ -600,7 +633,9 @@ class _RecordingDayCard extends StatelessWidget {
                       label: const Text('Edit'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: cs.primary,
-                        side: BorderSide(color: cs.primary.withValues(alpha: 0.5)),
+                        side: BorderSide(
+                          color: cs.primary.withValues(alpha: 0.5),
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 6,
@@ -608,7 +643,9 @@ class _RecordingDayCard extends StatelessWidget {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                         ),
                       ),
                     ),
@@ -633,12 +670,14 @@ class _RecordingDayCard extends StatelessWidget {
                       iconBgColor: cs.secondaryContainer,
                       iconColor: cs.primary,
                       label: 'Bobot Ayam',
-                      value: recording.avgWeightGram > 0
-                          ? '${numFmt.format(recording.avgWeightGram)} g'
-                          : '-',
-                      subtitle: recording.avgWeightGram > 0
-                          ? '${(recording.avgWeightGram / 1000).toStringAsFixed(2)} kg'
-                          : null,
+                      value:
+                          recording.avgWeightGram > 0
+                              ? '${numFmt.format(recording.avgWeightGram)} g'
+                              : '-',
+                      subtitle:
+                          recording.avgWeightGram > 0
+                              ? '${(recording.avgWeightGram / 1000).toStringAsFixed(2)} kg'
+                              : null,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -661,13 +700,16 @@ class _RecordingDayCard extends StatelessWidget {
                   Expanded(
                     child: _buildMetricTile(
                       context: context,
-                      icon: hasMortality
-                          ? Icons.warning_amber_rounded
-                          : Icons.check_circle_outline_rounded,
-                      iconBgColor: hasMortality
-                          ? AppColors.error.withValues(alpha: 0.12)
-                          : AppColors.success.withValues(alpha: 0.12),
-                      iconColor: hasMortality ? AppColors.error : AppColors.success,
+                      icon:
+                          hasMortality
+                              ? Icons.warning_amber_rounded
+                              : Icons.check_circle_outline_rounded,
+                      iconBgColor:
+                          hasMortality
+                              ? AppColors.error.withValues(alpha: 0.12)
+                              : AppColors.success.withValues(alpha: 0.12),
+                      iconColor:
+                          hasMortality ? AppColors.error : AppColors.success,
                       label: 'Kematian',
                       value: '${recording.mortality} ekor',
                       valueColor: hasMortality ? AppColors.error : cs.onSurface,
@@ -826,10 +868,14 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
         if (val != null) {
           if (newUnit == 'Kg') {
             final kg = val * 50.0;
-            _ctrlFeed.text = kg % 1 == 0 ? kg.toInt().toString() : kg.toStringAsFixed(1);
+            _ctrlFeed.text =
+                kg % 1 == 0 ? kg.toInt().toString() : kg.toStringAsFixed(1);
           } else {
             final sacks = val / 50.0;
-            _ctrlFeed.text = sacks % 1 == 0 ? sacks.toInt().toString() : sacks.toStringAsFixed(2);
+            _ctrlFeed.text =
+                sacks % 1 == 0
+                    ? sacks.toInt().toString()
+                    : sacks.toStringAsFixed(2);
           }
         }
       }
@@ -846,9 +892,13 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
         if (val != null) {
           if (newUnit == 'Kg') {
             final kg = val / 1000.0;
-            _ctrlWeight.text = kg % 1 == 0
-                ? kg.toInt().toString()
-                : kg.toStringAsFixed(3).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+            _ctrlWeight.text =
+                kg % 1 == 0
+                    ? kg.toInt().toString()
+                    : kg
+                        .toStringAsFixed(3)
+                        .replaceAll(RegExp(r'0+$'), '')
+                        .replaceAll(RegExp(r'\.$'), '');
           } else {
             final grams = (val * 1000).round();
             _ctrlWeight.text = grams.toString();
@@ -899,7 +949,7 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
           context,
           'Hari Sudah Ada',
           'Recording untuk hari ke-$newDay sudah ada. '
-          'Setiap hari hanya boleh ada satu catatan dalam satu periode.',
+              'Setiap hari hanya boleh ada satu catatan dalam satu periode.',
         );
       }
       return;
@@ -913,9 +963,10 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
     );
 
     // Validasi anomali dan typo
-    final initialPop = context.read<RecordingController>().initialPopulation > 0
-        ? context.read<RecordingController>().initialPopulation
-        : 1000;
+    final initialPop =
+        context.read<RecordingController>().initialPopulation > 0
+            ? context.read<RecordingController>().initialPopulation
+            : 1000;
     final anomalies = RecordingValidator.checkAnomalies(
       newRecording: updated,
       initialPopulation: initialPop,
@@ -926,11 +977,7 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
       if (anomaly.isBlocking) {
         setState(() => _isLoading = false);
         if (mounted) {
-          DialogHelper.showError(
-            context,
-            anomaly.title,
-            anomaly.message,
-          );
+          DialogHelper.showError(context, anomaly.title, anomaly.message);
         }
         return;
       }
@@ -973,93 +1020,98 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
         children: [
           AppTextFormField(
             controller: _ctrlDay,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                labelText: 'Umur Ayam (Hari)',
-                prefixIcon: Icons.calendar_month_outlined,
-                validator: RecordingValidator.validateDay,
-              ),
-              const SizedBox(height: 16),
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            labelText: 'Umur Ayam (Hari)',
+            prefixIcon: Icons.calendar_month_outlined,
+            validator: RecordingValidator.validateDay,
+          ),
+          const SizedBox(height: 16),
 
-              AppTextFormField(
-                controller: _ctrlFeed,
-                keyboardType: _feedUnit == 'Sak'
+          AppTextFormField(
+            controller: _ctrlFeed,
+            keyboardType:
+                _feedUnit == 'Sak'
                     ? TextInputType.number
                     : const TextInputType.numberWithOptions(decimal: true),
-                labelText: 'Pakan Terpakai ($_feedUnit)',
-                prefixIcon: Icons.inventory_2_outlined,
-                suffixIcon: _buildUnitToggle(
-                  currentUnit: _feedUnit,
-                  units: const ['Sak', 'Kg'],
-                  onChanged: _onFeedUnitChanged,
-                ),
-                validator: (v) => RecordingValidator.validateFeedInput(v, _feedUnit),
-              ),
-              const SizedBox(height: 16),
+            labelText: 'Pakan Terpakai ($_feedUnit)',
+            prefixIcon: Icons.inventory_2_outlined,
+            suffixIcon: _buildUnitToggle(
+              currentUnit: _feedUnit,
+              units: const ['Sak', 'Kg'],
+              onChanged: _onFeedUnitChanged,
+            ),
+            validator:
+                (v) => RecordingValidator.validateFeedInput(v, _feedUnit),
+          ),
+          const SizedBox(height: 16),
 
-              AppTextFormField(
-                controller: _ctrlWeight,
-                keyboardType: _weightUnit == 'Gram'
+          AppTextFormField(
+            controller: _ctrlWeight,
+            keyboardType:
+                _weightUnit == 'Gram'
                     ? TextInputType.number
                     : const TextInputType.numberWithOptions(decimal: true),
-                labelText: 'Berat Rata-Rata ($_weightUnit)',
-                prefixIcon: Icons.scale_outlined,
-                suffixIcon: _buildUnitToggle(
-                  currentUnit: _weightUnit,
-                  units: const ['Gram', 'Kg'],
-                  onChanged: _onWeightUnitChanged,
+            labelText: 'Berat Rata-Rata ($_weightUnit)',
+            prefixIcon: Icons.scale_outlined,
+            suffixIcon: _buildUnitToggle(
+              currentUnit: _weightUnit,
+              units: const ['Gram', 'Kg'],
+              onChanged: _onWeightUnitChanged,
+            ),
+            validator:
+                (v) => RecordingValidator.validateWeightInput(v, _weightUnit),
+          ),
+          const SizedBox(height: 16),
+
+          AppTextFormField(
+            controller: _ctrlMortality,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            labelText: 'Jumlah Kematian (Ekor)',
+            prefixIcon: Icons.heart_broken_outlined,
+            validator: RecordingValidator.validateMortality,
+          ),
+          const SizedBox(height: 28),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: cs.primary,
+                foregroundColor: cs.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
-                validator: (v) => RecordingValidator.validateWeightInput(v, _weightUnit),
+                elevation: 0,
               ),
-              const SizedBox(height: 16),
-
-              AppTextFormField(
-                controller: _ctrlMortality,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                labelText: 'Jumlah Kematian (Ekor)',
-                prefixIcon: Icons.heart_broken_outlined,
-                validator: RecordingValidator.validateMortality,
-              ),
-              const SizedBox(height: 28),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: cs.primary,
-                    foregroundColor: cs.onPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                    ),
-                    elevation: 0,
-                  ),
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
+              onPressed: _isLoading ? null : _submit,
+              child:
+                  _isLoading
                       ? SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              cs.onPrimary,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          'Simpan Perubahan',
-                          style: tt.labelLarge?.copyWith(
-                            color: cs.onPrimary,
-                            fontWeight: FontWeight.bold,
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            cs.onPrimary,
                           ),
                         ),
-                ),
-              ),
-            ],
+                      )
+                      : Text(
+                        'Simpan Perubahan',
+                        style: tt.labelLarge?.copyWith(
+                          color: cs.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+            ),
           ),
-        );
-      }
+        ],
+      ),
+    );
+  }
 
   Widget _buildUnitToggle({
     required String currentUnit,
@@ -1073,31 +1125,37 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
       padding: const EdgeInsets.only(right: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: units.map((unit) {
-          final isSelected = currentUnit == unit;
-          return GestureDetector(
-            onTap: () => onChanged(unit),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? cs.primary
-                    : cs.surfaceContainerHighest.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-              ),
-              child: Text(
-                unit,
-                style: tt.labelSmall?.copyWith(
-                  color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 12,
+        children:
+            units.map((unit) {
+              final isSelected = currentUnit == unit;
+              return GestureDetector(
+                onTap: () => onChanged(unit),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? cs.primary
+                            : cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                  ),
+                  child: Text(
+                    unit,
+                    style: tt.labelSmall?.copyWith(
+                      color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }

@@ -33,13 +33,15 @@ class ConfirmDialog extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final defaultIcon = isDestructive
-        ? Icons.warning_amber_rounded
-        : Icons.help_outline_rounded;
+    final defaultIcon =
+        isDestructive
+            ? Icons.warning_amber_rounded
+            : Icons.help_outline_rounded;
     final defaultIconColor = isDestructive ? AppColors.error : cs.primary;
-    final defaultIconBg = isDestructive
-        ? AppColors.error.withValues(alpha: 0.12)
-        : cs.secondaryContainer;
+    final defaultIconBg =
+        isDestructive
+            ? AppColors.error.withValues(alpha: 0.12)
+            : cs.secondaryContainer;
 
     return BaseDialog(
       title: title,
@@ -48,10 +50,7 @@ class ConfirmDialog extends StatelessWidget {
       iconBackgroundColor: iconBackgroundColor ?? defaultIconBg,
       content: Text(
         message,
-        style: tt.bodyMedium?.copyWith(
-          color: cs.onSurfaceVariant,
-          height: 1.4,
-        ),
+        style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
       ),
       actions: [
         TextButton(
@@ -99,17 +98,18 @@ class ConfirmDialog extends StatelessWidget {
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => ConfirmDialog(
-        title: title,
-        message: message,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        isDestructive: isDestructive,
-        icon: icon,
-        iconColor: iconColor,
-        iconBackgroundColor: iconBackgroundColor,
-        onConfirm: onConfirm,
-      ),
+      builder:
+          (context) => ConfirmDialog(
+            title: title,
+            message: message,
+            confirmText: confirmText,
+            cancelText: cancelText,
+            isDestructive: isDestructive,
+            icon: icon,
+            iconColor: iconColor,
+            iconBackgroundColor: iconBackgroundColor,
+            onConfirm: onConfirm,
+          ),
     );
   }
 }

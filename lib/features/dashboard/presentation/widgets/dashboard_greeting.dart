@@ -66,9 +66,10 @@ class DashboardGreeting extends StatelessWidget {
     final homeController = context.watch<HomeController>();
     final activePeriodName = homeController.activePeriodName;
 
-    final name = profile?.name.trim().isNotEmpty == true
-        ? profile!.name.trim()
-        : firebaseUser?.displayName?.trim().isNotEmpty == true
+    final name =
+        profile?.name.trim().isNotEmpty == true
+            ? profile!.name.trim()
+            : firebaseUser?.displayName?.trim().isNotEmpty == true
             ? firebaseUser!.displayName!.trim()
             : 'Peternak';
 
@@ -164,15 +165,16 @@ class DashboardGreeting extends StatelessWidget {
                       avatarUrl != null && avatarUrl.isNotEmpty
                           ? NetworkImage(avatarUrl)
                           : null,
-                  child: avatarUrl == null || avatarUrl.isEmpty
-                      ? Text(
-                          name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                          style: tt.titleMedium?.copyWith(
-                            color: cs.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
+                  child:
+                      avatarUrl == null || avatarUrl.isEmpty
+                          ? Text(
+                            name.isNotEmpty ? name[0].toUpperCase() : 'P',
+                            style: tt.titleMedium?.copyWith(
+                              color: cs.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                          : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -184,11 +186,7 @@ class DashboardGreeting extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          greetingIcon,
-                          size: 15,
-                          color: iconColor,
-                        ),
+                        Icon(greetingIcon, size: 15, color: iconColor),
                         const SizedBox(width: 5),
                         Text(
                           greeting,

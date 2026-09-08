@@ -50,16 +50,12 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
       context.read<ReportingController>().selectPeriod(period.id);
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const PeriodReportPage(),
-        ),
+        MaterialPageRoute(builder: (context) => const PeriodReportPage()),
       );
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => FormPeriod(period: period),
-        ),
+        MaterialPageRoute(builder: (context) => FormPeriod(period: period)),
       );
     }
   }
@@ -96,16 +92,20 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
                 onRefresh: () async => controller.reload(),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ── 1. Kartu Periode Aktif ───────────────────────────
                       ActivePeriodCard(
                         period: activePeriod,
-                        onManageTap: activePeriod != null
-                            ? () => _handlePeriodTap(context, activePeriod)
-                            : null,
+                        onManageTap:
+                            activePeriod != null
+                                ? () => _handlePeriodTap(context, activePeriod)
+                                : null,
                       ),
                       const SizedBox(height: 24),
 
@@ -131,9 +131,7 @@ class _PeriodListScreenState extends State<PeriodListScreen> {
     return Scaffold(
       appBar: const AppHeader(title: 'Periode Pemeliharaan'),
       floatingActionButton: const CreatePeriodButton(),
-      body: SafeArea(
-        child: body,
-      ),
+      body: SafeArea(child: body),
     );
   }
 }

@@ -102,13 +102,15 @@ class _InsightTile extends StatelessWidget {
     final isPos = _isPositive(text);
     final isWarn = _isWarning(text);
 
-    final Color accentColor = isPos
-        ? AppColors.success
-        : (isWarn ? AppColors.warning : cs.primary);
+    final Color accentColor =
+        isPos ? AppColors.success : (isWarn ? AppColors.warning : cs.primary);
 
-    final IconData icon = isPos
-        ? Icons.check_circle_rounded
-        : (isWarn ? Icons.warning_amber_rounded : Icons.info_outline_rounded);
+    final IconData icon =
+        isPos
+            ? Icons.check_circle_rounded
+            : (isWarn
+                ? Icons.warning_amber_rounded
+                : Icons.info_outline_rounded);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),

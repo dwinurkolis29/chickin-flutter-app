@@ -36,7 +36,7 @@ class AppFormBottomSheet extends StatelessWidget {
     Color? titleColor,
     bool isDismissible = true,
     required Widget Function(BuildContext context, StateSetter setModalState)
-        builder,
+    builder,
   }) {
     return DialogHelper.showBottomSheet<T>(
       context,
@@ -87,8 +87,8 @@ class AppFormBottomSheet extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: iconBackgroundColor ??
-                                  cs.secondaryContainer,
+                              color:
+                                  iconBackgroundColor ?? cs.secondaryContainer,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -171,11 +171,7 @@ class AppFormBottomSheet extends StatelessWidget {
                   color: iconBackgroundColor ?? cs.secondaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor ?? cs.primary,
-                  size: 22,
-                ),
+                child: Icon(icon, color: iconColor ?? cs.primary, size: 22),
               ),
               const SizedBox(width: 12),
             ],

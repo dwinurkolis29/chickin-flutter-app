@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_wrapper.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/onboarding/data/onboarding_data.dart';
 import 'package:recording_app/features/onboarding/presentation/widgets/onboarding_item.dart';
 
@@ -109,7 +110,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
           child:
               isLastPage
                   ? _buildStartButton(textTheme, colorScheme)
-                  : _buildNavButtons(textTheme, colorScheme, isWideScreen ? 480 : size.width),
+                  : _buildNavButtons(
+                    textTheme,
+                    colorScheme,
+                    isWideScreen ? 480 : size.width,
+                  ),
         ),
       ],
     );
@@ -122,10 +127,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
           margin: const EdgeInsets.symmetric(vertical: 24),
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: colorScheme.shadow.withValues(alpha: 0.08),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -136,7 +141,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
             child: content,
           ),
         ),
@@ -144,10 +149,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
 
     return Scaffold(
-      backgroundColor: isWideScreen ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3) : colorScheme.surface,
-      body: SafeArea(
-        child: content,
-      ),
+      backgroundColor:
+          isWideScreen
+              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+              : colorScheme.surface,
+      body: SafeArea(child: content),
     );
   }
 
@@ -159,9 +165,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       child: SizedBox(
         width: double.infinity,
         height: 54,
-        child: ElevatedButton(
+        child: FilledButton(
           onPressed: _finishOnboarding,
-          style: ElevatedButton.styleFrom(
+          style: FilledButton.styleFrom(
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
             elevation: 0,
@@ -182,7 +188,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   /// SKIP (left plain text) + NEXT pill button (right, ~40% screen width)
-  Widget _buildNavButtons(TextTheme textTheme, ColorScheme colorScheme, double screenWidth) {
+  Widget _buildNavButtons(
+    TextTheme textTheme,
+    ColorScheme colorScheme,
+    double screenWidth,
+  ) {
     return Padding(
       key: const ValueKey('nav'),
       padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
@@ -217,9 +227,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
           SizedBox(
             width: screenWidth * 0.40,
             height: 54,
-            child: ElevatedButton(
+            child: FilledButton(
               onPressed: _nextPage,
-              style: ElevatedButton.styleFrom(
+              style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
                 elevation: 0,

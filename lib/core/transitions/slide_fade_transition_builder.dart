@@ -15,21 +15,13 @@ class SlideFadeTransitionBuilder extends PageTransitionsBuilder {
     const end = Offset.zero;
     const curve = Curves.easeInOutCubic;
 
-    final tween = Tween(begin: begin, end: end).chain(
-      CurveTween(curve: curve),
-    );
+    final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
-    final fadeAnimation = CurvedAnimation(
-      parent: animation,
-      curve: curve,
-    );
+    final fadeAnimation = CurvedAnimation(parent: animation, curve: curve);
 
     return SlideTransition(
       position: animation.drive(tween),
-      child: FadeTransition(
-        opacity: fadeAnimation,
-        child: child,
-      ),
+      child: FadeTransition(opacity: fadeAnimation, child: child),
     );
   }
 }

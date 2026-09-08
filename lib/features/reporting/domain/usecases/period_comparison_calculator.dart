@@ -79,7 +79,11 @@ String formatCompactRupiah(double amount, {bool uppercase = false}) {
     final val = amount / 1000000.0;
     return 'Rp${val.toStringAsFixed(1).replaceAll('.', ',')} $suffix';
   } else if (abs > 0) {
-    final numFmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final numFmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
     return numFmt.format(amount);
   }
   return 'Rp0';
@@ -95,7 +99,11 @@ class PeriodComparisonCalculator {
     List<PeriodData> recentPeriods = const [],
     Map<String, FinanceSummary> pastFinanceMap = const {},
   }) {
-    final currencyFmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+    final currencyFmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
 
     // 1. Current values
     final currentProfit = currentFinance.netProfit;
@@ -104,15 +112,20 @@ class PeriodComparisonCalculator {
     final currentFcr = currentReport.fcr;
     final currentHpp = currentFinance.hppPerKg;
 
-    final profitText = currentFinance.hasTransactions
-        ? formatCompactRupiah(currentProfit, uppercase: true)
-        : 'Rp0 (Belum Dicatat)';
-    final mortalityText = '${currentMortality.toStringAsFixed(1).replaceAll('.', ',')}%';
-    final weightText = '${currentWeightKg.toStringAsFixed(2).replaceAll('.', ',')} KG';
-    final fcrText = currentFcr > 0 ? currentFcr.toStringAsFixed(2).replaceAll('.', ',') : '-';
-    final hppText = currentHpp > 0
-        ? 'HPP ${currencyFmt.format(currentHpp)}/kg'
-        : 'HPP -';
+    final profitText =
+        currentFinance.hasTransactions
+            ? formatCompactRupiah(currentProfit, uppercase: true)
+            : 'Rp0 (Belum Dicatat)';
+    final mortalityText =
+        '${currentMortality.toStringAsFixed(1).replaceAll('.', ',')}%';
+    final weightText =
+        '${currentWeightKg.toStringAsFixed(2).replaceAll('.', ',')} KG';
+    final fcrText =
+        currentFcr > 0
+            ? currentFcr.toStringAsFixed(2).replaceAll('.', ',')
+            : '-';
+    final hppText =
+        currentHpp > 0 ? 'HPP ${currencyFmt.format(currentHpp)}/kg' : 'HPP -';
 
     // 2. Previous values & Deltas
     double deltaProfit = 0.0;
@@ -150,7 +163,8 @@ class PeriodComparisonCalculator {
       hppComparisonLabel = 'dibanding ${prevPeriodName ?? 'P Sebelumnya'}';
 
       // Format Profit Delta
-      if (currentFinance.hasTransactions && (previousFinance?.hasTransactions ?? false)) {
+      if (currentFinance.hasTransactions &&
+          (previousFinance?.hasTransactions ?? false)) {
         final arrow = deltaProfit >= 0 ? '↑' : '↓';
         profitDeltaText = '$arrow ${formatCompactRupiah(deltaProfit.abs())}';
         isProfitBetter = deltaProfit >= 0;
@@ -160,18 +174,21 @@ class PeriodComparisonCalculator {
 
       // Format Mortality Delta (Mortalitas turun = lebih bagus)
       final mortArrow = deltaMortality <= 0 ? '↓' : '↑';
-      mortalityDeltaText = '$mortArrow ${deltaMortality.abs().toStringAsFixed(1).replaceAll('.', ',')}%';
+      mortalityDeltaText =
+          '$mortArrow ${deltaMortality.abs().toStringAsFixed(1).replaceAll('.', ',')}%';
       isMortalityBetter = deltaMortality <= 0;
 
       // Format Weight Delta (Bobot naik = lebih bagus)
       final weightArrow = deltaWeight >= 0 ? '↑' : '↓';
-      weightDeltaText = '$weightArrow ${deltaWeight.abs().toStringAsFixed(2).replaceAll('.', ',')}';
+      weightDeltaText =
+          '$weightArrow ${deltaWeight.abs().toStringAsFixed(2).replaceAll('.', ',')}';
       isWeightBetter = deltaWeight >= 0;
 
       // Format FCR Delta (FCR turun = lebih efisien)
       if (currentFcr > 0 && prevFcr > 0) {
         final fcrArrow = deltaFcr <= 0 ? '↓' : '↑';
-        fcrDeltaText = '$fcrArrow ${deltaFcr.abs().toStringAsFixed(2).replaceAll('.', ',')}';
+        fcrDeltaText =
+            '$fcrArrow ${deltaFcr.abs().toStringAsFixed(2).replaceAll('.', ',')}';
         isFcrBetter = deltaFcr <= 0;
       } else {
         fcrDeltaText = '-';
@@ -185,22 +202,32 @@ class PeriodComparisonCalculator {
         insights.add('✓ Kinerja periode membaik dibanding siklus sebelumnya');
       }
       if (isFcrBetter && currentFcr > 0) {
-        insights.add('✓ FCR semakin efisien (${currentFcr.toStringAsFixed(2)})');
+        insights.add(
+          '✓ FCR semakin efisien (${currentFcr.toStringAsFixed(2)})',
+        );
       } else if (!isFcrBetter && currentFcr > 0) {
         insights.add('⚠ FCR meningkat dibanding siklus sebelumnya');
       }
 
       if (isMortalityBetter) {
-        insights.add('✓ Mortalitas menurun menjadi ${currentMortality.toStringAsFixed(1)}%');
+        insights.add(
+          '✓ Mortalitas menurun menjadi ${currentMortality.toStringAsFixed(1)}%',
+        );
       } else {
-        insights.add('⚠ Mortalitas meningkat (${currentMortality.toStringAsFixed(1)}%) — cek biosekuriti');
+        insights.add(
+          '⚠ Mortalitas meningkat (${currentMortality.toStringAsFixed(1)}%) — cek biosekuriti',
+        );
       }
     } else {
       if (currentFcr > 0 && currentFcr <= 1.80) {
-        insights.add('✓ FCR efisien (${currentFcr.toStringAsFixed(2)}) sesuai standar broiler komersial');
+        insights.add(
+          '✓ FCR efisien (${currentFcr.toStringAsFixed(2)}) sesuai standar broiler komersial',
+        );
       }
       if (currentMortality <= 5.0) {
-        insights.add('✓ Mortalitas rendah (${currentMortality.toStringAsFixed(1)}%) — kesehatan ayam terjaga');
+        insights.add(
+          '✓ Mortalitas rendah (${currentMortality.toStringAsFixed(1)}%) — kesehatan ayam terjaga',
+        );
       }
     }
 
@@ -216,7 +243,9 @@ class PeriodComparisonCalculator {
       }
       if (highestMortCount > 10) {
         final weekNum = ((highestMortDay - 1) ~/ 7) + 1;
-        insights.add('⚠ Mortalitas tertinggi tercatat pada minggu ke-$weekNum (Hari $highestMortDay)');
+        insights.add(
+          '⚠ Mortalitas tertinggi tercatat pada minggu ke-$weekNum (Hari $highestMortDay)',
+        );
       }
     }
 
@@ -229,9 +258,10 @@ class PeriodComparisonCalculator {
       final sortedRecent = List<PeriodData>.from(recentPeriods)
         ..sort((a, b) => a.startDate.compareTo(b.startDate));
 
-      final lastThree = sortedRecent.length > 3
-          ? sortedRecent.sublist(sortedRecent.length - 3)
-          : sortedRecent;
+      final lastThree =
+          sortedRecent.length > 3
+              ? sortedRecent.sublist(sortedRecent.length - 3)
+              : sortedRecent;
 
       sequenceStr = lastThree.map((p) => p.name).join(' → ');
 
@@ -240,23 +270,29 @@ class PeriodComparisonCalculator {
         final last = lastThree.last;
 
         final firstProfit = pastFinanceMap[first.id]?.netProfit ?? 0.0;
-        final lastProfit = (last.id == currentReport.period.id)
-            ? currentProfit
-            : (pastFinanceMap[last.id]?.netProfit ?? 0.0);
+        final lastProfit =
+            (last.id == currentReport.period.id)
+                ? currentProfit
+                : (pastFinanceMap[last.id]?.netProfit ?? 0.0);
 
         final firstFcr = first.summary?.finalFCR ?? 0.0;
-        final lastFcr = (last.id == currentReport.period.id)
-            ? currentFcr
-            : (last.summary?.finalFCR ?? 0.0);
+        final lastFcr =
+            (last.id == currentReport.period.id)
+                ? currentFcr
+                : (last.summary?.finalFCR ?? 0.0);
 
-        final firstMort = (first.initialCapacity > 0 && first.summary != null)
-            ? (first.summary!.totalMortality / first.initialCapacity) * 100.0
-            : 0.0;
-        final lastMort = (last.id == currentReport.period.id)
-            ? currentMortality
-            : ((last.initialCapacity > 0 && last.summary != null)
-                ? (last.summary!.totalMortality / last.initialCapacity) * 100.0
-                : 0.0);
+        final firstMort =
+            (first.initialCapacity > 0 && first.summary != null)
+                ? (first.summary!.totalMortality / first.initialCapacity) *
+                    100.0
+                : 0.0;
+        final lastMort =
+            (last.id == currentReport.period.id)
+                ? currentMortality
+                : ((last.initialCapacity > 0 && last.summary != null)
+                    ? (last.summary!.totalMortality / last.initialCapacity) *
+                        100.0
+                    : 0.0);
 
         final profitArrow = lastProfit >= firstProfit ? '↑' : '↓';
         final mortArrow = lastMort <= firstMort ? '↓' : '↑';

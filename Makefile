@@ -14,24 +14,27 @@ else
     detected_OS := $(patsubst MINGW%,MSYS,$(detected_OS))
 endif
 
+# Flutter Binary (Auto-detect FVM or Flutter SDK)
+FLUTTER ?= $(shell which fvm >/dev/null 2>&1 && echo "fvm flutter" || echo "flutter")
+
 # Gradle & OS specifics
 ifeq ($(detected_OS),Windows)
   gradle := gradlew.bat
   open_cmd := explorer
   null_dev := nul
-  run_test := flutter test
-  run_test_coverage := flutter test --coverage
+  run_test := $(FLUTTER) test
+  run_test_coverage := $(FLUTTER) test --coverage
   # Windows: ambil device ID Android & iOS pertama dari output flutter devices
-  android_device = $(shell flutter devices 2>nul | findstr /i "android" | for /f "tokens=3" %i in ('more') do @echo %i & goto :break 2>nul || echo "")
-  ios_device     = $(shell flutter devices 2>nul | findstr /i "ios" | for /f "tokens=3" %i in ('more') do @echo %i & goto :break 2>nul || echo "")
+  android_device = $(shell $(FLUTTER) devices 2>nul | findstr /i "android" | for /f "tokens=3" %i in ('more') do @echo %i & goto :break 2>nul || echo "")
+  ios_device     = $(shell $(FLUTTER) devices 2>nul | findstr /i "ios" | for /f "tokens=3" %i in ('more') do @echo %i & goto :break 2>nul || echo "")
 else
   gradle := ./gradlew
   null_dev := /dev/null
   run_test := bash scripts/test_report.sh
   run_test_coverage := bash scripts/test_report.sh --full
   # Unix/Mac: ambil device ID (kolom ke-4 setelah '•') dari baris android/ios pertama
-  android_device = $(shell flutter devices 2>/dev/null | grep -i 'android' | head -1 | awk -F'•' '{gsub(/^[[:space:]]+|[[:space:]]+$$/, "", $$2); print $$2}')
-  ios_device     = $(shell flutter devices 2>/dev/null | grep -i 'ios' | head -1 | awk -F'•' '{gsub(/^[[:space:]]+|[[:space:]]+$$/, "", $$2); print $$2}')
+  android_device = $(shell $(FLUTTER) devices 2>/dev/null | grep -i 'android' | head -1 | awk -F'•' '{gsub(/^[[:space:]]+|[[:space:]]+$$/, "", $$2); print $$2}')
+  ios_device     = $(shell $(FLUTTER) devices 2>/dev/null | grep -i 'ios' | head -1 | awk -F'•' '{gsub(/^[[:space:]]+|[[:space:]]+$$/, "", $$2); print $$2}')
   ifeq ($(detected_OS),Darwin)
     open_cmd := open
   else
@@ -80,85 +83,85 @@ setup: pub-get ## Setup proyek (install dependencies)
 
 pub-get: ## Install dependencies
 	@echo '[INFO] Installing dependencies...'
-	@flutter pub get
+	@$(FLUTTER) pub get
 	@echo '[SUCCESS] Dependencies installed!'
 
 pub-upgrade: ## Upgrade dependencies
 	@echo '[INFO] Upgrading dependencies...'
-	@flutter pub upgrade
+	@$(FLUTTER) pub upgrade
 	@echo '[SUCCESS] Dependencies upgraded!'
 
 build-runner: ## Generate code (freezed, json_serializable, dll)
 	@echo '[BUILD] Running build_runner...'
-	@flutter pub run build_runner build --delete-conflicting-outputs
+	@$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 	@echo '[SUCCESS] Build runner selesai!'
 
 build-runner-watch: ## Watch mode untuk build_runner
 	@echo '[WATCH] Watching build_runner...'
-	@flutter pub run build_runner watch --delete-conflicting-outputs
+	@$(FLUTTER) pub run build_runner watch --delete-conflicting-outputs
 
 # =============================================================================
 ##@ Run Aplikasi
 # =============================================================================
 run: ## Run aplikasi (debug)
-	@flutter run
+	@$(FLUTTER) run
 
 run-release: ## Run aplikasi (release)
-	@flutter run --release
+	@$(FLUTTER) run --release
 
 run-a: ## Run di Android (auto-detect device)
 	$(eval _adev := $(android_device))
 	@[ -n "$(_adev)" ] || (echo '[ERROR] Tidak ada Android device yang terdeteksi. Pastikan device terhubung dan USB debugging aktif.' && exit 1)
 	@echo '[RUN] Menjalankan di Android device: $(_adev)'
-	@flutter run -d $(_adev)
+	@$(FLUTTER) run -d $(_adev)
 
 run-i: ## Run di iOS (auto-detect device)
 	$(eval _idev := $(ios_device))
 	@[ -n "$(_idev)" ] || (echo '[ERROR] Tidak ada iOS device yang terdeteksi.' && exit 1)
 	@echo '[RUN] Menjalankan di iOS device: $(_idev)'
-	@flutter run -d $(_idev)
+	@$(FLUTTER) run -d $(_idev)
 
 run-ar: ## Run di Android release (auto-detect device)
 	$(eval _adev := $(android_device))
 	@[ -n "$(_adev)" ] || (echo '[ERROR] Tidak ada Android device yang terdeteksi. Pastikan device terhubung dan USB debugging aktif.' && exit 1)
 	@echo '[RUN] Menjalankan release di Android device: $(_adev)'
-	@flutter run -d $(_adev) --release
+	@$(FLUTTER) run -d $(_adev) --release
 
 run-ir: ## Run di iOS release (auto-detect device)
 	$(eval _idev := $(ios_device))
 	@[ -n "$(_idev)" ] || (echo '[ERROR] Tidak ada iOS device yang terdeteksi.' && exit 1)
 	@echo '[RUN] Menjalankan release di iOS device: $(_idev)'
-	@flutter run -d $(_idev) --release
+	@$(FLUTTER) run -d $(_idev) --release
 
 run-web: ## Run di Web (Chrome)
-	@flutter run -d chrome
+	@$(FLUTTER) run -d chrome
 
 run-macos: ## Run di macOS
-	@flutter run -d macos
+	@$(FLUTTER) run -d macos
 
 # =============================================================================
 ##@ Build Aplikasi
 # =============================================================================
 build-apk: ## Build APK Release
 	@echo '[BUILD] Building APK Release...'
-	@flutter build apk --release
+	@$(FLUTTER) build apk --release
 	@echo '[SUCCESS] APK berhasil dibuat!'
 	@echo 'Location: build/app/outputs/flutter-apk/app-release.apk'
 
 build-aab: ## Build App Bundle (Play Store)
 	@echo '[BUILD] Building App Bundle...'
-	@flutter build appbundle --release
+	@$(FLUTTER) build appbundle --release
 	@echo '[SUCCESS] App Bundle berhasil dibuat!'
 	@echo 'Location: build/app/outputs/bundle/release/app-release.aab'
 
 build-ios: ## Build iOS
 	@echo '[BUILD] Building iOS...'
-	@flutter build ios --release
+	@$(FLUTTER) build ios --release
 	@echo '[SUCCESS] iOS build berhasil!'
 
 build-web: ## Build Web Release
 	@echo '[BUILD] Building Flutter Web...'
-	@flutter build web --release
+	@$(FLUTTER) build web --release
 	@echo '[SUCCESS] Web build berhasil!'
 
 deploy-web: clean pub-get build-runner build-web ## Build dan Deploy ke Firebase Hosting
@@ -171,7 +174,7 @@ deploy-web: clean pub-get build-runner build-web ## Build dan Deploy ke Firebase
 # =============================================================================
 clean: ## Clean build files
 	@echo '[CLEAN] Cleaning...'
-	@flutter clean
+	@$(FLUTTER) clean
 	@echo '[SUCCESS] Clean selesai!'
 
 fresh: clean pub-get build-runner ## Fresh install (clean + pub get + build runner)
@@ -184,7 +187,7 @@ rebuild: clean build-runner build-apk ## Rebuild APK (clean + build runner + bui
 # =============================================================================
 analyze: ## Analisis kode
 	@echo '[ANALYZE] Analyzing code...'
-	@flutter analyze
+	@$(FLUTTER) analyze
 	@echo '[SUCCESS] Analysis selesai!'
 
 format: ## Format kode
@@ -208,7 +211,7 @@ lint: format analyze ## Lint (format + analyze)
 ##@ Utility
 # =============================================================================
 devices: ## List connected devices
-	@flutter devices
+	@$(FLUTTER) devices
 
 doctor: ## Check development environment variables
 	@echo ============================================================
@@ -224,7 +227,7 @@ doctor: ## Check development environment variables
 	@echo Android Device  : $(android_device)
 	@echo iOS Device      : $(ios_device)
 	@echo ============================================================
-	@flutter doctor
+	@$(FLUTTER) doctor
 
 stop-daemon: ## Stop Gradle daemon to free memory
 	@echo '[GRADLE] Stopping Gradle daemon...'

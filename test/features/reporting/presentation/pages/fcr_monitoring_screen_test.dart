@@ -26,13 +26,13 @@ class _MockHomeController extends HomeController {
     List<RecordingData>? cachedRecordings,
     Stream<List<RecordingData>>? recordingsStream,
     bool isLoadingPeriod = false,
-  })  : _mockActivePeriodId = activePeriodId,
-        _mockActivePeriodName = activePeriodName,
-        _mockInitialPopulation = initialPopulation,
-        _mockCachedRecordings = cachedRecordings,
-        _mockRecordingsStream = recordingsStream,
-        _mockIsLoadingPeriod = isLoadingPeriod,
-        super(firebaseService: _FakeFirebaseService());
+  }) : _mockActivePeriodId = activePeriodId,
+       _mockActivePeriodName = activePeriodName,
+       _mockInitialPopulation = initialPopulation,
+       _mockCachedRecordings = cachedRecordings,
+       _mockRecordingsStream = recordingsStream,
+       _mockIsLoadingPeriod = isLoadingPeriod,
+       super(firebaseService: _FakeFirebaseService());
 
   @override
   String? get activePeriodId => _mockActivePeriodId;
@@ -73,7 +73,9 @@ void main() {
   }
 
   group('FCRMonitoringScreen Widget Tests', () {
-    testWidgets('menampilkan empty state jika belum ada periode aktif', (tester) async {
+    testWidgets('menampilkan empty state jika belum ada periode aktif', (
+      tester,
+    ) async {
       final ctrl = _MockHomeController(activePeriodId: null);
 
       await tester.pumpWidget(createWidgetUnderTest(ctrl));
@@ -83,7 +85,9 @@ void main() {
       expect(find.text('Tidak Ada Periode Aktif'), findsOneWidget);
     });
 
-    testWidgets('menampilkan empty state jika recordings kosong', (tester) async {
+    testWidgets('menampilkan empty state jika recordings kosong', (
+      tester,
+    ) async {
       final ctrl = _MockHomeController(
         activePeriodId: 'period-1',
         activePeriodName: 'Flok Broiler 1',
@@ -96,7 +100,9 @@ void main() {
       expect(find.text('Belum Ada Data Recording'), findsOneWidget);
     });
 
-    testWidgets('menampilkan hero summary card dan tab harian secara default', (tester) async {
+    testWidgets('menampilkan hero summary card dan tab harian secara default', (
+      tester,
+    ) async {
       final recordings = [
         RecordingData(
           day: 1,

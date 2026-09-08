@@ -16,10 +16,10 @@ class FCRData {
 
   // Konversi ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
-        'minggu_ke': mingguKe,
-        'total_pakan': totalPakan,
-        'sisa_ayam': sisaAyam,
-        'berat_ayam': beratAyam,
-        'fcr': fcr,
-      };
+    'minggu_ke': mingguKe,
+    'total_pakan': totalPakan,
+    'sisa_ayam': sisaAyam,
+    'berat_ayam': beratAyam,
+    'fcr': fcr,
+  };
 }

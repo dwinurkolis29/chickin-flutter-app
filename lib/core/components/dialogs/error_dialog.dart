@@ -31,7 +31,8 @@ class ErrorDialog extends StatelessWidget {
 
     final defaultIcon = icon ?? Icons.error_outline_rounded;
     final defaultIconColor = iconColor ?? AppColors.error;
-    final defaultIconBg = iconBackgroundColor ??
+    final defaultIconBg =
+        iconBackgroundColor ??
         (defaultIconColor == AppColors.error
             ? AppColors.error.withValues(alpha: 0.12)
             : cs.secondaryContainer);
@@ -43,10 +44,7 @@ class ErrorDialog extends StatelessWidget {
       iconBackgroundColor: showIcon ? defaultIconBg : null,
       content: Text(
         message,
-        style: tt.bodyMedium?.copyWith(
-          color: cs.onSurfaceVariant,
-          height: 1.4,
-        ),
+        style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.4),
       ),
       actions: [
         TextButton(
@@ -77,15 +75,16 @@ class ErrorDialog extends StatelessWidget {
   }) {
     return showDialog(
       context: context,
-      builder: (context) => ErrorDialog(
-        title: title,
-        message: message,
-        showIcon: showIcon,
-        icon: icon,
-        iconColor: iconColor,
-        iconBackgroundColor: iconBackgroundColor,
-        buttonText: buttonText,
-      ),
+      builder:
+          (context) => ErrorDialog(
+            title: title,
+            message: message,
+            showIcon: showIcon,
+            icon: icon,
+            iconColor: iconColor,
+            iconBackgroundColor: iconBackgroundColor,
+            buttonText: buttonText,
+          ),
     );
   }
 }

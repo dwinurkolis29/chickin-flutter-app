@@ -30,7 +30,8 @@ void main() {
       child: MaterialApp(
         theme: AppTheme.build(AppThemeOption.light),
         home: FormUser(
-          userProfile: initialProfile ??
+          userProfile:
+              initialProfile ??
               const UserProfile(
                 name: 'H. Ahmad Supriyadi',
                 phone: '081234567890',
@@ -42,16 +43,19 @@ void main() {
   }
 
   group('FormUser Widget Tests', () {
-    testWidgets('menampilkan header panduan, field input yang jelas, dan tombol simpan', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan header panduan, field input yang jelas, dan tombol simpan',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      expect(find.text('Edit Profil Peternak'), findsOneWidget);
-      expect(find.text('Informasi Akun Peternak'), findsOneWidget);
-      expect(find.text('Nama Lengkap Peternak'), findsOneWidget);
-      expect(find.text('Nomor HP / WhatsApp Aktif'), findsOneWidget);
-      expect(find.text('Alamat Domisili Peternak'), findsOneWidget);
-      expect(find.text('Simpan Perubahan'), findsOneWidget);
-    });
+        expect(find.text('Edit Profil Peternak'), findsOneWidget);
+        expect(find.text('Informasi Akun Peternak'), findsOneWidget);
+        expect(find.text('Nama Lengkap Peternak'), findsOneWidget);
+        expect(find.text('Nomor HP / WhatsApp Aktif'), findsOneWidget);
+        expect(find.text('Alamat Domisili Peternak'), findsOneWidget);
+        expect(find.text('Simpan Perubahan'), findsOneWidget);
+      },
+    );
   });
 }

@@ -30,7 +30,8 @@ class _HorizontalSlidePageTransitionsBuilder extends PageTransitionsBuilder {
       begin: Offset.zero,
       end: const Offset(-0.3, 0.0),
     ).animate(
-        CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut));
+      CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInOut),
+    );
 
     return SlideTransition(
       position: slideOut,
@@ -51,35 +52,45 @@ class _HorizontalSlidePageTransitionsBuilder extends PageTransitionsBuilder {
 class AppTheme {
   AppTheme._();
 
-  static const double pillRadius     = 999.0;
-  static const double cardRadius     = 24.0;
-  static const double rowRadius      = 16.0;
+  static const double pillRadius = 999.0;
+  static const double cardRadius = 24.0;
+  static const double rowRadius = 16.0;
   static const double snackbarRadius = 4.0;
 
   static ThemeData build(AppThemeOption option) {
     final isDark = option == AppThemeOption.dark;
 
     // ── Resolved surface tokens ──────────────────────────────────────────────
-    final Color surface              = isDark ? AppColors.surfaceDark              : AppColors.surface;
-    final Color surfaceContainer     = isDark ? AppColors.surfaceContainerDark     : AppColors.surfaceContainer;
-    final Color surfaceContainerHigh = isDark ? AppColors.surfaceContainerHighDark : AppColors.surfaceContainerHigh;
-    final Color onSurface            = isDark ? AppColors.onSurfaceDark            : AppColors.onSurface;
-    final Color onSurfaceVariant     = isDark ? AppColors.onSurfaceVariantDark     : AppColors.onSurfaceVariant;
-    final Color outline              = isDark ? AppColors.outlineDark              : AppColors.outline;
-    final Color outlineVariant       = isDark ? AppColors.outlineVariantDark       : AppColors.outlineVariant;
-    final Color background           = isDark ? AppColors.backgroundDark           : AppColors.background;
+    final Color surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final Color surfaceContainer =
+        isDark ? AppColors.surfaceContainerDark : AppColors.surfaceContainer;
+    final Color surfaceContainerHigh =
+        isDark
+            ? AppColors.surfaceContainerHighDark
+            : AppColors.surfaceContainerHigh;
+    final Color onSurface =
+        isDark ? AppColors.onSurfaceDark : AppColors.onSurface;
+    final Color onSurfaceVariant =
+        isDark ? AppColors.onSurfaceVariantDark : AppColors.onSurfaceVariant;
+    final Color outline = isDark ? AppColors.outlineDark : AppColors.outline;
+    final Color outlineVariant =
+        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariant;
+    final Color background =
+        isDark ? AppColors.backgroundDark : AppColors.background;
 
     // ── Primary tokens ───────────────────────────────────────────────────────
     const Color primary = AppColors.primaryBlue;
     const Color onPrimary = AppColors.blueOnPrimary;
 
     // primary container: tinted version of primary untuk chip/badge selected state
-    final Color primaryContainer = isDark
-        ? AppColors.bluePrimaryContainerDark
-        : AppColors.bluePrimaryContainer;
-    final Color onPrimaryContainer = isDark
-        ? AppColors.blueOnPrimaryContainerDark
-        : AppColors.blueOnPrimaryContainer;
+    final Color primaryContainer =
+        isDark
+            ? AppColors.bluePrimaryContainerDark
+            : AppColors.bluePrimaryContainer;
+    final Color onPrimaryContainer =
+        isDark
+            ? AppColors.blueOnPrimaryContainerDark
+            : AppColors.blueOnPrimaryContainer;
     final Color secondary =
         isDark ? AppColors.blueSecondaryDark : AppColors.blueSecondary;
     final Color onSecondary =
@@ -123,12 +134,14 @@ class AppTheme {
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.android: const ZoomPageTransitionsBuilder(),
-          TargetPlatform.iOS: kIsWeb
-              ? const _HorizontalSlidePageTransitionsBuilder()
-              : const CupertinoPageTransitionsBuilder(),
-          TargetPlatform.macOS: kIsWeb
-              ? const _HorizontalSlidePageTransitionsBuilder()
-              : const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS:
+              kIsWeb
+                  ? const _HorizontalSlidePageTransitionsBuilder()
+                  : const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS:
+              kIsWeb
+                  ? const _HorizontalSlidePageTransitionsBuilder()
+                  : const CupertinoPageTransitionsBuilder(),
         },
       ),
 
@@ -145,7 +158,8 @@ class AppTheme {
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
           systemNavigationBarColor: surface,
-          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarIconBrightness:
+              isDark ? Brightness.light : Brightness.dark,
           systemNavigationBarDividerColor: Colors.transparent,
         ),
       ),
@@ -224,8 +238,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(pillRadius),
           borderSide: const BorderSide(color: AppColors.formError, width: 2),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 14,
+        ),
         hintStyle: TextStyle(color: onSurfaceVariant),
       ),
 

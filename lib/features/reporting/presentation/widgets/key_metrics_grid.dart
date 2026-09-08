@@ -35,68 +35,74 @@ class KeyMetricsGrid extends StatelessWidget {
 
     final displayHarvested = harvestedChicks ?? finalPopulation;
     final displayWeightKg = harvestedWeightKg ?? (finalPopulation * 1.8);
-    final displayAvgWeightKg = avgHarvestWeightKg ??
+    final displayAvgWeightKg =
+        avgHarvestWeightKg ??
         (displayHarvested > 0 ? displayWeightKg / displayHarvested : 1.8);
 
-    final harvestPercent = initialPopulation > 0
-        ? ((displayHarvested / initialPopulation) * 100).toStringAsFixed(0)
-        : '0';
+    final harvestPercent =
+        initialPopulation > 0
+            ? ((displayHarvested / initialPopulation) * 100).toStringAsFixed(0)
+            : '0';
 
     return GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.30,
-          children: [
-            // Card 1: FCR Panen
-            _SimpleMetricCard(
-              label: 'FCR Panen',
-              value: fcr > 0 ? fcr.toStringAsFixed(2) : '1.60',
-              statusText: fcr <= 1.80 ? 'Efisien' : (fcr <= 2.20 ? 'Normal' : 'Boros'),
-              statusColor: fcr <= 1.80
+      crossAxisCount: 2,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 1.30,
+      children: [
+        // Card 1: FCR Panen
+        _SimpleMetricCard(
+          label: 'FCR Panen',
+          value: fcr > 0 ? fcr.toStringAsFixed(2) : '1.60',
+          statusText:
+              fcr <= 1.80 ? 'Efisien' : (fcr <= 2.20 ? 'Normal' : 'Boros'),
+          statusColor:
+              fcr <= 1.80
                   ? AppColors.success
                   : (fcr <= 2.20 ? cs.primary : AppColors.error),
-              subtitle: 'Hemat konsumsi pakan',
-              icon: Icons.scale_rounded,
-            ),
+          subtitle: 'Hemat konsumsi pakan',
+          icon: Icons.scale_rounded,
+        ),
 
-            // Card 2: Daya Hidup
-            _SimpleMetricCard(
-              label: 'Daya Hidup',
-              value: '${survivalRate.toStringAsFixed(1)}%',
-              statusText: survivalRate >= 95
+        // Card 2: Daya Hidup
+        _SimpleMetricCard(
+          label: 'Daya Hidup',
+          value: '${survivalRate.toStringAsFixed(1)}%',
+          statusText:
+              survivalRate >= 95
                   ? 'Bagus'
                   : (survivalRate >= 90 ? 'Cukup' : 'Kurang'),
-              statusColor: survivalRate >= 95
+          statusColor:
+              survivalRate >= 95
                   ? AppColors.success
                   : (survivalRate >= 90 ? cs.primary : AppColors.warning),
-              subtitle: 'Mati: ${fmt.format(totalMortality)} ekor',
-              icon: Icons.favorite_rounded,
-            ),
+          subtitle: 'Mati: ${fmt.format(totalMortality)} ekor',
+          icon: Icons.favorite_rounded,
+        ),
 
-            // Card 3: Ayam Dipanen
-            _SimpleMetricCard(
-              label: 'Ayam Dipanen',
-              value: '${fmt.format(displayHarvested)} ekor',
-              statusText: '$harvestPercent%',
-              statusColor: cs.primary,
-              subtitle: 'Dari ${fmt.format(initialPopulation)} DOC',
-              icon: Icons.egg_outlined,
-            ),
+        // Card 3: Ayam Dipanen
+        _SimpleMetricCard(
+          label: 'Ayam Dipanen',
+          value: '${fmt.format(displayHarvested)} ekor',
+          statusText: '$harvestPercent%',
+          statusColor: cs.primary,
+          subtitle: 'Dari ${fmt.format(initialPopulation)} DOC',
+          icon: Icons.egg_outlined,
+        ),
 
-            // Card 4: Rata-rata Bobot
-            _SimpleMetricCard(
-              label: 'Rata-rata Bobot',
-              value: '${displayAvgWeightKg.toStringAsFixed(2)} kg',
-              statusText: '${(displayAvgWeightKg * 1000).toStringAsFixed(0)} g',
-              statusColor: AppColors.success,
-              subtitle: 'Total: ${fmt.format(displayWeightKg.round())} kg',
-              icon: Icons.fitness_center_rounded,
-            ),
-          ],
-        );
+        // Card 4: Rata-rata Bobot
+        _SimpleMetricCard(
+          label: 'Rata-rata Bobot',
+          value: '${displayAvgWeightKg.toStringAsFixed(2)} kg',
+          statusText: '${(displayAvgWeightKg * 1000).toStringAsFixed(0)} g',
+          statusColor: AppColors.success,
+          subtitle: 'Total: ${fmt.format(displayWeightKg.round())} kg',
+          icon: Icons.fitness_center_rounded,
+        ),
+      ],
+    );
   }
 }
 
@@ -151,7 +157,10 @@ class _SimpleMetricCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppTheme.pillRadius),

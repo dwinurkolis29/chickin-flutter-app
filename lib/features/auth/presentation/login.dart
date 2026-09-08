@@ -32,22 +32,27 @@ class _LoginState extends State<Login> {
     setState(() => _isLoading = true);
     try {
       final result = await context.read<AuthService>().signIn(
-            email: _controllerEmail.text.trim(),
-            password: _controllerPassword.text,
-          );
+        email: _controllerEmail.text.trim(),
+        password: _controllerPassword.text,
+      );
       if (!mounted) return;
 
       if (!result.success) {
         DialogHelper.showError(
           context,
           'Gagal Masuk',
-          result.errorMessage ?? 'Email atau kata sandi tidak cocok. Silakan periksa kembali.',
+          result.errorMessage ??
+              'Email atau kata sandi tidak cocok. Silakan periksa kembali.',
         );
       }
       // Sukses: AuthWrapper reaktif — tidak perlu navigate manual.
     } catch (e) {
       if (mounted) {
-        DialogHelper.showError(context, 'Terjadi Kesalahan', 'Gagal memproses masuk: $e');
+        DialogHelper.showError(
+          context,
+          'Terjadi Kesalahan',
+          'Gagal memproses masuk: $e',
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -56,7 +61,9 @@ class _LoginState extends State<Login> {
 
   // ─── Lupa Password Dialog ──────────────────────────────────────────────────
   void _showForgotPasswordDialog() {
-    final resetEmailCtrl = TextEditingController(text: _controllerEmail.text.trim());
+    final resetEmailCtrl = TextEditingController(
+      text: _controllerEmail.text.trim(),
+    );
     final resetFormKey = GlobalKey<FormState>();
 
     showDialog(
@@ -78,7 +85,11 @@ class _LoginState extends State<Login> {
                   color: cs.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
-                child: Icon(Icons.lock_reset_rounded, color: cs.primary, size: 22),
+                child: Icon(
+                  Icons.lock_reset_rounded,
+                  color: cs.primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -130,19 +141,20 @@ class _LoginState extends State<Login> {
               onPressed: () => Navigator.pop(dialogCtx),
               child: Text(
                 'Batal',
-                style: tt.labelLarge?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: tt.labelLarge?.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
+            FilledButton(
+              style: FilledButton.styleFrom(
                 backgroundColor: cs.primary,
                 foregroundColor: cs.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
               ),
               onPressed: () async {
                 if (!(resetFormKey.currentState?.validate() ?? false)) return;
@@ -150,7 +162,9 @@ class _LoginState extends State<Login> {
                 Navigator.pop(dialogCtx);
 
                 try {
-                  await context.read<AuthService>().sendPasswordResetEmail(email);
+                  await context.read<AuthService>().sendPasswordResetEmail(
+                    email,
+                  );
                   if (mounted) {
                     AppSnackbar.showSuccess(
                       context,
@@ -189,7 +203,10 @@ class _LoginState extends State<Login> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 20.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -211,11 +228,12 @@ class _LoginState extends State<Login> {
                     child: Image.asset(
                       'assets/logos/logo.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Icon(
-                        Icons.flutter_dash,
-                        size: 40,
-                        color: cs.primary,
-                      ),
+                      errorBuilder:
+                          (_, __, ___) => Icon(
+                            Icons.flutter_dash,
+                            size: 40,
+                            color: cs.primary,
+                          ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -249,7 +267,11 @@ class _LoginState extends State<Login> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.login_rounded, color: cs.primary, size: 20),
+                              Icon(
+                                Icons.login_rounded,
+                                color: cs.primary,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'MASUK KE AKUN',
@@ -271,12 +293,15 @@ class _LoginState extends State<Login> {
                             prefixIcon: Icons.mail_outline_rounded,
                             keyboardType: TextInputType.emailAddress,
                             enabled: !busy,
-                            onEditingComplete: () => _focusNodePassword.requestFocus(),
+                            onEditingComplete:
+                                () => _focusNodePassword.requestFocus(),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Email tidak boleh kosong';
                               }
-                              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
                               if (!emailRegex.hasMatch(value.trim())) {
                                 return 'Format email tidak valid (contoh: budi@gmail.com)';
                               }
@@ -303,7 +328,10 @@ class _LoginState extends State<Login> {
                                 size: 20,
                                 color: cs.onSurfaceVariant,
                               ),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              onPressed:
+                                  () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -321,9 +349,13 @@ class _LoginState extends State<Login> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: busy ? null : _showForgotPasswordDialog,
+                              onPressed:
+                                  busy ? null : _showForgotPasswordDialog,
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 4,
+                                ),
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
@@ -342,33 +374,39 @@ class _LoginState extends State<Login> {
                           SizedBox(
                             width: double.infinity,
                             height: 52,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
                                 backgroundColor: cs.primary,
                                 foregroundColor: cs.onPrimary,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.pillRadius,
+                                  ),
                                 ),
                                 elevation: 0,
                               ),
                               onPressed: busy ? null : _handleLogin,
-                              child: _isLoading
-                                  ? SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+                              child:
+                                  _isLoading
+                                      ? SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                cs.onPrimary,
+                                              ),
+                                        ),
+                                      )
+                                      : Text(
+                                        'Masuk Sekarang',
+                                        style: tt.titleSmall?.copyWith(
+                                          color: cs.onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.3,
+                                        ),
                                       ),
-                                    )
-                                  : Text(
-                                      'Masuk Sekarang',
-                                      style: tt.titleSmall?.copyWith(
-                                        color: cs.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
                             ),
                           ),
                         ],
@@ -389,20 +427,23 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: busy
-                            ? null
-                            : () async {
-                                _formKey.currentState?.reset();
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const Signup(),
-                                  ),
-                                );
-                                if (result != null && result is Map<String, String>) {
-                                  _controllerEmail.text = result['email'] ?? '';
-                                }
-                              },
+                        onTap:
+                            busy
+                                ? null
+                                : () async {
+                                  _formKey.currentState?.reset();
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const Signup(),
+                                    ),
+                                  );
+                                  if (result != null &&
+                                      result is Map<String, String>) {
+                                    _controllerEmail.text =
+                                        result['email'] ?? '';
+                                  }
+                                },
                         child: Text(
                           'Daftar di Sini',
                           style: tt.bodyMedium?.copyWith(

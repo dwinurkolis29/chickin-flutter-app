@@ -41,21 +41,22 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
     return Scaffold(
       appBar: const AppHeader(title: 'Pertumbuhan Bobot Ayam'),
       body: SafeArea(
-        child: widget.recordings != null
-            ? _buildContent(context, widget.recordings!)
-            : StreamBuilder<List<RecordingData>>(
-                stream: controller.recordingsStream,
-                builder: (context, snapshot) {
-                  if (controller.isLoadingPeriod ||
-                      (snapshot.connectionState == ConnectionState.waiting &&
-                          !snapshot.hasData)) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+        child:
+            widget.recordings != null
+                ? _buildContent(context, widget.recordings!)
+                : StreamBuilder<List<RecordingData>>(
+                  stream: controller.recordingsStream,
+                  builder: (context, snapshot) {
+                    if (controller.isLoadingPeriod ||
+                        (snapshot.connectionState == ConnectionState.waiting &&
+                            !snapshot.hasData)) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  final recordings = snapshot.data ?? [];
-                  return _buildContent(context, recordings);
-                },
-              ),
+                    final recordings = snapshot.data ?? [];
+                    return _buildContent(context, recordings);
+                  },
+                ),
       ),
     );
   }
@@ -65,10 +66,9 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
     final tt = Theme.of(context).textTheme;
 
     // Filter data recording dengan bobot > 0 dan urutkan berdasarkan hari
-    final validRecordings = recordings
-        .where((r) => r.avgWeightGram > 0)
-        .toList()
-      ..sort((a, b) => a.day.compareTo(b.day));
+    final validRecordings =
+        recordings.where((r) => r.avgWeightGram > 0).toList()
+          ..sort((a, b) => a.day.compareTo(b.day));
 
     if (validRecordings.isEmpty) {
       return AppEmptyState(
@@ -92,12 +92,14 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
     final adg = totalGain / daySpan; // Average Daily Gain (gr/hari)
 
     // Data spot untuk fl_chart
-    final spots = validRecordings
-        .map((r) => FlSpot(r.day.toDouble(), r.avgWeightGram.toDouble()))
-        .toList();
+    final spots =
+        validRecordings
+            .map((r) => FlSpot(r.day.toDouble(), r.avgWeightGram.toDouble()))
+            .toList();
 
     final maxY = (latestWeight * 1.15).ceilToDouble();
-    final maxX = (latestRecording.day >= 7 ? latestRecording.day.toDouble() : 7.0);
+    final maxX =
+        (latestRecording.day >= 7 ? latestRecording.day.toDouble() : 7.0);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -198,13 +200,19 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                         color: cs.secondaryContainer,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.scale_rounded, size: 16, color: cs.primary),
+                      child: Icon(
+                        Icons.scale_rounded,
+                        size: 16,
+                        color: cs.primary,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Bobot Terakhir',
-                        style: tt.labelMedium?.copyWith(color: cs.onSurfaceVariant),
+                        style: tt.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -266,13 +274,19 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                         color: cs.secondaryContainer,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.trending_up_rounded, size: 16, color: cs.primary),
+                      child: Icon(
+                        Icons.trending_up_rounded,
+                        size: 16,
+                        color: cs.primary,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Rata-rata',
-                        style: tt.labelMedium?.copyWith(color: cs.onSurfaceVariant),
+                        style: tt.labelMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -348,7 +362,11 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                   color: cs.secondaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.show_chart_rounded, size: 20, color: cs.primary),
+                child: Icon(
+                  Icons.show_chart_rounded,
+                  size: 20,
+                  color: cs.primary,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -387,16 +405,21 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: maxY > 1000 ? 500 : 200,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: cs.outlineVariant.withValues(alpha: 0.5),
-                    strokeWidth: 1,
-                    dashArray: [4, 4],
-                  ),
+                  getDrawingHorizontalLine:
+                      (value) => FlLine(
+                        color: cs.outlineVariant.withValues(alpha: 0.5),
+                        strokeWidth: 1,
+                        dashArray: [4, 4],
+                      ),
                 ),
                 titlesData: FlTitlesData(
                   show: true,
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -440,18 +463,25 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                   enabled: true,
                   touchTooltipData: LineTouchTooltipData(
                     getTooltipColor: (_) => cs.inverseSurface,
-                    tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    tooltipPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((barSpot) {
                         return LineTooltipItem(
                           'Hari ${barSpot.x.toInt()}\n',
                           tt.bodySmall?.copyWith(
-                            color: cs.onInverseSurface.withValues(alpha: 0.8),
-                            fontSize: 11,
-                          ) ?? const TextStyle(),
+                                color: cs.onInverseSurface.withValues(
+                                  alpha: 0.8,
+                                ),
+                                fontSize: 11,
+                              ) ??
+                              const TextStyle(),
                           children: [
                             TextSpan(
-                              text: '${numberFmt.format(barSpot.y.toInt())} Gram',
+                              text:
+                                  '${numberFmt.format(barSpot.y.toInt())} Gram',
                               style: tt.titleSmall?.copyWith(
                                 color: cs.onInverseSurface,
                                 fontWeight: FontWeight.bold,
@@ -529,9 +559,7 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
             ),
             Text(
               '${dailyAdgList.length} Hari Catatan',
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -587,10 +615,15 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.pillRadius,
+                        ),
                       ),
                       child: Text(
                         'HARI ${item.day}',
@@ -612,7 +645,10 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -646,7 +682,11 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(Icons.trending_up_rounded, size: 20, color: statusColor),
+                          Icon(
+                            Icons.trending_up_rounded,
+                            size: 20,
+                            color: statusColor,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '+${item.dailyGainGram.toStringAsFixed(0)} g/hari',

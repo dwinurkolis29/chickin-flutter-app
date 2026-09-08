@@ -45,9 +45,10 @@ class CalculateFCR {
       final weekEndDay = week * 7;
 
       // Filter recordings for this week
-      final weekRecordings = sortedRecordings.where((rec) {
-        return rec.day >= weekStartDay && rec.day <= weekEndDay;
-      }).toList();
+      final weekRecordings =
+          sortedRecordings.where((rec) {
+            return rec.day >= weekStartDay && rec.day <= weekEndDay;
+          }).toList();
 
       if (weekRecordings.isEmpty) continue;
 
@@ -66,19 +67,22 @@ class CalculateFCR {
 
       // Perhitungkan panen parsial hingga akhir minggu ini
       final lastDayInWeek = weekRecordings.last.day;
-      final harvestedChicksUpToWeek = harvests
+      final harvestedChicksUpToWeek =
+          harvests
               ?.where((h) => h.day <= lastDayInWeek)
               .fold(0, (sum, h) => sum + h.chicks) ??
           0;
-      final harvestedWeightUpToWeek = harvests
+      final harvestedWeightUpToWeek =
+          harvests
               ?.where((h) => h.day <= lastDayInWeek)
               .fold(0.0, (sum, h) => sum + h.weightKg) ??
           0.0;
 
       // Sisa ayam di kandang
-      final remainingChickens =
-          (initialCapacity - cumulativeDeaths - harvestedChicksUpToWeek)
-              .clamp(0, initialCapacity);
+      final remainingChickens = (initialCapacity -
+              cumulativeDeaths -
+              harvestedChicksUpToWeek)
+          .clamp(0, initialCapacity);
       if (remainingChickens <= 0 && harvestedChicksUpToWeek == 0) continue;
 
       // Get last day recording for current average weight
@@ -92,13 +96,15 @@ class CalculateFCR {
       // Calculate FCR: total pakan / total biomassa kumulatif
       final fcr = totalBiomass > 0 ? cumulativeFeedKg / totalBiomass : 0.0;
 
-      weeklyFCR.add(FCRData(
-        mingguKe: week,
-        totalPakan: double.parse(cumulativeFeedKg.toStringAsFixed(2)),
-        sisaAyam: remainingChickens,
-        beratAyam: double.parse(totalBiomass.toStringAsFixed(2)),
-        fcr: double.parse(fcr.toStringAsFixed(2)),
-      ));
+      weeklyFCR.add(
+        FCRData(
+          mingguKe: week,
+          totalPakan: double.parse(cumulativeFeedKg.toStringAsFixed(2)),
+          sisaAyam: remainingChickens,
+          beratAyam: double.parse(totalBiomass.toStringAsFixed(2)),
+          fcr: double.parse(fcr.toStringAsFixed(2)),
+        ),
+      );
     }
 
     return weeklyFCR;
@@ -130,35 +136,40 @@ class CalculateFCR {
       cumulativeFeedKg += dailyFeedKg;
       cumulativeDeaths += rec.mortality;
 
-      final harvestedChicksUpToDay = harvests
+      final harvestedChicksUpToDay =
+          harvests
               ?.where((h) => h.day <= rec.day)
               .fold(0, (sum, h) => sum + h.chicks) ??
           0;
-      final harvestedWeightUpToDay = harvests
+      final harvestedWeightUpToDay =
+          harvests
               ?.where((h) => h.day <= rec.day)
               .fold(0.0, (sum, h) => sum + h.weightKg) ??
           0.0;
 
-      final remainingChickens =
-          (initialCapacity - cumulativeDeaths - harvestedChicksUpToDay)
-              .clamp(0, initialCapacity);
+      final remainingChickens = (initialCapacity -
+              cumulativeDeaths -
+              harvestedChicksUpToDay)
+          .clamp(0, initialCapacity);
       final avgWeightKg = rec.avgWeightGram / 1000.0;
       final inHouseBiomassKg = remainingChickens * avgWeightKg;
       final totalBiomassKg = inHouseBiomassKg + harvestedWeightUpToDay;
       final fcr = totalBiomassKg > 0 ? cumulativeFeedKg / totalBiomassKg : 0.0;
 
-      dailyList.add(DailyFCRData(
-        day: rec.day,
-        date: rec.createdAt,
-        dailyFeedKg: double.parse(dailyFeedKg.toStringAsFixed(2)),
-        cumulativeFeedKg: double.parse(cumulativeFeedKg.toStringAsFixed(2)),
-        dailyMortality: rec.mortality,
-        cumulativeMortality: cumulativeDeaths,
-        sisaAyam: remainingChickens,
-        avgWeightGram: rec.avgWeightGram,
-        totalBiomassKg: double.parse(totalBiomassKg.toStringAsFixed(2)),
-        fcr: double.parse(fcr.toStringAsFixed(2)),
-      ));
+      dailyList.add(
+        DailyFCRData(
+          day: rec.day,
+          date: rec.createdAt,
+          dailyFeedKg: double.parse(dailyFeedKg.toStringAsFixed(2)),
+          cumulativeFeedKg: double.parse(cumulativeFeedKg.toStringAsFixed(2)),
+          dailyMortality: rec.mortality,
+          cumulativeMortality: cumulativeDeaths,
+          sisaAyam: remainingChickens,
+          avgWeightGram: rec.avgWeightGram,
+          totalBiomassKg: double.parse(totalBiomassKg.toStringAsFixed(2)),
+          fcr: double.parse(fcr.toStringAsFixed(2)),
+        ),
+      );
     }
 
     return dailyList;

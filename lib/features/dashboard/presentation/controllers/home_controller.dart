@@ -14,14 +14,14 @@ class HomeController extends ChangeNotifier {
   final FirebaseService _firebaseService;
   final CalculateFCR _calculateFCRUseCase;
   final CalculateADG _calculateADGUseCase;
-  
+
   HomeController({
     required FirebaseService firebaseService,
     CalculateFCR? calculateFCRUseCase,
     CalculateADG? calculateADGUseCase,
-  })  : _firebaseService = firebaseService,
-        _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR(),
-        _calculateADGUseCase = calculateADGUseCase ?? CalculateADG();
+  }) : _firebaseService = firebaseService,
+       _calculateFCRUseCase = calculateFCRUseCase ?? CalculateFCR(),
+       _calculateADGUseCase = calculateADGUseCase ?? CalculateADG();
 
   PeriodData? _activePeriod;
   String? _activePeriodId;
@@ -50,7 +50,7 @@ class HomeController extends ChangeNotifier {
       final activePeriod = await _firebaseService.getActivePeriod(uid);
       _activePeriod = activePeriod;
       _activePeriodId = activePeriod?.id;
-      
+
       // Load initial population from cage data
       if (_activePeriodId != null) {
         // Use period.initialCapacity as the source of truth for initial population
@@ -58,10 +58,13 @@ class HomeController extends ChangeNotifier {
         _initialPopulation = activePeriod!.initialCapacity;
         _activePeriodName = activePeriod.name;
         // Cache streams so they don't get recreated on every rebuild
-        _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!, uid);
+        _recordingsStream = _firebaseService.getRecordingsStream(
+          _activePeriodId!,
+          uid,
+        );
         _weightStream = _firebaseService.getWeightStream(_activePeriodId!, uid);
       }
-      
+
       _isLoadingPeriod = false;
       notifyListeners();
     } catch (e) {
@@ -75,7 +78,9 @@ class HomeController extends ChangeNotifier {
   // BuildScope._flushDirtyElements yang sedang berjalan saat pop navigation.
   void refreshStreams() {
     if (_activePeriodId != null) {
-      _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
+      _recordingsStream = _firebaseService.getRecordingsStream(
+        _activePeriodId!,
+      );
       _weightStream = _firebaseService.getWeightStream(_activePeriodId!);
       SchedulerBinding.instance.addPostFrameCallback((_) {
         notifyListeners();
@@ -137,10 +142,16 @@ class HomeController extends ChangeNotifier {
     );
   }
 
-  List<DailyADGData> calculateDailyADG(List<RecordingData> recordings, [double initialWeightKg = 0.04]) {
+  List<DailyADGData> calculateDailyADG(
+    List<RecordingData> recordings, [
+    double initialWeightKg = 0.04,
+  ]) {
     if (recordings.isEmpty) {
       return <DailyADGData>[];
     }
-    return _calculateADGUseCase.executeDaily(recordings, initialWeightKg: initialWeightKg);
+    return _calculateADGUseCase.executeDaily(
+      recordings,
+      initialWeightKg: initialWeightKg,
+    );
   }
 }

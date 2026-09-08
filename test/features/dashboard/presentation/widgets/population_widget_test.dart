@@ -28,45 +28,50 @@ void main() {
   }
 
   group('PopulationSection Widget Tests', () {
-    testWidgets('menampilkan metrik populasi dan kelangsungan hidup dengan benar', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        populationRemain: 2988,
-        capacity: 3000,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan metrik populasi dan kelangsungan hidup dengan benar',
+      (tester) async {
+        await tester.pumpWidget(
+          createWidgetUnderTest(populationRemain: 2988, capacity: 3000),
+        );
+        await tester.pumpAndSettle();
 
-      // Judul Card
-      expect(find.text('Populasi Ayam'), findsOneWidget);
-      expect(find.byIcon(Icons.flutter_dash), findsNothing);
-      expect(find.text('Ayam Hidup'), findsOneWidget);
-      expect(find.text('Ekor'), findsOneWidget);
+        // Judul Card
+        expect(find.text('Populasi Ayam'), findsOneWidget);
+        expect(find.byIcon(Icons.flutter_dash), findsNothing);
+        expect(find.text('Ayam Hidup'), findsOneWidget);
+        expect(find.text('Ekor'), findsOneWidget);
 
-      // Angka Terformat
-      expect(find.text('2.988'), findsOneWidget);
+        // Angka Terformat
+        expect(find.text('2.988'), findsOneWidget);
 
-      // Survival & Badge Sangat Baik
-      expect(find.text('99.6%'), findsOneWidget);
-      expect(find.text('Survival'), findsOneWidget);
-      expect(find.text('Sangat Baik'), findsOneWidget);
-    });
+        // Survival & Badge Sangat Baik
+        expect(find.text('99.6%'), findsOneWidget);
+        expect(find.text('Survival'), findsOneWidget);
+        expect(find.text('Sangat Baik'), findsOneWidget);
+      },
+    );
 
-    testWidgets('menampilkan status Perhatian jika survival rate antara 90% - 95%', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        populationRemain: 2750,
-        capacity: 3000,
-      ));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan status Perhatian jika survival rate antara 90% - 95%',
+      (tester) async {
+        await tester.pumpWidget(
+          createWidgetUnderTest(populationRemain: 2750, capacity: 3000),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('2.750'), findsOneWidget);
-      expect(find.text('91.7%'), findsOneWidget);
-      expect(find.text('Perhatian'), findsOneWidget);
-    });
+        expect(find.text('2.750'), findsOneWidget);
+        expect(find.text('91.7%'), findsOneWidget);
+        expect(find.text('Perhatian'), findsOneWidget);
+      },
+    );
 
-    testWidgets('menangani kapasitas 0 dengan aman tanpa error', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        populationRemain: 0,
-        capacity: 0,
-      ));
+    testWidgets('menangani kapasitas 0 dengan aman tanpa error', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        createWidgetUnderTest(populationRemain: 0, capacity: 0),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('0'), findsOneWidget);

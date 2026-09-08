@@ -49,7 +49,6 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final FirebaseService _firebaseService = FirebaseService();
 
-
   // Logical page index: 0=Home, 1=Periode, 2=Laporan, 3=Profil
   int _selectedIndex = 0;
 
@@ -140,22 +139,23 @@ class _DashboardState extends State<Dashboard> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                  Icon(
+                Icon(
                   isSelected ? activeIcon : inactiveIcon,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                  color:
+                      isSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
                   size: 24,
                 ),
                 const SizedBox(height: 3),
                 Text(
                   label,
                   style: textTheme.labelSmall?.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color:
+                        isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -173,31 +173,25 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       appBar: AppHeader(
         title: switch (_selectedIndex) {
-          _kHome    => 'BroilerKu',
+          _kHome => 'BroilerKu',
           _kPeriode => 'Periode',
           _kLaporan => 'Laporan',
-          _kProfil  => 'Profil',
-          _         => 'BroilerKu',
+          _kProfil => 'Profil',
+          _ => 'BroilerKu',
         },
         isHome: true,
       ),
       body: SafeArea(
         bottom: false,
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
+        child: IndexedStack(index: _selectedIndex, children: _pages),
       ),
 
       // ── FAB ──────────────────────────────────────────────────────────
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Semantics(
         button: true,
         label:
-            _selectedIndex == _kPeriode
-                ? 'Tambah periode'
-                : 'Tambah recording',
+            _selectedIndex == _kPeriode ? 'Tambah periode' : 'Tambah recording',
         child: FloatingActionButton(
           onPressed:
               _selectedIndex == _kPeriode
@@ -272,8 +266,6 @@ class DashboardContent extends StatefulWidget {
   State<DashboardContent> createState() => _DashboardContentState();
 }
 
-
-
 class _DashboardContentState extends State<DashboardContent>
     with AutomaticKeepAliveClientMixin {
   @override
@@ -345,10 +337,11 @@ class _DashboardContentState extends State<DashboardContent>
             message: 'Anda belum login',
             subtitle: 'Silakan login terlebih dahulu',
             action: FilledButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Login()),
-              ),
+              onPressed:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login()),
+                  ),
               child: const Text('Masuk'),
             ),
           );
@@ -375,7 +368,8 @@ class _DashboardContentState extends State<DashboardContent>
                   child: AppEmptyState(
                     icon: Icons.calendar_today_outlined,
                     message: 'Belum Ada Periode Aktif',
-                    subtitle: 'Mulai siklus pemeliharaan baru untuk mencatat populasi DOC, konsumsi pakan, dan bobot ayam.',
+                    subtitle:
+                        'Mulai siklus pemeliharaan baru untuk mencatat populasi DOC, konsumsi pakan, dan bobot ayam.',
                     actionLabel: 'Buat Periode Baru',
                     onAction: () async {
                       await Navigator.push(
@@ -440,7 +434,8 @@ class _DashboardContentState extends State<DashboardContent>
                           AppEmptyState(
                             icon: Icons.assignment_outlined,
                             message: 'Belum Ada Data Recording',
-                            subtitle: 'Mulai catat konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
+                            subtitle:
+                                'Mulai catat konsumsi pakan, kematian, dan penimbangan bobot ayam untuk hari ini.',
                             actionLabel: 'Tambah Recording',
                             onAction: _navigateToAddRecord,
                           ),
@@ -448,14 +443,13 @@ class _DashboardContentState extends State<DashboardContent>
                       );
                     }
 
-                    final fcrResults =
-                        controller.calculateWeeklyFCR(recordings);
-                    final fcr = fcrResults.isNotEmpty
-                        ? fcrResults.last.fcr
-                        : 0.0;
-                    final populationRemain = fcrResults.isNotEmpty
-                        ? fcrResults.last.sisaAyam
-                        : 0;
+                    final fcrResults = controller.calculateWeeklyFCR(
+                      recordings,
+                    );
+                    final fcr =
+                        fcrResults.isNotEmpty ? fcrResults.last.fcr : 0.0;
+                    final populationRemain =
+                        fcrResults.isNotEmpty ? fcrResults.last.sisaAyam : 0;
                     final umur =
                         recordings.isNotEmpty ? recordings.last.day : 0;
 
@@ -481,8 +475,7 @@ class _DashboardContentState extends State<DashboardContent>
                         if (recentPartialHarvest != null)
                           Center(
                             child: ConstrainedBox(
-                              constraints:
-                                  const BoxConstraints(maxWidth: 720),
+                              constraints: const BoxConstraints(maxWidth: 720),
                               child: PostThinningStressAlert(
                                 lastPartialHarvest: recentPartialHarvest,
                               ),
@@ -503,24 +496,21 @@ class _DashboardContentState extends State<DashboardContent>
                         const SizedBox(height: 10),
                         Center(
                           child: ConstrainedBox(
-                            constraints:
-                                const BoxConstraints(maxWidth: 720),
+                            constraints: const BoxConstraints(maxWidth: 720),
                             child: ChickenDataTable(
                               chickenDataList: recordings,
-                              onViewAll: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const DetailRecording(),
-                                ),
-                              ),
+                              onViewAll:
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const DetailRecording(),
+                                    ),
+                                  ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 10),
-                        FCRDataCard(
-                          fcrData: fcrResults,
-                          showViewAllLink: true,
-                        ),
+                        FCRDataCard(fcrData: fcrResults, showViewAllLink: true),
                         const SizedBox(height: 80),
                       ],
                     );

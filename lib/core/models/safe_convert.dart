@@ -63,8 +63,11 @@ int? asIntOrNull(Map<String, dynamic>? json, String key) {
   return toInt(json[key]);
 }
 
-double asDouble(Map<String, dynamic>? json, String key,
-    {double defaultValue = 0.0}) {
+double asDouble(
+  Map<String, dynamic>? json,
+  String key, {
+  double defaultValue = 0.0,
+}) {
   if (json == null || !json.containsKey(key)) return defaultValue;
   return toDouble(json[key]);
 }
@@ -74,20 +77,29 @@ double? asDoubleOrNull(Map<String, dynamic>? json, String key) {
   return toDouble(json[key]);
 }
 
-bool asBool(Map<String, dynamic>? json, String key,
-    {bool defaultValue = false}) {
+bool asBool(
+  Map<String, dynamic>? json,
+  String key, {
+  bool defaultValue = false,
+}) {
   if (json == null || !json.containsKey(key)) return defaultValue;
   return toBool(json[key]);
 }
 
-String asString(Map<String, dynamic>? json, String key,
-    {String defaultValue = ""}) {
+String asString(
+  Map<String, dynamic>? json,
+  String key, {
+  String defaultValue = "",
+}) {
   if (json == null || !json.containsKey(key)) return defaultValue;
   return toString(json[key]);
 }
 
-Map<String, dynamic> asMap(Map<String, dynamic>? json, String key,
-    {Map<String, dynamic>? defaultValue}) {
+Map<String, dynamic> asMap(
+  Map<String, dynamic>? json,
+  String key, {
+  Map<String, dynamic>? defaultValue,
+}) {
   if (json == null || !json.containsKey(key)) {
     return defaultValue ?? <String, dynamic>{};
   }
@@ -99,18 +111,28 @@ List asList(Map<String, dynamic>? json, String key, {List? defaultValue}) {
   return toList(json[key]);
 }
 
-List<int> asListInt(Map<String, dynamic>? json, String key,
-    {List? defaultValue}) {
-  return asList(json, key, defaultValue: defaultValue)
-      .map((e) => toInt(e))
-      .toList();
+List<int> asListInt(
+  Map<String, dynamic>? json,
+  String key, {
+  List? defaultValue,
+}) {
+  return asList(
+    json,
+    key,
+    defaultValue: defaultValue,
+  ).map((e) => toInt(e)).toList();
 }
 
-List<String> asListString(Map<String, dynamic>? json, String key,
-    {List? defaultValue}) {
-  return asList(json, key, defaultValue: defaultValue)
-      .map((e) => toString(e))
-      .toList();
+List<String> asListString(
+  Map<String, dynamic>? json,
+  String key, {
+  List? defaultValue,
+}) {
+  return asList(
+    json,
+    key,
+    defaultValue: defaultValue,
+  ).map((e) => toString(e)).toList();
 }
 
 T asT<T>(Map<String, dynamic>? json, String key, {T? defaultValue}) {

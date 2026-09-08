@@ -75,9 +75,10 @@ class _FakeThemeController extends ChangeNotifier implements ThemeController {
   String _currentMode = 'light';
 
   @override
-  ThemeMode get themeMode => _currentMode == 'dark'
-      ? ThemeMode.dark
-      : _currentMode == 'system'
+  ThemeMode get themeMode =>
+      _currentMode == 'dark'
+          ? ThemeMode.dark
+          : _currentMode == 'system'
           ? ThemeMode.system
           : ThemeMode.light;
 
@@ -85,9 +86,10 @@ class _FakeThemeController extends ChangeNotifier implements ThemeController {
   String get currentThemeKey => _currentMode;
 
   @override
-  String get themeModeName => _currentMode == 'dark'
-      ? 'Tema Gelap'
-      : _currentMode == 'system'
+  String get themeModeName =>
+      _currentMode == 'dark'
+          ? 'Tema Gelap'
+          : _currentMode == 'system'
           ? 'Sesuai Sistem'
           : 'Tema Terang';
 
@@ -114,17 +116,17 @@ void main() {
     _FakeUserController? userController,
     _FakeThemeController? themeController,
   }) {
-    final fakeAuth = authService ??
+    final fakeAuth =
+        authService ??
         _FakeAuthService(
           user: _FakeUser(
             displayName: 'Budi Peternak',
             email: 'budi@example.com',
           ),
         );
-    final fakeUser = userController ??
-        _FakeUserController(
-          profile: const UserProfile(name: 'Budi Peternak'),
-        );
+    final fakeUser =
+        userController ??
+        _FakeUserController(profile: const UserProfile(name: 'Budi Peternak'));
     final fakeTheme = themeController ?? _FakeThemeController();
 
     return MultiProvider(
@@ -141,7 +143,9 @@ void main() {
   }
 
   group('ProfileScreen Widget Tests', () {
-    testWidgets('menampilkan profil pengguna, badge aktif, dan daftar menu', (tester) async {
+    testWidgets('menampilkan profil pengguna, badge aktif, dan daftar menu', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pump();
 
@@ -179,7 +183,9 @@ void main() {
       expect(find.text('Hubungi support'), findsNothing);
     });
 
-    testWidgets('menampilkan dialog Tentang Aplikasi saat diklik', (tester) async {
+    testWidgets('menampilkan dialog Tentang Aplikasi saat diklik', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pump();
 
@@ -200,7 +206,9 @@ void main() {
       expect(find.text('Versi 1.0.0 • Production Ready'), findsNothing);
     });
 
-    testWidgets('menampilkan konfirmasi keluar dan memanggil signOut', (tester) async {
+    testWidgets('menampilkan konfirmasi keluar dan memanggil signOut', (
+      tester,
+    ) async {
       final authService = _FakeAuthService(
         user: _FakeUser(displayName: 'Budi', email: 'budi@test.com'),
       );
@@ -225,53 +233,61 @@ void main() {
       expect(authService._signOutCalled, isTrue);
     });
 
-    testWidgets('menampilkan menu Tema Aplikasi dan dapat mengubah tema ke Tema Gelap', (tester) async {
-      final themeCtrl = _FakeThemeController();
+    testWidgets(
+      'menampilkan menu Tema Aplikasi dan dapat mengubah tema ke Tema Gelap',
+      (tester) async {
+        final themeCtrl = _FakeThemeController();
 
-      await tester.pumpWidget(createWidgetUnderTest(themeController: themeCtrl));
-      await tester.pump();
+        await tester.pumpWidget(
+          createWidgetUnderTest(themeController: themeCtrl),
+        );
+        await tester.pump();
 
-      // Ensure menu Tema Aplikasi is visible
-      await tester.ensureVisible(find.text('Tema Aplikasi'));
-      await tester.pumpAndSettle();
+        // Ensure menu Tema Aplikasi is visible
+        await tester.ensureVisible(find.text('Tema Aplikasi'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('PENGATURAN & APLIKASI'), findsOneWidget);
-      expect(find.text('Tema Terang'), findsWidgets);
+        expect(find.text('PENGATURAN & APLIKASI'), findsOneWidget);
+        expect(find.text('Tema Terang'), findsWidgets);
 
-      // Open bottom sheet
-      await tester.tap(find.text('Tema Aplikasi'));
-      await tester.pumpAndSettle();
+        // Open bottom sheet
+        await tester.tap(find.text('Tema Aplikasi'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Tema Aplikasi'), findsOneWidget);
-      expect(find.text('Tema Terang'), findsWidgets);
-      expect(find.text('Tema Gelap'), findsOneWidget);
-      expect(find.text('Sesuai Sistem'), findsOneWidget);
+        expect(find.text('Pilih Tema Aplikasi'), findsOneWidget);
+        expect(find.text('Tema Terang'), findsWidgets);
+        expect(find.text('Tema Gelap'), findsOneWidget);
+        expect(find.text('Sesuai Sistem'), findsOneWidget);
 
-      // Select Tema Gelap
-      await tester.tap(find.text('Tema Gelap'));
-      await tester.pumpAndSettle();
+        // Select Tema Gelap
+        await tester.tap(find.text('Tema Gelap'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Tema Aplikasi'), findsNothing);
-      expect(themeCtrl.currentThemeKey, equals('dark'));
-      expect(themeCtrl.themeModeName, equals('Tema Gelap'));
-    });
+        expect(find.text('Pilih Tema Aplikasi'), findsNothing);
+        expect(themeCtrl.currentThemeKey, equals('dark'));
+        expect(themeCtrl.themeModeName, equals('Tema Gelap'));
+      },
+    );
 
-    testWidgets('menampilkan toggle Pengingat Recording Harian dan dapat di-toggle', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pump();
+    testWidgets(
+      'menampilkan toggle Pengingat Recording Harian dan dapat di-toggle',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pump();
 
-      // Scroll to toggle item
-      await tester.ensureVisible(find.text('Pengingat Recording Harian'));
-      await tester.pumpAndSettle();
+        // Scroll to toggle item
+        await tester.ensureVisible(find.text('Pengingat Recording Harian'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pengingat Recording Harian'), findsOneWidget);
-      expect(find.byType(Switch), findsOneWidget);
+        expect(find.text('Pengingat Recording Harian'), findsOneWidget);
+        expect(find.byType(Switch), findsOneWidget);
 
-      // Tap toggle Switch
-      await tester.tap(find.byType(Switch));
-      await tester.pumpAndSettle();
+        // Tap toggle Switch
+        await tester.tap(find.byType(Switch));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(Switch), findsOneWidget);
-    });
+        expect(find.byType(Switch), findsOneWidget);
+      },
+    );
   });
 }

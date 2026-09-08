@@ -4,7 +4,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 
-export 'package:image_cropper/image_cropper.dart' show CropAspectRatioPreset, CropStyle;
+export 'package:image_cropper/image_cropper.dart'
+    show CropAspectRatioPreset, CropStyle;
 export 'package:image_picker/image_picker.dart' show ImageSource;
 
 class ImagePickerHelper {
@@ -29,14 +30,15 @@ class ImagePickerHelper {
     bool lockAspectRatio = false,
     List<CropAspectRatioPreset>? presets,
   }) async {
-    final defaultPresets = aspectRatio != null && lockAspectRatio
-        ? [aspectRatio]
-        : [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.ratio16x9,
-            CropAspectRatioPreset.ratio4x3,
-            CropAspectRatioPreset.square,
-          ];
+    final defaultPresets =
+        aspectRatio != null && lockAspectRatio
+            ? [aspectRatio]
+            : [
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.ratio16x9,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPreset.square,
+            ];
 
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: imageFile.path,

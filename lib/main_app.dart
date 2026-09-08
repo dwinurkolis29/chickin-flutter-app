@@ -79,8 +79,7 @@ class MainApp extends StatelessWidget {
         ),
 
         ChangeNotifierProxyProvider<AuthService, FinanceController>(
-          create:
-              (_) => FinanceController(firebaseService: FirebaseService()),
+          create: (_) => FinanceController(firebaseService: FirebaseService()),
           update: (_, auth, controller) {
             controller!.onAuthChanged(auth.currentUid);
             return controller;

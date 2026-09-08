@@ -13,7 +13,8 @@ class ImageSourcePickerBottomSheet extends StatelessWidget {
   const ImageSourcePickerBottomSheet({
     super.key,
     this.title = 'Pilih Sumber Foto',
-    this.subtitle = 'Pilih galeri untuk foto tersimpan atau gunakan kamera untuk mengambil foto baru:',
+    this.subtitle =
+        'Pilih galeri untuk foto tersimpan atau gunakan kamera untuk mengambil foto baru:',
   });
 
   /// Helper statis untuk menampilkan bottom sheet dan mengembalikan [ImageSource] yang dipilih
@@ -32,7 +33,8 @@ class ImageSourcePickerBottomSheet extends StatelessWidget {
       ),
       builder: ImageSourcePickerBottomSheet(
         title: title,
-        subtitle: subtitle ??
+        subtitle:
+            subtitle ??
             'Pilih galeri untuk foto tersimpan atau gunakan kamera untuk mengambil foto baru:',
       ),
     );
@@ -131,7 +133,8 @@ class ImageSourcePickerBottomSheet extends StatelessWidget {
             _SourceOptionCard(
               icon: Icons.camera_alt_rounded,
               title: 'Ambil Foto Kamera',
-              description: 'Buka kamera untuk mengambil foto baru secara langsung',
+              description:
+                  'Buka kamera untuk mengambil foto baru secara langsung',
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             const SizedBox(height: 16),
@@ -206,11 +209,7 @@ class _SourceOptionCard extends StatelessWidget {
                     color: cs.secondaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: cs.primary,
-                    size: 22,
-                  ),
+                  child: Icon(icon, color: cs.primary, size: 22),
                 ),
                 const SizedBox(width: 14),
                 Expanded(

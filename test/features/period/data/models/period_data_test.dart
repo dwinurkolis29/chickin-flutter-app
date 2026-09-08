@@ -82,14 +82,35 @@ void main() {
   // ─────────────────────────────────────────────────────────────────────────
   group('PeriodSummary', () {
     group('default values', () {
-      test('totalFeedKg 0', () => expect(const PeriodSummary().totalFeedKg, 0.0));
-      test('finalPopulation 0', () => expect(const PeriodSummary().finalPopulation, 0));
-      test('totalMortality 0', () => expect(const PeriodSummary().totalMortality, 0));
-      test('finalBiomass 0', () => expect(const PeriodSummary().finalBiomass, 0.0));
+      test(
+        'totalFeedKg 0',
+        () => expect(const PeriodSummary().totalFeedKg, 0.0),
+      );
+      test(
+        'finalPopulation 0',
+        () => expect(const PeriodSummary().finalPopulation, 0),
+      );
+      test(
+        'totalMortality 0',
+        () => expect(const PeriodSummary().totalMortality, 0),
+      );
+      test(
+        'finalBiomass 0',
+        () => expect(const PeriodSummary().finalBiomass, 0.0),
+      );
       test('finalFCR 0', () => expect(const PeriodSummary().finalFCR, 0.0));
-      test('avgDailyGain 0', () => expect(const PeriodSummary().avgDailyGain, 0.0));
-      test('weeklyFCR empty list', () => expect(const PeriodSummary().weeklyFCR, []));
-      test('insights empty list', () => expect(const PeriodSummary().insights, []));
+      test(
+        'avgDailyGain 0',
+        () => expect(const PeriodSummary().avgDailyGain, 0.0),
+      );
+      test(
+        'weeklyFCR empty list',
+        () => expect(const PeriodSummary().weeklyFCR, []),
+      );
+      test(
+        'insights empty list',
+        () => expect(const PeriodSummary().insights, []),
+      );
     });
 
     group('fromJson — null', () {
@@ -165,7 +186,10 @@ void main() {
           finalBiomass: 2112.3,
           finalFCR: 1.51,
           avgDailyGain: 57.4,
-          weeklyFCR: [WeeklyFCR(week: 1, fcr: 0.68), WeeklyFCR(week: 5, fcr: 1.51)],
+          weeklyFCR: [
+            WeeklyFCR(week: 1, fcr: 0.68),
+            WeeklyFCR(week: 5, fcr: 1.51),
+          ],
           insights: ['FCR baik', 'Mortalitas rendah'],
         );
         final json = original.toJson();
@@ -215,23 +239,38 @@ void main() {
       });
 
       test('initialWeight default 0.4', () {
-        expect(PeriodData(startDate: baseDate, createdAt: createdAt).initialWeight, 0.4);
+        expect(
+          PeriodData(startDate: baseDate, createdAt: createdAt).initialWeight,
+          0.4,
+        );
       });
 
       test('isActive default true', () {
-        expect(PeriodData(startDate: baseDate, createdAt: createdAt).isActive, true);
+        expect(
+          PeriodData(startDate: baseDate, createdAt: createdAt).isActive,
+          true,
+        );
       });
 
       test('isDeleted default false', () {
-        expect(PeriodData(startDate: baseDate, createdAt: createdAt).isDeleted, false);
+        expect(
+          PeriodData(startDate: baseDate, createdAt: createdAt).isDeleted,
+          false,
+        );
       });
 
       test('endDate default null', () {
-        expect(PeriodData(startDate: baseDate, createdAt: createdAt).endDate, null);
+        expect(
+          PeriodData(startDate: baseDate, createdAt: createdAt).endDate,
+          null,
+        );
       });
 
       test('summary default null', () {
-        expect(PeriodData(startDate: baseDate, createdAt: createdAt).summary, null);
+        expect(
+          PeriodData(startDate: baseDate, createdAt: createdAt).summary,
+          null,
+        );
       });
     });
 
@@ -288,10 +327,7 @@ void main() {
       test('summary di-parse jika ada', () {
         final result = PeriodData.fromJson({
           'name': 'Test',
-          'summary': {
-            'totalFeedKg': 3200.0,
-            'finalFCR': 1.51,
-          },
+          'summary': {'totalFeedKg': 3200.0, 'finalFCR': 1.51},
         });
         expect(result.summary, isNotNull);
         expect(result.summary!.totalFeedKg, 3200.0);

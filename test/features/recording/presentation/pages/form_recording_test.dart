@@ -39,15 +39,23 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
   Future<PeriodData?> getActivePeriod([String? uid]) async => mockActivePeriod;
 
   @override
-  Stream<List<RecordingData>> getRecordingsStream(String periodId, [String? uid]) =>
-      Stream.value(mockRecordings);
+  Stream<List<RecordingData>> getRecordingsStream(
+    String periodId, [
+    String? uid,
+  ]) => Stream.value(mockRecordings);
 
   @override
-  Future<List<RecordingData>> getRecordingsOnce(String periodId, [String? uid]) async =>
-      mockRecordings;
+  Future<List<RecordingData>> getRecordingsOnce(
+    String periodId, [
+    String? uid,
+  ]) async => mockRecordings;
 
   @override
-  Future<void> addRecording(String periodId, RecordingData recording, [String? uid]) async {
+  Future<void> addRecording(
+    String periodId,
+    RecordingData recording, [
+    String? uid,
+  ]) async {
     mockRecordings.add(recording);
   }
 }
@@ -66,7 +74,8 @@ void main() {
     _FakeFirebaseService? firebaseService,
   }) {
     final fakeAuth = authService ?? _FakeAuthService(user: _FakeUser());
-    final fakeFirebase = firebaseService ??
+    final fakeFirebase =
+        firebaseService ??
         (_FakeFirebaseService()..mockActivePeriod = testPeriod);
 
     return ChangeNotifierProvider<AuthService>.value(
@@ -79,67 +88,85 @@ void main() {
   }
 
   group('FormRecording Widget Tests', () {
-    testWidgets('menampilkan header, form field, toggle satuan, dan guidance card', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan header, form field, toggle satuan, dan guidance card',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      expect(find.text('Tambah Recording'), findsOneWidget);
-      expect(find.text('Pencatatan Harian Ternak'), findsOneWidget);
-      expect(find.text('WAKTU & KEMATIAN'), findsOneWidget);
-      expect(find.text('PAKAN & PENIMBANGAN'), findsOneWidget);
-      expect(find.text('Data Siap Disimpan (Standar Database)'), findsOneWidget);
+        expect(find.text('Tambah Recording'), findsOneWidget);
+        expect(find.text('Pencatatan Harian Ternak'), findsOneWidget);
+        expect(find.text('WAKTU & KEMATIAN'), findsOneWidget);
+        expect(find.text('PAKAN & PENIMBANGAN'), findsOneWidget);
+        expect(
+          find.text('Data Siap Disimpan (Standar Database)'),
+          findsOneWidget,
+        );
 
-      // Default labels and unit selectors
-      expect(find.text('Umur Ayam (Hari)'), findsOneWidget);
-      expect(find.text('Mati Ayam (Ekor)'), findsOneWidget);
-      expect(find.text('Habis Pakan (Sak)'), findsOneWidget);
-      expect(find.text('Berat Rata-rata (Gram)'), findsOneWidget);
-      expect(find.text('Simpan Data Recording'), findsOneWidget);
-    });
+        // Default labels and unit selectors
+        expect(find.text('Umur Ayam (Hari)'), findsOneWidget);
+        expect(find.text('Mati Ayam (Ekor)'), findsOneWidget);
+        expect(find.text('Habis Pakan (Sak)'), findsOneWidget);
+        expect(find.text('Berat Rata-rata (Gram)'), findsOneWidget);
+        expect(find.text('Simpan Data Recording'), findsOneWidget);
+      },
+    );
 
-    testWidgets('dapat toggle satuan pakan antara Sak dan Kg dengan konversi nilai', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'dapat toggle satuan pakan antara Sak dan Kg dengan konversi nilai',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      // Input 2 sak pakan
-      final pakanField = find.widgetWithText(TextFormField, 'Habis Pakan (Sak)');
-      await tester.enterText(pakanField, '2');
-      await tester.pumpAndSettle();
+        // Input 2 sak pakan
+        final pakanField = find.widgetWithText(
+          TextFormField,
+          'Habis Pakan (Sak)',
+        );
+        await tester.enterText(pakanField, '2');
+        await tester.pumpAndSettle();
 
-      // Memastikan helper text menunjukkan setara 100 kg
-      expect(find.text('Setara ≈ 100 Kg (1 sak = 50 kg)'), findsOneWidget);
+        // Memastikan helper text menunjukkan setara 100 kg
+        expect(find.text('Setara ≈ 100 Kg (1 sak = 50 kg)'), findsOneWidget);
 
-      // Tap toggle Kg pertama (pada pakan)
-      await tester.tap(find.text('Kg').first);
-      await tester.pumpAndSettle();
+        // Tap toggle Kg pertama (pada pakan)
+        await tester.tap(find.text('Kg').first);
+        await tester.pumpAndSettle();
 
-      // Field label berubah ke Kg dan nilainya otomatis dikonversi jadi 100
-      expect(find.text('Habis Pakan (Kg)'), findsOneWidget);
-      expect(find.text('100'), findsOneWidget);
-      expect(find.text('Setara ≈ 2.00 Sak pakan'), findsOneWidget);
-    });
+        // Field label berubah ke Kg dan nilainya otomatis dikonversi jadi 100
+        expect(find.text('Habis Pakan (Kg)'), findsOneWidget);
+        expect(find.text('100'), findsOneWidget);
+        expect(find.text('Setara ≈ 2.00 Sak pakan'), findsOneWidget);
+      },
+    );
 
-    testWidgets('dapat toggle satuan bobot antara Gram dan Kg dengan konversi nilai', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'dapat toggle satuan bobot antara Gram dan Kg dengan konversi nilai',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      // Input 1250 gram
-      final beratField = find.widgetWithText(TextFormField, 'Berat Rata-rata (Gram)');
-      await tester.enterText(beratField, '1250');
-      await tester.pumpAndSettle();
+        // Input 1250 gram
+        final beratField = find.widgetWithText(
+          TextFormField,
+          'Berat Rata-rata (Gram)',
+        );
+        await tester.enterText(beratField, '1250');
+        await tester.pumpAndSettle();
 
-      expect(find.text('Setara ≈ 1.25 Kg per ekor'), findsOneWidget);
+        expect(find.text('Setara ≈ 1.25 Kg per ekor'), findsOneWidget);
 
-      // Tap toggle Kg kedua (pada bobot)
-      final kgToggles = find.text('Kg');
-      await tester.tap(kgToggles.last);
-      await tester.pumpAndSettle();
+        // Tap toggle Kg kedua (pada bobot)
+        final kgToggles = find.text('Kg');
+        await tester.tap(kgToggles.last);
+        await tester.pumpAndSettle();
 
-      // Field label berubah ke Kg dan nilai otomatis terkonversi jadi 1.25
-      expect(find.text('Berat Rata-rata (Kg)'), findsOneWidget);
-      expect(find.text('1.25'), findsOneWidget);
-      expect(find.text('Setara ≈ 1250 Gram per ekor'), findsOneWidget);
-    });
+        // Field label berubah ke Kg dan nilai otomatis terkonversi jadi 1.25
+        expect(find.text('Berat Rata-rata (Kg)'), findsOneWidget);
+        expect(find.text('1.25'), findsOneWidget);
+        expect(find.text('Setara ≈ 1250 Gram per ekor'), findsOneWidget);
+      },
+    );
 
     testWidgets('menampilkan validasi saat submit form kosong', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());

@@ -64,10 +64,11 @@ class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
   @override
   void initState() {
     super.initState();
-    final initialChicks = widget.estimatedRemainingChicks != null &&
-            widget.estimatedRemainingChicks! > 0
-        ? widget.estimatedRemainingChicks.toString()
-        : '';
+    final initialChicks =
+        widget.estimatedRemainingChicks != null &&
+                widget.estimatedRemainingChicks! > 0
+            ? widget.estimatedRemainingChicks.toString()
+            : '';
     _chicksController = TextEditingController(text: initialChicks);
 
     _chicksController.addListener(_recalculateAvg);
@@ -107,8 +108,7 @@ class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
         _chicksController.text.replaceAll('.', '').replaceAll(',', '').trim();
     final weightText = _weightController.text.replaceAll(',', '.').trim();
 
-    final int? chicks =
-        chicksText.isNotEmpty ? int.tryParse(chicksText) : null;
+    final int? chicks = chicksText.isNotEmpty ? int.tryParse(chicksText) : null;
     final double? weight =
         weightText.isNotEmpty ? double.tryParse(weightText) : null;
 
@@ -203,8 +203,7 @@ class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
           // Field 2: Total Bobot Panen
           AppTextFormField(
             controller: _weightController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             labelText: 'Total Bobot Panen (Kg)',
             hintText: 'Contoh: 17460',
             prefixIcon: Icons.scale_rounded,
@@ -219,9 +218,7 @@ class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
               decoration: BoxDecoration(
                 color: cs.secondaryContainer.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                border: Border.all(
-                  color: cs.primary.withValues(alpha: 0.15),
-                ),
+                border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
               ),
               child: Row(
                 children: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 
 /// Base dialog widget dengan styling konsisten di seluruh aplikasi (Material 3 & Card Radius).
@@ -42,11 +43,7 @@ class BaseDialog extends StatelessWidget {
                 color: iconBackgroundColor ?? cs.secondaryContainer,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
               ),
-              child: Icon(
-                icon,
-                color: iconColor ?? cs.primary,
-                size: 24,
-              ),
+              child: Icon(icon, color: iconColor ?? cs.primary, size: 24),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -76,7 +73,7 @@ class BaseDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
       backgroundColor: cs.surface,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: AppColors.transparent,
       title: headerTitle,
       content: content,
       actions: actions,
@@ -101,16 +98,17 @@ class BaseDialog extends StatelessWidget {
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (context) => BaseDialog(
-        title: title,
-        titleWidget: titleWidget,
-        icon: icon,
-        iconColor: iconColor,
-        iconBackgroundColor: iconBackgroundColor,
-        content: content,
-        actions: actions,
-        barrierDismissible: barrierDismissible,
-      ),
+      builder:
+          (context) => BaseDialog(
+            title: title,
+            titleWidget: titleWidget,
+            icon: icon,
+            iconColor: iconColor,
+            iconBackgroundColor: iconBackgroundColor,
+            content: content,
+            actions: actions,
+            barrierDismissible: barrierDismissible,
+          ),
     );
   }
 }

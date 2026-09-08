@@ -30,10 +30,10 @@ class _MockPeriodController extends PeriodController {
     List<PeriodData>? periods,
     bool isLoading = false,
     String? errorMessage,
-  })  : _mockPeriods = periods ?? [],
-        _mockIsLoading = isLoading,
-        _mockError = errorMessage,
-        super(firebaseService: _FakeFirebaseService());
+  }) : _mockPeriods = periods ?? [],
+       _mockIsLoading = isLoading,
+       _mockError = errorMessage,
+       super(firebaseService: _FakeFirebaseService());
 
   @override
   List<PeriodData> get periods => _mockPeriods;
@@ -66,7 +66,9 @@ void main() {
   }
 
   group('PeriodListScreen Widget Tests', () {
-    testWidgets('menampilkan ajakan buat siklus saat tidak ada periode aktif', (tester) async {
+    testWidgets('menampilkan ajakan buat siklus saat tidak ada periode aktif', (
+      tester,
+    ) async {
       final ctrl = _MockPeriodController(periods: []);
 
       await tester.pumpWidget(createWidgetUnderTest(ctrl));
@@ -78,7 +80,9 @@ void main() {
       expect(find.text('Buat Periode Baru'), findsOneWidget);
     });
 
-    testWidgets('menampilkan kartu periode aktif dan riwayat periode', (tester) async {
+    testWidgets('menampilkan kartu periode aktif dan riwayat periode', (
+      tester,
+    ) async {
       final activePeriod = PeriodData(
         id: 'p-1',
         name: 'Batch Broiler 1',
@@ -121,7 +125,9 @@ void main() {
       expect(find.text('Batch Broiler Lama'), findsOneWidget);
     });
 
-    testWidgets('filter chips menyaring riwayat periode dengan benar', (tester) async {
+    testWidgets('filter chips menyaring riwayat periode dengan benar', (
+      tester,
+    ) async {
       final activePeriod = PeriodData(
         id: 'p-1',
         name: 'Batch Broiler 1',

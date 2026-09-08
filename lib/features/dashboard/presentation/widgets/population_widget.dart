@@ -35,14 +35,12 @@ class _PopulationSectionState extends State<PopulationSection>
       vsync: this,
     );
 
-    final targetProgress = widget.capacity > 0
-        ? (widget.populationRemain / widget.capacity).clamp(0.0, 1.0)
-        : 0.0;
+    final targetProgress =
+        widget.capacity > 0
+            ? (widget.populationRemain / widget.capacity).clamp(0.0, 1.0)
+            : 0.0;
 
-    _progressAnimation = Tween<double>(
-      begin: 0.0,
-      end: targetProgress,
-    ).animate(
+    _progressAnimation = Tween<double>(begin: 0.0, end: targetProgress).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
@@ -61,9 +59,10 @@ class _PopulationSectionState extends State<PopulationSection>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.populationRemain != widget.populationRemain ||
         oldWidget.capacity != widget.capacity) {
-      final targetProgress = widget.capacity > 0
-          ? (widget.populationRemain / widget.capacity).clamp(0.0, 1.0)
-          : 0.0;
+      final targetProgress =
+          widget.capacity > 0
+              ? (widget.populationRemain / widget.capacity).clamp(0.0, 1.0)
+              : 0.0;
 
       _progressAnimation = Tween<double>(
         begin: _progressAnimation.value,
@@ -112,9 +111,13 @@ class _PopulationSectionState extends State<PopulationSection>
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final survivalPercent = widget.capacity > 0
-        ? (widget.populationRemain / widget.capacity * 100).clamp(0.0, 100.0)
-        : 0.0;
+    final survivalPercent =
+        widget.capacity > 0
+            ? (widget.populationRemain / widget.capacity * 100).clamp(
+              0.0,
+              100.0,
+            )
+            : 0.0;
 
     final statusColor = _getStatusColor(survivalPercent);
     final statusLabel = _getStatusLabel(survivalPercent);

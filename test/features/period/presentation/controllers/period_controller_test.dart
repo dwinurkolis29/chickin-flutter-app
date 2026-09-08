@@ -23,17 +23,27 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
   }
 
   @override
-  Future<void> updatePeriod(String periodId, PeriodData period, [String? uid]) async {
+  Future<void> updatePeriod(
+    String periodId,
+    PeriodData period, [
+    String? uid,
+  ]) async {
     updatedPeriods.add(period);
   }
 
   @override
-  Future<List<RecordingData>> getRecordingsOnce(String periodId, [String? uid]) async {
+  Future<List<RecordingData>> getRecordingsOnce(
+    String periodId, [
+    String? uid,
+  ]) async {
     return [];
   }
 
   @override
-  Future<String> createFinanceTransaction(FinanceTransaction transaction, [String? uid]) async {
+  Future<String> createFinanceTransaction(
+    FinanceTransaction transaction, [
+    String? uid,
+  ]) async {
     createdTransactions.add(transaction);
     return 'tx-new-id';
   }
@@ -41,87 +51,96 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
 
 void main() {
   group('PeriodController.createPeriod', () {
-    test('belum ada periode aktif -> otomatis menjadi periode aktif (isActive = true)', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'belum ada periode aktif -> otomatis menjadi periode aktif (isActive = true)',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      final newPeriod = PeriodData(
-        name: 'Periode Pertama',
-        initialCapacity: 3000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 8, 1),
-        createdAt: DateTime(2026, 8, 1),
-      );
+        final newPeriod = PeriodData(
+          name: 'Periode Pertama',
+          initialCapacity: 3000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 8, 1),
+          createdAt: DateTime(2026, 8, 1),
+        );
 
-      await controller.createPeriod(newPeriod);
+        await controller.createPeriod(newPeriod);
 
-      expect(fakeFirebase.createdPeriods.length, 1);
-      expect(fakeFirebase.createdPeriods.first.name, 'Periode Pertama');
-      expect(fakeFirebase.createdPeriods.first.isActive, isTrue);
-    });
+        expect(fakeFirebase.createdPeriods.length, 1);
+        expect(fakeFirebase.createdPeriods.first.name, 'Periode Pertama');
+        expect(fakeFirebase.createdPeriods.first.isActive, isTrue);
+      },
+    );
 
-    test('sudah ada periode aktif -> otomatis disimpan sebagai draft (isActive = false)', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'sudah ada periode aktif -> otomatis disimpan sebagai draft (isActive = false)',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      // Simulasikan ada periode yang sedang aktif
-      final activePeriod = PeriodData(
-        id: 'active-1',
-        name: 'Periode Berjalan',
-        initialCapacity: 5000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 7, 1),
-        createdAt: DateTime(2026, 7, 1),
-        isActive: true,
-      );
+        // Simulasikan ada periode yang sedang aktif
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Periode Berjalan',
+          initialCapacity: 5000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 7, 1),
+          createdAt: DateTime(2026, 7, 1),
+          isActive: true,
+        );
 
-      // Gunakan onAuthChanged atau inject data ke controller
-      controller.periods.add(activePeriod);
+        // Gunakan onAuthChanged atau inject data ke controller
+        controller.periods.add(activePeriod);
 
-      final secondPeriod = PeriodData(
-        name: 'Periode Kedua',
-        initialCapacity: 4000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 8, 1),
-        createdAt: DateTime(2026, 8, 1),
-      );
+        final secondPeriod = PeriodData(
+          name: 'Periode Kedua',
+          initialCapacity: 4000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 8, 1),
+          createdAt: DateTime(2026, 8, 1),
+        );
 
-      await controller.createPeriod(secondPeriod);
+        await controller.createPeriod(secondPeriod);
 
-      expect(fakeFirebase.createdPeriods.length, 1);
-      expect(fakeFirebase.createdPeriods.first.name, 'Periode Kedua');
-      expect(fakeFirebase.createdPeriods.first.isActive, isFalse);
-    });
+        expect(fakeFirebase.createdPeriods.length, 1);
+        expect(fakeFirebase.createdPeriods.first.name, 'Periode Kedua');
+        expect(fakeFirebase.createdPeriods.first.isActive, isFalse);
+      },
+    );
   });
 
   group('PeriodController.updatePeriodDetails', () {
-    test('periode aktif dapat diedit detailnya (kapasitas/nama/bobot)', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'periode aktif dapat diedit detailnya (kapasitas/nama/bobot)',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      final activePeriod = PeriodData(
-        id: 'active-1',
-        name: 'Batch Lama',
-        initialCapacity: 5000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 7, 1),
-        createdAt: DateTime(2026, 7, 1),
-        isActive: true,
-      );
-      controller.periods.add(activePeriod);
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Batch Lama',
+          initialCapacity: 5000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 7, 1),
+          createdAt: DateTime(2026, 7, 1),
+          isActive: true,
+        );
+        controller.periods.add(activePeriod);
 
-      final updatedData = activePeriod.copyWith(
-        name: 'Batch Baru Terkoreksi',
-        initialCapacity: 5100,
-      );
+        final updatedData = activePeriod.copyWith(
+          name: 'Batch Baru Terkoreksi',
+          initialCapacity: 5100,
+        );
 
-      await controller.updatePeriodDetails('active-1', updatedData);
+        await controller.updatePeriodDetails('active-1', updatedData);
 
-      expect(fakeFirebase.updatedPeriods.length, 1);
-      expect(fakeFirebase.updatedPeriods.first.name, 'Batch Baru Terkoreksi');
-      expect(fakeFirebase.updatedPeriods.first.initialCapacity, 5100);
-      expect(fakeFirebase.updatedPeriods.first.isActive, isTrue);
-    });
+        expect(fakeFirebase.updatedPeriods.length, 1);
+        expect(fakeFirebase.updatedPeriods.first.name, 'Batch Baru Terkoreksi');
+        expect(fakeFirebase.updatedPeriods.first.initialCapacity, 5100);
+        expect(fakeFirebase.updatedPeriods.first.isActive, isTrue);
+      },
+    );
 
     test('periode selesai panen (closed) tidak dapat diedit', () async {
       final fakeFirebase = _FakeFirebaseService();
@@ -140,167 +159,190 @@ void main() {
       controller.periods.add(closedPeriod);
 
       expect(
-        () => controller.updatePeriodDetails('closed-1', closedPeriod.copyWith(name: 'Ubah Nama')),
+        () => controller.updatePeriodDetails(
+          'closed-1',
+          closedPeriod.copyWith(name: 'Ubah Nama'),
+        ),
         throwsA(isA<Exception>()),
       );
     });
   });
 
   group('PeriodController.activatePeriod', () {
-    test('menolak aktivasi jika ada periode lain yang sedang berjalan', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'menolak aktivasi jika ada periode lain yang sedang berjalan',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      final activePeriod = PeriodData(
-        id: 'active-1',
-        name: 'Batch Sedang Aktif',
-        initialCapacity: 5000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 7, 1),
-        createdAt: DateTime(2026, 7, 1),
-        isActive: true,
-      );
-      final draftPeriod = PeriodData(
-        id: 'draft-1',
-        name: 'Batch Draft',
-        initialCapacity: 4000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 8, 1),
-        createdAt: DateTime(2026, 8, 1),
-        isActive: false,
-      );
-      controller.periods.addAll([activePeriod, draftPeriod]);
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Batch Sedang Aktif',
+          initialCapacity: 5000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 7, 1),
+          createdAt: DateTime(2026, 7, 1),
+          isActive: true,
+        );
+        final draftPeriod = PeriodData(
+          id: 'draft-1',
+          name: 'Batch Draft',
+          initialCapacity: 4000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 8, 1),
+          createdAt: DateTime(2026, 8, 1),
+          isActive: false,
+        );
+        controller.periods.addAll([activePeriod, draftPeriod]);
 
-      expect(
-        () => controller.activatePeriod('draft-1'),
-        throwsA(predicate((e) => e.toString().contains('Ada periode lain yang sedang berjalan'))),
-      );
-    });
+        expect(
+          () => controller.activatePeriod('draft-1'),
+          throwsA(
+            predicate(
+              (e) => e.toString().contains(
+                'Ada periode lain yang sedang berjalan',
+              ),
+            ),
+          ),
+        );
+      },
+    );
   });
 
   group('PeriodController.closePeriod', () {
-    test('menutup periode dengan data panen riil menyimpan summary panen & IP', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'menutup periode dengan data panen riil menyimpan summary panen & IP',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      final activePeriod = PeriodData(
-        id: 'active-1',
-        name: 'Batch Siap Panen',
-        initialCapacity: 10000,
-        initialWeight: 0.04,
-        startDate: DateTime.now().subtract(const Duration(days: 35)),
-        createdAt: DateTime.now().subtract(const Duration(days: 35)),
-        isActive: true,
-      );
-      controller.periods.add(activePeriod);
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Batch Siap Panen',
+          initialCapacity: 10000,
+          initialWeight: 0.04,
+          startDate: DateTime.now().subtract(const Duration(days: 35)),
+          createdAt: DateTime.now().subtract(const Duration(days: 35)),
+          isActive: true,
+        );
+        controller.periods.add(activePeriod);
 
-      await controller.closePeriod(
-        'active-1',
-        harvestedChicks: 9700,
-        harvestedWeightKg: 17460.0,
-      );
+        await controller.closePeriod(
+          'active-1',
+          harvestedChicks: 9700,
+          harvestedWeightKg: 17460.0,
+        );
 
-      expect(fakeFirebase.updatedPeriods.length, 1);
-      final updated = fakeFirebase.updatedPeriods.first;
-      expect(updated.isActive, isFalse);
-      expect(updated.endDate, isNotNull);
-      expect(updated.summary, isNotNull);
-      expect(updated.summary!.harvestedChicks, equals(9700));
-      expect(updated.summary!.harvestedWeightKg, equals(17460.0));
-      expect(updated.summary!.avgHarvestWeightKg, closeTo(1.80, 0.01));
-    });
+        expect(fakeFirebase.updatedPeriods.length, 1);
+        final updated = fakeFirebase.updatedPeriods.first;
+        expect(updated.isActive, isFalse);
+        expect(updated.endDate, isNotNull);
+        expect(updated.summary, isNotNull);
+        expect(updated.summary!.harvestedChicks, equals(9700));
+        expect(updated.summary!.harvestedWeightKg, equals(17460.0));
+        expect(updated.summary!.avgHarvestWeightKg, closeTo(1.80, 0.01));
+      },
+    );
   });
 
   group('PeriodController.addPartialHarvest', () {
-    test('berhasil menambah panen parsial dan mencatat transaksi kas masuk jika diaktifkan', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'berhasil menambah panen parsial dan mencatat transaksi kas masuk jika diaktifkan',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      final activePeriod = PeriodData(
-        id: 'active-1',
-        name: 'Batch Aktif 10k',
-        initialCapacity: 10000,
-        initialWeight: 0.04,
-        startDate: DateTime.now().subtract(const Duration(days: 30)),
-        createdAt: DateTime.now().subtract(const Duration(days: 30)),
-        isActive: true,
-      );
-      controller.periods.add(activePeriod);
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Batch Aktif 10k',
+          initialCapacity: 10000,
+          initialWeight: 0.04,
+          startDate: DateTime.now().subtract(const Duration(days: 30)),
+          createdAt: DateTime.now().subtract(const Duration(days: 30)),
+          isActive: true,
+        );
+        controller.periods.add(activePeriod);
 
-      final harvest = HarvestRecord(
-        id: 'h-part-1',
-        type: HarvestType.partial,
-        date: DateTime.now(),
-        day: 30,
-        chicks: 2500,
-        weightKg: 3750.0,
-        avgWeightKg: 1.5,
-        pricePerKg: 21000.0,
-        totalRevenue: 78750000.0,
-        notes: 'PT Mitra Utama',
-        createdAt: DateTime.now(),
-      );
+        final harvest = HarvestRecord(
+          id: 'h-part-1',
+          type: HarvestType.partial,
+          date: DateTime.now(),
+          day: 30,
+          chicks: 2500,
+          weightKg: 3750.0,
+          avgWeightKg: 1.5,
+          pricePerKg: 21000.0,
+          totalRevenue: 78750000.0,
+          notes: 'PT Mitra Utama',
+          createdAt: DateTime.now(),
+        );
 
-      await controller.addPartialHarvest(
-        'active-1',
-        harvest,
-        createIncomeTransaction: true,
-      );
+        await controller.addPartialHarvest(
+          'active-1',
+          harvest,
+          createIncomeTransaction: true,
+        );
 
-      // Verifikasi update period
-      expect(fakeFirebase.updatedPeriods.length, 1);
-      final updated = fakeFirebase.updatedPeriods.first;
-      expect(updated.summary, isNotNull);
-      expect(updated.summary!.harvests.length, 1);
-      expect(updated.summary!.harvests.first.chicks, 2500);
-      expect(updated.summary!.totalPartialHarvestChicks, 2500);
-      expect(updated.summary!.totalPartialHarvestWeightKg, 3750.0);
+        // Verifikasi update period
+        expect(fakeFirebase.updatedPeriods.length, 1);
+        final updated = fakeFirebase.updatedPeriods.first;
+        expect(updated.summary, isNotNull);
+        expect(updated.summary!.harvests.length, 1);
+        expect(updated.summary!.harvests.first.chicks, 2500);
+        expect(updated.summary!.totalPartialHarvestChicks, 2500);
+        expect(updated.summary!.totalPartialHarvestWeightKg, 3750.0);
 
-      // Verifikasi pembuatan transaksi kas masuk
-      expect(fakeFirebase.createdTransactions.length, 1);
-      final tx = fakeFirebase.createdTransactions.first;
-      expect(tx.periodId, 'active-1');
-      expect(tx.type, 'income');
-      expect(tx.category, 'main_harvest');
-      expect(tx.amount, 78750000.0);
-      expect(tx.birdCount, 2500);
-      expect(tx.weightKg, 3750.0);
-    });
+        // Verifikasi pembuatan transaksi kas masuk
+        expect(fakeFirebase.createdTransactions.length, 1);
+        final tx = fakeFirebase.createdTransactions.first;
+        expect(tx.periodId, 'active-1');
+        expect(tx.type, 'income');
+        expect(tx.category, 'main_harvest');
+        expect(tx.amount, 78750000.0);
+        expect(tx.birdCount, 2500);
+        expect(tx.weightKg, 3750.0);
+      },
+    );
 
-    test('gagal menambah panen parsial jika jumlah ekor melebihi sisa ayam hidup', () async {
-      final fakeFirebase = _FakeFirebaseService();
-      final controller = PeriodController(firebaseService: fakeFirebase);
+    test(
+      'gagal menambah panen parsial jika jumlah ekor melebihi sisa ayam hidup',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
 
-      final activePeriod = PeriodData(
-        id: 'active-1',
-        name: 'Batch Kecil',
-        initialCapacity: 1000,
-        initialWeight: 0.04,
-        startDate: DateTime.now().subtract(const Duration(days: 28)),
-        createdAt: DateTime.now().subtract(const Duration(days: 28)),
-        isActive: true,
-      );
-      controller.periods.add(activePeriod);
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Batch Kecil',
+          initialCapacity: 1000,
+          initialWeight: 0.04,
+          startDate: DateTime.now().subtract(const Duration(days: 28)),
+          createdAt: DateTime.now().subtract(const Duration(days: 28)),
+          isActive: true,
+        );
+        controller.periods.add(activePeriod);
 
-      final harvestExcessive = HarvestRecord(
-        id: 'h-too-many',
-        type: HarvestType.partial,
-        date: DateTime.now(),
-        day: 28,
-        chicks: 1500, // Melebihi kapasitas 1000
-        weightKg: 2100.0,
-        avgWeightKg: 1.4,
-        createdAt: DateTime.now(),
-      );
+        final harvestExcessive = HarvestRecord(
+          id: 'h-too-many',
+          type: HarvestType.partial,
+          date: DateTime.now(),
+          day: 28,
+          chicks: 1500, // Melebihi kapasitas 1000
+          weightKg: 2100.0,
+          avgWeightKg: 1.4,
+          createdAt: DateTime.now(),
+        );
 
-      expect(
-        () => controller.addPartialHarvest('active-1', harvestExcessive),
-        throwsA(isA<Exception>().having(
-          (e) => e.toString(),
-          'message',
-          contains('melebihi sisa ayam hidup'),
-        )),
-      );
-    });
+        expect(
+          () => controller.addPartialHarvest('active-1', harvestExcessive),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('melebihi sisa ayam hidup'),
+            ),
+          ),
+        );
+      },
+    );
   });
 }

@@ -49,17 +49,15 @@ class HarvestRecord {
 
   factory HarvestRecord.fromJson(Map<String, dynamic>? json, {String? docId}) {
     if (json == null) {
-      return HarvestRecord(
-        date: DateTime.now(),
-        createdAt: DateTime.now(),
-      );
+      return HarvestRecord(date: DateTime.now(), createdAt: DateTime.now());
     }
 
     final chicksCount = asInt(json, 'chicks');
     final totalWeight = asDouble(json, 'weightKg');
-    final calculatedAvg = (chicksCount > 0 && totalWeight > 0)
-        ? totalWeight / chicksCount
-        : asDouble(json, 'avgWeightKg');
+    final calculatedAvg =
+        (chicksCount > 0 && totalWeight > 0)
+            ? totalWeight / chicksCount
+            : asDouble(json, 'avgWeightKg');
 
     return HarvestRecord(
       id: docId ?? asString(json, 'id'),

@@ -59,4 +59,3 @@ class CageData {
     return 'CageData(name: $name, type: $type, capacity: $capacity, location: $location, imageUrl: $imageUrl)';
   }
 }
-

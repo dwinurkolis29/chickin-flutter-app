@@ -48,9 +48,9 @@ class _FakeUserController extends ChangeNotifier implements UserController {
     UserProfile? profile,
     bool isLoading = false,
     String? errorMessage,
-  })  : _userProfile = profile,
-        _isLoading = isLoading,
-        _errorMessage = errorMessage;
+  }) : _userProfile = profile,
+       _isLoading = isLoading,
+       _errorMessage = errorMessage;
 
   @override
   UserProfile? get userProfile => _userProfile;
@@ -76,14 +76,16 @@ void main() {
     _FakeAuthService? authService,
     _FakeUserController? userController,
   }) {
-    final fakeAuth = authService ??
+    final fakeAuth =
+        authService ??
         _FakeAuthService(
           user: _FakeUser(
             displayName: 'Pak Slamet',
             email: 'slamet.broiler@gmail.com',
           ),
         );
-    final fakeUser = userController ??
+    final fakeUser =
+        userController ??
         _FakeUserController(
           profile: const UserProfile(
             name: 'Pak Slamet Peternak',
@@ -105,23 +107,26 @@ void main() {
   }
 
   group('UserProfile (Profil Saya) Widget Tests', () {
-    testWidgets('menampilkan informasi identitas peternak, kontak, dan keamanan akun', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pump();
+    testWidgets(
+      'menampilkan informasi identitas peternak, kontak, dan keamanan akun',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pump();
 
-      // 1. Identitas
-      expect(find.text('Profil Saya'), findsOneWidget);
-      expect(find.text('Pak Slamet Peternak'), findsOneWidget);
-      expect(find.text('Peternak Terdaftar Aktif'), findsOneWidget);
+        // 1. Identitas
+        expect(find.text('Profil Saya'), findsOneWidget);
+        expect(find.text('Pak Slamet Peternak'), findsOneWidget);
+        expect(find.text('Peternak Terdaftar Aktif'), findsOneWidget);
 
-      // 2. Kontak
-      expect(find.text('Informasi Kontak & Domisili'), findsOneWidget);
-      expect(find.text('081234567890'), findsOneWidget);
-      expect(find.text('slamet.broiler@gmail.com'), findsOneWidget);
-      expect(find.text('Desa Sukamaju, RT 02/05'), findsOneWidget);
+        // 2. Kontak
+        expect(find.text('Informasi Kontak & Domisili'), findsOneWidget);
+        expect(find.text('081234567890'), findsOneWidget);
+        expect(find.text('slamet.broiler@gmail.com'), findsOneWidget);
+        expect(find.text('Desa Sukamaju, RT 02/05'), findsOneWidget);
 
-      // 3. Tombol Utama
-      expect(find.text('Ubah Data Profil'), findsOneWidget);
-    });
+        // 3. Tombol Utama
+        expect(find.text('Ubah Data Profil'), findsOneWidget);
+      },
+    );
   });
 }

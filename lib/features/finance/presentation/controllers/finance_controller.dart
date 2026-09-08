@@ -13,8 +13,8 @@ class FinanceController extends ChangeNotifier {
   FinanceController({
     FirebaseService? firebaseService,
     CalculateFinanceSummary? calculateSummary,
-  })  : _firebaseService = firebaseService ?? FirebaseService(),
-        _calculateSummary = calculateSummary ?? CalculateFinanceSummary();
+  }) : _firebaseService = firebaseService ?? FirebaseService(),
+       _calculateSummary = calculateSummary ?? CalculateFinanceSummary();
 
   String? _uid;
   PeriodData? _currentPeriod;
@@ -66,19 +66,19 @@ class FinanceController extends ChangeNotifier {
       _subscription = _firebaseService
           .getFinanceTransactionsStream(periodId, _uid)
           .listen(
-        (txList) {
-          _transactions = txList;
-          _isLoading = false;
-          _errorMessage = null;
-          _recalculate();
-          notifyListeners();
-        },
-        onError: (e) {
-          _isLoading = false;
-          _errorMessage = e.toString();
-          notifyListeners();
-        },
-      );
+            (txList) {
+              _transactions = txList;
+              _isLoading = false;
+              _errorMessage = null;
+              _recalculate();
+              notifyListeners();
+            },
+            onError: (e) {
+              _isLoading = false;
+              _errorMessage = e.toString();
+              notifyListeners();
+            },
+          );
     } catch (e) {
       _isLoading = false;
       _errorMessage = e.toString();
@@ -89,9 +89,11 @@ class FinanceController extends ChangeNotifier {
   void _recalculate() {
     _summary = _calculateSummary.execute(
       transactions: _transactions,
-      fallbackHarvestWeightKg: _currentPeriod?.summary?.harvestedWeightKg ??
+      fallbackHarvestWeightKg:
+          _currentPeriod?.summary?.harvestedWeightKg ??
           _currentPeriod?.summary?.finalBiomass,
-      fallbackHarvestedChicks: _currentPeriod?.summary?.harvestedChicks ??
+      fallbackHarvestedChicks:
+          _currentPeriod?.summary?.harvestedChicks ??
           _currentPeriod?.summary?.finalPopulation,
     );
   }
@@ -99,6 +101,16 @@ class FinanceController extends ChangeNotifier {
   Future<void> addTransaction(FinanceTransaction tx) async {
     try {
       await _firebaseService.createFinanceTransaction(tx, _uid);
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> updateTransaction(FinanceTransaction tx) async {
+    try {
+      await _firebaseService.updateFinanceTransaction(tx, _uid);
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();

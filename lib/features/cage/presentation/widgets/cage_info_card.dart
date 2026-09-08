@@ -6,10 +6,7 @@ import 'package:recording_app/features/cage/data/models/cage_data.dart';
 class CageInfoCard extends StatelessWidget {
   final CageData cageData;
 
-  const CageInfoCard({
-    super.key,
-    required this.cageData,
-  });
+  const CageInfoCard({super.key, required this.cageData});
 
   @override
   Widget build(BuildContext context) {

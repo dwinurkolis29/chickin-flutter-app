@@ -13,14 +13,14 @@ class CalculateADG {
     if (recordings.isEmpty) return [];
 
     // Filter hanya rekaman yang memiliki data bobot sampling > 0
-    final validRecordings = recordings
-        .where((r) => r.avgWeightGram > 0)
-        .toList()
-      ..sort((a, b) => a.day.compareTo(b.day));
+    final validRecordings =
+        recordings.where((r) => r.avgWeightGram > 0).toList()
+          ..sort((a, b) => a.day.compareTo(b.day));
 
     if (validRecordings.isEmpty) return [];
 
-    final docWeightGram = (initialWeightKg > 0 ? initialWeightKg * 1000 : 40.0).round();
+    final docWeightGram =
+        (initialWeightKg > 0 ? initialWeightKg * 1000 : 40.0).round();
     final List<DailyADGData> result = [];
 
     int prevWeight = docWeightGram;
@@ -52,8 +52,14 @@ class CalculateADG {
           weightGram: currentWeight,
           previousWeightGram: prevWeight,
           previousDay: prevDay,
-          dailyGainGram: intervalGain > 0 ? double.parse(intervalGain.toStringAsFixed(1)) : 0.0,
-          cumulativeADGGram: cumulativeGain > 0 ? double.parse(cumulativeGain.toStringAsFixed(1)) : 0.0,
+          dailyGainGram:
+              intervalGain > 0
+                  ? double.parse(intervalGain.toStringAsFixed(1))
+                  : 0.0,
+          cumulativeADGGram:
+              cumulativeGain > 0
+                  ? double.parse(cumulativeGain.toStringAsFixed(1))
+                  : 0.0,
           status: statusInfo.status,
           statusDescription: statusInfo.description,
         ),
@@ -67,12 +73,16 @@ class CalculateADG {
   }
 
   /// Evaluasi status ADG berdasarkan umur ayam
-  ({String status, String description}) _evaluateADGStatus(int day, double adg) {
+  ({String status, String description}) _evaluateADGStatus(
+    int day,
+    double adg,
+  ) {
     if (day <= 7) {
       if (adg >= 20.0) {
         return (
           status: 'Optimal',
-          description: 'Pertumbuhan awal sangat bagus, brooding berjalan optimal.',
+          description:
+              'Pertumbuhan awal sangat bagus, brooding berjalan optimal.',
         );
       } else if (adg >= 14.0) {
         return (
@@ -82,14 +92,16 @@ class CalculateADG {
       } else {
         return (
           status: 'Lambat',
-          description: 'Pertumbuhan awal lambat. Periksa suhu brooding dan pakan.',
+          description:
+              'Pertumbuhan awal lambat. Periksa suhu brooding dan pakan.',
         );
       }
     } else if (day <= 14) {
       if (adg >= 35.0) {
         return (
           status: 'Optimal',
-          description: 'Laju kenaikan bobot di atas standar target umur 2 minggu.',
+          description:
+              'Laju kenaikan bobot di atas standar target umur 2 minggu.',
         );
       } else if (adg >= 25.0) {
         return (
@@ -106,7 +118,8 @@ class CalculateADG {
       if (adg >= 55.0) {
         return (
           status: 'Optimal',
-          description: 'Pertumbuhan pesat, nafsu makan dan penyerapan pakan sangat baik.',
+          description:
+              'Pertumbuhan pesat, nafsu makan dan penyerapan pakan sangat baik.',
         );
       } else if (adg >= 42.0) {
         return (
@@ -116,7 +129,8 @@ class CalculateADG {
       } else {
         return (
           status: 'Lambat',
-          description: 'Pertumbuhan di bawah target. Cek ventilasi & kepadatan kandang.',
+          description:
+              'Pertumbuhan di bawah target. Cek ventilasi & kepadatan kandang.',
         );
       }
     } else {
@@ -124,7 +138,8 @@ class CalculateADG {
       if (adg >= 65.0) {
         return (
           status: 'Optimal',
-          description: 'Pertumbuhan sangat cepat, siap menuju target panen prima.',
+          description:
+              'Pertumbuhan sangat cepat, siap menuju target panen prima.',
         );
       } else if (adg >= 50.0) {
         return (
@@ -134,7 +149,8 @@ class CalculateADG {
       } else {
         return (
           status: 'Lambat',
-          description: 'Pertumbuhan melambat. Evaluasi kualitas pakan & sirkulasi udara.',
+          description:
+              'Pertumbuhan melambat. Evaluasi kualitas pakan & sirkulasi udara.',
         );
       }
     }

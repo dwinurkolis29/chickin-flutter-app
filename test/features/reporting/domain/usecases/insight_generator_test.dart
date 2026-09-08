@@ -83,7 +83,13 @@ void main() {
       test('FCR antara 1.8 dan 2.2 (zona abu-abu) → tidak ada FCR insight', () {
         // FCR > 1.8 tapi < 2.2 → tidak masuk kriteria manapun
         final result = generator.execute(snap(finalFCR: 2.0), 1000);
-        final fcrInsights = result.where((s) => s.contains('FCR sangat baik') || s.contains('FCR tinggi')).toList();
+        final fcrInsights =
+            result
+                .where(
+                  (s) =>
+                      s.contains('FCR sangat baik') || s.contains('FCR tinggi'),
+                )
+                .toList();
         expect(fcrInsights, isEmpty);
       });
     });
@@ -124,9 +130,14 @@ void main() {
       test('mortalityRate antara 5% dan 10% → tidak ada mortality insight', () {
         // 1000 ekor, 70 mati = 7% — zona abu-abu
         final result = generator.execute(snap(totalMortality: 70), 1000);
-        final mortalityInsights = result.where(
-          (s) => s.contains('Mortalitas rendah') || s.contains('Mortalitas tinggi'),
-        ).toList();
+        final mortalityInsights =
+            result
+                .where(
+                  (s) =>
+                      s.contains('Mortalitas rendah') ||
+                      s.contains('Mortalitas tinggi'),
+                )
+                .toList();
         expect(mortalityInsights, isEmpty);
       });
     });
@@ -135,7 +146,8 @@ void main() {
     group('ADG insight', () {
       test('ADG = 0 → tidak ada ADG insight', () {
         final result = generator.execute(snap(avgDailyGain: 0), 1000);
-        final adgInsights = result.where((s) => s.contains('Pertumbuhan harian')).toList();
+        final adgInsights =
+            result.where((s) => s.contains('Pertumbuhan harian')).toList();
         expect(adgInsights, isEmpty);
       });
 
@@ -152,19 +164,26 @@ void main() {
 
       test('ADG < 30 g/hari → pertumbuhan lambat', () {
         final result = generator.execute(snap(avgDailyGain: 25.0), 1000);
-        expect(result.any((s) => s.contains('Pertumbuhan harian lambat')), true);
+        expect(
+          result.any((s) => s.contains('Pertumbuhan harian lambat')),
+          true,
+        );
         expect(result.any((s) => s.contains('cek kualitas pakan')), true);
       });
 
       test('ADG = 10 g/hari → pertumbuhan lambat', () {
         final result = generator.execute(snap(avgDailyGain: 10.0), 1000);
-        expect(result.any((s) => s.contains('Pertumbuhan harian lambat')), true);
+        expect(
+          result.any((s) => s.contains('Pertumbuhan harian lambat')),
+          true,
+        );
       });
 
       test('ADG antara 30 dan 50 → tidak ada ADG insight', () {
         // 40 g/hari — zona abu-abu
         final result = generator.execute(snap(avgDailyGain: 40.0), 1000);
-        final adgInsights = result.where((s) => s.contains('Pertumbuhan harian')).toList();
+        final adgInsights =
+            result.where((s) => s.contains('Pertumbuhan harian')).toList();
         expect(adgInsights, isEmpty);
       });
     });
@@ -191,7 +210,10 @@ void main() {
         );
         expect(result.any((s) => s.contains('FCR tinggi')), true);
         expect(result.any((s) => s.contains('Mortalitas tinggi')), true);
-        expect(result.any((s) => s.contains('Pertumbuhan harian lambat')), true);
+        expect(
+          result.any((s) => s.contains('Pertumbuhan harian lambat')),
+          true,
+        );
       });
 
       test('tidak ada insight jika semua di zona abu-abu', () {

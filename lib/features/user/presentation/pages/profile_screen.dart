@@ -105,7 +105,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -120,14 +122,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Text(
                           'Pilih Tema Aplikasi',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           'Sesuaikan kenyamanan visual layar Anda',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -138,7 +142,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 12),
               Divider(
                 height: 1,
-                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 8),
               _buildThemeOptionTile(
@@ -195,9 +201,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Material(
-        color: isSelected
-            ? cs.primary.withValues(alpha: 0.08)
-            : Colors.transparent,
+        color:
+            isSelected
+                ? cs.primary.withValues(alpha: 0.08)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         child: InkWell(
           onTap: onTap,
@@ -209,9 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? cs.primary
-                        : cs.surfaceContainerHigh,
+                    color: isSelected ? cs.primary : cs.surfaceContainerHigh,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -228,7 +233,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Text(
                         title,
                         style: tt.bodyLarge?.copyWith(
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w600,
                           color: isSelected ? cs.primary : cs.onSurface,
                         ),
                       ),
@@ -244,11 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 if (isSelected)
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: cs.primary,
-                    size: 22,
-                  )
+                  Icon(Icons.check_circle_rounded, color: cs.primary, size: 22)
                 else
                   Icon(
                     Icons.radio_button_unchecked_rounded,
@@ -288,366 +290,393 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              // ── 1. Hero Profile Card ─────────────────────────────────────────
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      // Avatar dengan outer ring secondary
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: cs.secondaryContainer,
-                        ),
-                        child: CircleAvatar(
-                          radius: 30,
-                          backgroundColor: cs.surface,
-                          backgroundImage: controller.userProfile?.avatarUrl != null
-                              ? NetworkImage(controller.userProfile!.avatarUrl!)
-                              : null,
-                          child: controller.userProfile?.avatarUrl == null
-                              ? Text(
-                                  _initials(displayName),
-                                  style: tt.titleLarge?.copyWith(
-                                    color: cs.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      // User Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              displayName.isNotEmpty
-                                  ? displayName
-                                  : 'Peternak Broiler',
-                              style: tt.titleMedium?.copyWith(
-                                color: cs.onSurface,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            if (email.isNotEmpty) ...[
-                              Text(
-                                email,
-                                style: tt.bodyMedium?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                            ],
-                            // Status Pill Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.success.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  AppTheme.pillRadius,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.success,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Akun Peternak Aktif',
-                                    style: tt.labelSmall?.copyWith(
-                                      color: AppColors.success,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // ── 2. Group Akun & Keamanan ───────────────────────────────────
-              _MenuGroup(
-                label: 'AKUN & KEAMANAN',
-                items: [
-                  _MenuItemData(
-                    icon: Icons.person_outline_rounded,
-                    title: 'Edit Profil',
-                    subtitle: 'Ubah nama, foto profil & kontak peternak',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const User()),
-                    ),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.manage_accounts_outlined,
-                    title: 'Kelola Akun',
-                    subtitle: 'Keamanan kata sandi & status akun terdaftar',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AccountManagementScreen(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── 3. Group Kandang & Periode Ternak ───────────────────────────
-              _MenuGroup(
-                label: 'KANDANG & SIKLUS TERNAK',
-                items: [
-                  _MenuItemData(
-                    icon: Icons.warehouse_outlined,
-                    title: 'Data Kandang',
-                    subtitle: 'Kapasitas, tipe & spesifikasi kandang',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const CageProfile()),
-                    ),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.calendar_month_outlined,
-                    title: 'Periode Pemeliharaan',
-                    subtitle: 'Kelola siklus ternak & riwayat panen',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PeriodListScreen(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── 4. Group Catatan & Monitoring Harian ─────────────────────────
-              _MenuGroup(
-                label: 'CATATAN & MONITORING HARIAN',
-                items: [
-                  _MenuItemData(
-                    icon: Icons.assignment_outlined,
-                    title: 'Semua Recording',
-                    subtitle: 'Daftar catatan harian pakan, bobot & kematian',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DetailRecording(),
-                      ),
-                    ),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.speed_rounded,
-                    title: 'Monitoring FCR',
-                    subtitle: 'Pantau efisiensi pakan harian & mingguan',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const FCRMonitoringScreen(),
-                      ),
-                    ),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.show_chart_rounded,
-                    title: 'Pertumbuhan Bobot Ayam',
-                    subtitle: 'Grafik lengkap penimbangan harian & kurva ADG',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ChickenWeightScreen(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── 5. Group Laporan & Analisis Panen ───────────────────────────
-              _MenuGroup(
-                label: 'LAPORAN & ANALISIS PANEN',
-                items: [
-                  _MenuItemData(
-                    icon: Icons.assessment_outlined,
-                    title: 'Laporan Periode Panen',
-                    subtitle: 'Kesimpulan performa, skor IP, FCR & export panen',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PeriodReportPage(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── 6. Group Kamus & Panduan Ternak ─────────────────────────────
-              _MenuGroup(
-                label: 'ALAT & PANDUAN TERNAK',
-                items: [
-                  _MenuItemData(
-                    icon: Icons.calculate_outlined,
-                    title: 'Kalkulator Cepat',
-                    subtitle: 'Simulasi FCR, Indeks Performa (IP) & HPP Panen',
-                    trailingBadge: 'Alat',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const QuickCalculatorScreen(),
-                      ),
-                    ),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.menu_book_rounded,
-                    title: 'Ensiklopedia Broiler',
-                    subtitle: 'Kamus istilah, arti angka FCR, IP & rumus praktis ternak',
-                    trailingBadge: 'Panduan',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const BroilerEncyclopediaScreen(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── 7. Group Pengaturan & Tampilan ──────────────────────────────
-              _MenuGroup(
-                label: 'PENGATURAN & APLIKASI',
-                items: [
-                  _MenuItemData(
-                    icon: Icons.notifications_active_outlined,
-                    title: 'Pengingat Recording Harian',
-                    subtitle: _isDailyReminderEnabled
-                        ? 'Aktif (Otomatis pukul 19:00 WIB)'
-                        : 'Nonaktif (Pengingat harian dimatikan)',
-                    trailingWidget: Switch.adaptive(
-                      value: _isDailyReminderEnabled,
-                      activeColor: cs.primary,
-                      onChanged: (value) async {
-                        setState(() {
-                          _isDailyReminderEnabled = value;
-                        });
-                        await NotificationService().setDailyReminderEnabled(value);
-                      },
-                    ),
-                    onTap: () async {
-                      final newValue = !_isDailyReminderEnabled;
-                      setState(() {
-                        _isDailyReminderEnabled = newValue;
-                      });
-                      await NotificationService().setDailyReminderEnabled(newValue);
-                    },
-                  ),
-                  _MenuItemData(
-                    icon: Icons.palette_outlined,
-                    title: 'Tema Aplikasi',
-                    subtitle: 'Pilih tema terang, gelap, atau sesuai sistem',
-                    trailingBadge: context.watch<ThemeController>().themeModeName,
-                    onTap: () => _showThemeSelectionDialog(context),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.info_outline_rounded,
-                    title: 'Tentang Aplikasi',
-                    subtitle: 'BroilerKu v1.0.0',
-                    trailingBadge: 'v1.0.0',
-                    onTap: () => _showAboutDialog(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── 5. Tombol Logout ─────────────────────────────────────────────
-              AppCard(
-                child: InkWell(
-                  onTap: () => _showLogoutDialog(context),
-                  borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                // ── 1. Hero Profile Card ─────────────────────────────────────────
+                AppCard(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.all(20),
                     child: Row(
                       children: [
+                        // Avatar dengan outer ring secondary
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: cs.error.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
+                            color: cs.secondaryContainer,
                           ),
-                          child: Icon(
-                            Icons.logout_rounded,
-                            size: 20,
-                            color: cs.error,
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundColor: cs.surface,
+                            backgroundImage:
+                                controller.userProfile?.avatarUrl != null
+                                    ? NetworkImage(
+                                      controller.userProfile!.avatarUrl!,
+                                    )
+                                    : null,
+                            child:
+                                controller.userProfile?.avatarUrl == null
+                                    ? Text(
+                                      _initials(displayName),
+                                      style: tt.titleLarge?.copyWith(
+                                        color: cs.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                    : null,
                           ),
                         ),
                         const SizedBox(width: 16),
+
+                        // User Info
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Keluar dari Akun',
-                                style: tt.titleSmall?.copyWith(
-                                  color: cs.error,
+                                displayName.isNotEmpty
+                                    ? displayName
+                                    : 'Peternak Broiler',
+                                style: tt.titleMedium?.copyWith(
+                                  color: cs.onSurface,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 18,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Akhiri sesi aktif pada perangkat ini',
-                                style: tt.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                  fontSize: 12,
+                              const SizedBox(height: 4),
+                              if (email.isNotEmpty) ...[
+                                Text(
+                                  email,
+                                  style: tt.bodyMedium?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              // Status Pill Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.pillRadius,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.success,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Akun Peternak Aktif',
+                                      style: tt.labelSmall?.copyWith(
+                                        color: AppColors.success,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          size: 20,
-                          color: cs.error.withValues(alpha: 0.7),
-                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 80),
-            ],
+                const SizedBox(height: 20),
+
+                // ── 2. Group Akun & Keamanan ───────────────────────────────────
+                _MenuGroup(
+                  label: 'AKUN & KEAMANAN',
+                  items: [
+                    _MenuItemData(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Edit Profil',
+                      subtitle: 'Ubah nama, foto profil & kontak peternak',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const User()),
+                          ),
+                    ),
+                    _MenuItemData(
+                      icon: Icons.manage_accounts_outlined,
+                      title: 'Kelola Akun',
+                      subtitle: 'Keamanan kata sandi & status akun terdaftar',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AccountManagementScreen(),
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── 3. Group Kandang & Periode Ternak ───────────────────────────
+                _MenuGroup(
+                  label: 'KANDANG & SIKLUS TERNAK',
+                  items: [
+                    _MenuItemData(
+                      icon: Icons.warehouse_outlined,
+                      title: 'Data Kandang',
+                      subtitle: 'Kapasitas, tipe & spesifikasi kandang',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CageProfile(),
+                            ),
+                          ),
+                    ),
+                    _MenuItemData(
+                      icon: Icons.calendar_month_outlined,
+                      title: 'Periode Pemeliharaan',
+                      subtitle: 'Kelola siklus ternak & riwayat panen',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PeriodListScreen(),
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── 4. Group Catatan & Monitoring Harian ─────────────────────────
+                _MenuGroup(
+                  label: 'CATATAN & MONITORING HARIAN',
+                  items: [
+                    _MenuItemData(
+                      icon: Icons.assignment_outlined,
+                      title: 'Semua Recording',
+                      subtitle: 'Daftar catatan harian pakan, bobot & kematian',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const DetailRecording(),
+                            ),
+                          ),
+                    ),
+                    _MenuItemData(
+                      icon: Icons.speed_rounded,
+                      title: 'Monitoring FCR',
+                      subtitle: 'Pantau efisiensi pakan harian & mingguan',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const FCRMonitoringScreen(),
+                            ),
+                          ),
+                    ),
+                    _MenuItemData(
+                      icon: Icons.show_chart_rounded,
+                      title: 'Pertumbuhan Bobot Ayam',
+                      subtitle: 'Grafik lengkap penimbangan harian & kurva ADG',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ChickenWeightScreen(),
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── 5. Group Laporan & Analisis Panen ───────────────────────────
+                _MenuGroup(
+                  label: 'LAPORAN & ANALISIS PANEN',
+                  items: [
+                    _MenuItemData(
+                      icon: Icons.assessment_outlined,
+                      title: 'Laporan Periode Panen',
+                      subtitle:
+                          'Kesimpulan performa, skor IP, FCR & export panen',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PeriodReportPage(),
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── 6. Group Kamus & Panduan Ternak ─────────────────────────────
+                _MenuGroup(
+                  label: 'ALAT & PANDUAN TERNAK',
+                  items: [
+                    _MenuItemData(
+                      icon: Icons.calculate_outlined,
+                      title: 'Kalkulator Cepat',
+                      subtitle:
+                          'Simulasi FCR, Indeks Performa (IP) & HPP Panen',
+                      trailingBadge: 'Alat',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const QuickCalculatorScreen(),
+                            ),
+                          ),
+                    ),
+                    _MenuItemData(
+                      icon: Icons.menu_book_rounded,
+                      title: 'Ensiklopedia Broiler',
+                      subtitle:
+                          'Kamus istilah, arti angka FCR, IP & rumus praktis ternak',
+                      trailingBadge: 'Panduan',
+                      onTap:
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const BroilerEncyclopediaScreen(),
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── 7. Group Pengaturan & Tampilan ──────────────────────────────
+                _MenuGroup(
+                  label: 'PENGATURAN & APLIKASI',
+                  items: [
+                    _MenuItemData(
+                      icon: Icons.notifications_active_outlined,
+                      title: 'Pengingat Recording Harian',
+                      subtitle:
+                          _isDailyReminderEnabled
+                              ? 'Aktif (Otomatis pukul 19:00 WIB)'
+                              : 'Nonaktif (Pengingat harian dimatikan)',
+                      trailingWidget: Switch.adaptive(
+                        value: _isDailyReminderEnabled,
+                        activeColor: cs.primary,
+                        onChanged: (value) async {
+                          setState(() {
+                            _isDailyReminderEnabled = value;
+                          });
+                          await NotificationService().setDailyReminderEnabled(
+                            value,
+                          );
+                        },
+                      ),
+                      onTap: () async {
+                        final newValue = !_isDailyReminderEnabled;
+                        setState(() {
+                          _isDailyReminderEnabled = newValue;
+                        });
+                        await NotificationService().setDailyReminderEnabled(
+                          newValue,
+                        );
+                      },
+                    ),
+                    _MenuItemData(
+                      icon: Icons.palette_outlined,
+                      title: 'Tema Aplikasi',
+                      subtitle: 'Pilih tema terang, gelap, atau sesuai sistem',
+                      trailingBadge:
+                          context.watch<ThemeController>().themeModeName,
+                      onTap: () => _showThemeSelectionDialog(context),
+                    ),
+                    _MenuItemData(
+                      icon: Icons.info_outline_rounded,
+                      title: 'Tentang Aplikasi',
+                      subtitle: 'BroilerKu v1.0.0',
+                      trailingBadge: 'v1.0.0',
+                      onTap: () => _showAboutDialog(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // ── 5. Tombol Logout ─────────────────────────────────────────────
+                AppCard(
+                  child: InkWell(
+                    onTap: () => _showLogoutDialog(context),
+                    borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: cs.error.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.logout_rounded,
+                              size: 20,
+                              color: cs.error,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Keluar dari Akun',
+                                  style: tt.titleSmall?.copyWith(
+                                    color: cs.error,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Akhiri sesi aktif pada perangkat ini',
+                                  style: tt.bodySmall?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            size: 20,
+                            color: cs.error.withValues(alpha: 0.7),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 80),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -768,7 +797,10 @@ class _MenuGroup extends StatelessWidget {
             ] else ...[
               if (item.trailingBadge != null) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainer,
                     borderRadius: BorderRadius.circular(AppTheme.pillRadius),

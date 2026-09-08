@@ -13,7 +13,9 @@ void main() {
   }
 
   group('AppEmptyState Widget Tests', () {
-    testWidgets('menampilkan icon, title, subtitle, dan tombol aksi standar', (tester) async {
+    testWidgets('menampilkan icon, title, subtitle, dan tombol aksi standar', (
+      tester,
+    ) async {
       bool actionTriggered = false;
 
       await tester.pumpWidget(
@@ -31,7 +33,10 @@ void main() {
 
       expect(find.byIcon(Icons.calendar_today_outlined), findsOneWidget);
       expect(find.text('Tidak Ada Periode Aktif'), findsOneWidget);
-      expect(find.text('Mulai siklus pemeliharaan baru untuk mencatat harian.'), findsOneWidget);
+      expect(
+        find.text('Mulai siklus pemeliharaan baru untuk mencatat harian.'),
+        findsOneWidget,
+      );
       expect(find.text('Mulai Siklus Baru'), findsOneWidget);
 
       await tester.tap(find.text('Mulai Siklus Baru'));
@@ -39,7 +44,9 @@ void main() {
       expect(actionTriggered, isTrue);
     });
 
-    testWidgets('mendukung mode compact dan custom action widget', (tester) async {
+    testWidgets('mendukung mode compact dan custom action widget', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createWidgetUnderTest(
           AppEmptyState(

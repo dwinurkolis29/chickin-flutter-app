@@ -25,10 +25,10 @@ class _MockPeriodController extends PeriodController {
     List<PeriodData>? periods,
     bool isLoading = false,
     String? errorMessage,
-  })  : _mockPeriods = periods ?? [],
-        _mockIsLoading = isLoading,
-        _mockError = errorMessage,
-        super(firebaseService: _FakeFirebaseService());
+  }) : _mockPeriods = periods ?? [],
+       _mockIsLoading = isLoading,
+       _mockError = errorMessage,
+       super(firebaseService: _FakeFirebaseService());
 
   @override
   List<PeriodData> get periods => _mockPeriods;
@@ -45,7 +45,10 @@ class _MockPeriodController extends PeriodController {
   }
 
   @override
-  Future<void> updatePeriodDetails(String periodId, PeriodData updatedData) async {
+  Future<void> updatePeriodDetails(
+    String periodId,
+    PeriodData updatedData,
+  ) async {
     lastUpdatedPeriod = updatedData;
   }
 
@@ -88,23 +91,26 @@ void main() {
   }
 
   group('FormPeriod Widget Tests', () {
-    testWidgets('menampilkan form buat periode baru dengan nilai default yang benar', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan form buat periode baru dengan nilai default yang benar',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final ctrl = _MockPeriodController();
+        final ctrl = _MockPeriodController();
 
-      await tester.pumpWidget(createWidgetUnderTest(controller: ctrl));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createWidgetUnderTest(controller: ctrl));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Buat Periode Baru'), findsWidgets);
-      expect(find.text('INFORMASI SIKLUS DOC'), findsOneWidget);
-      expect(find.text('Nama Periode / Siklus'), findsOneWidget);
-      expect(find.text('Tanggal DOC Masuk'), findsOneWidget);
-      expect(find.text('Jumlah DOC / Populasi Awal (Ekor)'), findsOneWidget);
-      expect(find.text('Bobot Awal DOC (Kg)'), findsNothing);
-    });
+        expect(find.text('Buat Periode Baru'), findsWidgets);
+        expect(find.text('INFORMASI SIKLUS DOC'), findsOneWidget);
+        expect(find.text('Nama Periode / Siklus'), findsOneWidget);
+        expect(find.text('Tanggal DOC Masuk'), findsOneWidget);
+        expect(find.text('Jumlah DOC / Populasi Awal (Ekor)'), findsOneWidget);
+        expect(find.text('Bobot Awal DOC (Kg)'), findsNothing);
+      },
+    );
 
     testWidgets('validasi gagal jika field wajib kosong', (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
@@ -117,8 +123,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap submit button
-      await tester.ensureVisible(find.byType(ElevatedButton));
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.ensureVisible(find.byType(FilledButton));
+      await tester.tap(find.byType(FilledButton));
       await tester.pumpAndSettle();
 
       expect(find.text('Nama periode wajib diisi'), findsOneWidget);
@@ -126,7 +132,9 @@ void main() {
       expect(ctrl.lastCreatedPeriod, isNull);
     });
 
-    testWidgets('berhasil submit buat periode baru saat diisi dengan benar', (tester) async {
+    testWidgets('berhasil submit buat periode baru saat diisi dengan benar', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -142,8 +150,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Submit
-      await tester.ensureVisible(find.byType(ElevatedButton));
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.ensureVisible(find.byType(FilledButton));
+      await tester.tap(find.byType(FilledButton));
       await tester.pumpAndSettle();
 
       expect(ctrl.lastCreatedPeriod, isNotNull);
@@ -152,135 +160,155 @@ void main() {
       expect(ctrl.lastCreatedPeriod!.initialWeight, 0.04);
     });
 
-    testWidgets('menampilkan mode edit dan opsi tutup panen saat periode aktif diedit', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan mode edit dan opsi tutup panen saat periode aktif diedit',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final activePeriod = PeriodData(
-        id: 'period-active',
-        name: 'Siklus Aktif 1',
-        initialCapacity: 4000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 8, 1),
-        createdAt: DateTime(2026, 8, 1),
-        isActive: true,
-      );
+        final activePeriod = PeriodData(
+          id: 'period-active',
+          name: 'Siklus Aktif 1',
+          initialCapacity: 4000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 8, 1),
+          createdAt: DateTime(2026, 8, 1),
+          isActive: true,
+        );
 
-      final ctrl = _MockPeriodController(periods: [activePeriod]);
+        final ctrl = _MockPeriodController(periods: [activePeriod]);
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        controller: ctrl,
-        period: activePeriod,
-      ));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createWidgetUnderTest(controller: ctrl, period: activePeriod),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Edit Periode'), findsOneWidget);
-      expect(find.text('Periode Ini Sedang Aktif'), findsOneWidget);
-      expect(find.text('Tutup Siklus (Selesai Panen)'), findsOneWidget);
-      expect(find.text('Simpan Perubahan'), findsOneWidget);
-      // Tombol hapus DILARANG muncul pada periode aktif
-      expect(find.text('Hapus Periode Draft'), findsNothing);
-      expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
-    });
+        expect(find.text('Edit Periode'), findsOneWidget);
+        expect(find.text('Periode Ini Sedang Aktif'), findsOneWidget);
+        expect(find.text('Tutup Siklus (Selesai Panen)'), findsOneWidget);
+        expect(find.text('Simpan Perubahan'), findsOneWidget);
+        // Tombol hapus DILARANG muncul pada periode aktif
+        expect(find.text('Hapus Periode Draft'), findsNothing);
+        expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+      },
+    );
 
-    testWidgets('menampilkan tombol hapus periode draft di bawah simpan dan menampilkan konfirmasi saat ditekan', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan tombol hapus periode draft di bawah simpan dan menampilkan konfirmasi saat ditekan',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final draftPeriod = PeriodData(
-        id: 'period-draft',
-        name: 'Siklus Draft 2',
-        initialCapacity: 3000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 9, 1),
-        createdAt: DateTime(2026, 8, 1),
-        isActive: false,
-      );
+        final draftPeriod = PeriodData(
+          id: 'period-draft',
+          name: 'Siklus Draft 2',
+          initialCapacity: 3000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 9, 1),
+          createdAt: DateTime(2026, 8, 1),
+          isActive: false,
+        );
 
-      final ctrl = _MockPeriodController(periods: [draftPeriod]);
+        final ctrl = _MockPeriodController(periods: [draftPeriod]);
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        controller: ctrl,
-        period: draftPeriod,
-      ));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createWidgetUnderTest(controller: ctrl, period: draftPeriod),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Edit Periode'), findsOneWidget);
-      expect(find.text('Simpan Perubahan'), findsOneWidget);
-      expect(find.text('Hapus Periode Draft'), findsOneWidget);
+        expect(find.text('Edit Periode'), findsOneWidget);
+        expect(find.text('Simpan Perubahan'), findsOneWidget);
+        expect(find.text('Hapus Periode Draft'), findsOneWidget);
 
-      // Tap Hapus Periode Draft
-      await tester.tap(find.text('Hapus Periode Draft'));
-      await tester.pumpAndSettle();
+        // Tap Hapus Periode Draft
+        await tester.tap(find.text('Hapus Periode Draft'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Hapus Periode Draft'), findsWidgets);
-      expect(find.textContaining('Apakah Anda yakin ingin menghapus periode draft "Siklus Draft 2"?'), findsOneWidget);
-      expect(find.text('Ya, Hapus'), findsOneWidget);
-    });
+        expect(find.text('Hapus Periode Draft'), findsWidgets);
+        expect(
+          find.textContaining(
+            'Apakah Anda yakin ingin menghapus periode draft "Siklus Draft 2"?',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Ya, Hapus'), findsOneWidget);
+      },
+    );
 
-    testWidgets('sembunyikan tombol aktifkan periode jika masih ada periode lain yang aktif', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'sembunyikan tombol aktifkan periode jika masih ada periode lain yang aktif',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final activePeriod = PeriodData(
-        id: 'period-active',
-        name: 'Siklus Aktif 1',
-        initialCapacity: 4000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 8, 1),
-        createdAt: DateTime(2026, 8, 1),
-        isActive: true,
-      );
+        final activePeriod = PeriodData(
+          id: 'period-active',
+          name: 'Siklus Aktif 1',
+          initialCapacity: 4000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 8, 1),
+          createdAt: DateTime(2026, 8, 1),
+          isActive: true,
+        );
 
-      final draftPeriod = PeriodData(
-        id: 'period-draft',
-        name: 'Siklus Draft 2',
-        initialCapacity: 3000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 9, 1),
-        createdAt: DateTime(2026, 8, 1),
-        isActive: false,
-      );
+        final draftPeriod = PeriodData(
+          id: 'period-draft',
+          name: 'Siklus Draft 2',
+          initialCapacity: 3000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 9, 1),
+          createdAt: DateTime(2026, 8, 1),
+          isActive: false,
+        );
 
-      final ctrl = _MockPeriodController(periods: [activePeriod, draftPeriod]);
+        final ctrl = _MockPeriodController(
+          periods: [activePeriod, draftPeriod],
+        );
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        controller: ctrl,
-        period: draftPeriod,
-      ));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createWidgetUnderTest(controller: ctrl, period: draftPeriod),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Tidak dapat mengaktifkan periode ini karena masih ada siklus pemeliharaan yang sedang aktif. Selesaikan panen pada periode aktif terlebih dahulu.'), findsOneWidget);
-      expect(find.text('Aktifkan Periode Ini Sekarang'), findsNothing);
-    });
+        expect(
+          find.text(
+            'Tidak dapat mengaktifkan periode ini karena masih ada siklus pemeliharaan yang sedang aktif. Selesaikan panen pada periode aktif terlebih dahulu.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Aktifkan Periode Ini Sekarang'), findsNothing);
+      },
+    );
 
-    testWidgets('tampilkan tombol aktifkan periode jika tidak ada periode lain yang aktif', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'tampilkan tombol aktifkan periode jika tidak ada periode lain yang aktif',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final draftPeriod = PeriodData(
-        id: 'period-draft',
-        name: 'Siklus Draft 2',
-        initialCapacity: 3000,
-        initialWeight: 0.04,
-        startDate: DateTime(2026, 9, 1),
-        createdAt: DateTime(2026, 8, 1),
-        isActive: false,
-      );
+        final draftPeriod = PeriodData(
+          id: 'period-draft',
+          name: 'Siklus Draft 2',
+          initialCapacity: 3000,
+          initialWeight: 0.04,
+          startDate: DateTime(2026, 9, 1),
+          createdAt: DateTime(2026, 8, 1),
+          isActive: false,
+        );
 
-      final ctrl = _MockPeriodController(periods: [draftPeriod]);
+        final ctrl = _MockPeriodController(periods: [draftPeriod]);
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        controller: ctrl,
-        period: draftPeriod,
-      ));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          createWidgetUnderTest(controller: ctrl, period: draftPeriod),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Aktifkan Periode Ini Sekarang'), findsOneWidget);
-    });
+        expect(find.text('Aktifkan Periode Ini Sekarang'), findsOneWidget);
+      },
+    );
   });
 }

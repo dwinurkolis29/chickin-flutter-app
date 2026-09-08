@@ -5,7 +5,8 @@ class DailyFCRData {
   final double dailyFeedKg; // Pakan terkonsumsi hari ini (kg)
   final double cumulativeFeedKg; // Total pakan kumulatif hingga hari ini (kg)
   final int dailyMortality; // Kematian hari ini (ekor)
-  final int cumulativeMortality; // Total kematian kumulatif hingga hari ini (ekor)
+  final int
+  cumulativeMortality; // Total kematian kumulatif hingga hari ini (ekor)
   final int sisaAyam; // Populasi sisa ayam hidup (ekor)
   final int avgWeightGram; // Bobot rata-rata sampling (gram)
   final double totalBiomassKg; // Total bobot biomassa ayam hidup (kg)
@@ -25,15 +26,15 @@ class DailyFCRData {
   });
 
   Map<String, dynamic> toJson() => {
-        'day': day,
-        'date': date.toIso8601String(),
-        'daily_feed_kg': dailyFeedKg,
-        'cumulative_feed_kg': cumulativeFeedKg,
-        'daily_mortality': dailyMortality,
-        'cumulative_mortality': cumulativeMortality,
-        'sisa_ayam': sisaAyam,
-        'avg_weight_gram': avgWeightGram,
-        'total_biomass_kg': totalBiomassKg,
-        'fcr': fcr,
-      };
+    'day': day,
+    'date': date.toIso8601String(),
+    'daily_feed_kg': dailyFeedKg,
+    'cumulative_feed_kg': cumulativeFeedKg,
+    'daily_mortality': dailyMortality,
+    'cumulative_mortality': cumulativeMortality,
+    'sisa_ayam': sisaAyam,
+    'avg_weight_gram': avgWeightGram,
+    'total_biomass_kg': totalBiomassKg,
+    'fcr': fcr,
+  };
 }

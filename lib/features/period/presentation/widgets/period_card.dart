@@ -10,11 +10,7 @@ class PeriodCard extends StatelessWidget {
   final PeriodData period;
   final void Function(PeriodData)? onTap;
 
-  const PeriodCard({
-    super.key,
-    required this.period,
-    this.onTap,
-  });
+  const PeriodCard({super.key, required this.period, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +23,18 @@ class PeriodCard extends StatelessWidget {
     final isClosed = !isActive && period.endDate != null;
 
     // Status Styling
-    final String statusLabel = isActive ? 'Aktif' : (isClosed ? 'Selesai Panen' : 'Draft');
-    final Color statusColor = isActive
-        ? AppColors.success
-        : (isClosed ? cs.primary : cs.onSurfaceVariant);
-    final Color statusBg = isActive
-        ? AppColors.success.withValues(alpha: 0.12)
-        : (isClosed ? cs.primary.withValues(alpha: 0.1) : cs.surfaceContainerHighest);
+    final String statusLabel =
+        isActive ? 'Aktif' : (isClosed ? 'Selesai Panen' : 'Draft');
+    final Color statusColor =
+        isActive
+            ? AppColors.success
+            : (isClosed ? cs.primary : cs.onSurfaceVariant);
+    final Color statusBg =
+        isActive
+            ? AppColors.success.withValues(alpha: 0.12)
+            : (isClosed
+                ? cs.primary.withValues(alpha: 0.1)
+                : cs.surfaceContainerHighest);
 
     // Tanggal
     String dateRangeText;
@@ -41,7 +42,8 @@ class PeriodCard extends StatelessWidget {
       dateRangeText = 'Mulai ${dateFmt.format(period.startDate)} (Berjalan)';
     } else if (isClosed) {
       final days = period.endDate!.difference(period.startDate).inDays;
-      dateRangeText = '${dateFmt.format(period.startDate)} - ${dateFmt.format(period.endDate!)} ($days hari)';
+      dateRangeText =
+          '${dateFmt.format(period.startDate)} - ${dateFmt.format(period.endDate!)} ($days hari)';
     } else {
       dateRangeText = 'Dibuat ${dateFmt.format(period.createdAt)}';
     }
@@ -69,7 +71,9 @@ class PeriodCard extends StatelessWidget {
                   child: Icon(
                     isActive
                         ? Icons.play_circle_outline_rounded
-                        : (isClosed ? Icons.task_alt_rounded : Icons.edit_note_rounded),
+                        : (isClosed
+                            ? Icons.task_alt_rounded
+                            : Icons.edit_note_rounded),
                     color: statusColor,
                     size: 22,
                   ),
@@ -85,7 +89,9 @@ class PeriodCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              period.name.isNotEmpty ? period.name : 'Periode Tanpa Nama',
+                              period.name.isNotEmpty
+                                  ? period.name
+                                  : 'Periode Tanpa Nama',
                               style: tt.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: cs.onSurface,
@@ -96,10 +102,15 @@ class PeriodCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: statusBg,
-                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.pillRadius,
+                              ),
                             ),
                             child: Text(
                               statusLabel,
@@ -125,7 +136,11 @@ class PeriodCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.groups_outlined, size: 14, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.groups_outlined,
+                            size: 14,
+                            color: cs.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${numFmt.format(period.initialCapacity)} ekor DOC',
@@ -136,7 +151,10 @@ class PeriodCard extends StatelessWidget {
                           ),
                           if (period.summary != null) ...[
                             const SizedBox(width: 8),
-                            Text('•', style: TextStyle(color: cs.outlineVariant)),
+                            Text(
+                              '•',
+                              style: TextStyle(color: cs.outlineVariant),
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'FCR: ${period.summary!.finalFCR.toStringAsFixed(2)}',

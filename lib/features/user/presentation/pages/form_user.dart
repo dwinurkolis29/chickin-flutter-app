@@ -126,181 +126,194 @@ class _FormUserState extends State<FormUser> {
       backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Edit Profil Peternak'),
       body: SafeArea(
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator(color: cs.primary))
-            : _errorMessage.isNotEmpty
+        child:
+            _isLoading
+                ? Center(child: CircularProgressIndicator(color: cs.primary))
+                : _errorMessage.isNotEmpty
                 ? AppErrorState(
-                    message: 'Gagal memuat data pengguna',
-                    subtitle: _errorMessage,
-                    onRetry: () => _loadUserData(),
-                  )
+                  message: 'Gagal memuat data pengguna',
+                  subtitle: _errorMessage,
+                  onRetry: () => _loadUserData(),
+                )
                 : Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 640),
-                      child: Form(
-                        key: _formKey,
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0,
-                            vertical: 16.0,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // ── 1. Hero Guidance Card ─────────────────────
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: cs.secondaryContainer.withValues(alpha: 0.5),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: Form(
+                      key: _formKey,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 16.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // ── 1. Hero Guidance Card ─────────────────────
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: cs.secondaryContainer.withValues(
+                                  alpha: 0.5,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.cardRadius,
+                                ),
+                                border: Border.all(
+                                  color: cs.primary.withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: cs.primary.withValues(alpha: 0.12),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.person_pin_circle_rounded,
+                                      size: 24,
+                                      color: cs.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Informasi Akun Peternak',
+                                          style: tt.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: cs.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Pastikan nama lengkap, nomor telepon, dan domisili Anda diisi dengan benar untuk kemudahan kontak peternakan.',
+                                          style: tt.bodySmall?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // ── 2. Section Identitas Peternak ─────────────
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 4,
+                                bottom: 8,
+                              ),
+                              child: Text(
+                                'IDENTITAS PETERNAK',
+                                style: tt.labelSmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ),
+                            AppTextFormField(
+                              controller: _nameController,
+                              labelText: 'Nama Lengkap Peternak',
+                              hintText: 'Contoh: H. Ahmad Supriyadi',
+                              prefixIcon: Icons.person_outline_rounded,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Nama lengkap wajib diisi.';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 14),
+                            AppTextFormField(
+                              readOnly: true,
+                              initialValue:
+                                  userEmail.isNotEmpty
+                                      ? userEmail
+                                      : 'Tidak ada email',
+                              labelText: 'Email Akun Terdaftar',
+                              prefixIcon: Icons.mail_outline_rounded,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // ── 3. Section Kontak & Domisili ──────────────
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 4,
+                                bottom: 8,
+                              ),
+                              child: Text(
+                                'KONTAK & DOMISILI',
+                                style: tt.labelSmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ),
+                            AppTextFormField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              labelText: 'Nomor HP / WhatsApp Aktif',
+                              hintText: 'Contoh: 081234567890',
+                              prefixIcon: Icons.phone_outlined,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Nomor telepon wajib diisi.';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 14),
+                            AppTextFormField(
+                              controller: _addressController,
+                              maxLines: 3,
+                              labelText: 'Alamat Domisili Peternak',
+                              hintText:
+                                  'Contoh: Dusun Krajan RT 01/02, Desa Sukamaju, Kec. Ciawi',
+                              prefixIcon: Icons.location_on_outlined,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Alamat domisili wajib diisi.';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 28),
+
+                            // ── 4. Tombol Simpan ───────────────────────────
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
-                                    AppTheme.cardRadius,
-                                  ),
-                                  border: Border.all(
-                                    color: cs.primary.withValues(alpha: 0.15),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: cs.primary.withValues(alpha: 0.12),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.person_pin_circle_rounded,
-                                        size: 24,
-                                        color: cs.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Informasi Akun Peternak',
-                                            style: tt.titleSmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: cs.onSurface,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            'Pastikan nama lengkap, nomor telepon, dan domisili Anda diisi dengan benar untuk kemudahan kontak peternakan.',
-                                            style: tt.bodySmall?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // ── 2. Section Identitas Peternak ─────────────
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 8),
-                                child: Text(
-                                  'IDENTITAS PETERNAK',
-                                  style: tt.labelSmall?.copyWith(
-                                    color: cs.primary,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.8,
+                                    AppTheme.pillRadius,
                                   ),
                                 ),
                               ),
-                              AppTextFormField(
-                                controller: _nameController,
-                                labelText: 'Nama Lengkap Peternak',
-                                hintText: 'Contoh: H. Ahmad Supriyadi',
-                                prefixIcon: Icons.person_outline_rounded,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Nama lengkap wajib diisi.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 14),
-                              AppTextFormField(
-                                readOnly: true,
-                                initialValue: userEmail.isNotEmpty
-                                    ? userEmail
-                                    : 'Tidak ada email',
-                                labelText: 'Email Akun Terdaftar',
-                                prefixIcon: Icons.mail_outline_rounded,
-                              ),
-                              const SizedBox(height: 20),
-
-                              // ── 3. Section Kontak & Domisili ──────────────
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 8),
-                                child: Text(
-                                  'KONTAK & DOMISILI',
-                                  style: tt.labelSmall?.copyWith(
-                                    color: cs.primary,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.8,
-                                  ),
-                                ),
-                              ),
-                              AppTextFormField(
-                                controller: _phoneController,
-                                keyboardType: TextInputType.phone,
-                                labelText: 'Nomor HP / WhatsApp Aktif',
-                                hintText: 'Contoh: 081234567890',
-                                prefixIcon: Icons.phone_outlined,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Nomor telepon wajib diisi.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 14),
-                              AppTextFormField(
-                                controller: _addressController,
-                                maxLines: 3,
-                                labelText: 'Alamat Domisili Peternak',
-                                hintText:
-                                    'Contoh: Dusun Krajan RT 01/02, Desa Sukamaju, Kec. Ciawi',
-                                prefixIcon: Icons.location_on_outlined,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Alamat domisili wajib diisi.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 28),
-
-                              // ── 4. Tombol Simpan ───────────────────────────
-                              FilledButton(
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(52),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppTheme.pillRadius,
-                                    ),
-                                  ),
-                                ),
-                                onPressed: _isSaving ? null : _handleUpdate,
-                                child: _isSaving
-                                    ? SizedBox(
+                              onPressed: _isSaving ? null : _handleUpdate,
+                              child:
+                                  _isSaving
+                                      ? SizedBox(
                                         height: 22,
                                         width: 22,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            cs.onPrimary,
-                                          ),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                cs.onPrimary,
+                                              ),
                                         ),
                                       )
-                                    : Text(
+                                      : Text(
                                         'Simpan Perubahan',
                                         style: tt.labelLarge?.copyWith(
                                           color: cs.onPrimary,
@@ -308,14 +321,14 @@ class _FormUserState extends State<FormUser> {
                                           fontSize: 16,
                                         ),
                                       ),
-                              ),
-                              const SizedBox(height: 40),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 40),
+                          ],
                         ),
                       ),
                     ),
                   ),
+                ),
       ),
     );
   }

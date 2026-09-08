@@ -13,11 +13,7 @@ void main() {
     return MaterialApp(
       theme: AppTheme.build(AppThemeOption.light),
       home: Scaffold(
-        appBar: AppHeader(
-          title: title,
-          isHome: isHome,
-          actions: actions,
-        ),
+        appBar: AppHeader(title: title, isHome: isHome, actions: actions),
       ),
     );
   }
@@ -28,9 +24,7 @@ void main() {
         createWidgetUnderTest(
           title: 'Judul Halaman',
           isHome: true,
-          actions: const [
-            Icon(Icons.more_vert, key: Key('test_action')),
-          ],
+          actions: const [Icon(Icons.more_vert, key: Key('test_action'))],
         ),
       );
 
@@ -40,27 +34,31 @@ void main() {
       expect(find.byIcon(Icons.chevron_left), findsNothing);
     });
 
-    testWidgets('menampilkan back button IconButton saat navigator canPop', (tester) async {
+    testWidgets('menampilkan back button IconButton saat navigator canPop', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.build(AppThemeOption.light),
           home: Builder(
-            builder: (context) => Scaffold(
-              body: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const Scaffold(
-                          appBar: AppHeader(title: 'Sub Page'),
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Go to Sub Page'),
+            builder:
+                (context) => Scaffold(
+                  body: Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (_) => const Scaffold(
+                                  appBar: AppHeader(title: 'Sub Page'),
+                                ),
+                          ),
+                        );
+                      },
+                      child: const Text('Go to Sub Page'),
+                    ),
+                  ),
                 ),
-              ),
-            ),
           ),
         ),
       );

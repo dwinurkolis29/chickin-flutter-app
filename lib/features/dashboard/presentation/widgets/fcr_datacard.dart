@@ -59,7 +59,8 @@ class FCRDataCard extends StatelessWidget {
             const SizedBox(height: 12),
             Center(
               child: _ViewAllFCRButton(
-                onTap: onViewAll ??
+                onTap:
+                    onViewAll ??
                     () {
                       Navigator.push(
                         context,
@@ -99,9 +100,10 @@ class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Material(
-        color: _isHovered
-            ? cs.primary.withValues(alpha: 0.12)
-            : cs.surfaceContainerHighest.withValues(alpha: 0.4),
+        color:
+            _isHovered
+                ? cs.primary.withValues(alpha: 0.12)
+                : cs.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(AppTheme.pillRadius),
         child: InkWell(
           onTap: widget.onTap,
@@ -115,20 +117,22 @@ class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.pillRadius),
               border: Border.all(
-                color: _isHovered
-                    ? cs.primary
-                    : cs.outlineVariant.withValues(alpha: 0.6),
+                color:
+                    _isHovered
+                        ? cs.primary
+                        : cs.outlineVariant.withValues(alpha: 0.6),
                 width: _isHovered ? 1.5 : 1.0,
               ),
-              boxShadow: _isHovered
-                  ? [
-                      BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  _isHovered
+                      ? [
+                        BoxShadow(
+                          color: cs.primary.withValues(alpha: 0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                      : null,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -136,14 +140,20 @@ class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
                 Icon(
                   Icons.analytics_outlined,
                   size: 18,
-                  color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.85),
+                  color:
+                      _isHovered
+                          ? cs.primary
+                          : cs.primary.withValues(alpha: 0.85),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Lihat semua FCR',
                   style: tt.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.9),
+                    color:
+                        _isHovered
+                            ? cs.primary
+                            : cs.primary.withValues(alpha: 0.9),
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -154,7 +164,10 @@ class _ViewAllFCRButtonState extends State<_ViewAllFCRButton> {
                   child: Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color: _isHovered ? cs.primary : cs.primary.withValues(alpha: 0.85),
+                    color:
+                        _isHovered
+                            ? cs.primary
+                            : cs.primary.withValues(alpha: 0.85),
                   ),
                 ),
               ],
@@ -187,7 +200,8 @@ class _WeekCard extends StatefulWidget {
   State<_WeekCard> createState() => _WeekCardState();
 }
 
-class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixin {
+class _WeekCardState extends State<_WeekCard>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
   late AnimationController _controller;
   late Animation<double> _expandAnim;
@@ -199,10 +213,7 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
       vsync: this,
       duration: const Duration(milliseconds: 250),
     );
-    _expandAnim = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+    _expandAnim = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
   @override
@@ -310,7 +321,10 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
             children: [
               // ── CARD HEADER (SELALU TERLIHAT) ──────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   children: [
                     // Informasi Minggu & Rentang Umur
@@ -339,10 +353,15 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
 
                     // Badge Status FCR (Besar & Kontras Jelas)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: _statusBgColor,
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.pillRadius,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -393,15 +412,21 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                           Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                              color: cs.surfaceContainerHigh.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.cardRadius,
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.alphabetic,
                                   children: [
                                     Text(
@@ -415,7 +440,9 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                                       text: TextSpan(
                                         children: [
                                           TextSpan(
-                                            text: widget.fmt.format(widget.data.fcr),
+                                            text: widget.fmt.format(
+                                              widget.data.fcr,
+                                            ),
                                             style: tt.headlineSmall?.copyWith(
                                               color: _statusTextColor,
                                               fontWeight: FontWeight.w800,
@@ -437,12 +464,17 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
 
                                 // Progress Indicator Bar
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.pillRadius,
+                                  ),
                                   child: LinearProgressIndicator(
                                     value: _barProgress,
                                     minHeight: 8,
-                                    backgroundColor: cs.outlineVariant.withValues(alpha: 0.4),
-                                    valueColor: AlwaysStoppedAnimation<Color>(_statusBarColor),
+                                    backgroundColor: cs.outlineVariant
+                                        .withValues(alpha: 0.4),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      _statusBarColor,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -480,8 +512,10 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                             iconColor: cs.primary,
                             iconBgColor: cs.secondaryContainer,
                             label: 'Total Pakan Dikonsumsi',
-                            value: '${widget.fmt.format(widget.data.totalPakan)} kg',
-                            subtitle: '${(widget.data.totalPakan / 50).toStringAsFixed(1)} sak (per 50 kg)',
+                            value:
+                                '${widget.fmt.format(widget.data.totalPakan)} kg',
+                            subtitle:
+                                '${(widget.data.totalPakan / 50).toStringAsFixed(1)} sak (per 50 kg)',
                             textTheme: tt,
                           ),
                           const SizedBox(height: 8),
@@ -490,7 +524,8 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                             iconColor: cs.primary,
                             iconBgColor: cs.secondaryContainer,
                             label: 'Total Bobot Ayam Hidup',
-                            value: '${widget.fmt.format(widget.data.beratAyam)} kg',
+                            value:
+                                '${widget.fmt.format(widget.data.beratAyam)} kg',
                             subtitle: 'Akumulasi seluruh populasi',
                             textTheme: tt,
                           ),
@@ -500,7 +535,8 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                             iconColor: cs.primary,
                             iconBgColor: cs.secondaryContainer,
                             label: 'Sisa Ayam Hidup',
-                            value: '${widget.fmt.format(widget.data.sisaAyam)} ekor',
+                            value:
+                                '${widget.fmt.format(widget.data.sisaAyam)} ekor',
                             subtitle: 'Populasi kandang aktif',
                             textTheme: tt,
                           ),
@@ -511,7 +547,9 @@ class _WeekCardState extends State<_WeekCard> with SingleTickerProviderStateMixi
                             child: Text(
                               'Rumus: Total Pakan (kg) ÷ Total Bobot (kg) = FCR',
                               style: tt.labelSmall?.copyWith(
-                                color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                                color: cs.onSurfaceVariant.withValues(
+                                  alpha: 0.8,
+                                ),
                                 fontSize: 10.5,
                                 fontStyle: FontStyle.italic,
                               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 
 /// Menampilkan tren FCR per minggu sebagai list visual.
@@ -89,11 +90,7 @@ class _FCRWeekRow extends StatelessWidget {
   final double fcr;
   final double? previousFcr;
 
-  const _FCRWeekRow({
-    required this.week,
-    required this.fcr,
-    this.previousFcr,
-  });
+  const _FCRWeekRow({required this.week, required this.fcr, this.previousFcr});
 
   @override
   Widget build(BuildContext context) {
@@ -114,11 +111,23 @@ class _FCRWeekRow extends StatelessWidget {
     Widget trendIcon = const SizedBox.shrink();
     if (previousFcr != null) {
       if (fcr < previousFcr! - 0.05) {
-        trendIcon = Icon(Icons.trending_down_rounded, size: 16, color: AppColors.success);
+        trendIcon = Icon(
+          Icons.trending_down_rounded,
+          size: 16,
+          color: AppColors.success,
+        );
       } else if (fcr > previousFcr! + 0.05) {
-        trendIcon = Icon(Icons.trending_up_rounded, size: 16, color: AppColors.error);
+        trendIcon = Icon(
+          Icons.trending_up_rounded,
+          size: 16,
+          color: AppColors.error,
+        );
       } else {
-        trendIcon = Icon(Icons.trending_flat_rounded, size: 16, color: AppColors.warning);
+        trendIcon = Icon(
+          Icons.trending_flat_rounded,
+          size: 16,
+          color: AppColors.warning,
+        );
       }
     }
 
@@ -142,7 +151,7 @@ class _FCRWeekRow extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                   child: Stack(
                     children: [
                       // Background track
@@ -157,7 +166,9 @@ class _FCRWeekRow extends StatelessWidget {
                           height: 8,
                           decoration: BoxDecoration(
                             color: barColor,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
                           ),
                         ),
                       ),

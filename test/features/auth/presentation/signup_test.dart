@@ -74,46 +74,52 @@ void main() {
   }
 
   group('Signup Widget Tests', () {
-    testWidgets('menampilkan header pendaftaran, form input, dan tombol daftar', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan header pendaftaran, form input, dan tombol daftar',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      expect(find.text('Daftar Akun Peternak'), findsOneWidget);
-      expect(find.text('Mulai Bersama BroilerKu'), findsOneWidget);
-      expect(find.text('DATA DIRI & KANDANG'), findsOneWidget);
+        expect(find.text('Daftar Akun Peternak'), findsOneWidget);
+        expect(find.text('Mulai Bersama BroilerKu'), findsOneWidget);
+        expect(find.text('DATA DIRI & KANDANG'), findsOneWidget);
 
-      expect(find.text('Nama Lengkap Peternak'), findsOneWidget);
-      expect(find.text('Alamat Email'), findsOneWidget);
-      expect(find.text('Nomor WhatsApp / HP (Opsional)'), findsOneWidget);
-      expect(find.text('Alamat / Lokasi Kandang (Opsional)'), findsOneWidget);
-      expect(find.text('Kata Sandi'), findsOneWidget);
-      expect(find.text('Konfirmasi Kata Sandi'), findsOneWidget);
-      expect(find.text('Daftar Sekarang'), findsOneWidget);
-      expect(find.text('Sudah punya akun peternak? '), findsOneWidget);
-      expect(find.text('Masuk di Sini'), findsOneWidget);
-    });
+        expect(find.text('Nama Lengkap Peternak'), findsOneWidget);
+        expect(find.text('Alamat Email'), findsOneWidget);
+        expect(find.text('Nomor WhatsApp / HP (Opsional)'), findsOneWidget);
+        expect(find.text('Alamat / Lokasi Kandang (Opsional)'), findsOneWidget);
+        expect(find.text('Kata Sandi'), findsOneWidget);
+        expect(find.text('Konfirmasi Kata Sandi'), findsOneWidget);
+        expect(find.text('Daftar Sekarang'), findsOneWidget);
+        expect(find.text('Sudah punya akun peternak? '), findsOneWidget);
+        expect(find.text('Masuk di Sini'), findsOneWidget);
+      },
+    );
 
-    testWidgets('validasi form pendaftaran ketika input kosong atau tidak cocok', (tester) async {
-      tester.view.physicalSize = const Size(800, 1600);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'validasi form pendaftaran ketika input kosong atau tidak cocok',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final auth = _FakeAuthService();
-      await tester.pumpWidget(createWidgetUnderTest(authService: auth));
-      await tester.pumpAndSettle();
+        final auth = _FakeAuthService();
+        await tester.pumpWidget(createWidgetUnderTest(authService: auth));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Daftar Sekarang'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Daftar Sekarang'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Nama lengkap wajib diisi'), findsOneWidget);
-      expect(find.text('Email wajib diisi'), findsOneWidget);
-      expect(find.text('Kata sandi wajib diisi'), findsOneWidget);
-      expect(auth.signUpCalled, isFalse);
-    });
+        expect(find.text('Nama lengkap wajib diisi'), findsOneWidget);
+        expect(find.text('Email wajib diisi'), findsOneWidget);
+        expect(find.text('Kata sandi wajib diisi'), findsOneWidget);
+        expect(auth.signUpCalled, isFalse);
+      },
+    );
 
     testWidgets('memproses registrasi dengan data valid', (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
@@ -124,12 +130,24 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest(authService: auth));
       await tester.pumpAndSettle();
 
-      final nameField = find.widgetWithText(TextFormField, 'Nama Lengkap Peternak');
+      final nameField = find.widgetWithText(
+        TextFormField,
+        'Nama Lengkap Peternak',
+      );
       final emailField = find.widgetWithText(TextFormField, 'Alamat Email');
-      final phoneField = find.widgetWithText(TextFormField, 'Nomor WhatsApp / HP (Opsional)');
-      final addressField = find.widgetWithText(TextFormField, 'Alamat / Lokasi Kandang (Opsional)');
+      final phoneField = find.widgetWithText(
+        TextFormField,
+        'Nomor WhatsApp / HP (Opsional)',
+      );
+      final addressField = find.widgetWithText(
+        TextFormField,
+        'Alamat / Lokasi Kandang (Opsional)',
+      );
       final passField = find.widgetWithText(TextFormField, 'Kata Sandi');
-      final confirmPassField = find.widgetWithText(TextFormField, 'Konfirmasi Kata Sandi');
+      final confirmPassField = find.widgetWithText(
+        TextFormField,
+        'Konfirmasi Kata Sandi',
+      );
 
       await tester.enterText(nameField, 'Budi Santoso');
       await tester.enterText(emailField, 'budi@peternak.com');

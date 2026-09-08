@@ -10,19 +10,22 @@ void main() {
       theme: AppTheme.build(AppThemeOption.light),
       home: Scaffold(
         body: Builder(
-          builder: (context) => Center(
-            child: ElevatedButton(
-              onPressed: () => onOpen(context),
-              child: const Text('Buka Form Sheet'),
-            ),
-          ),
+          builder:
+              (context) => Center(
+                child: ElevatedButton(
+                  onPressed: () => onOpen(context),
+                  child: const Text('Buka Form Sheet'),
+                ),
+              ),
         ),
       ),
     );
   }
 
   group('AppFormBottomSheet Tests', () {
-    testWidgets('menampilkan title, subtitle, icon, dan builder content', (tester) async {
+    testWidgets('menampilkan title, subtitle, icon, dan builder content', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createTestWidget((context) {
           AppFormBottomSheet.show(
@@ -31,11 +34,7 @@ void main() {
             subtitle: 'Ini adalah deskripsi bantuan form.',
             icon: Icons.edit_note_rounded,
             builder: (sheetContext, setModalState) {
-              return const Column(
-                children: [
-                  Text('Isi Konten Form Reusable'),
-                ],
-              );
+              return const Column(children: [Text('Isi Konten Form Reusable')]);
             },
           );
         }),
@@ -50,7 +49,9 @@ void main() {
       expect(find.byIcon(Icons.edit_note_rounded), findsOneWidget);
     });
 
-    testWidgets('menampilkan widget mandiri AppFormBottomSheet', (tester) async {
+    testWidgets('menampilkan widget mandiri AppFormBottomSheet', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.build(AppThemeOption.light),

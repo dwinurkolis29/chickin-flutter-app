@@ -20,9 +20,9 @@ class CageController extends ChangeNotifier {
     required FirebaseService firebaseService,
     required StorageService storageService,
     required AuthService authService,
-  })  : _firebaseService = firebaseService,
-        _storageService = storageService,
-        _authService = authService;
+  }) : _firebaseService = firebaseService,
+       _storageService = storageService,
+       _authService = authService;
 
   CageData? get cageData => _cageData;
   bool get isLoading => _isLoading;
@@ -45,7 +45,6 @@ class CageController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-
       _errorMessage = 'Gagal memuat data kandang. Silakan coba lagi.';
       _isLoading = false;
       notifyListeners();
@@ -71,7 +70,6 @@ class CageController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-
       _errorMessage = 'Gagal menyimpan data kandang: $e';
       _isLoading = false;
       notifyListeners();
@@ -83,7 +81,7 @@ class CageController extends ChangeNotifier {
     try {
       final user = _authService.currentUser;
       if (user == null) return;
-      
+
       final File? imageFile = await ImagePickerHelper.pickImage(source);
       if (imageFile == null) return;
 
@@ -100,15 +98,20 @@ class CageController extends ChangeNotifier {
 
       final pathPrefix = 'users/${user.uid}/cage/cover';
 
-      final downloadUrl = await _storageService.uploadImage(croppedFile, pathPrefix);
+      final downloadUrl = await _storageService.uploadImage(
+        croppedFile,
+        pathPrefix,
+      );
       await _firebaseService.updateCageImageUrl(downloadUrl);
 
       _cageData = _cageData?.copyWith(imageUrl: downloadUrl);
       _isUploadingImage = false;
       notifyListeners();
     } catch (e) {
-
-      final cleanMsg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception', '');
+      final cleanMsg = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('Exception', '');
       _errorMessage = 'Gagal mengunggah foto kandang: $cleanMsg';
       _isUploadingImage = false;
       notifyListeners();

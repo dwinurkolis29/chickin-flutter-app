@@ -49,7 +49,7 @@ class SummaryCalculator {
   final CalculateFCR _calculateFCR;
 
   SummaryCalculator({CalculateFCR? calculateFCR})
-      : _calculateFCR = calculateFCR ?? CalculateFCR();
+    : _calculateFCR = calculateFCR ?? CalculateFCR();
 
   PeriodSnapshot execute(
     PeriodData period,
@@ -60,12 +60,16 @@ class SummaryCalculator {
   }) {
     final initialPopulation = period.initialCapacity;
     final endDate = period.endDate ?? DateTime.now();
-    final calendarDurationDays =
-        endDate.difference(period.startDate).inDays.clamp(1, 9999);
-    final durationDays = (recordings.isNotEmpty &&
-            recordings.map((r) => r.day).reduce((a, b) => a > b ? a : b) > 0)
-        ? recordings.map((r) => r.day).reduce((a, b) => a > b ? a : b)
-        : calendarDurationDays;
+    final calendarDurationDays = endDate
+        .difference(period.startDate)
+        .inDays
+        .clamp(1, 9999);
+    final durationDays =
+        (recordings.isNotEmpty &&
+                recordings.map((r) => r.day).reduce((a, b) => a > b ? a : b) >
+                    0)
+            ? recordings.map((r) => r.day).reduce((a, b) => a > b ? a : b)
+            : calendarDurationDays;
 
     // Kumpulkan seluruh data panen (parsial sebelumnya + panen akhir saat ini)
     final List<HarvestRecord> allHarvests = List<HarvestRecord>.from(
@@ -77,8 +81,9 @@ class SummaryCalculator {
         harvestedChicks > 0 &&
         harvestedWeightKg != null &&
         harvestedWeightKg > 0) {
-      final hasFinalAlready =
-          allHarvests.any((h) => h.type == HarvestType.finalHarvest);
+      final hasFinalAlready = allHarvests.any(
+        (h) => h.type == HarvestType.finalHarvest,
+      );
       if (!hasFinalAlready) {
         final avgW = harvestedWeightKg / harvestedChicks;
         allHarvests.add(
@@ -96,20 +101,23 @@ class SummaryCalculator {
     }
 
     if (recordings.isEmpty) {
-      final totalHarvestChicks = allHarvests.isNotEmpty
-          ? allHarvests.fold(0, (sum, h) => sum + h.chicks)
-          : harvestedChicks;
-      final totalHarvestKg = allHarvests.isNotEmpty
-          ? allHarvests.fold(0.0, (sum, h) => sum + h.weightKg)
-          : harvestedWeightKg;
+      final totalHarvestChicks =
+          allHarvests.isNotEmpty
+              ? allHarvests.fold(0, (sum, h) => sum + h.chicks)
+              : harvestedChicks;
+      final totalHarvestKg =
+          allHarvests.isNotEmpty
+              ? allHarvests.fold(0.0, (sum, h) => sum + h.weightKg)
+              : harvestedWeightKg;
 
       final finalPop = totalHarvestChicks ?? initialPopulation;
       final finalBio = totalHarvestKg ?? 0.0;
-      final avgWeight = (totalHarvestChicks != null &&
-              totalHarvestChicks > 0 &&
-              totalHarvestKg != null)
-          ? totalHarvestKg / totalHarvestChicks
-          : 0.0;
+      final avgWeight =
+          (totalHarvestChicks != null &&
+                  totalHarvestChicks > 0 &&
+                  totalHarvestKg != null)
+              ? totalHarvestKg / totalHarvestChicks
+              : 0.0;
 
       return PeriodSnapshot(
         totalFeedKg: 0,
@@ -153,40 +161,48 @@ class SummaryCalculator {
     final estFCR = weeklyFCR.isNotEmpty ? weeklyFCR.last.fcr : 0.0;
 
     // Evaluasi data panen riil akumulatif (parsial + akhir)
-    final bool hasHarvestData = allHarvests.isNotEmpty ||
+    final bool hasHarvestData =
+        allHarvests.isNotEmpty ||
         (harvestedChicks != null &&
             harvestedChicks > 0 &&
             harvestedWeightKg != null &&
             harvestedWeightKg > 0);
 
-    final int totalHarvestedChicks = allHarvests.isNotEmpty
-        ? allHarvests.fold(0, (sum, h) => sum + h.chicks)
-        : (harvestedChicks ?? 0);
-    final double totalHarvestedWeightKg = allHarvests.isNotEmpty
-        ? allHarvests.fold(0.0, (sum, h) => sum + h.weightKg)
-        : (harvestedWeightKg ?? 0.0);
+    final int totalHarvestedChicks =
+        allHarvests.isNotEmpty
+            ? allHarvests.fold(0, (sum, h) => sum + h.chicks)
+            : (harvestedChicks ?? 0);
+    final double totalHarvestedWeightKg =
+        allHarvests.isNotEmpty
+            ? allHarvests.fold(0.0, (sum, h) => sum + h.weightKg)
+            : (harvestedWeightKg ?? 0.0);
 
-    final int estPopulation =
-        (initialPopulation - totalMortality).clamp(0, initialPopulation);
+    final int estPopulation = (initialPopulation - totalMortality).clamp(
+      0,
+      initialPopulation,
+    );
     final double estBiomassKg = estPopulation * estAvgWeightGram / 1000.0;
 
     final int finalPopulation =
         hasHarvestData ? totalHarvestedChicks : estPopulation;
     final double finalBiomassKg =
         hasHarvestData ? totalHarvestedWeightKg : estBiomassKg;
-    final double? avgHarvestWeightKg = hasHarvestData && totalHarvestedChicks > 0
-        ? (totalHarvestedWeightKg / totalHarvestedChicks)
-        : null;
-    final int finalAvgWeightGram = hasHarvestData && avgHarvestWeightKg != null
-        ? (avgHarvestWeightKg * 1000).round()
-        : estAvgWeightGram;
+    final double? avgHarvestWeightKg =
+        hasHarvestData && totalHarvestedChicks > 0
+            ? (totalHarvestedWeightKg / totalHarvestedChicks)
+            : null;
+    final int finalAvgWeightGram =
+        hasHarvestData && avgHarvestWeightKg != null
+            ? (avgHarvestWeightKg * 1000).round()
+            : estAvgWeightGram;
 
     // FCR Aktual Panen = Total Feed Kg / Total Harvest Weight Kg
-    final double finalFCR = hasHarvestData
-        ? (totalHarvestedWeightKg > 0
-            ? totalFeedKg / totalHarvestedWeightKg
-            : estFCR)
-        : estFCR;
+    final double finalFCR =
+        hasHarvestData
+            ? (totalHarvestedWeightKg > 0
+                ? totalFeedKg / totalHarvestedWeightKg
+                : estFCR)
+            : estFCR;
 
     // Umur Panen Tertimbang (Weighted Average Age) jika ada penjarangan
     double weightedHarvestAge = durationDays.toDouble();
@@ -200,12 +216,12 @@ class SummaryCalculator {
 
     // ADG: (berat akhir - berat awal) / durasi, dalam gram/hari
     final initialWeightGram = period.initialWeight * 1000;
-    final effectiveDuration = weightedHarvestAge > 0
-        ? weightedHarvestAge
-        : durationDays.toDouble();
-    final avgDailyGain = effectiveDuration > 0
-        ? (finalAvgWeightGram - initialWeightGram) / effectiveDuration
-        : 0.0;
+    final effectiveDuration =
+        weightedHarvestAge > 0 ? weightedHarvestAge : durationDays.toDouble();
+    final avgDailyGain =
+        effectiveDuration > 0
+            ? (finalAvgWeightGram - initialWeightGram) / effectiveDuration
+            : 0.0;
 
     // Indeks Performa (IP) Broiler Standard:
     // IP = (Livability % * BW kg * 100) / (Umur Panen Tertimbang * FCR)
@@ -213,8 +229,9 @@ class SummaryCalculator {
     if (initialPopulation > 0 && finalFCR > 0 && effectiveDuration > 0) {
       final livabilityPct = (finalPopulation / initialPopulation) * 100.0;
       final avgWeightKg = finalAvgWeightGram / 1000.0;
-      ipScore = ((livabilityPct * avgWeightKg * 100.0) /
-          (effectiveDuration * finalFCR));
+      ipScore =
+          ((livabilityPct * avgWeightKg * 100.0) /
+              (effectiveDuration * finalFCR));
     }
 
     return PeriodSnapshot(

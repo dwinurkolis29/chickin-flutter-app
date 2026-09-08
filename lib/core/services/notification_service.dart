@@ -26,9 +26,11 @@ class NotificationService {
   static const int dailyRecordingReminderId = 8888;
 
   /// Key preferensi lokal Hive untuk toggle pengingat harian
-  static const String dailyReminderSettingKey = 'is_daily_recording_reminder_enabled';
+  static const String dailyReminderSettingKey =
+      'is_daily_recording_reminder_enabled';
 
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
   FirebaseMessaging? _messaging;
 
   // Initialize notification service
@@ -44,16 +46,18 @@ class NotificationService {
 
     // iOS: jangan rely pada requestAlertPermission di sini untuk v17+
     // Permission diminta eksplisit via requestPermissions() di bawah
-    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsIOS,
+        );
 
     await _notifications.initialize(
       initializationSettings,
@@ -136,13 +140,18 @@ class NotificationService {
   Future<bool> requestPermissions() async {
     // iOS
     final bool? iosResult = await _notifications
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
 
     // Android 13+ (API 33+) butuh runtime permission POST_NOTIFICATIONS
-    final bool? androidResult = await _notifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    final bool? androidResult =
+        await _notifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.requestNotificationsPermission();
 
     return (iosResult ?? true) && (androidResult ?? true);
   }
@@ -151,7 +160,6 @@ class NotificationService {
   void _onNotificationTap(NotificationResponse response) {
     // TODO: Navigate to reminder detail page
     // You can pass reminder ID via payload
-
   }
 
   // Schedule a notification
@@ -163,19 +171,23 @@ class NotificationService {
     String? payload,
   }) async {
     // Convert DateTime to TZDateTime
-    final tz.TZDateTime scheduledTZDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    final tz.TZDateTime scheduledTZDate = tz.TZDateTime.from(
+      scheduledDate,
+      tz.local,
+    );
 
     // Android notification details
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'broiler_notification_channel', // channel ID
-      'Notifikasi BroilerKu', // channel name
-      channelDescription: 'Channel notifikasi otomatis BroilerKu',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-      enableVibration: true,
-      playSound: true,
-    );
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'broiler_notification_channel', // channel ID
+          'Notifikasi BroilerKu', // channel name
+          channelDescription: 'Channel notifikasi otomatis BroilerKu',
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: true,
+          enableVibration: true,
+          playSound: true,
+        );
 
     // iOS notification details
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
@@ -203,7 +215,8 @@ class NotificationService {
       scheduledTZDate,
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       payload: payload,
     );
   }
@@ -241,13 +254,14 @@ class NotificationService {
     String? payload,
   }) async {
     try {
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'broiler_notification_channel',
-        'Notifikasi BroilerKu',
-        channelDescription: 'Channel notifikasi otomatis BroilerKu',
-        importance: Importance.high,
-        priority: Priority.high,
-      );
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+            'broiler_notification_channel',
+            'Notifikasi BroilerKu',
+            channelDescription: 'Channel notifikasi otomatis BroilerKu',
+            importance: Importance.high,
+            priority: Priority.high,
+          );
 
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
         presentAlert: true,
@@ -319,7 +333,11 @@ class NotificationService {
       final startDate = activePeriod.startDate;
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
-      final periodStart = DateTime(startDate.year, startDate.month, startDate.day);
+      final periodStart = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      );
       final int currentAgeDays = todayStart.difference(periodStart).inDays + 1;
 
       // Jika periode baru dimulai di masa depan
@@ -329,7 +347,9 @@ class NotificationService {
       }
 
       // 3. Periksa apakah recording hari ini sudah terisi
-      final bool isTodayRecorded = recordings.any((rec) => rec.day == currentAgeDays);
+      final bool isTodayRecorded = recordings.any(
+        (rec) => rec.day == currentAgeDays,
+      );
 
       // 4. Tentukan target jadwal pengingat
       DateTime scheduledDateTime;
@@ -378,15 +398,21 @@ class NotificationService {
       }
 
       final title = 'Waktunya Catat Recording Harian 🐔';
-      final body = 'Siklus ${activePeriod.name} hari ke-$targetAgeDays belum diisi. Yuk catat pakan & bobot ayam hari ini!';
+      final body =
+          'Siklus ${activePeriod.name} hari ke-$targetAgeDays belum diisi. Yuk catat pakan & bobot ayam hari ini!';
 
       // Convert DateTime to TZDateTime
-      final tz.TZDateTime scheduledTZDate = tz.TZDateTime.from(scheduledDateTime, tz.local);
+      final tz.TZDateTime scheduledTZDate = tz.TZDateTime.from(
+        scheduledDateTime,
+        tz.local,
+      );
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      const AndroidNotificationDetails
+      androidDetails = AndroidNotificationDetails(
         'broiler_recording_reminder',
         'Pengingat Recording Harian',
-        channelDescription: 'Channel pengingat pencatatan harian pakan dan bobot ayam BroilerKu',
+        channelDescription:
+            'Channel pengingat pencatatan harian pakan dan bobot ayam BroilerKu',
         importance: Importance.high,
         priority: Priority.high,
         showWhen: true,
@@ -418,7 +444,8 @@ class NotificationService {
           scheduledTZDate,
           notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
           payload: 'daily_recording_${activePeriod.id}',
         );
       }

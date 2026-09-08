@@ -10,6 +10,7 @@ import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
 import 'package:recording_app/features/finance/presentation/pages/finance_list_screen.dart';
+import 'package:recording_app/features/finance/presentation/pages/form_finance_screen.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
@@ -162,7 +163,10 @@ class _ActivePeriodContentCard extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -262,18 +266,27 @@ class _ActivePeriodContentCard extends StatelessWidget {
                             ),
                           ),
                           Container(
-                              width: 1, height: 36, color: cs.outlineVariant),
+                            width: 1,
+                            height: 36,
+                            color: cs.outlineVariant,
+                          ),
                           Expanded(
                             child: _StatMiniTile(
                               label: 'FCR Terkini',
                               value: liveFcr > 0 ? numFmt.format(liveFcr) : '-',
-                              sub: liveFcr <= 1.80
-                                  ? 'Efisien'
-                                  : (liveFcr <= 2.20 ? 'Cukup' : 'Perhatian'),
+                              sub:
+                                  liveFcr <= 1.80
+                                      ? 'Efisien'
+                                      : (liveFcr <= 2.20
+                                          ? 'Cukup'
+                                          : 'Perhatian'),
                             ),
                           ),
                           Container(
-                              width: 1, height: 36, color: cs.outlineVariant),
+                            width: 1,
+                            height: 36,
+                            color: cs.outlineVariant,
+                          ),
                           Expanded(
                             child: _StatMiniTile(
                               label: 'Total Pakan',
@@ -297,14 +310,17 @@ class _ActivePeriodContentCard extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.account_balance_wallet_outlined,
-                          size: 18),
+                      icon: const Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 18,
+                      ),
                       label: const Text('Catat & Kelola Keuangan'),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(42),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                         ),
                       ),
                     ),
@@ -331,8 +347,9 @@ class _ActivePeriodContentCard extends StatelessWidget {
                             label: const Text('Kelola Siklus'),
                             style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppTheme.pillRadius),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.pillRadius,
+                                ),
                               ),
                             ),
                           ),
@@ -340,14 +357,16 @@ class _ActivePeriodContentCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () =>
-                                _openPartialHarvest(context, livePopulasi),
+                            onPressed:
+                                () =>
+                                    _openPartialHarvest(context, livePopulasi),
                             icon: const Icon(Icons.scale_rounded, size: 18),
                             label: const Text('Panen Parsial'),
                             style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppTheme.pillRadius),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.pillRadius,
+                                ),
                               ),
                             ),
                           ),
@@ -358,12 +377,16 @@ class _ActivePeriodContentCard extends StatelessWidget {
 
                     // Quick Action 3: Tutup Panen Akhir
                     OutlinedButton.icon(
-                      onPressed: () => _confirmClosePeriod(
-                        context,
-                        estimatedRemainingChicks: livePopulasi,
+                      onPressed:
+                          () => _confirmClosePeriod(
+                            context,
+                            estimatedRemainingChicks: livePopulasi,
+                          ),
+                      icon: Icon(
+                        Icons.check_box_outlined,
+                        size: 18,
+                        color: cs.error,
                       ),
-                      icon: Icon(Icons.check_box_outlined,
-                          size: 18, color: cs.error),
                       label: Text(
                         'Tutup Panen',
                         style: tt.bodyMedium?.copyWith(
@@ -374,10 +397,12 @@ class _ActivePeriodContentCard extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(42),
                         side: BorderSide(
-                            color: cs.error.withValues(alpha: 0.6)),
+                          color: cs.error.withValues(alpha: 0.6),
+                        ),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                         ),
                       ),
                     ),
@@ -392,7 +417,9 @@ class _ActivePeriodContentCard extends StatelessWidget {
   }
 
   Future<void> _openPartialHarvest(
-      BuildContext context, int livePopulasi) async {
+    BuildContext context,
+    int livePopulasi,
+  ) async {
     final result = await DialogHelper.showPartialHarvest(
       context,
       period: period,
@@ -403,10 +430,10 @@ class _ActivePeriodContentCard extends StatelessWidget {
     if (!context.mounted) return;
     try {
       await context.read<PeriodController>().addPartialHarvest(
-            period.id,
-            result.harvest,
-            createIncomeTransaction: result.createIncomeTransaction,
-          );
+        period.id,
+        result.harvest,
+        createIncomeTransaction: result.createIncomeTransaction,
+      );
       if (context.mounted) {
         AppSnackbar.showSuccess(
           context,
@@ -437,15 +464,39 @@ class _ActivePeriodContentCard extends StatelessWidget {
     if (!context.mounted) return;
     try {
       await context.read<PeriodController>().closePeriod(
-            period.id,
-            harvestedChicks: result.harvestedChicks,
-            harvestedWeightKg: result.harvestedWeightKg,
-          );
+        period.id,
+        harvestedChicks: result.harvestedChicks,
+        harvestedWeightKg: result.harvestedWeightKg,
+      );
       if (context.mounted) {
         AppSnackbar.showSuccess(
           context,
           'Periode berhasil ditutup & laporan panen siap',
         );
+
+        final shouldRecordFinance = await DialogHelper.showConfirm(
+          context,
+          'Catat Uang Penjualan Panen?',
+          'Periode telah berhasil ditutup. Apakah Anda ingin langsung mencatat nilai uang hasil penjualan ayam ke Buku Keuangan?',
+          confirmText: 'Ya, Catat Sekarang',
+          cancelText: 'Nanti Saja',
+        );
+
+        if (shouldRecordFinance == true && context.mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder:
+                  (_) => FormFinanceScreen(
+                    periodId: period.id,
+                    periodName: period.name,
+                    initialType: 'income',
+                    initialCategory: 'main_harvest',
+                    initialBirdCount: result.harvestedChicks,
+                    initialWeightKg: result.harvestedWeightKg,
+                  ),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (context.mounted) {

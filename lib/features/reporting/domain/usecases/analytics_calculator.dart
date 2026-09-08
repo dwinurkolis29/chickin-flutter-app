@@ -21,17 +21,20 @@ class AnalyticsResult {
 
 class AnalyticsCalculator {
   AnalyticsResult execute(PeriodSnapshot snapshot, int initialPopulation) {
-    final mortalityRate = initialPopulation > 0
-        ? (snapshot.totalMortality / initialPopulation) * 100
-        : 0.0;
+    final mortalityRate =
+        initialPopulation > 0
+            ? (snapshot.totalMortality / initialPopulation) * 100
+            : 0.0;
 
-    final survivalRate = initialPopulation > 0
-        ? (snapshot.finalPopulation / initialPopulation) * 100
-        : 0.0;
+    final survivalRate =
+        initialPopulation > 0
+            ? (snapshot.finalPopulation / initialPopulation) * 100
+            : 0.0;
 
-    final feedPerBird = snapshot.finalPopulation > 0
-        ? snapshot.totalFeedKg / snapshot.finalPopulation
-        : 0.0;
+    final feedPerBird =
+        snapshot.finalPopulation > 0
+            ? snapshot.totalFeedKg / snapshot.finalPopulation
+            : 0.0;
 
     return AnalyticsResult(
       mortalityRate: mortalityRate,

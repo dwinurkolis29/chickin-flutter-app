@@ -20,7 +20,7 @@ class OnboardingItemWidget extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
-    
+
     final isWideScreen = size.width > 600;
     final containerSize = isWideScreen ? 240.0 : size.width * 0.65;
 
@@ -38,10 +38,7 @@ class OnboardingItemWidget extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               padding: const EdgeInsets.all(36),
-              child: SvgPicture.asset(
-                item.svgAsset,
-                fit: BoxFit.contain,
-              ),
+              child: SvgPicture.asset(item.svgAsset, fit: BoxFit.contain),
             ),
           ),
         ),

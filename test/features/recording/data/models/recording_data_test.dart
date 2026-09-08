@@ -130,21 +130,24 @@ void main() {
     });
 
     group('fromJson — partial json (no Timestamp)', () {
-      test('json kosong {} → semua default (kecuali createdAt dari DateTime.now)', () {
-        // createdAt akan jatuh ke DateTime.now() karena Timestamp null
-        final before = DateTime.now().subtract(const Duration(seconds: 1));
-        final result = RecordingData.fromJson({});
-        final after = DateTime.now().add(const Duration(seconds: 1));
+      test(
+        'json kosong {} → semua default (kecuali createdAt dari DateTime.now)',
+        () {
+          // createdAt akan jatuh ke DateTime.now() karena Timestamp null
+          final before = DateTime.now().subtract(const Duration(seconds: 1));
+          final result = RecordingData.fromJson({});
+          final after = DateTime.now().add(const Duration(seconds: 1));
 
-        expect(result.id, '');
-        expect(result.day, 0);
-        expect(result.avgWeightGram, 0);
-        expect(result.feedSack, 0);
-        expect(result.mortality, 0);
-        // createdAt harus antara before dan after
-        expect(result.createdAt.isAfter(before), true);
-        expect(result.createdAt.isBefore(after), true);
-      });
+          expect(result.id, '');
+          expect(result.day, 0);
+          expect(result.avgWeightGram, 0);
+          expect(result.feedSack, 0);
+          expect(result.mortality, 0);
+          // createdAt harus antara before dan after
+          expect(result.createdAt.isAfter(before), true);
+          expect(result.createdAt.isBefore(after), true);
+        },
+      );
 
       test('json dengan field day dan feedSack saja', () {
         final result = RecordingData.fromJson({'day': 7, 'feedSack': 4});

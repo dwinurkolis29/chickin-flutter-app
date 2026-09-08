@@ -10,7 +10,10 @@ void main() {
       test('type default ""', () => expect(const CageData().type, ''));
       test('capacity default 0', () => expect(const CageData().capacity, 0));
       test('location default ""', () => expect(const CageData().location, ''));
-      test('imageUrl default null', () => expect(const CageData().imageUrl, null));
+      test(
+        'imageUrl default null',
+        () => expect(const CageData().imageUrl, null),
+      );
     });
 
     group('fromJson — null', () {
@@ -155,15 +158,18 @@ void main() {
         expect(copy.capacity, 100000);
       });
 
-      test('update imageUrl ke null — masih menggunakan nilai lama (copyWith tidak support null override)', () {
-        // Note: CageData.copyWith tidak support set imageUrl ke null secara eksplisit
-        // karena `imageUrl ?? this.imageUrl`. Ini adalah potensi bug — didokumentasikan di bawah.
-        final copy = base.copyWith(imageUrl: null);
-        // Saat ini: akan tetap pakai imageUrl lama karena null ?? old = old
-        expect(copy.imageUrl, base.imageUrl);
-        // ⚠️  Potensi Bug: tidak bisa menghapus imageUrl via copyWith.
-        // Rekomendasi: tambah sentinel pattern seperti PeriodData.
-      });
+      test(
+        'update imageUrl ke null — masih menggunakan nilai lama (copyWith tidak support null override)',
+        () {
+          // Note: CageData.copyWith tidak support set imageUrl ke null secara eksplisit
+          // karena `imageUrl ?? this.imageUrl`. Ini adalah potensi bug — didokumentasikan di bawah.
+          final copy = base.copyWith(imageUrl: null);
+          // Saat ini: akan tetap pakai imageUrl lama karena null ?? old = old
+          expect(copy.imageUrl, base.imageUrl);
+          // ⚠️  Potensi Bug: tidak bisa menghapus imageUrl via copyWith.
+          // Rekomendasi: tambah sentinel pattern seperti PeriodData.
+        },
+      );
     });
 
     group('toString', () {

@@ -48,26 +48,31 @@ class StorageService {
 
     // ── Upload ke Cloudinary ───────────────────────────────────────────────
 
-    final uploadUrl = Uri.parse("https://api.cloudinary.com/v1_1/$_cloudName/image/upload");
+    final uploadUrl = Uri.parse(
+      "https://api.cloudinary.com/v1_1/$_cloudName/image/upload",
+    );
 
-    final request = http.MultipartRequest('POST', uploadUrl)
-      ..fields['upload_preset'] = _uploadPreset
-      ..fields['public_id'] = publicId
-      ..fields['folder'] = targetFolder
-      ..files.add(
-        await http.MultipartFile.fromPath(
-          'file',
-          imageFile.path,
-          filename: '$publicId.$ext',
-        ),
-      );
+    final request =
+        http.MultipartRequest('POST', uploadUrl)
+          ..fields['upload_preset'] = _uploadPreset
+          ..fields['public_id'] = publicId
+          ..fields['folder'] = targetFolder
+          ..files.add(
+            await http.MultipartFile.fromPath(
+              'file',
+              imageFile.path,
+              filename: '$publicId.$ext',
+            ),
+          );
 
     final streamedResponse = await request.send().timeout(
       _uploadTimeout,
-      onTimeout: () => throw Exception(
-        'Upload timeout setelah ${_uploadTimeout.inSeconds} detik. '
-        'Periksa koneksi internet kamu.',
-      ),
+      onTimeout:
+          () =>
+              throw Exception(
+                'Upload timeout setelah ${_uploadTimeout.inSeconds} detik. '
+                'Periksa koneksi internet kamu.',
+              ),
     );
 
     final response = await http.Response.fromStream(streamedResponse);

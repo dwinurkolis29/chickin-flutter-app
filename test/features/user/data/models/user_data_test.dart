@@ -10,8 +10,14 @@ void main() {
       test('name default ""', () => expect(const UserProfile().name, ''));
       test('phone default ""', () => expect(const UserProfile().phone, ''));
       test('address default ""', () => expect(const UserProfile().address, ''));
-      test('hasCompletedTour default false', () => expect(const UserProfile().hasCompletedTour, false));
-      test('avatarUrl default null', () => expect(const UserProfile().avatarUrl, null));
+      test(
+        'hasCompletedTour default false',
+        () => expect(const UserProfile().hasCompletedTour, false),
+      );
+      test(
+        'avatarUrl default null',
+        () => expect(const UserProfile().avatarUrl, null),
+      );
     });
 
     group('fromJson — null', () {
@@ -89,7 +95,10 @@ void main() {
       });
 
       test('avatarUrl explicit null → null', () {
-        final result = UserProfile.fromJson({'name': 'Budi', 'avatarUrl': null});
+        final result = UserProfile.fromJson({
+          'name': 'Budi',
+          'avatarUrl': null,
+        });
         expect(result.avatarUrl, null);
       });
     });
@@ -172,11 +181,14 @@ void main() {
         expect(copy.avatarUrl, 'https://example.com/new.jpg');
       });
 
-      test('update avatarUrl ke null → masih pakai lama (same bug as CageData)', () {
-        // ⚠️  Potensi Bug: sama seperti CageData — tidak bisa clear avatarUrl via copyWith.
-        final copy = base.copyWith(avatarUrl: null);
-        expect(copy.avatarUrl, base.avatarUrl);
-      });
+      test(
+        'update avatarUrl ke null → masih pakai lama (same bug as CageData)',
+        () {
+          // ⚠️  Potensi Bug: sama seperti CageData — tidak bisa clear avatarUrl via copyWith.
+          final copy = base.copyWith(avatarUrl: null);
+          expect(copy.avatarUrl, base.avatarUrl);
+        },
+      );
     });
 
     group('toString', () {

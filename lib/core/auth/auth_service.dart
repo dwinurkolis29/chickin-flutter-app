@@ -12,11 +12,7 @@ class AuthResult {
   final String? errorMessage;
   final User? user;
 
-  const AuthResult({
-    required this.success,
-    this.errorMessage,
-    this.user,
-  });
+  const AuthResult({required this.success, this.errorMessage, this.user});
 
   factory AuthResult.success(User user) =>
       AuthResult(success: true, user: user);
@@ -48,9 +44,8 @@ class AuthService extends ChangeNotifier {
   bool _initialized = false;
 
   AuthService({FirebaseService? firebaseService})
-      : _firebaseService = firebaseService ?? FirebaseService() {
+    : _firebaseService = firebaseService ?? FirebaseService() {
     _authSub = _auth.authStateChanges().listen((user) {
-
       _initialized = true;
       notifyListeners();
     });

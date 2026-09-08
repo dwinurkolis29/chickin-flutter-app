@@ -66,26 +66,35 @@ class PeriodPickerDialog extends StatelessWidget {
         child: ListView.separated(
           shrinkWrap: true,
           itemCount: periods.length,
-          separatorBuilder: (_, __) => Divider(
-            height: 1,
-            color: cs.outlineVariant.withValues(alpha: 0.3),
-          ),
+          separatorBuilder:
+              (_, __) => Divider(
+                height: 1,
+                color: cs.outlineVariant.withValues(alpha: 0.3),
+              ),
           itemBuilder: (context, index) {
             final period = periods[index];
             final isSelected = period.id == selectedPeriodId;
 
             final startStr = dateFmt.format(period.startDate);
-            final endStr = period.endDate != null ? dateFmt.format(period.endDate!) : 'Aktif';
+            final endStr =
+                period.endDate != null
+                    ? dateFmt.format(period.endDate!)
+                    : 'Aktif';
 
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 2,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
               ),
               selected: isSelected,
               selectedTileColor: cs.secondaryContainer.withValues(alpha: 0.5),
               leading: Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
                 color: isSelected ? cs.primary : cs.outline,
               ),
               title: Text(

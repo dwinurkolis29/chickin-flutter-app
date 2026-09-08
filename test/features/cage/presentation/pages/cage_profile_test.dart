@@ -17,9 +17,9 @@ class _FakeCageController extends ChangeNotifier implements CageController {
     CageData? cageData,
     bool isLoading = false,
     String? errorMessage,
-  })  : _cageData = cageData,
-        _isLoading = isLoading,
-        _errorMessage = errorMessage;
+  }) : _cageData = cageData,
+       _isLoading = isLoading,
+       _errorMessage = errorMessage;
 
   @override
   CageData? get cageData => _cageData;
@@ -46,7 +46,8 @@ void main() {
   });
 
   Widget createWidgetUnderTest({_FakeCageController? controller}) {
-    final fakeCtrl = controller ??
+    final fakeCtrl =
+        controller ??
         _FakeCageController(
           cageData: const CageData(
             type: 'Closed House (Modern)',
@@ -65,32 +66,37 @@ void main() {
   }
 
   group('CageProfile Widget Tests', () {
-    testWidgets('menampilkan foto landscape, kapasitas hero, spesifikasi dan tombol edit', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan foto landscape, kapasitas hero, spesifikasi dan tombol edit',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      // Header & Title
-      expect(find.text('Profil Kandang'), findsOneWidget);
+        // Header & Title
+        expect(find.text('Profil Kandang'), findsOneWidget);
 
-      // Hero Landscape Banner
-      expect(find.text('Foto Tampak Kandang'), findsOneWidget);
-      expect(find.text('Unggah Foto'), findsOneWidget);
+        // Hero Landscape Banner
+        expect(find.text('Foto Tampak Kandang'), findsOneWidget);
+        expect(find.text('Unggah Foto'), findsOneWidget);
 
-      // Hero Kapasitas
-      expect(find.text('Kapasitas Maksimal'), findsOneWidget);
-      expect(find.text('10.000'), findsOneWidget);
-      expect(find.text('Ekor DOC'), findsOneWidget);
+        // Hero Kapasitas
+        expect(find.text('Kapasitas Maksimal'), findsOneWidget);
+        expect(find.text('10.000'), findsOneWidget);
+        expect(find.text('Ekor DOC'), findsOneWidget);
 
-      // Spesifikasi Konstruksi & Lokasi
-      expect(find.text('Spesifikasi Bangunan & Lokasi'), findsOneWidget);
-      expect(find.text('Closed House (Modern)'), findsOneWidget);
-      expect(find.text('Kecamatan Ciawi, Blok A No. 12'), findsOneWidget);
+        // Spesifikasi Konstruksi & Lokasi
+        expect(find.text('Spesifikasi Bangunan & Lokasi'), findsOneWidget);
+        expect(find.text('Closed House (Modern)'), findsOneWidget);
+        expect(find.text('Kecamatan Ciawi, Blok A No. 12'), findsOneWidget);
 
-      // Tombol Utama
-      expect(find.text('Ubah Spesifikasi Kandang'), findsOneWidget);
-    });
+        // Tombol Utama
+        expect(find.text('Ubah Spesifikasi Kandang'), findsOneWidget);
+      },
+    );
 
-    testWidgets('menampilkan empty state jika belum ada data kandang', (tester) async {
+    testWidgets('menampilkan empty state jika belum ada data kandang', (
+      tester,
+    ) async {
       final fakeCtrl = _FakeCageController(
         cageData: const CageData(type: '', capacity: 0, location: ''),
       );

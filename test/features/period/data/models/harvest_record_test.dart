@@ -42,12 +42,18 @@ void main() {
       expect(serialized['notes'], 'Penjualan ke PT Mitra Unggas');
     });
 
-    test('HarvestType.fromString converts final and partial strings correctly', () {
-      expect(HarvestType.fromString('final'), HarvestType.finalHarvest);
-      expect(HarvestType.fromString('finalHarvest'), HarvestType.finalHarvest);
-      expect(HarvestType.fromString('partial'), HarvestType.partial);
-      expect(HarvestType.fromString('anything_else'), HarvestType.partial);
-    });
+    test(
+      'HarvestType.fromString converts final and partial strings correctly',
+      () {
+        expect(HarvestType.fromString('final'), HarvestType.finalHarvest);
+        expect(
+          HarvestType.fromString('finalHarvest'),
+          HarvestType.finalHarvest,
+        );
+        expect(HarvestType.fromString('partial'), HarvestType.partial);
+        expect(HarvestType.fromString('anything_else'), HarvestType.partial);
+      },
+    );
 
     test('auto-calculates avgWeightKg if not explicitly given in json', () {
       final now = DateTime.now();

@@ -9,6 +9,7 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
   final StreamController<List<FinanceTransaction>> _streamController =
       StreamController<List<FinanceTransaction>>.broadcast();
   final List<FinanceTransaction> createdTransactions = [];
+  final List<FinanceTransaction> updatedTransactions = [];
   final List<String> deletedTransactionIds = [];
 
   @override
@@ -26,6 +27,14 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
   ]) async {
     createdTransactions.add(transaction);
     return 'tx-new-id';
+  }
+
+  @override
+  Future<void> updateFinanceTransaction(
+    FinanceTransaction transaction, [
+    String? uid,
+  ]) async {
+    updatedTransactions.add(transaction);
   }
 
   @override
@@ -77,41 +86,44 @@ void main() {
       expect(controller.isLoading, isFalse);
     });
 
-    test('setPeriod triggers stream listen and calculates summary on emission', () async {
-      controller.setPeriod(testPeriod);
+    test(
+      'setPeriod triggers stream listen and calculates summary on emission',
+      () async {
+        controller.setPeriod(testPeriod);
 
-      expect(controller.currentPeriod?.id, 'p-1');
-      expect(controller.isLoading, isTrue);
+        expect(controller.currentPeriod?.id, 'p-1');
+        expect(controller.isLoading, isTrue);
 
-      final now = DateTime(2026, 7, 10);
-      final tx1 = FinanceTransaction(
-        id: 't1',
-        periodId: 'p-1',
-        type: 'expense',
-        category: 'feed',
-        amount: 25000000,
-        date: now,
-        createdAt: now,
-      );
-      final tx2 = FinanceTransaction(
-        id: 't2',
-        periodId: 'p-1',
-        type: 'income',
-        category: 'main_harvest',
-        amount: 50000000,
-        date: DateTime(2026, 8, 5),
-        createdAt: DateTime(2026, 8, 5),
-      );
+        final now = DateTime(2026, 7, 10);
+        final tx1 = FinanceTransaction(
+          id: 't1',
+          periodId: 'p-1',
+          type: 'expense',
+          category: 'feed',
+          amount: 25000000,
+          date: now,
+          createdAt: now,
+        );
+        final tx2 = FinanceTransaction(
+          id: 't2',
+          periodId: 'p-1',
+          type: 'income',
+          category: 'main_harvest',
+          amount: 50000000,
+          date: DateTime(2026, 8, 5),
+          createdAt: DateTime(2026, 8, 5),
+        );
 
-      fakeFirebase.emit([tx1, tx2]);
-      await Future<void>.delayed(Duration.zero);
+        fakeFirebase.emit([tx1, tx2]);
+        await Future<void>.delayed(Duration.zero);
 
-      expect(controller.isLoading, isFalse);
-      expect(controller.transactions.length, 2);
-      expect(controller.summary.totalExpense, 25000000);
-      expect(controller.summary.totalRevenue, 50000000);
-      expect(controller.summary.netProfit, 25000000);
-    });
+        expect(controller.isLoading, isFalse);
+        expect(controller.transactions.length, 2);
+        expect(controller.summary.totalExpense, 25000000);
+        expect(controller.summary.totalRevenue, 50000000);
+        expect(controller.summary.netProfit, 25000000);
+      },
+    );
 
     test('addTransaction delegates to FirebaseService', () async {
       final now = DateTime(2026, 7, 1);
@@ -131,12 +143,34 @@ void main() {
       expect(fakeFirebase.createdTransactions.first.amount, 7000000);
     });
 
-    test('deleteTransaction delegates to FirebaseService when currentPeriod is set', () async {
-      controller.setPeriod(testPeriod);
-      await controller.deleteTransaction('t1');
+    test('updateTransaction delegates to FirebaseService', () async {
+      final now = DateTime(2026, 7, 1);
+      final tx = FinanceTransaction(
+        id: 't1',
+        periodId: 'p-1',
+        type: 'expense',
+        category: 'doc',
+        amount: 7500000,
+        date: now,
+        createdAt: now,
+      );
 
-      expect(fakeFirebase.deletedTransactionIds, contains('t1'));
+      await controller.updateTransaction(tx);
+
+      expect(fakeFirebase.updatedTransactions.length, 1);
+      expect(fakeFirebase.updatedTransactions.first.amount, 7500000);
+      expect(fakeFirebase.updatedTransactions.first.id, 't1');
     });
+
+    test(
+      'deleteTransaction delegates to FirebaseService when currentPeriod is set',
+      () async {
+        controller.setPeriod(testPeriod);
+        await controller.deleteTransaction('t1');
+
+        expect(fakeFirebase.deletedTransactionIds, contains('t1'));
+      },
+    );
 
     test('onAuthChanged resets state when uid changes', () async {
       controller.setPeriod(testPeriod);

@@ -49,7 +49,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     AppFormBottomSheet.show(
       context: context,
       title: 'Ubah Kata Sandi Langsung',
-      subtitle: 'Masukkan kata sandi saat ini dan tentukan kata sandi baru akun Anda:',
+      subtitle:
+          'Masukkan kata sandi saat ini dan tentukan kata sandi baru akun Anda:',
       icon: Icons.lock_reset_rounded,
       builder: (dialogContext, setModalState) {
         final cs = Theme.of(dialogContext).colorScheme;
@@ -104,51 +105,50 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.pillRadius,
-                    ),
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                   ),
                 ),
-                onPressed: isSaving
-                    ? null
-                    : () async {
-                        if (!formKey.currentState!.validate()) return;
-                        setModalState(() => isSaving = true);
-                        final res = await context
-                            .read<AuthService>()
-                            .changePassword(
-                              currentPassword:
-                                  currentPasswordController.text.trim(),
-                              newPassword:
-                                  newPasswordController.text.trim(),
-                            );
-                        setModalState(() => isSaving = false);
-                        if (context.mounted) {
-                          Navigator.pop(dialogContext);
-                          if (res.success) {
-                            AppSnackbar.showSuccess(
-                              context,
-                              'Kata sandi berhasil diperbarui.',
-                            );
-                          } else {
-                            AppSnackbar.showError(
-                              context,
-                              res.errorMessage ??
-                                  'Gagal mengubah kata sandi.',
-                            );
+                onPressed:
+                    isSaving
+                        ? null
+                        : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          setModalState(() => isSaving = true);
+                          final res = await context
+                              .read<AuthService>()
+                              .changePassword(
+                                currentPassword:
+                                    currentPasswordController.text.trim(),
+                                newPassword: newPasswordController.text.trim(),
+                              );
+                          setModalState(() => isSaving = false);
+                          if (context.mounted) {
+                            Navigator.pop(dialogContext);
+                            if (res.success) {
+                              AppSnackbar.showSuccess(
+                                context,
+                                'Kata sandi berhasil diperbarui.',
+                              );
+                            } else {
+                              AppSnackbar.showError(
+                                context,
+                                res.errorMessage ??
+                                    'Gagal mengubah kata sandi.',
+                              );
+                            }
                           }
-                        }
-                      },
-                icon: isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.check_circle_outline_rounded),
+                        },
+                icon:
+                    isSaving
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Icon(Icons.check_circle_outline_rounded),
                 label: Text(
                   isSaving ? 'Menyimpan...' : 'Simpan Kata Sandi Baru',
                   style: tt.labelLarge?.copyWith(
@@ -190,7 +190,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     AppFormBottomSheet.show(
       context: context,
       title: 'Konfirmasi Kata Sandi',
-      subtitle: 'Masukkan kata sandi akun Anda untuk mengonfirmasi penghapusan permanen.',
+      subtitle:
+          'Masukkan kata sandi akun Anda untuk mengonfirmasi penghapusan permanen.',
       icon: Icons.delete_forever_rounded,
       iconColor: AppColors.error,
       iconBackgroundColor: AppColors.error.withValues(alpha: 0.12),
@@ -223,43 +224,42 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.pillRadius,
-                    ),
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                   ),
                 ),
-                onPressed: isDeleting
-                    ? null
-                    : () async {
-                        if (!formKey.currentState!.validate()) return;
-                        setModalState(() => isDeleting = true);
-                        final res = await context
-                            .read<AuthService>()
-                            .deleteAccount(
-                              password: passwordController.text.trim(),
-                            );
-                        setModalState(() => isDeleting = false);
-                        if (context.mounted) {
-                          Navigator.pop(dialogContext);
-                          if (!res.success) {
-                            AppSnackbar.showError(
-                              context,
-                              res.errorMessage ??
-                                  'Gagal menghapus akun.',
-                            );
+                onPressed:
+                    isDeleting
+                        ? null
+                        : () async {
+                          if (!formKey.currentState!.validate()) return;
+                          setModalState(() => isDeleting = true);
+                          final res = await context
+                              .read<AuthService>()
+                              .deleteAccount(
+                                password: passwordController.text.trim(),
+                              );
+                          setModalState(() => isDeleting = false);
+                          if (context.mounted) {
+                            Navigator.pop(dialogContext);
+                            if (!res.success) {
+                              AppSnackbar.showError(
+                                context,
+                                res.errorMessage ?? 'Gagal menghapus akun.',
+                              );
+                            }
                           }
-                        }
-                      },
-                icon: isDeleting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.delete_forever_rounded),
+                        },
+                icon:
+                    isDeleting
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Icon(Icons.delete_forever_rounded),
                 label: Text(
                   isDeleting ? 'Menghapus Akun...' : 'Hapus Akun Permanen',
                   style: tt.labelLarge?.copyWith(
@@ -412,7 +412,9 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.success.withValues(alpha: 0.12),
+                                  color: AppColors.success.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(
                                     AppTheme.pillRadius,
                                   ),
@@ -472,8 +474,13 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                           ),
                           const Divider(height: 20),
                           InkWell(
-                            borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                            onTap: () => _showEmailVerificationDevelopmentNotice(context),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.cardRadius,
+                            ),
+                            onTap:
+                                () => _showEmailVerificationDevelopmentNotice(
+                                  context,
+                                ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
@@ -650,7 +657,9 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                             size: 18,
                             color: cs.onSurfaceVariant,
                           ),
-                          onTap: () => _showPasswordResetDevelopmentNotice(context),
+                          onTap:
+                              () =>
+                                  _showPasswordResetDevelopmentNotice(context),
                         ),
                       ],
                     ),

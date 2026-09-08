@@ -33,11 +33,7 @@ class AppErrorState extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          size: compact ? 48 : 64,
-          color: cs.error,
-        ),
+        Icon(icon, size: compact ? 48 : 64, color: cs.error),
         const SizedBox(height: 16),
         Text(
           message,
@@ -62,11 +58,11 @@ class AppErrorState extends StatelessWidget {
           if (action != null)
             action!
           else if (onRetry != null)
-            ElevatedButton.icon(
+            FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Coba Lagi'),
-              style: ElevatedButton.styleFrom(
+              style: FilledButton.styleFrom(
                 backgroundColor: cs.error,
                 foregroundColor: cs.onError,
                 shape: RoundedRectangleBorder(
@@ -90,10 +86,7 @@ class AppErrorState extends StatelessWidget {
     }
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: content,
-      ),
+      child: Padding(padding: const EdgeInsets.all(32), child: content),
     );
   }
 }

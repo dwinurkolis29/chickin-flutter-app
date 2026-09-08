@@ -28,11 +28,11 @@ class _MockReportingController extends ReportingController {
     PeriodReport? report,
     bool isLoading = false,
     String? errorMessage,
-  })  : _mockClosedPeriods = closedPeriods ?? [],
-        _mockReport = report,
-        _mockLoading = isLoading,
-        _mockError = errorMessage,
-        super(firebaseService: _FakeFirebaseService());
+  }) : _mockClosedPeriods = closedPeriods ?? [],
+       _mockReport = report,
+       _mockLoading = isLoading,
+       _mockError = errorMessage,
+       super(firebaseService: _FakeFirebaseService());
 
   @override
   List<PeriodData> get closedPeriods => _mockClosedPeriods;
@@ -50,7 +50,8 @@ class _MockReportingController extends ReportingController {
   String? get errorMessage => _mockError;
 
   @override
-  String? get selectedPeriodId => _mockClosedPeriods.isNotEmpty ? _mockClosedPeriods.first.id : null;
+  String? get selectedPeriodId =>
+      _mockClosedPeriods.isNotEmpty ? _mockClosedPeriods.first.id : null;
 }
 
 void main() {
@@ -58,7 +59,10 @@ void main() {
     await initializeDateFormatting('id_ID', null);
   });
 
-  Widget createTestWidget(ReportingController controller, {bool isTab = false}) {
+  Widget createTestWidget(
+    ReportingController controller, {
+    bool isTab = false,
+  }) {
     return ChangeNotifierProvider<ReportingController>.value(
       value: controller,
       child: MaterialApp(
@@ -69,16 +73,21 @@ void main() {
   }
 
   group('PeriodReportPage Widget Tests', () {
-    testWidgets('menampilkan empty state jika belum ada periode yang selesai dipanen', (tester) async {
-      final ctrl = _MockReportingController(closedPeriods: []);
+    testWidgets(
+      'menampilkan empty state jika belum ada periode yang selesai dipanen',
+      (tester) async {
+        final ctrl = _MockReportingController(closedPeriods: []);
 
-      await tester.pumpWidget(createTestWidget(ctrl));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createTestWidget(ctrl));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Belum Ada Periode Panen'), findsOneWidget);
-    });
+        expect(find.text('Belum Ada Periode Panen'), findsOneWidget);
+      },
+    );
 
-    testWidgets('menampilkan error state saat terjadi kegagalan muat data', (tester) async {
+    testWidgets('menampilkan error state saat terjadi kegagalan muat data', (
+      tester,
+    ) async {
       final ctrl = _MockReportingController(
         closedPeriods: [
           PeriodData(
@@ -100,96 +109,104 @@ void main() {
       expect(find.text('Koneksi jaringan terputus'), findsOneWidget);
     });
 
-    testWidgets('menampilkan kesimpulan laporan panen, hero IP, 4 indikator utama, dan saran', (tester) async {
-      tester.view.physicalSize = const Size(800, 2000);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'menampilkan kesimpulan laporan panen, hero IP, 4 indikator utama, dan saran',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 2000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      final closedPeriod = PeriodData(
-        id: 'p1',
-        name: 'Periode Batch Panen 1',
-        initialCapacity: 10000,
-        startDate: DateTime(2026, 1, 1),
-        endDate: DateTime(2026, 2, 5),
-        createdAt: DateTime(2026, 1, 1),
-        isActive: false,
-        summary: const PeriodSummary(
-          totalFeedKg: 28000,
-          finalPopulation: 9700,
+        final closedPeriod = PeriodData(
+          id: 'p1',
+          name: 'Periode Batch Panen 1',
+          initialCapacity: 10000,
+          startDate: DateTime(2026, 1, 1),
+          endDate: DateTime(2026, 2, 5),
+          createdAt: DateTime(2026, 1, 1),
+          isActive: false,
+          summary: const PeriodSummary(
+            totalFeedKg: 28000,
+            finalPopulation: 9700,
+            totalMortality: 300,
+            finalBiomass: 17460,
+            finalFCR: 1.60,
+            avgDailyGain: 50.0,
+            harvestedChicks: 9700,
+            harvestedWeightKg: 17460,
+            avgHarvestWeightKg: 1.80,
+            ipScore: 311,
+            insights: [
+              'FCR sangat baik (1.60) — efisiensi pakan optimal',
+              'Mortalitas rendah (3.0%) — manajemen kesehatan baik',
+            ],
+          ),
+        );
+
+        final mockReport = PeriodReport(
+          period: closedPeriod,
+          recordings: const [],
+          initialPopulation: 10000,
           totalMortality: 300,
-          finalBiomass: 17460,
-          finalFCR: 1.60,
-          avgDailyGain: 50.0,
+          finalPopulation: 9700,
+          mortalityRate: 3.0,
+          totalFeedKg: 28000,
+          finalAvgWeightGram: 1800,
+          totalBiomassKg: 17460,
+          weightGainKg: 17060,
+          fcr: 1.60,
+          avgDailyGainGram: 50.0,
+          feedPerBird: 2.89,
+          survivalRate: 97.0,
+          durationDays: 35,
           harvestedChicks: 9700,
           harvestedWeightKg: 17460,
           avgHarvestWeightKg: 1.80,
           ipScore: 311,
-          insights: [
-            'FCR sangat baik (1.60) — efisiensi pakan optimal',
-            'Mortalitas rendah (3.0%) — manajemen kesehatan baik',
-          ],
-        ),
-      );
+        );
 
-      final mockReport = PeriodReport(
-        period: closedPeriod,
-        recordings: const [],
-        initialPopulation: 10000,
-        totalMortality: 300,
-        finalPopulation: 9700,
-        mortalityRate: 3.0,
-        totalFeedKg: 28000,
-        finalAvgWeightGram: 1800,
-        totalBiomassKg: 17460,
-        weightGainKg: 17060,
-        fcr: 1.60,
-        avgDailyGainGram: 50.0,
-        feedPerBird: 2.89,
-        survivalRate: 97.0,
-        durationDays: 35,
-        harvestedChicks: 9700,
-        harvestedWeightKg: 17460,
-        avgHarvestWeightKg: 1.80,
-        ipScore: 311,
-      );
+        final ctrl = _MockReportingController(
+          closedPeriods: [closedPeriod],
+          report: mockReport,
+        );
 
-      final ctrl = _MockReportingController(
-        closedPeriods: [closedPeriod],
-        report: mockReport,
-      );
+        await tester.pumpWidget(createTestWidget(ctrl));
+        await tester.pumpAndSettle();
 
-      await tester.pumpWidget(createTestWidget(ctrl));
-      await tester.pumpAndSettle();
+        // 1. Verifikasi Hero Section & Indeks Performa (IP)
+        expect(find.text('Pilih Periode'), findsWidgets);
+        expect(find.text('Periode Batch Panen 1'), findsNWidgets(2));
+        expect(find.text('Indeks Performa (IP)'), findsOneWidget);
+        expect(find.text('311'), findsOneWidget);
+        expect(find.text('Baik / Standar'), findsOneWidget);
 
-      // 1. Verifikasi Hero Section & Indeks Performa (IP)
-      expect(find.text('Pilih Periode'), findsWidgets);
-      expect(find.text('Periode Batch Panen 1'), findsNWidgets(2));
-      expect(find.text('Indeks Performa (IP)'), findsOneWidget);
-      expect(find.text('311'), findsOneWidget);
-      expect(find.text('Baik / Standar'), findsOneWidget);
+        // 2. Verifikasi 4 Indikator Utama (tanpa header 'Indikator Utama Panen')
+        expect(find.text('Indikator Utama Panen'), findsNothing);
+        expect(find.text('FCR Panen'), findsWidgets);
+        expect(find.text('Daya Hidup'), findsWidgets);
+        expect(find.text('Ayam Dipanen'), findsOneWidget);
+        expect(find.text('Rata-rata Bobot'), findsWidgets);
+        expect(find.text('9.700 ekor'), findsOneWidget);
+        expect(find.text('1.80 kg'), findsWidgets);
 
-      // 2. Verifikasi 4 Indikator Utama (tanpa header 'Indikator Utama Panen')
-      expect(find.text('Indikator Utama Panen'), findsNothing);
-      expect(find.text('FCR Panen'), findsWidgets);
-      expect(find.text('Daya Hidup'), findsWidgets);
-      expect(find.text('Ayam Dipanen'), findsOneWidget);
-      expect(find.text('Rata-rata Bobot'), findsWidgets);
-      expect(find.text('9.700 ekor'), findsOneWidget);
-      expect(find.text('1.80 kg'), findsWidgets);
+        // 3. Verifikasi Kesimpulan & Saran Periode Berikutnya
+        expect(
+          find.text('Kesimpulan & Saran Periode Berikutnya'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('FCR sangat baik (1.60)'), findsOneWidget);
 
-      // 3. Verifikasi Kesimpulan & Saran Periode Berikutnya
-      expect(find.text('Kesimpulan & Saran Periode Berikutnya'), findsOneWidget);
-      expect(find.textContaining('FCR sangat baik (1.60)'), findsOneWidget);
+        // 4. Verifikasi Ringkasan Data Produksi
+        expect(find.text('Ringkasan Data Produksi'), findsOneWidget);
+        expect(find.text('Total Pakan Dikonsumsi'), findsOneWidget);
+        expect(find.text('28.000 kg'), findsOneWidget);
+        expect(find.text('Total Bobot Daging Panen'), findsOneWidget);
+        expect(find.text('17.460 kg'), findsOneWidget);
+      },
+    );
 
-      // 4. Verifikasi Ringkasan Data Produksi
-      expect(find.text('Ringkasan Data Produksi'), findsOneWidget);
-      expect(find.text('Total Pakan Dikonsumsi'), findsOneWidget);
-      expect(find.text('28.000 kg'), findsOneWidget);
-      expect(find.text('Total Bobot Daging Panen'), findsOneWidget);
-      expect(find.text('17.460 kg'), findsOneWidget);
-    });
-
-    testWidgets('tombol quick export PDF tampil dan Excel/CSV tidak tampil', (tester) async {
+    testWidgets('tombol quick export PDF tampil dan Excel/CSV tidak tampil', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -237,6 +254,53 @@ void main() {
       // Excel and CSV export icons must NOT be present
       expect(find.byIcon(Icons.table_chart_outlined), findsNothing);
       expect(find.byIcon(Icons.description_outlined), findsNothing);
+    });
+
+    testWidgets('menampilkan akses Buku Keuangan di AppBar dan tombol body', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final closedPeriod = PeriodData(
+        id: 'p1',
+        name: 'Batch Finance Test',
+        initialCapacity: 5000,
+        startDate: DateTime(2026, 1, 1),
+        endDate: DateTime(2026, 2, 5),
+        createdAt: DateTime(2026, 1, 1),
+        isActive: false,
+      );
+
+      final mockReport = PeriodReport(
+        period: closedPeriod,
+        recordings: const [],
+        initialPopulation: 5000,
+        totalMortality: 150,
+        finalPopulation: 4850,
+        mortalityRate: 3.0,
+        totalFeedKg: 14000,
+        finalAvgWeightGram: 1800,
+        totalBiomassKg: 8730,
+        weightGainKg: 8530,
+        fcr: 1.60,
+        avgDailyGainGram: 50.0,
+        feedPerBird: 2.89,
+        survivalRate: 97.0,
+        durationDays: 35,
+      );
+
+      final ctrl = _MockReportingController(
+        closedPeriods: [closedPeriod],
+        report: mockReport,
+      );
+
+      await tester.pumpWidget(createTestWidget(ctrl));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.account_balance_wallet_outlined), findsWidgets);
+      expect(find.text('Buku Keuangan & Hasil Panen'), findsOneWidget);
     });
   });
 }

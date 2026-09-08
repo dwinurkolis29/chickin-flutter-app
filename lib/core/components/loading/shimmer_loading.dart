@@ -18,25 +18,25 @@ class ShimmerLoading extends StatelessWidget {
     this.shape = BoxShape.rectangle,
   });
 
-  const ShimmerLoading.circular({
-    super.key,
-    required double size,
-  })  : width = size,
-        height = size,
-        borderRadius = null,
-        shape = BoxShape.circle;
+  const ShimmerLoading.circular({super.key, required double size})
+    : width = size,
+      height = size,
+      borderRadius = null,
+      shape = BoxShape.circle;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final baseColor = isDark
-        ? cs.surfaceContainerHighest.withValues(alpha: 0.6)
-        : cs.surfaceContainerHigh;
-    final highlightColor = isDark
-        ? cs.surfaceContainer.withValues(alpha: 0.3)
-        : cs.surfaceContainerLowest;
+    final baseColor =
+        isDark
+            ? cs.surfaceContainerHighest.withValues(alpha: 0.6)
+            : cs.surfaceContainerHigh;
+    final highlightColor =
+        isDark
+            ? cs.surfaceContainer.withValues(alpha: 0.3)
+            : cs.surfaceContainerLowest;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -47,9 +47,10 @@ class ShimmerLoading extends StatelessWidget {
         decoration: BoxDecoration(
           color: cs.surface,
           shape: shape,
-          borderRadius: shape == BoxShape.circle
-              ? null
-              : (borderRadius ?? BorderRadius.circular(AppTheme.rowRadius)),
+          borderRadius:
+              shape == BoxShape.circle
+                  ? null
+                  : (borderRadius ?? BorderRadius.circular(AppTheme.rowRadius)),
         ),
       ),
     );
@@ -143,7 +144,7 @@ class TableSkeleton extends StatelessWidget {
           ShimmerLoading(
             width: double.infinity,
             height: 32,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.rowRadius),
           ),
           const SizedBox(height: 8),
 
@@ -152,44 +153,54 @@ class TableSkeleton extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: rowCount,
-            separatorBuilder: (_, __) => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Divider(height: 1),
-            ),
-            itemBuilder: (_, __) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: ShimmerLoading(
-                      width: 44,
-                      height: 20,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  const Expanded(
-                    flex: 3,
-                    child: Center(child: ShimmerLoading(width: 55, height: 14)),
-                  ),
-                  const Expanded(
-                    flex: 2,
-                    child: Center(child: ShimmerLoading(width: 45, height: 14)),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: ShimmerLoading(
-                        width: 40,
-                        height: 18,
-                        borderRadius: BorderRadius.circular(6),
+            separatorBuilder:
+                (_, __) => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Divider(height: 1),
+                ),
+            itemBuilder:
+                (_, __) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: ShimmerLoading(
+                          width: 44,
+                          height: 20,
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
+                        ),
                       ),
-                    ),
+                      const Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: ShimmerLoading(width: 55, height: 14),
+                        ),
+                      ),
+                      const Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: ShimmerLoading(width: 45, height: 14),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: ShimmerLoading(
+                            width: 40,
+                            height: 18,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
           ),
         ],
       ),
@@ -229,7 +240,7 @@ class ReportSkeleton extends StatelessWidget {
                 ShimmerLoading(
                   width: double.infinity,
                   height: 110,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                 ),
                 const SizedBox(height: 16),
 
@@ -276,7 +287,9 @@ class ReportSkeleton extends StatelessWidget {
                         ShimmerLoading(
                           width: 40,
                           height: 16,
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                         ),
                       ],
                     ),
@@ -310,7 +323,7 @@ class ReportSkeleton extends StatelessWidget {
                     child: ShimmerLoading(
                       width: double.infinity,
                       height: 18,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                     ),
                   ),
                 ),
@@ -336,13 +349,13 @@ class ReportSkeleton extends StatelessWidget {
                 ShimmerLoading(
                   width: double.infinity,
                   height: 48,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                 ),
                 const SizedBox(height: 8),
                 ShimmerLoading(
                   width: double.infinity,
                   height: 48,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                 ),
               ],
             ),
@@ -398,7 +411,9 @@ class DashboardSkeleton extends StatelessWidget {
                           ShimmerLoading(
                             width: 60,
                             height: 20,
-                            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
                           ),
                         ],
                       ),
@@ -409,7 +424,9 @@ class DashboardSkeleton extends StatelessWidget {
                             child: ShimmerLoading(
                               width: double.infinity,
                               height: 64,
-                              borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.rowRadius,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -417,7 +434,9 @@ class DashboardSkeleton extends StatelessWidget {
                             child: ShimmerLoading(
                               width: double.infinity,
                               height: 64,
-                              borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.rowRadius,
+                              ),
                             ),
                           ),
                         ],
@@ -441,7 +460,10 @@ class DashboardSkeleton extends StatelessWidget {
                             children: const [
                               ShimmerLoading(width: 100, height: 16),
                               SizedBox(height: 16),
-                              ShimmerLoading(width: double.infinity, height: 60),
+                              ShimmerLoading(
+                                width: double.infinity,
+                                height: 60,
+                              ),
                               SizedBox(height: 16),
                               ShimmerLoading(width: 70, height: 22),
                             ],
@@ -458,7 +480,8 @@ class DashboardSkeleton extends StatelessWidget {
                                 padding: const EdgeInsets.all(12),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: const [
                                     ShimmerLoading(width: 50, height: 12),
                                     ShimmerLoading(width: 40, height: 20),
@@ -472,7 +495,8 @@ class DashboardSkeleton extends StatelessWidget {
                                 padding: const EdgeInsets.all(12),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: const [
                                     ShimmerLoading(width: 40, height: 12),
                                     ShimmerLoading(width: 40, height: 20),

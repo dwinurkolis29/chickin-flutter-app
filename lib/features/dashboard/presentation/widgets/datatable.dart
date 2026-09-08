@@ -79,7 +79,10 @@ class ChickenDataTable extends StatelessWidget {
                   onPressed: onViewAll,
                   style: TextButton.styleFrom(
                     foregroundColor: cs.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     visualDensity: VisualDensity.compact,
                   ),
                   child: Row(
@@ -120,7 +123,8 @@ class ChickenDataTable extends StatelessWidget {
               child: const AppEmptyState(
                 icon: Icons.assignment_outlined,
                 message: 'Belum Ada Data Recording',
-                subtitle: 'Data harian populasi, pakan, dan bobot ayam akan muncul di sini.',
+                subtitle:
+                    'Data harian populasi, pakan, dan bobot ayam akan muncul di sini.',
                 compact: true,
               ),
             )
@@ -187,11 +191,12 @@ class ChickenDataTable extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: latestList.length,
-              separatorBuilder: (_, __) => Divider(
-                height: 1,
-                thickness: 0.6,
-                color: cs.outlineVariant.withValues(alpha: 0.3),
-              ),
+              separatorBuilder:
+                  (_, __) => Divider(
+                    height: 1,
+                    thickness: 0.6,
+                    color: cs.outlineVariant.withValues(alpha: 0.3),
+                  ),
               itemBuilder: (context, index) {
                 final item = latestList[index];
                 final hasMortality = item.mortality > 0;
@@ -214,8 +219,12 @@ class ChickenDataTable extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: cs.secondaryContainer.withValues(alpha: 0.7),
-                                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                color: cs.secondaryContainer.withValues(
+                                  alpha: 0.7,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.pillRadius,
+                                ),
                               ),
                               child: Text(
                                 'H-${item.day}',
@@ -291,18 +300,24 @@ class ChickenDataTable extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: hasMortality
-                                  ? AppColors.error.withValues(alpha: 0.12)
-                                  : AppColors.success.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                              color:
+                                  hasMortality
+                                      ? AppColors.error.withValues(alpha: 0.12)
+                                      : AppColors.success.withValues(
+                                        alpha: 0.12,
+                                      ),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.pillRadius,
+                              ),
                             ),
                             child: Text(
                               '${item.mortality} ekor',
                               style: tt.labelSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: hasMortality
-                                    ? AppColors.error
-                                    : AppColors.success,
+                                color:
+                                    hasMortality
+                                        ? AppColors.error
+                                        : AppColors.success,
                               ),
                             ),
                           ),

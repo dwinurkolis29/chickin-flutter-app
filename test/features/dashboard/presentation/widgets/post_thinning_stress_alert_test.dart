@@ -36,7 +36,9 @@ void main() {
   }
 
   group('PostThinningStressAlert Widget Tests', () {
-    testWidgets('bebas dari overflow pada layar standar iPhone (393px)', (tester) async {
+    testWidgets('bebas dari overflow pada layar standar iPhone (393px)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(393, 852);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -50,7 +52,9 @@ void main() {
       expect(find.textContaining('Dipanen 50 ekor (700.0 kg)'), findsOneWidget);
     });
 
-    testWidgets('bebas dari overflow pada layar sempit (360px)', (tester) async {
+    testWidgets('bebas dari overflow pada layar sempit (360px)', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(360, 640);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -63,7 +67,9 @@ void main() {
       expect(find.text('Baru saja'), findsOneWidget);
     });
 
-    testWidgets('menampilkan panduan saat banner diklik/expanded', (tester) async {
+    testWidgets('menampilkan panduan saat banner diklik/expanded', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(393, 852);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -76,9 +82,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('PANDUAN MITIGASI RISIKO STRES & BIOSEKURITI:'), findsOneWidget);
+      expect(
+        find.text('PANDUAN MITIGASI RISIKO STRES & BIOSEKURITI:'),
+        findsOneWidget,
+      );
       expect(find.text('Anti-Stres & Elektrolit'), findsOneWidget);
-      expect(find.text('Pantau Konsumsi Pakan (*Feed Intake*)'), findsOneWidget);
+      expect(
+        find.text('Pantau Konsumsi Pakan (*Feed Intake*)'),
+        findsOneWidget,
+      );
       expect(find.text('Suhu & Ventilasi Kandang'), findsOneWidget);
       expect(find.text('Disinfeksi Pasca Panen'), findsOneWidget);
     });

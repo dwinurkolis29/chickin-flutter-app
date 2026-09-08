@@ -8,6 +8,7 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/export/presentation/pages/pdf_preview_page.dart';
+import 'package:recording_app/features/finance/presentation/pages/finance_list_screen.dart';
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 import 'package:recording_app/features/reporting/domain/usecases/period_comparison_calculator.dart';
 import 'package:recording_app/features/reporting/presentation/controllers/reporting_controller.dart';
@@ -39,9 +40,7 @@ class _PeriodReportPageView extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     if (isTab) {
-      return SafeArea(
-        child: _buildBody(context, controller),
-      );
+      return SafeArea(child: _buildBody(context, controller));
     }
 
     return Scaffold(
@@ -49,22 +48,37 @@ class _PeriodReportPageView extends StatelessWidget {
       appBar: AppHeader(
         title: 'Laporan',
         actions: [
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            tooltip: 'Buku Keuangan',
+            onPressed: () {
+              final targetPeriod =
+                  controller.selectedPeriod ?? controller.report?.period;
+              if (targetPeriod != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FinanceListScreen(period: targetPeriod),
+                  ),
+                );
+              }
+            },
+          ),
           if (controller.closedPeriods.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.calendar_month_outlined),
               tooltip: 'Pilih Periode',
-              onPressed: () => DialogHelper.showPeriodPicker(
-                context,
-                periods: controller.closedPeriods,
-                selectedPeriodId: controller.selectedPeriodId,
-                onSelected: controller.selectPeriod,
-              ),
+              onPressed:
+                  () => DialogHelper.showPeriodPicker(
+                    context,
+                    periods: controller.closedPeriods,
+                    selectedPeriodId: controller.selectedPeriodId,
+                    onSelected: controller.selectPeriod,
+                  ),
             ),
         ],
       ),
-      body: SafeArea(
-        child: _buildBody(context, controller),
-      ),
+      body: SafeArea(child: _buildBody(context, controller)),
     );
   }
 
@@ -104,16 +118,18 @@ class _PeriodReportPageView extends StatelessWidget {
               const AppEmptyState(
                 icon: Icons.bar_chart_outlined,
                 message: 'Belum Ada Data Laporan',
-                subtitle: 'Data ringkasan panen untuk siklus ini belum tersedia.',
+                subtitle:
+                    'Data ringkasan panen untuk siklus ini belum tersedia.',
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: () => DialogHelper.showPeriodPicker(
-                  context,
-                  periods: controller.closedPeriods,
-                  selectedPeriodId: controller.selectedPeriodId,
-                  onSelected: controller.selectPeriod,
-                ),
+                onPressed:
+                    () => DialogHelper.showPeriodPicker(
+                      context,
+                      periods: controller.closedPeriods,
+                      selectedPeriodId: controller.selectedPeriodId,
+                      onSelected: controller.selectPeriod,
+                    ),
                 icon: const Icon(Icons.calendar_month_outlined),
                 label: const Text('Pilih Periode Lain'),
               ),
@@ -123,10 +139,7 @@ class _PeriodReportPageView extends StatelessWidget {
       );
     }
 
-    return _SummaryContent(
-      controller: controller,
-      report: controller.report!,
-    );
+    return _SummaryContent(controller: controller, report: controller.report!);
   }
 }
 
@@ -147,7 +160,8 @@ class _SummaryContent extends StatelessWidget {
     final dateFmt = DateFormat('dd MMM yyyy', 'id_ID');
 
     final startStr = dateFmt.format(period.startDate);
-    final endStr = period.endDate != null ? dateFmt.format(period.endDate!) : 'Aktif';
+    final endStr =
+        period.endDate != null ? dateFmt.format(period.endDate!) : 'Aktif';
     final dateRange = '$startStr – $endStr';
 
     final insights = summary?.insights ?? [];
@@ -167,14 +181,18 @@ class _SummaryContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
               child: InkWell(
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                onTap: () => DialogHelper.showPeriodPicker(
-                  context,
-                  periods: controller.closedPeriods,
-                  selectedPeriodId: controller.selectedPeriodId,
-                  onSelected: controller.selectPeriod,
-                ),
+                onTap:
+                    () => DialogHelper.showPeriodPicker(
+                      context,
+                      periods: controller.closedPeriods,
+                      selectedPeriodId: controller.selectedPeriodId,
+                      onSelected: controller.selectPeriod,
+                    ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -216,10 +234,15 @@ class _SummaryContent extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: cs.primaryContainer,
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -257,12 +280,13 @@ class _SummaryContent extends StatelessWidget {
               finalAvgWeightGram: report.finalAvgWeightGram,
               ipScore: report.ipScore,
               showPeriodSelector: true,
-              onPeriodSelectorTap: () => DialogHelper.showPeriodPicker(
-                context,
-                periods: controller.closedPeriods,
-                selectedPeriodId: controller.selectedPeriodId,
-                onSelected: controller.selectPeriod,
-              ),
+              onPeriodSelectorTap:
+                  () => DialogHelper.showPeriodPicker(
+                    context,
+                    periods: controller.closedPeriods,
+                    selectedPeriodId: controller.selectedPeriodId,
+                    onSelected: controller.selectPeriod,
+                  ),
               controller: controller,
             ),
             const SizedBox(height: 16),
@@ -301,7 +325,35 @@ class _SummaryContent extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // 6. TOMBOL UTAMA PRATINJAU & CETAK LAPORAN PDF
+            // 6. TOMBOL BUKU KEUANGAN PERIODE
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                ),
+              ),
+              onPressed: () {
+                final targetPeriod =
+                    controller.selectedPeriod ?? controller.report?.period;
+                if (targetPeriod != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FinanceListScreen(period: targetPeriod),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              label: const Text(
+                'Buku Keuangan & Hasil Panen',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 7. TOMBOL UTAMA PRATINJAU & CETAK LAPORAN PDF
             FilledButton.icon(
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
@@ -314,16 +366,18 @@ class _SummaryContent extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => PdfPreviewPage(
-                      report: report,
-                      finance: controller.financeSummary,
-                      comparison: controller.comparison ??
-                          PeriodComparisonCalculator().execute(
-                            currentReport: report,
-                            currentFinance: controller.financeSummary,
-                          ),
-                      cage: controller.cageData,
-                    ),
+                    builder:
+                        (_) => PdfPreviewPage(
+                          report: report,
+                          finance: controller.financeSummary,
+                          comparison:
+                              controller.comparison ??
+                              PeriodComparisonCalculator().execute(
+                                currentReport: report,
+                                currentFinance: controller.financeSummary,
+                              ),
+                          cage: controller.cageData,
+                        ),
                   ),
                 );
               },

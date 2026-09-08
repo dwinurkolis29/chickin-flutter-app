@@ -9,10 +9,7 @@ import 'package:recording_app/features/period/data/models/harvest_record.dart';
 class PostThinningStressAlert extends StatefulWidget {
   final HarvestRecord lastPartialHarvest;
 
-  const PostThinningStressAlert({
-    super.key,
-    required this.lastPartialHarvest,
-  });
+  const PostThinningStressAlert({super.key, required this.lastPartialHarvest});
 
   @override
   State<PostThinningStressAlert> createState() =>
@@ -32,9 +29,10 @@ class _PostThinningStressAlertState extends State<PostThinningStressAlert> {
     final hoursAgo = DateTime.now().difference(harvest.date).inHours;
     final daysAgo = DateTime.now().difference(harvest.date).inDays;
 
-    final String timeAgoText = hoursAgo < 1
-        ? 'Baru saja'
-        : (hoursAgo < 24 ? '$hoursAgo jam lalu' : '$daysAgo hari lalu');
+    final String timeAgoText =
+        hoursAgo < 1
+            ? 'Baru saja'
+            : (hoursAgo < 24 ? '$hoursAgo jam lalu' : '$daysAgo hari lalu');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -211,9 +209,7 @@ class _PostThinningStressAlertState extends State<PostThinningStressAlert> {
             children: [
               Text(
                 title,
-                style: tt.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: tt.bodySmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 desc,

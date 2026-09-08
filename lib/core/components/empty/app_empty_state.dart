@@ -79,11 +79,7 @@ class AppEmptyState extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: Icon(
-            icon,
-            size: compact ? 36 : 48,
-            color: cs.primary,
-          ),
+          child: Icon(icon, size: compact ? 36 : 48, color: cs.primary),
         ),
         SizedBox(height: compact ? 12 : 16),
 

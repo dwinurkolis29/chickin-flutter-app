@@ -20,10 +20,7 @@ class _FakeUser extends Fake implements fb.User {
   @override
   final String? photoURL;
 
-  _FakeUser({
-    required this.displayName,
-    required this.email,
-  }) : photoURL = null;
+  _FakeUser({required this.displayName, required this.email}) : photoURL = null;
 }
 
 class _FakeAuthService extends ChangeNotifier implements AuthService {
@@ -68,8 +65,8 @@ class _TestHomeController extends HomeController {
   final String? _mockPeriodName;
 
   _TestHomeController({String? activePeriodName})
-      : _mockPeriodName = activePeriodName,
-        super(firebaseService: _FakeFirebaseService());
+    : _mockPeriodName = activePeriodName,
+      super(firebaseService: _FakeFirebaseService());
 
   @override
   String? get activePeriodName => _mockPeriodName;
@@ -94,30 +91,33 @@ void main() {
           create: (_) => _FakeUserController(profile: userProfile),
         ),
         ChangeNotifierProvider<HomeController>(
-          create: (_) => _TestHomeController(activePeriodName: activePeriodName),
+          create:
+              (_) => _TestHomeController(activePeriodName: activePeriodName),
         ),
       ],
       child: MaterialApp(
         theme: AppTheme.build(AppThemeOption.light),
-        home: const Scaffold(
-          body: DashboardGreeting(),
-        ),
+        home: const Scaffold(body: DashboardGreeting()),
       ),
     );
   }
 
   group('DashboardGreeting Widget Tests', () {
-    testWidgets('menampilkan nama profil dan tanggal hari ini dengan benar', (tester) async {
+    testWidgets('menampilkan nama profil dan tanggal hari ini dengan benar', (
+      tester,
+    ) async {
       const profile = UserProfile(
         name: 'Budi Santoso',
         phone: '08123456789',
         address: 'Kandang 1',
       );
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        userProfile: profile,
-        activePeriodName: 'Siklus 1',
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          userProfile: profile,
+          activePeriodName: 'Siklus 1',
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Nama profil
@@ -130,21 +130,27 @@ void main() {
       expect(find.byIcon(Icons.calendar_today_rounded), findsOneWidget);
     });
 
-    testWidgets('menampilkan fallback Peternak jika userProfile dan firebaseUser kosong', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'menampilkan fallback Peternak jika userProfile dan firebaseUser kosong',
+      (tester) async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-      expect(find.text('Peternak'), findsOneWidget);
-      expect(find.text('P'), findsOneWidget);
-      expect(find.text('Siklus 1'), findsNothing);
-    });
+        expect(find.text('Peternak'), findsOneWidget);
+        expect(find.text('P'), findsOneWidget);
+        expect(find.text('Siklus 1'), findsNothing);
+      },
+    );
 
-    testWidgets('menampilkan nama dari firebaseUser jika userProfile kosong', (tester) async {
-      final user = _FakeUser(displayName: 'Ahmad Fauzi', email: 'ahmad@mail.com');
+    testWidgets('menampilkan nama dari firebaseUser jika userProfile kosong', (
+      tester,
+    ) async {
+      final user = _FakeUser(
+        displayName: 'Ahmad Fauzi',
+        email: 'ahmad@mail.com',
+      );
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        firebaseUser: user,
-      ));
+      await tester.pumpWidget(createWidgetUnderTest(firebaseUser: user));
       await tester.pumpAndSettle();
 
       expect(find.text('Ahmad Fauzi'), findsOneWidget);

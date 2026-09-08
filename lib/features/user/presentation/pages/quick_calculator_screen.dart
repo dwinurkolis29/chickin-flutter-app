@@ -76,8 +76,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   }
 
   void _calculateFcr() {
-    final feedInput = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
-    final weight = double.tryParse(_fcrWeightController.text.replaceAll(',', '.')) ?? 0;
+    final feedInput =
+        double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
+    final weight =
+        double.tryParse(_fcrWeightController.text.replaceAll(',', '.')) ?? 0;
     final feedKg = _fcrUnit == 'sak' ? feedInput * 50.0 : feedInput;
 
     setState(() {
@@ -90,10 +92,14 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   }
 
   void _calculateIp() {
-    final livability = double.tryParse(_ipLivabilityController.text.replaceAll(',', '.')) ?? 0;
-    final avgBw = double.tryParse(_ipAvgWeightController.text.replaceAll(',', '.')) ?? 0;
-    final age = double.tryParse(_ipAgeController.text.replaceAll(',', '.')) ?? 0;
-    final fcr = double.tryParse(_ipFcrController.text.replaceAll(',', '.')) ?? 0;
+    final livability =
+        double.tryParse(_ipLivabilityController.text.replaceAll(',', '.')) ?? 0;
+    final avgBw =
+        double.tryParse(_ipAvgWeightController.text.replaceAll(',', '.')) ?? 0;
+    final age =
+        double.tryParse(_ipAgeController.text.replaceAll(',', '.')) ?? 0;
+    final fcr =
+        double.tryParse(_ipFcrController.text.replaceAll(',', '.')) ?? 0;
 
     setState(() {
       if (age > 0 && fcr > 0) {
@@ -105,16 +111,21 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
   }
 
   void _calculateHpp() {
-    final cost = double.tryParse(
+    final cost =
+        double.tryParse(
           _hppCostController.text.replaceAll('.', '').replaceAll(',', ''),
         ) ??
         0;
-    final weight = double.tryParse(
+    final weight =
+        double.tryParse(
           _hppWeightController.text.replaceAll('.', '').replaceAll(',', ''),
         ) ??
         0;
-    final sellingPrice = double.tryParse(
-          _hppSellingPriceController.text.replaceAll('.', '').replaceAll(',', ''),
+    final sellingPrice =
+        double.tryParse(
+          _hppSellingPriceController.text
+              .replaceAll('.', '')
+              .replaceAll(',', ''),
         ) ??
         0;
 
@@ -140,9 +151,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const AppHeader(
-        title: 'Kalkulator Cepat',
-      ),
+      appBar: const AppHeader(title: 'Kalkulator Cepat'),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -159,7 +168,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                   child: TabBar(
                     controller: _tabController,
                     indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
+                    dividerColor: AppColors.transparent,
                     indicator: BoxDecoration(
                       color: cs.primary,
                       borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -217,15 +226,18 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     } else if (_fcrResult <= 1.80) {
       fcrColor = cs.primary;
       fcrStatus = 'Efisien (Standar Baik)';
-      fcrDesc = 'Performa FCR memenuhi standar performa pemeliharaan ayam broiler.';
+      fcrDesc =
+          'Performa FCR memenuhi standar performa pemeliharaan ayam broiler.';
     } else if (_fcrResult <= 2.10) {
       fcrColor = AppColors.warning;
       fcrStatus = 'Cukup / Perhatian';
-      fcrDesc = 'FCR agak tinggi, periksa kualitas pakan, kesehatan, dan suhu brooding.';
+      fcrDesc =
+          'FCR agak tinggi, periksa kualitas pakan, kesehatan, dan suhu brooding.';
     } else {
       fcrColor = AppColors.error;
       fcrStatus = 'Boros Pakan';
-      fcrDesc = 'FCR di atas normal. Evaluasi potensi pakan tercecer atau gangguan pencernaan.';
+      fcrDesc =
+          'FCR di atas normal. Evaluasi potensi pakan tercecer atau gangguan pencernaan.';
     }
 
     return ListView(
@@ -259,7 +271,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: fcrColor,
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -267,7 +282,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                 child: Text(
                   fcrStatus,
                   style: tt.labelMedium?.copyWith(
-                    color: Colors.white,
+                    color: cs.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -276,9 +291,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               Text(
                 fcrDesc,
                 textAlign: TextAlign.center,
-                style: tt.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
@@ -334,9 +347,17 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                             if (_fcrUnit != 'kg') {
                               setState(() {
                                 _fcrUnit = 'kg';
-                                final currentVal = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
+                                final currentVal =
+                                    double.tryParse(
+                                      _fcrFeedController.text.replaceAll(
+                                        ',',
+                                        '.',
+                                      ),
+                                    ) ??
+                                    0;
                                 if (currentVal > 0) {
-                                  _fcrFeedController.text = (currentVal * 50).round().toString();
+                                  _fcrFeedController.text =
+                                      (currentVal * 50).round().toString();
                                 }
                                 _calculateFcr();
                               });
@@ -351,12 +372,20 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                             if (_fcrUnit != 'sak') {
                               setState(() {
                                 _fcrUnit = 'sak';
-                                final currentVal = double.tryParse(_fcrFeedController.text.replaceAll(',', '.')) ?? 0;
+                                final currentVal =
+                                    double.tryParse(
+                                      _fcrFeedController.text.replaceAll(
+                                        ',',
+                                        '.',
+                                      ),
+                                    ) ??
+                                    0;
                                 if (currentVal > 0) {
                                   final sakVal = currentVal / 50.0;
-                                  _fcrFeedController.text = sakVal % 1 == 0
-                                      ? sakVal.toInt().toString()
-                                      : sakVal.toStringAsFixed(1);
+                                  _fcrFeedController.text =
+                                      sakVal % 1 == 0
+                                          ? sakVal.toInt().toString()
+                                          : sakVal.toStringAsFixed(1);
                                 }
                                 _calculateFcr();
                               });
@@ -372,13 +401,19 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
 
               AppTextFormField(
                 controller: _fcrFeedController,
-                labelText: _fcrUnit == 'sak' ? 'Total Pakan (Sak)' : 'Total Pakan (Kg)',
-                helperText: _fcrUnit == 'sak'
-                    ? '1 Sak = 50 Kg pakan (otomatis dikalikan 50 saat menghitung FCR)'
-                    : 'Total pakan yang dihabiskan selama masa pemeliharaan',
+                labelText:
+                    _fcrUnit == 'sak'
+                        ? 'Total Pakan (Sak)'
+                        : 'Total Pakan (Kg)',
+                helperText:
+                    _fcrUnit == 'sak'
+                        ? '1 Sak = 50 Kg pakan (otomatis dikalikan 50 saat menghitung FCR)'
+                        : 'Total pakan yang dihabiskan selama masa pemeliharaan',
                 helperMaxLines: 2,
                 prefixIcon: Icons.inventory_2_outlined,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => _calculateFcr(),
               ),
               const SizedBox(height: 14),
@@ -388,7 +423,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                 helperText: 'Total bobot timbangan ayam hidup hasil panen',
                 helperMaxLines: 2,
                 prefixIcon: Icons.scale_outlined,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => _calculateFcr(),
               ),
             ],
@@ -406,7 +443,11 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.lightbulb_outline_rounded, color: cs.primary, size: 20),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: cs.primary,
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -454,11 +495,13 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     } else if (_ipResult >= 250) {
       ipColor = AppColors.warning;
       ipStatus = 'Cukup / Perhatian';
-      ipDesc = 'Perlu evaluasi tingkat kematian (mortalitas) dan kebersihan kandang.';
+      ipDesc =
+          'Perlu evaluasi tingkat kematian (mortalitas) dan kebersihan kandang.';
     } else {
       ipColor = AppColors.error;
       ipStatus = 'Kurang / Evaluasi Total';
-      ipDesc = 'Skor IP rendah. Periksa FCR, umur panen, dan penanganan penyakit.';
+      ipDesc =
+          'Skor IP rendah. Periksa FCR, umur panen, dan penanganan penyakit.';
     }
 
     return ListView(
@@ -492,7 +535,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: ipColor,
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -500,7 +546,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                 child: Text(
                   ipStatus,
                   style: tt.labelMedium?.copyWith(
-                    color: Colors.white,
+                    color: cs.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -509,9 +555,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               Text(
                 ipDesc,
                 textAlign: TextAlign.center,
-                style: tt.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
@@ -542,20 +586,26 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               AppTextFormField(
                 controller: _ipLivabilityController,
                 labelText: 'Daya Hidup (%)',
-                helperText: 'Persentase ayam yang bertahan hidup hingga masa panen',
+                helperText:
+                    'Persentase ayam yang bertahan hidup hingga masa panen',
                 helperMaxLines: 2,
                 prefixIcon: Icons.favorite_outline_rounded,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => _calculateIp(),
               ),
               const SizedBox(height: 14),
               AppTextFormField(
                 controller: _ipAvgWeightController,
                 labelText: 'Bobot Rata-rata (Kg/ekor)',
-                helperText: 'Rata-rata bobot timbangan per ekor ayam saat panen',
+                helperText:
+                    'Rata-rata bobot timbangan per ekor ayam saat panen',
                 helperMaxLines: 2,
                 prefixIcon: Icons.scale_outlined,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => _calculateIp(),
               ),
               const SizedBox(height: 14),
@@ -575,7 +625,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                 helperText: 'Rasio konversi pakan akhir saat panen',
                 helperMaxLines: 2,
                 prefixIcon: Icons.speed_rounded,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => _calculateIp(),
               ),
             ],
@@ -593,7 +645,11 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.lightbulb_outline_rounded, color: cs.primary, size: 20),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: cs.primary,
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -625,23 +681,28 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     if (_hppResult <= 0) {
       hppColor = cs.onSurfaceVariant;
       hppStatus = 'Masukkan Data';
-      hppDesc = 'Isi total biaya produksi dan total bobot panen untuk menghitung.';
+      hppDesc =
+          'Isi total biaya produksi dan total bobot panen untuk menghitung.';
     } else if (_hppResult <= 17500) {
       hppColor = AppColors.success;
       hppStatus = 'Sangat Hemat / Efisiensi Tinggi';
-      hppDesc = 'Biaya pokok produksi sangat kompetitif, potensi keuntungan sangat besar.';
+      hppDesc =
+          'Biaya pokok produksi sangat kompetitif, potensi keuntungan sangat besar.';
     } else if (_hppResult <= 20000) {
       hppColor = cs.primary;
       hppStatus = 'Normal / Kompetitif Pasar';
-      hppDesc = 'HPP berada di rentang standar rata-rata peternak broiler mandiri.';
+      hppDesc =
+          'HPP berada di rentang standar rata-rata peternak broiler mandiri.';
     } else if (_hppResult <= 22000) {
       hppColor = AppColors.warning;
       hppStatus = 'Cukup Tinggi / Waspada';
-      hppDesc = 'HPP agak tinggi. Perhatikan efisiensi pakan, mortalitas, dan biaya OVK.';
+      hppDesc =
+          'HPP agak tinggi. Perhatikan efisiensi pakan, mortalitas, dan biaya OVK.';
     } else {
       hppColor = AppColors.error;
       hppStatus = 'Sangat Tinggi / Rawan Rugi';
-      hppDesc = 'HPP melebihi rata-rata pasar. Segera evaluasi FCR dan manajemen pemeliharaan.';
+      hppDesc =
+          'HPP melebihi rata-rata pasar. Segera evaluasi FCR dan manajemen pemeliharaan.';
     }
 
     return ListView(
@@ -667,7 +728,9 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                _hppResult > 0 ? '${_currencyFmt.format(_hppResult.round())} / kg' : '-',
+                _hppResult > 0
+                    ? '${_currencyFmt.format(_hppResult.round())} / kg'
+                    : '-',
                 style: tt.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: hppColor,
@@ -675,7 +738,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: hppColor,
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -683,7 +749,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                 child: Text(
                   hppStatus,
                   style: tt.labelMedium?.copyWith(
-                    color: Colors.white,
+                    color: cs.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -692,16 +758,19 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               Text(
                 hppDesc,
                 textAlign: TextAlign.center,
-                style: tt.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
               ),
               if (_hppMarginResult != 0 && _hppResult > 0) ...[
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: (_hppMarginResult >= 0 ? AppColors.success : AppColors.error)
+                    color: (_hppMarginResult >= 0
+                            ? AppColors.success
+                            : AppColors.error)
                         .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                   ),
@@ -713,7 +782,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                             ? Icons.trending_up_rounded
                             : Icons.trending_down_rounded,
                         size: 18,
-                        color: _hppMarginResult >= 0 ? AppColors.success : AppColors.error,
+                        color:
+                            _hppMarginResult >= 0
+                                ? AppColors.success
+                                : AppColors.error,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -722,7 +794,10 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
                             : 'Estimasi Potensi Rugi: ${_currencyFmt.format(_hppMarginResult.round())} / kg',
                         style: tt.labelMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: _hppMarginResult >= 0 ? AppColors.success : AppColors.error,
+                          color:
+                              _hppMarginResult >= 0
+                                  ? AppColors.success
+                                  : AppColors.error,
                         ),
                       ),
                     ],
@@ -758,7 +833,8 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               AppTextFormField(
                 controller: _hppCostController,
                 labelText: 'Total Biaya (Rp)',
-                helperText: 'Mencakup biaya DOC, pakan, OVK, listrik, sekam, dan tenaga kerja',
+                helperText:
+                    'Mencakup biaya DOC, pakan, OVK, listrik, sekam, dan tenaga kerja',
                 helperMaxLines: 3,
                 prefixIcon: Icons.account_balance_wallet_outlined,
                 keyboardType: TextInputType.number,
@@ -768,17 +844,21 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
               AppTextFormField(
                 controller: _hppWeightController,
                 labelText: 'Total Bobot Panen (Kg)',
-                helperText: 'Total kilogram seluruh ayam hidup yang ditimbang dan terjual',
+                helperText:
+                    'Total kilogram seluruh ayam hidup yang ditimbang dan terjual',
                 helperMaxLines: 2,
                 prefixIcon: Icons.scale_outlined,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => _calculateHpp(),
               ),
               const SizedBox(height: 14),
               AppTextFormField(
                 controller: _hppSellingPriceController,
                 labelText: 'Harga Jual Pasar (Rp/kg)',
-                helperText: 'Opsional: untuk menghitung perkiraan selisih keuntungan terhadap modal',
+                helperText:
+                    'Opsional: untuk menghitung perkiraan selisih keuntungan terhadap modal',
                 helperMaxLines: 3,
                 prefixIcon: Icons.monetization_on_outlined,
                 keyboardType: TextInputType.number,
@@ -799,7 +879,11 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.lightbulb_outline_rounded, color: cs.primary, size: 20),
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: cs.primary,
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -832,7 +916,7 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? cs.primary : Colors.transparent,
+          color: isSelected ? cs.primary : AppColors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.pillRadius),
         ),
         child: Text(

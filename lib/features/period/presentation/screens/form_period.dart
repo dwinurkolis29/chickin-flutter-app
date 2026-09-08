@@ -8,6 +8,7 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/finance/presentation/pages/form_finance_screen.dart';
 import '../../data/models/period_data.dart';
 import '../controllers/period_controller.dart';
 
@@ -42,9 +43,10 @@ class _FormPeriodState extends State<FormPeriod> {
     super.initState();
     _nameController = TextEditingController(text: widget.period?.name ?? '');
     _capacityController = TextEditingController(
-      text: widget.period != null && widget.period!.initialCapacity > 0
-          ? widget.period!.initialCapacity.toString()
-          : '',
+      text:
+          widget.period != null && widget.period!.initialCapacity > 0
+              ? widget.period!.initialCapacity.toString()
+              : '',
     );
     _startDate = widget.period?.startDate ?? DateTime.now();
   }
@@ -116,7 +118,10 @@ class _FormPeriodState extends State<FormPeriod> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+        AppSnackbar.showError(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+        );
       }
     } finally {
       if (mounted) {
@@ -137,14 +142,19 @@ class _FormPeriodState extends State<FormPeriod> {
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          await context.read<PeriodController>().deletePeriod(widget.period!.id);
+          await context.read<PeriodController>().deletePeriod(
+            widget.period!.id,
+          );
           if (mounted) {
             AppSnackbar.showSuccess(context, 'Periode draft berhasil dihapus');
             Navigator.pop(context, true);
           }
         } catch (e) {
           if (mounted) {
-            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+            AppSnackbar.showError(
+              context,
+              e.toString().replaceAll('Exception: ', ''),
+            );
           }
         } finally {
           if (mounted) setState(() => _isLoading = false);
@@ -167,14 +177,19 @@ class _FormPeriodState extends State<FormPeriod> {
       onConfirm: () async {
         setState(() => _isLoading = true);
         try {
-          await context.read<PeriodController>().activatePeriod(widget.period!.id);
+          await context.read<PeriodController>().activatePeriod(
+            widget.period!.id,
+          );
           if (mounted) {
             AppSnackbar.showSuccess(context, 'Periode berhasil diaktifkan');
             Navigator.pop(context, true);
           }
         } catch (e) {
           if (mounted) {
-            AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+            AppSnackbar.showError(
+              context,
+              e.toString().replaceAll('Exception: ', ''),
+            );
           }
         } finally {
           if (mounted) setState(() => _isLoading = false);
@@ -186,7 +201,10 @@ class _FormPeriodState extends State<FormPeriod> {
   Future<void> _closePeriod() async {
     if (widget.period == null) return;
 
-    final result = await DialogHelper.showClosePeriodHarvest(context, widget.period!);
+    final result = await DialogHelper.showClosePeriodHarvest(
+      context,
+      widget.period!,
+    );
     if (result == null) return;
 
     if (!mounted) return;
@@ -198,12 +216,45 @@ class _FormPeriodState extends State<FormPeriod> {
         harvestedWeightKg: result.harvestedWeightKg,
       );
       if (mounted) {
-        AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan dibuat');
-        Navigator.pop(context, true);
+        AppSnackbar.showSuccess(
+          context,
+          'Periode berhasil ditutup & laporan dibuat',
+        );
+
+        final shouldRecordFinance = await DialogHelper.showConfirm(
+          context,
+          'Catat Uang Penjualan Panen?',
+          'Periode telah berhasil ditutup. Apakah Anda ingin langsung mencatat nilai uang hasil penjualan ayam ke Buku Keuangan?',
+          confirmText: 'Ya, Catat Sekarang',
+          cancelText: 'Nanti Saja',
+        );
+
+        if (shouldRecordFinance == true && mounted) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder:
+                  (_) => FormFinanceScreen(
+                    periodId: widget.period!.id,
+                    periodName: widget.period!.name,
+                    initialType: 'income',
+                    initialCategory: 'main_harvest',
+                    initialBirdCount: result.harvestedChicks,
+                    initialWeightKg: result.harvestedWeightKg,
+                  ),
+            ),
+          );
+        }
+
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+        AppSnackbar.showError(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -216,8 +267,10 @@ class _FormPeriodState extends State<FormPeriod> {
     final tt = Theme.of(context).textTheme;
     final dateFmt = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
 
-    final bool showActivateOption = _isEditing && !(widget.period?.isActive ?? false);
-    final bool isCurrentlyActive = _isEditing && (widget.period?.isActive ?? false);
+    final bool showActivateOption =
+        _isEditing && !(widget.period?.isActive ?? false);
+    final bool isCurrentlyActive =
+        _isEditing && (widget.period?.isActive ?? false);
 
     return Scaffold(
       appBar: AppHeader(
@@ -230,23 +283,34 @@ class _FormPeriodState extends State<FormPeriod> {
             child: Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 16.0,
+                ),
                 children: [
                   if (!_isEditing) ...[
                     Consumer<PeriodController>(
                       builder: (context, periodCtrl, _) {
-                        final hasActive = periodCtrl.periods.any((p) => p.isActive);
+                        final hasActive = periodCtrl.periods.any(
+                          (p) => p.isActive,
+                        );
                         return Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: hasActive
-                                ? cs.surfaceContainer
-                                : AppColors.success.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                            color:
+                                hasActive
+                                    ? cs.surfaceContainer
+                                    : AppColors.success.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.rowRadius,
+                            ),
                             border: Border.all(
-                              color: hasActive
-                                  ? cs.outlineVariant
-                                  : AppColors.success.withValues(alpha: 0.3),
+                              color:
+                                  hasActive
+                                      ? cs.outlineVariant
+                                      : AppColors.success.withValues(
+                                        alpha: 0.3,
+                                      ),
                             ),
                           ),
                           child: Row(
@@ -255,7 +319,8 @@ class _FormPeriodState extends State<FormPeriod> {
                                 hasActive
                                     ? Icons.info_outline_rounded
                                     : Icons.check_circle_outline_rounded,
-                                color: hasActive ? cs.primary : AppColors.success,
+                                color:
+                                    hasActive ? cs.primary : AppColors.success,
                                 size: 20,
                               ),
                               const SizedBox(width: 10),
@@ -289,7 +354,11 @@ class _FormPeriodState extends State<FormPeriod> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.inventory_2_outlined, size: 20, color: cs.primary),
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                size: 20,
+                                color: cs.primary,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'INFORMASI SIKLUS DOC',
@@ -329,17 +398,28 @@ class _FormPeriodState extends State<FormPeriod> {
                           const SizedBox(height: 6),
                           InkWell(
                             onTap: _isLoading ? null : _pickStartDate,
-                            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                               decoration: BoxDecoration(
                                 color: cs.surfaceContainer,
-                                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.pillRadius,
+                                ),
                                 border: Border.all(color: cs.outlineVariant),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.calendar_today_rounded, size: 20, color: cs.primary),
+                                  Icon(
+                                    Icons.calendar_today_rounded,
+                                    size: 20,
+                                    color: cs.primary,
+                                  ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
@@ -350,7 +430,11 @@ class _FormPeriodState extends State<FormPeriod> {
                                       ),
                                     ),
                                   ),
-                                  Icon(Icons.edit_calendar_rounded, size: 18, color: cs.onSurfaceVariant),
+                                  Icon(
+                                    Icons.edit_calendar_rounded,
+                                    size: 18,
+                                    color: cs.onSurfaceVariant,
+                                  ),
                                 ],
                               ),
                             ),
@@ -391,7 +475,11 @@ class _FormPeriodState extends State<FormPeriod> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.tune_rounded, size: 20, color: cs.primary),
+                                Icon(
+                                  Icons.tune_rounded,
+                                  size: 20,
+                                  color: cs.primary,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'STATUS SIKLUS TERNAK',
@@ -409,17 +497,30 @@ class _FormPeriodState extends State<FormPeriod> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.success.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(AppTheme.rowRadius),
-                                  border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                                  color: AppColors.success.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.rowRadius,
+                                  ),
+                                  border: Border.all(
+                                    color: AppColors.success.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.check_circle_rounded, color: AppColors.success, size: 22),
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      color: AppColors.success,
+                                      size: 22,
+                                    ),
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Periode Ini Sedang Aktif',
@@ -444,7 +545,11 @@ class _FormPeriodState extends State<FormPeriod> {
                               const SizedBox(height: 14),
                               OutlinedButton.icon(
                                 onPressed: _isLoading ? null : _closePeriod,
-                                icon: Icon(Icons.check_box_outlined, color: cs.error, size: 20),
+                                icon: Icon(
+                                  Icons.check_box_outlined,
+                                  color: cs.error,
+                                  size: 20,
+                                ),
                                 label: Text(
                                   'Tutup Siklus (Selesai Panen)',
                                   style: tt.bodyMedium?.copyWith(
@@ -454,9 +559,13 @@ class _FormPeriodState extends State<FormPeriod> {
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   minimumSize: const Size.fromHeight(46),
-                                  side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
+                                  side: BorderSide(
+                                    color: cs.error.withValues(alpha: 0.5),
+                                  ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                    borderRadius: BorderRadius.circular(
+                                      AppTheme.pillRadius,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -466,16 +575,23 @@ class _FormPeriodState extends State<FormPeriod> {
                                   final hasActivePeriod = context
                                       .watch<PeriodController>()
                                       .periods
-                                      .any((p) => p.isActive && p.id != widget.period?.id);
+                                      .any(
+                                        (p) =>
+                                            p.isActive &&
+                                            p.id != widget.period?.id,
+                                      );
 
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: cs.surfaceContainer,
-                                          borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                                          borderRadius: BorderRadius.circular(
+                                            AppTheme.rowRadius,
+                                          ),
                                         ),
                                         child: Row(
                                           children: [
@@ -489,23 +605,28 @@ class _FormPeriodState extends State<FormPeriod> {
                                             const SizedBox(width: 10),
                                             Expanded(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    widget.period?.endDate != null
+                                                    widget.period?.endDate !=
+                                                            null
                                                         ? 'Periode Selesai / Arsip Panen'
                                                         : 'Periode Draft (Belum Aktif)',
-                                                    style: tt.bodyMedium?.copyWith(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: cs.onSurface,
-                                                    ),
+                                                    style: tt.bodyMedium
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: cs.onSurface,
+                                                        ),
                                                   ),
                                                   Text(
                                                     hasActivePeriod
                                                         ? 'Tidak dapat mengaktifkan periode ini karena masih ada siklus pemeliharaan yang sedang aktif. Selesaikan panen pada periode aktif terlebih dahulu.'
                                                         : 'Aktifkan periode ini jika Anda ingin mulai mencatat perkembangan harian.',
                                                     style: tt.bodySmall?.copyWith(
-                                                      color: cs.onSurfaceVariant,
+                                                      color:
+                                                          cs.onSurfaceVariant,
                                                       fontSize: 11.5,
                                                     ),
                                                   ),
@@ -518,16 +639,26 @@ class _FormPeriodState extends State<FormPeriod> {
                                       if (!hasActivePeriod) ...[
                                         const SizedBox(height: 14),
                                         FilledButton.tonal(
-                                          onPressed: _isLoading ? null : _activatePeriod,
+                                          onPressed:
+                                              _isLoading
+                                                  ? null
+                                                  : _activatePeriod,
                                           style: FilledButton.styleFrom(
-                                            minimumSize: const Size.fromHeight(46),
+                                            minimumSize: const Size.fromHeight(
+                                              46,
+                                            ),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                    AppTheme.pillRadius,
+                                                  ),
                                             ),
                                           ),
                                           child: const Text(
                                             'Aktifkan Periode Ini Sekarang',
-                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -544,33 +675,40 @@ class _FormPeriodState extends State<FormPeriod> {
                   const SizedBox(height: 24),
 
                   // ── 3. Tombol Submit Form ──────────────────────────────────
-                  ElevatedButton(
+                  FilledButton(
                     onPressed: _isLoading ? null : _submitForm,
-                    style: ElevatedButton.styleFrom(
+                    style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.pillRadius,
+                        ),
                       ),
                     ),
-                    child: _isLoading
-                        ? SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+                    child:
+                        _isLoading
+                            ? SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  cs.onPrimary,
+                                ),
+                              ),
+                            )
+                            : Text(
+                              _isEditing
+                                  ? 'Simpan Perubahan'
+                                  : 'Buat Periode Baru',
+                              style: tt.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.onPrimary,
+                              ),
                             ),
-                          )
-                        : Text(
-                            _isEditing ? 'Simpan Perubahan' : 'Buat Periode Baru',
-                            style: tt.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: cs.onPrimary,
-                            ),
-                          ),
                   ),
 
                   // ── 4. Tombol Hapus Periode (Khusus Draft) ─────────────────
@@ -588,7 +726,9 @@ class _FormPeriodState extends State<FormPeriod> {
                         ),
                         backgroundColor: Colors.transparent,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
                         ),
                         textStyle: tt.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,

@@ -15,9 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
   await dotenv.load(fileName: 'assets/env');
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Daftarkan FCM background message handler jika bukan web
   if (!kIsWeb) {
@@ -27,12 +25,10 @@ void main() async {
   // Aktifkan Firebase App Check jika bukan web, atau jika di web site key reCAPTCHA diisi.
   if (!kIsWeb) {
     await FirebaseAppCheck.instance.activate(
-      androidProvider: kDebugMode
-          ? AndroidProvider.debug
-          : AndroidProvider.playIntegrity,
-      appleProvider: kDebugMode
-          ? AppleProvider.debug
-          : AppleProvider.deviceCheck,
+      androidProvider:
+          kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+      appleProvider:
+          kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck,
     );
   } else {
     final siteKey = dotenv.env['RECAPTCHA_ENTERPRISE_SITE_KEY'] ?? '';
@@ -48,7 +44,7 @@ void main() async {
 
   // Inisialisasi Hive
   await Hive.initFlutter();
-  
+
   // Inisialisasi Hive boxes
   await _initHive();
 
@@ -61,4 +57,3 @@ Future<void> _initHive() async {
   await Hive.openBox("onboarding");
   await Hive.openBox("settings");
 }
-

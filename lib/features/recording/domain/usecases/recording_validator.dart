@@ -157,12 +157,14 @@ class RecordingValidator {
       }
     }
 
-    final currentLivePopulation = initialPopulation > 0
-        ? (initialPopulation - totalPreviousMortality)
-        : 1000;
+    final currentLivePopulation =
+        initialPopulation > 0
+            ? (initialPopulation - totalPreviousMortality)
+            : 1000;
 
     // A. Kematian melebihi sisa populasi (BLOCKING)
-    if (initialPopulation > 0 && newRecording.mortality > currentLivePopulation) {
+    if (initialPopulation > 0 &&
+        newRecording.mortality > currentLivePopulation) {
       anomalies.add(
         RecordingAnomaly(
           title: 'Mortalitas Melebihi Populasi',
@@ -178,7 +180,8 @@ class RecordingValidator {
     if (currentLivePopulation > 0 &&
         newRecording.mortality > (currentLivePopulation * 0.10) &&
         newRecording.mortality > 10) {
-      final pct = ((newRecording.mortality / currentLivePopulation) * 100).toStringAsFixed(1);
+      final pct = ((newRecording.mortality / currentLivePopulation) * 100)
+          .toStringAsFixed(1);
       anomalies.add(
         RecordingAnomaly(
           title: 'Mortalitas Tinggi Terdeteksi',
@@ -217,9 +220,14 @@ class RecordingValidator {
     }
 
     // D. Pengecekan penurunan bobot dibanding recording hari sebelumnya
-    final prevRecordings = existingRecordings
-        .where((r) => _isDifferentRecord(r, newRecording) && r.day < newRecording.day)
-        .toList();
+    final prevRecordings =
+        existingRecordings
+            .where(
+              (r) =>
+                  _isDifferentRecord(r, newRecording) &&
+                  r.day < newRecording.day,
+            )
+            .toList();
     if (prevRecordings.isNotEmpty) {
       prevRecordings.sort((a, b) => b.day.compareTo(a.day));
       final lastRec = prevRecordings.first;

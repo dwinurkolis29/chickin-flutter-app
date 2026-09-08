@@ -12,44 +12,50 @@ void main() {
       theme: AppTheme.build(AppThemeOption.light),
       home: Scaffold(
         body: Builder(
-          builder: (context) => Center(
-            child: ElevatedButton(
-              onPressed: () => onOpen(context),
-              child: const Text('Buka Dialog'),
-            ),
-          ),
+          builder:
+              (context) => Center(
+                child: ElevatedButton(
+                  onPressed: () => onOpen(context),
+                  child: const Text('Buka Dialog'),
+                ),
+              ),
         ),
       ),
     );
   }
 
   group('DialogHelper & Unified Dialogs Tests', () {
-    testWidgets('showError menampilkan judul, pesan, dan icon error konsisten', (tester) async {
-      await tester.pumpWidget(
-        createTestWidget((context) {
-          DialogHelper.showError(
-            context,
-            'Terjadi Kesalahan',
-            'Data gagal disimpan ke server.',
-          );
-        }),
-      );
+    testWidgets(
+      'showError menampilkan judul, pesan, dan icon error konsisten',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestWidget((context) {
+            DialogHelper.showError(
+              context,
+              'Terjadi Kesalahan',
+              'Data gagal disimpan ke server.',
+            );
+          }),
+        );
 
-      await tester.tap(find.text('Buka Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Buka Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Terjadi Kesalahan'), findsOneWidget);
-      expect(find.text('Data gagal disimpan ke server.'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
-      expect(find.text('Tutup'), findsOneWidget);
+        expect(find.text('Terjadi Kesalahan'), findsOneWidget);
+        expect(find.text('Data gagal disimpan ke server.'), findsOneWidget);
+        expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+        expect(find.text('Tutup'), findsOneWidget);
 
-      await tester.tap(find.text('Tutup'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Tutup'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Terjadi Kesalahan'), findsNothing);
-    });
+        expect(find.text('Terjadi Kesalahan'), findsNothing);
+      },
+    );
 
-    testWidgets('showInfo menampilkan judul, pesan, dan icon info konsisten', (tester) async {
+    testWidgets('showInfo menampilkan judul, pesan, dan icon info konsisten', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createTestWidget((context) {
           DialogHelper.showInfo(
@@ -64,7 +70,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Informasi Siklus'), findsOneWidget);
-      expect(find.text('Siklus pemeliharaan saat ini telah mencapai 21 hari.'), findsOneWidget);
+      expect(
+        find.text('Siklus pemeliharaan saat ini telah mencapai 21 hari.'),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
 
       await tester.tap(find.text('Tutup'));
@@ -72,7 +81,9 @@ void main() {
       expect(find.text('Informasi Siklus'), findsNothing);
     });
 
-    testWidgets('showSuccess menampilkan judul, pesan, dan icon check sukses', (tester) async {
+    testWidgets('showSuccess menampilkan judul, pesan, dan icon check sukses', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createTestWidget((context) {
           DialogHelper.showSuccess(
@@ -87,7 +98,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Berhasil Disimpan'), findsOneWidget);
-      expect(find.text('Catatan recording hari ini telah tercatat.'), findsOneWidget);
+      expect(
+        find.text('Catatan recording hari ini telah tercatat.'),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
       expect(find.text('Selesai'), findsOneWidget);
 
@@ -96,77 +110,92 @@ void main() {
       expect(find.text('Berhasil Disimpan'), findsNothing);
     });
 
-    testWidgets('showConfirm mengembalikan nilai true saat tombol konfirmasi ditekan', (tester) async {
-      bool? confirmResult;
-      await tester.pumpWidget(
-        createTestWidget((context) async {
-          confirmResult = await DialogHelper.showConfirm(
-            context,
-            'Tutup Periode',
-            'Apakah Anda yakin ingin menutup periode aktif ini?',
-            confirmText: 'Ya, Tutup',
-            cancelText: 'Batal',
-            isDestructive: true,
-          );
-        }),
-      );
+    testWidgets(
+      'showConfirm mengembalikan nilai true saat tombol konfirmasi ditekan',
+      (tester) async {
+        bool? confirmResult;
+        await tester.pumpWidget(
+          createTestWidget((context) async {
+            confirmResult = await DialogHelper.showConfirm(
+              context,
+              'Tutup Periode',
+              'Apakah Anda yakin ingin menutup periode aktif ini?',
+              confirmText: 'Ya, Tutup',
+              cancelText: 'Batal',
+              isDestructive: true,
+            );
+          }),
+        );
 
-      await tester.tap(find.text('Buka Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Buka Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Tutup Periode'), findsOneWidget);
-      expect(find.text('Apakah Anda yakin ingin menutup periode aktif ini?'), findsOneWidget);
-      expect(find.text('Ya, Tutup'), findsOneWidget);
-      expect(find.text('Batal'), findsOneWidget);
+        expect(find.text('Tutup Periode'), findsOneWidget);
+        expect(
+          find.text('Apakah Anda yakin ingin menutup periode aktif ini?'),
+          findsOneWidget,
+        );
+        expect(find.text('Ya, Tutup'), findsOneWidget);
+        expect(find.text('Batal'), findsOneWidget);
 
-      await tester.tap(find.text('Ya, Tutup'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Ya, Tutup'));
+        await tester.pumpAndSettle();
 
-      expect(confirmResult, isTrue);
-      expect(find.text('Tutup Periode'), findsNothing);
-    });
+        expect(confirmResult, isTrue);
+        expect(find.text('Tutup Periode'), findsNothing);
+      },
+    );
 
-    testWidgets('showConfirm mengembalikan nilai false saat tombol batal ditekan', (tester) async {
-      bool? confirmResult;
-      await tester.pumpWidget(
-        createTestWidget((context) async {
-          confirmResult = await DialogHelper.showConfirm(
-            context,
-            'Hapus Data',
-            'Data recording akan dihapus secara permanen.',
-            isDestructive: true,
-          );
-        }),
-      );
+    testWidgets(
+      'showConfirm mengembalikan nilai false saat tombol batal ditekan',
+      (tester) async {
+        bool? confirmResult;
+        await tester.pumpWidget(
+          createTestWidget((context) async {
+            confirmResult = await DialogHelper.showConfirm(
+              context,
+              'Hapus Data',
+              'Data recording akan dihapus secara permanen.',
+              isDestructive: true,
+            );
+          }),
+        );
 
-      await tester.tap(find.text('Buka Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Buka Dialog'));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Batal'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Batal'));
+        await tester.pumpAndSettle();
 
-      expect(confirmResult, isFalse);
-    });
+        expect(confirmResult, isFalse);
+      },
+    );
 
-    testWidgets('showAbout menampilkan identitas aplikasi dengan styling konsisten', (tester) async {
-      await tester.pumpWidget(
-        createTestWidget((context) {
-          DialogHelper.showAbout(context);
-        }),
-      );
+    testWidgets(
+      'showAbout menampilkan identitas aplikasi dengan styling konsisten',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestWidget((context) {
+            DialogHelper.showAbout(context);
+          }),
+        );
 
-      await tester.tap(find.text('Buka Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Buka Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('BroilerKu'), findsOneWidget);
-      expect(find.textContaining('Aplikasi Manajemen Peternakan'), findsOneWidget);
-      expect(find.text('Versi 1.0.0 • Production Ready'), findsOneWidget);
-      expect(find.byIcon(Icons.egg_outlined), findsOneWidget);
+        expect(find.text('BroilerKu'), findsOneWidget);
+        expect(
+          find.textContaining('Aplikasi Manajemen Peternakan'),
+          findsOneWidget,
+        );
+        expect(find.text('Versi 1.0.0 • Production Ready'), findsOneWidget);
+        expect(find.byIcon(Icons.egg_outlined), findsOneWidget);
 
-      await tester.tap(find.text('Tutup'));
-      await tester.pumpAndSettle();
-      expect(find.text('BroilerKu'), findsNothing);
-    });
+        await tester.tap(find.text('Tutup'));
+        await tester.pumpAndSettle();
+        expect(find.text('BroilerKu'), findsNothing);
+      },
+    );
 
     testWidgets('showPeriodPicker memilih periode yang diklik', (tester) async {
       String? selectedId;
@@ -214,7 +243,9 @@ void main() {
       expect(find.text('Pilih Periode'), findsNothing);
     });
 
-    testWidgets('showStringPicker memilih opsi string yang diklik', (tester) async {
+    testWidgets('showStringPicker memilih opsi string yang diklik', (
+      tester,
+    ) async {
       String? selectedOption;
       final options = ['Pakan Pokok', 'Vitamin / Suplemen', 'Obat Vaksin'];
 
@@ -243,55 +274,61 @@ void main() {
       expect(find.text('Pilih Kategori'), findsNothing);
     });
 
-    testWidgets('showImageSourcePicker menampilkan bottom sheet dan mengembalikan ImageSource.gallery', (tester) async {
-      ImageSource? pickedSource;
+    testWidgets(
+      'showImageSourcePicker menampilkan bottom sheet dan mengembalikan ImageSource.gallery',
+      (tester) async {
+        ImageSource? pickedSource;
 
-      await tester.pumpWidget(
-        createTestWidget((context) async {
-          pickedSource = await DialogHelper.showImageSourcePicker(
-            context,
-            title: 'Pilih Foto Profil',
-          );
-        }),
-      );
+        await tester.pumpWidget(
+          createTestWidget((context) async {
+            pickedSource = await DialogHelper.showImageSourcePicker(
+              context,
+              title: 'Pilih Foto Profil',
+            );
+          }),
+        );
 
-      await tester.tap(find.text('Buka Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Buka Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Foto Profil'), findsOneWidget);
-      expect(find.text('Pilih dari Galeri'), findsOneWidget);
-      expect(find.text('Ambil Foto Kamera'), findsOneWidget);
-      expect(find.text('Batal'), findsOneWidget);
+        expect(find.text('Pilih Foto Profil'), findsOneWidget);
+        expect(find.text('Pilih dari Galeri'), findsOneWidget);
+        expect(find.text('Ambil Foto Kamera'), findsOneWidget);
+        expect(find.text('Batal'), findsOneWidget);
 
-      await tester.tap(find.text('Pilih dari Galeri'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Pilih dari Galeri'));
+        await tester.pumpAndSettle();
 
-      expect(pickedSource, equals(ImageSource.gallery));
-      expect(find.text('Pilih dari Galeri'), findsNothing);
-    });
+        expect(pickedSource, equals(ImageSource.gallery));
+        expect(find.text('Pilih dari Galeri'), findsNothing);
+      },
+    );
 
-    testWidgets('showImageSourcePicker mengembalikan ImageSource.camera saat memilih kamera', (tester) async {
-      ImageSource? pickedSource;
+    testWidgets(
+      'showImageSourcePicker mengembalikan ImageSource.camera saat memilih kamera',
+      (tester) async {
+        ImageSource? pickedSource;
 
-      await tester.pumpWidget(
-        createTestWidget((context) async {
-          pickedSource = await DialogHelper.showImageSourcePicker(
-            context,
-            title: 'Pilih Foto Kandang',
-          );
-        }),
-      );
+        await tester.pumpWidget(
+          createTestWidget((context) async {
+            pickedSource = await DialogHelper.showImageSourcePicker(
+              context,
+              title: 'Pilih Foto Kandang',
+            );
+          }),
+        );
 
-      await tester.tap(find.text('Buka Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Buka Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Foto Kandang'), findsOneWidget);
+        expect(find.text('Pilih Foto Kandang'), findsOneWidget);
 
-      await tester.tap(find.text('Ambil Foto Kamera'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Ambil Foto Kamera'));
+        await tester.pumpAndSettle();
 
-      expect(pickedSource, equals(ImageSource.camera));
-      expect(find.text('Ambil Foto Kamera'), findsNothing);
-    });
+        expect(pickedSource, equals(ImageSource.camera));
+        expect(find.text('Ambil Foto Kamera'), findsNothing);
+      },
+    );
   });
 }

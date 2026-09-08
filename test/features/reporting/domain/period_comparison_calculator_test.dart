@@ -103,7 +103,12 @@ void main() {
         previousReport: prevReport,
         previousFinance: prevFinance,
         recentPeriods: [
-          PeriodData(id: 'p-10', name: 'Periode 10', startDate: DateTime(2026, 4, 1), createdAt: DateTime(2026, 4, 1)),
+          PeriodData(
+            id: 'p-10',
+            name: 'Periode 10',
+            startDate: DateTime(2026, 4, 1),
+            createdAt: DateTime(2026, 4, 1),
+          ),
           prevPeriod,
           currentPeriod,
         ],
@@ -131,24 +136,30 @@ void main() {
       expect(result.hppComparisonLabel, 'dibanding Periode 11');
 
       // Tren 3 periode
-      expect(result.threePeriodSequence, 'Periode 10 → Periode 11 → Periode 12');
-    });
-
-    test('menangani kasus periode pertama tanpa periode sebelumnya secara aman', () {
-      final result = calculator.execute(
-        currentReport: currentReport,
-        currentFinance: currentFinance,
-        previousReport: null,
-        previousFinance: null,
+      expect(
+        result.threePeriodSequence,
+        'Periode 10 → Periode 11 → Periode 12',
       );
-
-      expect(result.netProfitText, 'Rp60,5 JT');
-      expect(result.netProfitDeltaText, '-');
-      expect(result.mortalityDeltaText, '-');
-      expect(result.fcrDeltaText, '-');
-      expect(result.hppComparisonLabel, 'Periode Pertama');
-      expect(result.threePeriodSequence, 'Periode 12');
     });
+
+    test(
+      'menangani kasus periode pertama tanpa periode sebelumnya secara aman',
+      () {
+        final result = calculator.execute(
+          currentReport: currentReport,
+          currentFinance: currentFinance,
+          previousReport: null,
+          previousFinance: null,
+        );
+
+        expect(result.netProfitText, 'Rp60,5 JT');
+        expect(result.netProfitDeltaText, '-');
+        expect(result.mortalityDeltaText, '-');
+        expect(result.fcrDeltaText, '-');
+        expect(result.hppComparisonLabel, 'Periode Pertama');
+        expect(result.threePeriodSequence, 'Periode 12');
+      },
+    );
 
     test('menangani data keuangan kosong secara aman (placeholder Rp0)', () {
       final result = calculator.execute(

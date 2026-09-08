@@ -43,10 +43,12 @@ class PeriodPdfDocumentBuilder {
 
     final dateFmt = DateFormat('d MMM yyyy', 'id_ID');
     final startDateStr = dateFmt.format(report.period.startDate);
-    final endDateStr = report.period.endDate != null
-        ? dateFmt.format(report.period.endDate!)
-        : 'Aktif';
-    final dateRangeStr = '$startDateStr - $endDateStr - ${report.durationDays} hari';
+    final endDateStr =
+        report.period.endDate != null
+            ? dateFmt.format(report.period.endDate!)
+            : 'Aktif';
+    final dateRangeStr =
+        '$startDateStr - $endDateStr - ${report.durationDays} hari';
 
     final numFmt = NumberFormat.decimalPattern('id_ID');
 
@@ -63,7 +65,9 @@ class PeriodPdfDocumentBuilder {
                 padding: const pw.EdgeInsets.all(14),
                 decoration: pw.BoxDecoration(
                   color: _primaryColor,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(10)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(10),
+                  ),
                 ),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -100,10 +104,15 @@ class PeriodPdfDocumentBuilder {
                       ],
                     ),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: pw.BoxDecoration(
                         color: const PdfColor.fromInt(0xFF2855F0),
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(8),
+                        ),
                       ),
                       child: pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -133,10 +142,15 @@ class PeriodPdfDocumentBuilder {
 
               // ── 2. ROW 1 KPI (LABA, MORTALITAS, BOBOT) ─────────────────────
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: pw.BoxDecoration(
                   color: _cardBg,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(8),
+                  ),
                   border: pw.Border.all(color: _cardBorder, width: 0.8),
                 ),
                 child: pw.Row(
@@ -147,7 +161,10 @@ class PeriodPdfDocumentBuilder {
                       value: _clean(comparison.netProfitText),
                       label: 'LABA',
                       delta: _clean(comparison.netProfitDeltaText),
-                      deltaColor: comparison.isProfitImproved ? _successGreen : _warningAmber,
+                      deltaColor:
+                          comparison.isProfitImproved
+                              ? _successGreen
+                              : _warningAmber,
                     ),
                     _buildVerticalDivider(),
                     // Col 2: Mortalitas
@@ -155,7 +172,10 @@ class PeriodPdfDocumentBuilder {
                       value: _clean(comparison.mortalityText),
                       label: 'MORTALITAS',
                       delta: _clean(comparison.mortalityDeltaText),
-                      deltaColor: comparison.isMortalityImproved ? _successGreen : _warningAmber,
+                      deltaColor:
+                          comparison.isMortalityImproved
+                              ? _successGreen
+                              : _warningAmber,
                     ),
                     _buildVerticalDivider(),
                     // Col 3: Bobot
@@ -163,7 +183,10 @@ class PeriodPdfDocumentBuilder {
                       value: _clean(comparison.weightText),
                       label: 'BOBOT',
                       delta: _clean(comparison.weightDeltaText),
-                      deltaColor: comparison.isWeightImproved ? _successGreen : _warningAmber,
+                      deltaColor:
+                          comparison.isWeightImproved
+                              ? _successGreen
+                              : _warningAmber,
                     ),
                   ],
                 ),
@@ -172,10 +195,15 @@ class PeriodPdfDocumentBuilder {
 
               // ── 3. ROW 2 KPI (FCR & HPP) ───────────────────────────────────
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: pw.BoxDecoration(
                   color: _cardBg,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(8),
+                  ),
                   border: pw.Border.all(color: _cardBorder, width: 0.8),
                 ),
                 child: pw.Row(
@@ -184,7 +212,10 @@ class PeriodPdfDocumentBuilder {
                     _buildMiniKpi(
                       title: 'FCR ${_clean(comparison.fcrText)}',
                       subtitle: _clean(comparison.fcrDeltaText),
-                      deltaColor: comparison.isFcrImproved ? _successGreen : _warningAmber,
+                      deltaColor:
+                          comparison.isFcrImproved
+                              ? _successGreen
+                              : _warningAmber,
                     ),
                     _buildVerticalDivider(),
                     _buildMiniKpi(
@@ -202,8 +233,13 @@ class PeriodPdfDocumentBuilder {
                 padding: const pw.EdgeInsets.all(10),
                 decoration: pw.BoxDecoration(
                   color: const PdfColor.fromInt(0xFFF0F4FF),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-                  border: pw.Border.all(color: const PdfColor.fromInt(0xFFD2DEFF), width: 0.8),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(8),
+                  ),
+                  border: pw.Border.all(
+                    color: const PdfColor.fromInt(0xFFD2DEFF),
+                    width: 0.8,
+                  ),
                 ),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -249,7 +285,9 @@ class PeriodPdfDocumentBuilder {
                       padding: const pw.EdgeInsets.all(10),
                       decoration: pw.BoxDecoration(
                         color: _cardBg,
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(8),
+                        ),
                         border: pw.Border.all(color: _cardBorder, width: 0.8),
                       ),
                       child: pw.Column(
@@ -279,7 +317,9 @@ class PeriodPdfDocumentBuilder {
                           _buildDataRow(
                             'Penjualan utama',
                             finance.mainHarvestRevenue > 0
-                                ? formatCompactRupiah(finance.mainHarvestRevenue)
+                                ? formatCompactRupiah(
+                                  finance.mainHarvestRevenue,
+                                )
                                 : 'Rp0',
                           ),
                           _buildDataRow(
@@ -308,7 +348,9 @@ class PeriodPdfDocumentBuilder {
                       padding: const pw.EdgeInsets.all(10),
                       decoration: pw.BoxDecoration(
                         color: _cardBg,
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(8),
+                        ),
                         border: pw.Border.all(color: _cardBorder, width: 0.8),
                       ),
                       child: pw.Column(
@@ -342,7 +384,10 @@ class PeriodPdfDocumentBuilder {
                                 ? formatCompactRupiah(finance.netProfit)
                                 : 'Rp0',
                             isBold: true,
-                            valueColor: finance.netProfit >= 0 ? _successGreen : _warningAmber,
+                            valueColor:
+                                finance.netProfit >= 0
+                                    ? _successGreen
+                                    : _warningAmber,
                           ),
                           pw.SizedBox(height: 8),
 
@@ -377,10 +422,15 @@ class PeriodPdfDocumentBuilder {
 
               // ── 6. TREN 3 PERIODE ──────────────────────────────────────────
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: pw.BoxDecoration(
                   color: _cardBg,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(8),
+                  ),
                   border: pw.Border.all(color: _cardBorder, width: 0.8),
                 ),
                 child: pw.Row(
@@ -409,10 +459,15 @@ class PeriodPdfDocumentBuilder {
                       ],
                     ),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: pw.BoxDecoration(
                         color: const PdfColor.fromInt(0xFFEBF0FF),
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                        borderRadius: const pw.BorderRadius.all(
+                          pw.Radius.circular(6),
+                        ),
                       ),
                       child: pw.Text(
                         _clean(comparison.threePeriodTrendSummary),
@@ -433,7 +488,9 @@ class PeriodPdfDocumentBuilder {
               pw.Container(
                 padding: const pw.EdgeInsets.only(top: 8),
                 decoration: const pw.BoxDecoration(
-                  border: pw.Border(top: pw.BorderSide(color: _cardBorder, width: 0.5)),
+                  border: pw.Border(
+                    top: pw.BorderSide(color: _cardBorder, width: 0.5),
+                  ),
                 ),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -486,10 +543,7 @@ class PeriodPdfDocumentBuilder {
         pw.SizedBox(height: 2),
         pw.Text(
           label,
-          style: const pw.TextStyle(
-            color: _textSecondary,
-            fontSize: 8.5,
-          ),
+          style: const pw.TextStyle(color: _textSecondary, fontSize: 8.5),
         ),
         pw.SizedBox(height: 2),
         pw.Text(
@@ -523,21 +577,14 @@ class PeriodPdfDocumentBuilder {
         pw.SizedBox(height: 2),
         pw.Text(
           subtitle,
-          style: pw.TextStyle(
-            color: deltaColor,
-            fontSize: 8.5,
-          ),
+          style: pw.TextStyle(color: deltaColor, fontSize: 8.5),
         ),
       ],
     );
   }
 
   static pw.Widget _buildVerticalDivider() {
-    return pw.Container(
-      width: 0.8,
-      height: 32,
-      color: _dividerColor,
-    );
+    return pw.Container(width: 0.8, height: 32, color: _dividerColor);
   }
 
   static pw.Widget _buildDataRow(
@@ -603,7 +650,9 @@ class PeriodPdfDocumentBuilder {
                     height: 7,
                     decoration: pw.BoxDecoration(
                       color: barColor,
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(3),
+                      ),
                     ),
                   ),
                 ],

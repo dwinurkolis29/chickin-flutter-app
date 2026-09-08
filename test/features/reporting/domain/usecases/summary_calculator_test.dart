@@ -131,7 +131,10 @@ void main() {
       });
 
       test('avgDailyGain = (2150 - 400) / 35 = 50.0 g/hari', () {
-        final result = calculator.execute(period(initialWeight: 0.4), recordings35hari);
+        final result = calculator.execute(
+          period(initialWeight: 0.4),
+          recordings35hari,
+        );
         expect(result.avgDailyGain, closeTo(50.0, 0.1));
       });
 
@@ -152,7 +155,12 @@ void main() {
       test('mortality > initialCapacity → finalPopulation = 0', () {
         final p = period(initialCapacity: 100);
         final recordings = [
-          rec(day: 7, avgWeightGram: 400, feedSack: 2, mortality: 200), // lebih dari kapasitas
+          rec(
+            day: 7,
+            avgWeightGram: 400,
+            feedSack: 2,
+            mortality: 200,
+          ), // lebih dari kapasitas
         ];
         final result = calculator.execute(p, recordings);
         expect(result.finalPopulation, 0); // clamp(0, 100) = 0
@@ -206,101 +214,108 @@ void main() {
     });
 
     group('harvest data inputs — penutupan panen riil', () {
-      test('menggunakan data panen riil 9.700 ekor & 17.460 kg menghitung bobot rata-rata & IP', () {
-        final start = DateTime(2026, 7, 1);
-        final end = DateTime(2026, 8, 5); // 35 hari
-        final p = PeriodData(
-          id: 'p-harvest',
-          name: 'Batch Panen 10k',
-          initialCapacity: 10000,
-          initialWeight: 0.04,
-          startDate: start,
-          endDate: end,
-          createdAt: start,
-        );
+      test(
+        'menggunakan data panen riil 9.700 ekor & 17.460 kg menghitung bobot rata-rata & IP',
+        () {
+          final start = DateTime(2026, 7, 1);
+          final end = DateTime(2026, 8, 5); // 35 hari
+          final p = PeriodData(
+            id: 'p-harvest',
+            name: 'Batch Panen 10k',
+            initialCapacity: 10000,
+            initialWeight: 0.04,
+            startDate: start,
+            endDate: end,
+            createdAt: start,
+          );
 
-        final recordings = [
-          rec(day: 1, avgWeightGram: 180, feedSack: 20, mortality: 50),
-          rec(day: 35, avgWeightGram: 1750, feedSack: 540, mortality: 250),
-        ];
+          final recordings = [
+            rec(day: 1, avgWeightGram: 180, feedSack: 20, mortality: 50),
+            rec(day: 35, avgWeightGram: 1750, feedSack: 540, mortality: 250),
+          ];
 
-        final result = calculator.execute(
-          p,
-          recordings,
-          harvestedChicks: 9700,
-          harvestedWeightKg: 17460.0,
-        );
+          final result = calculator.execute(
+            p,
+            recordings,
+            harvestedChicks: 9700,
+            harvestedWeightKg: 17460.0,
+          );
 
-        expect(result.harvestedChicks, 9700);
-        expect(result.harvestedWeightKg, 17460.0);
-        expect(result.avgHarvestWeightKg, closeTo(1.80, 0.01));
-        expect(result.finalPopulation, 9700);
-        expect(result.finalBiomassKg, 17460.0);
-        expect(result.totalFeedKg, 560 * 50.0); // 28.000 kg
-        // FCR aktual panen: 28.000 / 17.460 = 1.6036
-        expect(result.finalFCR, closeTo(1.6036, 0.01));
-        // IP: (97.0 * 1.80 * 100) / (35 * 1.6036) ~ 311.0
-        expect(result.ipScore, isNotNull);
-        expect(result.ipScore!, greaterThan(300));
-        expect(result.ipScore!, lessThan(330));
-      });
+          expect(result.harvestedChicks, 9700);
+          expect(result.harvestedWeightKg, 17460.0);
+          expect(result.avgHarvestWeightKg, closeTo(1.80, 0.01));
+          expect(result.finalPopulation, 9700);
+          expect(result.finalBiomassKg, 17460.0);
+          expect(result.totalFeedKg, 560 * 50.0); // 28.000 kg
+          // FCR aktual panen: 28.000 / 17.460 = 1.6036
+          expect(result.finalFCR, closeTo(1.6036, 0.01));
+          // IP: (97.0 * 1.80 * 100) / (35 * 1.6036) ~ 311.0
+          expect(result.ipScore, isNotNull);
+          expect(result.ipScore!, greaterThan(300));
+          expect(result.ipScore!, lessThan(330));
+        },
+      );
 
-      test('skenario multi-harvest (panen parsial hari ke-30 + panen akhir hari ke-35) menghitung umur panen tertimbang & IP akurat', () {
-        final start = DateTime(2026, 7, 1);
-        final end = DateTime(2026, 8, 5); // 35 hari
-        final p = PeriodData(
-          id: 'p-multi-harvest',
-          name: 'Batch Multi Harvest 10k',
-          initialCapacity: 10000,
-          initialWeight: 0.04,
-          startDate: start,
-          endDate: end,
-          createdAt: start,
-        );
+      test(
+        'skenario multi-harvest (panen parsial hari ke-30 + panen akhir hari ke-35) menghitung umur panen tertimbang & IP akurat',
+        () {
+          final start = DateTime(2026, 7, 1);
+          final end = DateTime(2026, 8, 5); // 35 hari
+          final p = PeriodData(
+            id: 'p-multi-harvest',
+            name: 'Batch Multi Harvest 10k',
+            initialCapacity: 10000,
+            initialWeight: 0.04,
+            startDate: start,
+            endDate: end,
+            createdAt: start,
+          );
 
-        final recordings = [
-          rec(day: 1, avgWeightGram: 180, feedSack: 20, mortality: 50),
-          rec(day: 30, avgWeightGram: 1500, feedSack: 400, mortality: 150),
-          rec(day: 35, avgWeightGram: 2000, feedSack: 140, mortality: 100),
-        ];
+          final recordings = [
+            rec(day: 1, avgWeightGram: 180, feedSack: 20, mortality: 50),
+            rec(day: 30, avgWeightGram: 1500, feedSack: 400, mortality: 150),
+            rec(day: 35, avgWeightGram: 2000, feedSack: 140, mortality: 100),
+          ];
 
-        final partialHarvest = HarvestRecord(
-          id: 'h-part-1',
-          type: HarvestType.partial,
-          date: start.add(const Duration(days: 30)),
-          day: 30,
-          chicks: 3000,
-          weightKg: 4500.0,
-          avgWeightKg: 1.5,
-          createdAt: start.add(const Duration(days: 30)),
-        );
+          final partialHarvest = HarvestRecord(
+            id: 'h-part-1',
+            type: HarvestType.partial,
+            date: start.add(const Duration(days: 30)),
+            day: 30,
+            chicks: 3000,
+            weightKg: 4500.0,
+            avgWeightKg: 1.5,
+            createdAt: start.add(const Duration(days: 30)),
+          );
 
-        final result = calculator.execute(
-          p,
-          recordings,
-          harvests: [partialHarvest],
-          harvestedChicks: 6700,
-          harvestedWeightKg: 13400.0,
-        );
+          final result = calculator.execute(
+            p,
+            recordings,
+            harvests: [partialHarvest],
+            harvestedChicks: 6700,
+            harvestedWeightKg: 13400.0,
+          );
 
-        // Total akumulasi panen
-        expect(result.harvestedChicks, 9700); // 3.000 + 6.700
-        expect(result.harvestedWeightKg, 17900.0); // 4.500 + 13.400
-        expect(result.avgHarvestWeightKg, closeTo(17900.0 / 9700, 0.001));
+          // Total akumulasi panen
+          expect(result.harvestedChicks, 9700); // 3.000 + 6.700
+          expect(result.harvestedWeightKg, 17900.0); // 4.500 + 13.400
+          expect(result.avgHarvestWeightKg, closeTo(17900.0 / 9700, 0.001));
 
-        // Weighted Average Harvest Age: ((3000 * 30) + (6700 * 35)) / 9700 = 324500 / 9700 = 33.4536 hari
-        expect(result.weightedHarvestAgeDays, isNotNull);
-        expect(result.weightedHarvestAgeDays!, closeTo(33.4536, 0.01));
+          // Weighted Average Harvest Age: ((3000 * 30) + (6700 * 35)) / 9700 = 324500 / 9700 = 33.4536 hari
+          expect(result.weightedHarvestAgeDays, isNotNull);
+          expect(result.weightedHarvestAgeDays!, closeTo(33.4536, 0.01));
 
-        // IP dihitung dengan weightedHarvestAgeDays (33.45 hari)
-        expect(result.ipScore, isNotNull);
-        final expectedLivability = (9700 / 10000) * 100.0;
-        final expectedAvgWeight = result.finalAvgWeightGram / 1000.0;
-        final expectedFCR = (560 * 50.0) / 17900.0;
-        final expectedIP = (expectedLivability * expectedAvgWeight * 100.0) /
-            (result.weightedHarvestAgeDays! * expectedFCR);
-        expect(result.ipScore!, closeTo(expectedIP, 0.01));
-      });
+          // IP dihitung dengan weightedHarvestAgeDays (33.45 hari)
+          expect(result.ipScore, isNotNull);
+          final expectedLivability = (9700 / 10000) * 100.0;
+          final expectedAvgWeight = result.finalAvgWeightGram / 1000.0;
+          final expectedFCR = (560 * 50.0) / 17900.0;
+          final expectedIP =
+              (expectedLivability * expectedAvgWeight * 100.0) /
+              (result.weightedHarvestAgeDays! * expectedFCR);
+          expect(result.ipScore!, closeTo(expectedIP, 0.01));
+        },
+      );
     });
   });
 }

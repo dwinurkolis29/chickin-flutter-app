@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:recording_app/core/auth/auth_service.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
+import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
@@ -31,7 +32,8 @@ class _SignupState extends State<Signup> {
   final TextEditingController _controllerPhone = TextEditingController();
   final TextEditingController _controllerAddress = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
-  final TextEditingController _controllerConfirmPassword = TextEditingController();
+  final TextEditingController _controllerConfirmPassword =
+      TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -51,10 +53,10 @@ class _SignupState extends State<Signup> {
       );
 
       final result = await context.read<AuthService>().signUp(
-            email: _controllerEmail.text.trim(),
-            password: _controllerPassword.text,
-            profile: profile,
-          );
+        email: _controllerEmail.text.trim(),
+        password: _controllerPassword.text,
+        profile: profile,
+      );
 
       if (!mounted) return;
 
@@ -68,12 +70,17 @@ class _SignupState extends State<Signup> {
         DialogHelper.showError(
           context,
           'Pendaftaran Gagal',
-          result.errorMessage ?? 'Gagal membuat akun. Silakan periksa kembali data Anda.',
+          result.errorMessage ??
+              'Gagal membuat akun. Silakan periksa kembali data Anda.',
         );
       }
     } catch (e) {
       if (mounted) {
-        DialogHelper.showError(context, 'Terjadi Kesalahan', 'Gagal memproses pendaftaran: $e');
+        DialogHelper.showError(
+          context,
+          'Terjadi Kesalahan',
+          'Gagal memproses pendaftaran: $e',
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -89,28 +96,16 @@ class _SignupState extends State<Signup> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-          onPressed: busy ? null : () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Daftar Akun Peternak',
-          style: tt.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: cs.onSurface,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: const AppHeader(title: 'Daftar Akun Peternak'),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 12.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -130,11 +125,12 @@ class _SignupState extends State<Signup> {
                     child: Image.asset(
                       'assets/logos/logo.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Icon(
-                        Icons.flutter_dash,
-                        size: 32,
-                        color: cs.primary,
-                      ),
+                      errorBuilder:
+                          (_, __, ___) => Icon(
+                            Icons.flutter_dash,
+                            size: 32,
+                            color: cs.primary,
+                          ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -168,7 +164,11 @@ class _SignupState extends State<Signup> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.person_add_outlined, color: cs.primary, size: 20),
+                              Icon(
+                                Icons.person_add_outlined,
+                                color: cs.primary,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'DATA DIRI & KANDANG',
@@ -191,7 +191,8 @@ class _SignupState extends State<Signup> {
                             prefixIcon: Icons.person_outline_rounded,
                             keyboardType: TextInputType.name,
                             enabled: !busy,
-                            onEditingComplete: () => _focusNodeEmail.requestFocus(),
+                            onEditingComplete:
+                                () => _focusNodeEmail.requestFocus(),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Nama lengkap wajib diisi';
@@ -210,12 +211,15 @@ class _SignupState extends State<Signup> {
                             prefixIcon: Icons.mail_outline_rounded,
                             keyboardType: TextInputType.emailAddress,
                             enabled: !busy,
-                            onEditingComplete: () => _focusNodePhone.requestFocus(),
+                            onEditingComplete:
+                                () => _focusNodePhone.requestFocus(),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Email wajib diisi';
                               }
-                              final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
                               if (!emailRegex.hasMatch(value.trim())) {
                                 return 'Format email tidak valid (contoh: budi@gmail.com)';
                               }
@@ -233,7 +237,8 @@ class _SignupState extends State<Signup> {
                             prefixIcon: Icons.phone_outlined,
                             keyboardType: TextInputType.phone,
                             enabled: !busy,
-                            onEditingComplete: () => _focusNodeAddress.requestFocus(),
+                            onEditingComplete:
+                                () => _focusNodeAddress.requestFocus(),
                           ),
                           const SizedBox(height: 14),
 
@@ -246,7 +251,8 @@ class _SignupState extends State<Signup> {
                             prefixIcon: Icons.location_on_outlined,
                             keyboardType: TextInputType.streetAddress,
                             enabled: !busy,
-                            onEditingComplete: () => _focusNodePassword.requestFocus(),
+                            onEditingComplete:
+                                () => _focusNodePassword.requestFocus(),
                           ),
                           const SizedBox(height: 14),
 
@@ -259,7 +265,8 @@ class _SignupState extends State<Signup> {
                             prefixIcon: Icons.lock_outline_rounded,
                             obscureText: _obscurePassword,
                             enabled: !busy,
-                            onEditingComplete: () => _focusNodeConfirmPassword.requestFocus(),
+                            onEditingComplete:
+                                () => _focusNodeConfirmPassword.requestFocus(),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -268,7 +275,10 @@ class _SignupState extends State<Signup> {
                                 size: 20,
                                 color: cs.onSurfaceVariant,
                               ),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              onPressed:
+                                  () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -300,8 +310,12 @@ class _SignupState extends State<Signup> {
                                 size: 20,
                                 color: cs.onSurfaceVariant,
                               ),
-                              onPressed: () => setState(
-                                  () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                              onPressed:
+                                  () => setState(
+                                    () =>
+                                        _obscureConfirmPassword =
+                                            !_obscureConfirmPassword,
+                                  ),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -319,33 +333,39 @@ class _SignupState extends State<Signup> {
                           SizedBox(
                             width: double.infinity,
                             height: 52,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
                                 backgroundColor: cs.primary,
                                 foregroundColor: cs.onPrimary,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.pillRadius,
+                                  ),
                                 ),
                                 elevation: 0,
                               ),
                               onPressed: busy ? null : _handleSignup,
-                              child: _isLoading
-                                  ? SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+                              child:
+                                  _isLoading
+                                      ? SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                cs.onPrimary,
+                                              ),
+                                        ),
+                                      )
+                                      : Text(
+                                        'Daftar Sekarang',
+                                        style: tt.titleSmall?.copyWith(
+                                          color: cs.onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.3,
+                                        ),
                                       ),
-                                    )
-                                  : Text(
-                                      'Daftar Sekarang',
-                                      style: tt.titleSmall?.copyWith(
-                                        color: cs.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
                             ),
                           ),
                         ],

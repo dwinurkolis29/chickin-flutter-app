@@ -12,8 +12,8 @@ class RecordingController extends ChangeNotifier {
   RecordingController({
     required FirebaseService firebaseService,
     CalculateFCR? calculateFCR,
-  })  : _firebaseService = firebaseService,
-        _calculateFCR = calculateFCR ?? CalculateFCR();
+  }) : _firebaseService = firebaseService,
+       _calculateFCR = calculateFCR ?? CalculateFCR();
 
   String? _activePeriodId;
   bool _isLoadingPeriod = false;
@@ -34,7 +34,10 @@ class RecordingController extends ChangeNotifier {
 
       if (_activePeriodId != null) {
         _initialPopulation = activePeriod!.initialCapacity;
-        _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!, uid);
+        _recordingsStream = _firebaseService.getRecordingsStream(
+          _activePeriodId!,
+          uid,
+        );
         _weightStream = _firebaseService.getWeightStream(_activePeriodId!, uid);
       }
 
@@ -48,7 +51,9 @@ class RecordingController extends ChangeNotifier {
 
   void refreshStreams() {
     if (_activePeriodId != null) {
-      _recordingsStream = _firebaseService.getRecordingsStream(_activePeriodId!);
+      _recordingsStream = _firebaseService.getRecordingsStream(
+        _activePeriodId!,
+      );
       _weightStream = _firebaseService.getWeightStream(_activePeriodId!);
       notifyListeners();
     }
@@ -61,7 +66,11 @@ class RecordingController extends ChangeNotifier {
 
   Future<void> updateRecording(RecordingData recording) async {
     if (_activePeriodId == null) return;
-    await _firebaseService.updateRecording(_activePeriodId!, recording.id, recording);
+    await _firebaseService.updateRecording(
+      _activePeriodId!,
+      recording.id,
+      recording,
+    );
   }
 
   /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.

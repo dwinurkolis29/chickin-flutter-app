@@ -71,7 +71,8 @@ class _CageProfileState extends State<CageProfile> {
             }
 
             final cageData = controller.cageData;
-            if (cageData == null || (cageData.capacity == 0 && cageData.type.isEmpty)) {
+            if (cageData == null ||
+                (cageData.capacity == 0 && cageData.type.isEmpty)) {
               return _buildEmptyState(context, cs, tt);
             }
 
@@ -91,14 +92,17 @@ class _CageProfileState extends State<CageProfile> {
                         width: double.infinity,
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.cardRadius,
+                          ),
                           color: cs.primary.withValues(alpha: 0.08),
-                          image: cageData.imageUrl != null
-                              ? DecorationImage(
-                                  image: NetworkImage(cageData.imageUrl!),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
+                          image:
+                              cageData.imageUrl != null
+                                  ? DecorationImage(
+                                    image: NetworkImage(cageData.imageUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                  : null,
                         ),
                         child: Stack(
                           children: [
@@ -154,14 +158,17 @@ class _CageProfileState extends State<CageProfile> {
                               bottom: 12,
                               right: 12,
                               child: FilledButton.tonalIcon(
-                                onPressed: controller.isUploadingImage
-                                    ? null
-                                    : () => _showImageSourceBottomSheet(
+                                onPressed:
+                                    controller.isUploadingImage
+                                        ? null
+                                        : () => _showImageSourceBottomSheet(
                                           context,
                                           controller,
                                         ),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: cs.surface.withValues(alpha: 0.9),
+                                  backgroundColor: cs.surface.withValues(
+                                    alpha: 0.9,
+                                  ),
                                   foregroundColor: cs.primary,
                                   minimumSize: const Size(0, 36),
                                   padding: const EdgeInsets.symmetric(
@@ -174,9 +181,14 @@ class _CageProfileState extends State<CageProfile> {
                                     ),
                                   ),
                                 ),
-                                icon: const Icon(Icons.camera_alt_rounded, size: 16),
+                                icon: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  size: 16,
+                                ),
                                 label: Text(
-                                  cageData.imageUrl != null ? 'Ganti Foto' : 'Unggah Foto',
+                                  cageData.imageUrl != null
+                                      ? 'Ganti Foto'
+                                      : 'Unggah Foto',
                                   style: tt.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
@@ -197,7 +209,8 @@ class _CageProfileState extends State<CageProfile> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
@@ -205,7 +218,7 @@ class _CageProfileState extends State<CageProfile> {
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: cs.secondaryContainer,
-                                          borderRadius: BorderRadius.circular(8),
+                                          shape: BoxShape.circle,
                                         ),
                                         child: Icon(
                                           Icons.groups_rounded,
@@ -229,7 +242,9 @@ class _CageProfileState extends State<CageProfile> {
                                       vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.success.withValues(alpha: 0.12),
+                                      color: AppColors.success.withValues(
+                                        alpha: 0.12,
+                                      ),
                                       borderRadius: BorderRadius.circular(
                                         AppTheme.pillRadius,
                                       ),
@@ -311,14 +326,20 @@ class _CageProfileState extends State<CageProfile> {
                               _CageSpecTile(
                                 icon: Icons.roofing_rounded,
                                 label: 'Tipe Konstruksi Kandang',
-                                value: cageData.type.isNotEmpty ? cageData.type : 'Belum diisi',
+                                value:
+                                    cageData.type.isNotEmpty
+                                        ? cageData.type
+                                        : 'Belum diisi',
                                 subtitle: 'Model ventilasi dan sirkulasi udara',
                               ),
                               const Divider(height: 20),
                               _CageSpecTile(
                                 icon: Icons.location_on_outlined,
                                 label: 'Alamat / Titik Lokasi Kandang',
-                                value: cageData.location.isNotEmpty ? cageData.location : 'Belum diisi',
+                                value:
+                                    cageData.location.isNotEmpty
+                                        ? cageData.location
+                                        : 'Belum diisi',
                                 subtitle: 'Lokasi operasional peternakan',
                               ),
                             ],
@@ -333,7 +354,8 @@ class _CageProfileState extends State<CageProfile> {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => FormCage(cageData: cageData),
+                              builder:
+                                  (context) => FormCage(cageData: cageData),
                             ),
                           );
                           if (result == true && mounted) {

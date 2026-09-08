@@ -45,11 +45,12 @@ class ReportingController extends ChangeNotifier {
     BuildRealtimeReportUseCase? realtimeUseCase,
     CalculateFinanceSummary? calculateFinance,
     PeriodComparisonCalculator? comparisonCalculator,
-  })  : _firebaseService = firebaseService,
-        _snapshotUseCase = snapshotUseCase ?? BuildReportSnapshotUseCase(),
-        _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase(),
-        _calculateFinance = calculateFinance ?? CalculateFinanceSummary(),
-        _comparisonCalculator = comparisonCalculator ?? PeriodComparisonCalculator();
+  }) : _firebaseService = firebaseService,
+       _snapshotUseCase = snapshotUseCase ?? BuildReportSnapshotUseCase(),
+       _realtimeUseCase = realtimeUseCase ?? BuildRealtimeReportUseCase(),
+       _calculateFinance = calculateFinance ?? CalculateFinanceSummary(),
+       _comparisonCalculator =
+           comparisonCalculator ?? PeriodComparisonCalculator();
 
   // ── Getters ─────────────────────────────────────────────────────────────────
   List<PeriodData> get closedPeriods => _closedPeriods;
@@ -64,9 +65,8 @@ class ReportingController extends ChangeNotifier {
   PeriodDeltaComparison? get comparison => _comparison;
   CageData get cageData => _cageData;
 
-  PeriodData? get selectedPeriod => _closedPeriods
-      .where((p) => p.id == _selectedPeriodId)
-      .firstOrNull;
+  PeriodData? get selectedPeriod =>
+      _closedPeriods.where((p) => p.id == _selectedPeriodId).firstOrNull;
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
@@ -91,30 +91,35 @@ class ReportingController extends ChangeNotifier {
     _cachedFullReport = null;
     notifyListeners();
 
-    _periodSub = _firebaseService.getPeriodsStream(uid).listen(
-      (periods) {
-        // Closed = not active, has endDate, not deleted
-        _closedPeriods = periods
-            .where((p) => !p.isActive && p.endDate != null && !p.isDeleted)
-            .toList()
-          ..sort((a, b) => b.startDate.compareTo(a.startDate));
+    _periodSub = _firebaseService
+        .getPeriodsStream(uid)
+        .listen(
+          (periods) {
+            // Closed = not active, has endDate, not deleted
+            _closedPeriods =
+                periods
+                    .where(
+                      (p) => !p.isActive && p.endDate != null && !p.isDeleted,
+                    )
+                    .toList()
+                  ..sort((a, b) => b.startDate.compareTo(a.startDate));
 
-        _isLoading = false;
+            _isLoading = false;
 
-        // Auto-select first period on first load
-        if (_selectedPeriodId == null && _closedPeriods.isNotEmpty) {
-          _selectedPeriodId = _closedPeriods.first.id;
-          _buildReport();
-        } else {
-          notifyListeners();
-        }
-      },
-      onError: (error) {
-        _isLoading = false;
-        _errorMessage = error.toString();
-        notifyListeners();
-      },
-    );
+            // Auto-select first period on first load
+            if (_selectedPeriodId == null && _closedPeriods.isNotEmpty) {
+              _selectedPeriodId = _closedPeriods.first.id;
+              _buildReport();
+            } else {
+              notifyListeners();
+            }
+          },
+          onError: (error) {
+            _isLoading = false;
+            _errorMessage = error.toString();
+            notifyListeners();
+          },
+        );
   }
 
   // ── Select Period ────────────────────────────────────────────────────────────
@@ -145,7 +150,8 @@ class ReportingController extends ChangeNotifier {
     try {
       _cageData = await _firebaseService.getCage(_currentUid);
 
-      final bool hasValidSnapshot = period.endDate != null &&
+      final bool hasValidSnapshot =
+          period.endDate != null &&
           period.summary != null &&
           period.summary!.finalFCR > 0;
 
@@ -219,6 +225,7 @@ class ReportingController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   // ── View Recording Detail Flow ────────────────────────────────────────────────
   /// Fetch recordings dari DB lalu panggil [onReady] dengan hasilnya.
   /// Reuses cache yang sama dengan export flow — tidak double fetch jika sudah ada.

@@ -41,9 +41,7 @@ class PdfPreviewPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const AppHeader(
-        title: 'Pratinjau Laporan PDF',
-      ),
+      appBar: const AppHeader(title: 'Pratinjau Laporan PDF'),
       body: SafeArea(
         child: PdfPreview(
           build: (format) => _generatePdf(),
@@ -53,9 +51,7 @@ class PdfPreviewPage extends StatelessWidget {
           allowSharing: true,
           canDebug: false,
           pdfFileName: sanitizedFileName,
-          loadingWidget: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          loadingWidget: const Center(child: CircularProgressIndicator()),
           actions: const [],
         ),
       ),

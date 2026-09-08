@@ -22,35 +22,38 @@ class PeriodController extends ChangeNotifier {
     required FirebaseService firebaseService,
     SummaryCalculator? summaryCalculator,
     InsightGenerator? insightGenerator,
-  })  : _firebaseService = firebaseService,
-        _summaryCalculator = summaryCalculator ?? SummaryCalculator(),
-        _insightGenerator = insightGenerator ?? InsightGenerator();
+  }) : _firebaseService = firebaseService,
+       _summaryCalculator = summaryCalculator ?? SummaryCalculator(),
+       _insightGenerator = insightGenerator ?? InsightGenerator();
 
   List<PeriodData> get periods => _periods;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
   void _loadPeriods(String uid) {
-    _periodSubscription?.cancel(); // Cancel sebelum buat yang baru — hindari leak
+    _periodSubscription
+        ?.cancel(); // Cancel sebelum buat yang baru — hindari leak
     _periodSubscription = null;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _periodSubscription = _firebaseService.getPeriodsStream(uid).listen(
+      _periodSubscription = _firebaseService
+          .getPeriodsStream(uid)
+          .listen(
             (data) {
-          _periods = data.where((p) => !p.isDeleted).toList();
-          _isLoading = false;
-          _errorMessage = null;
-          notifyListeners();
-        },
-        onError: (error) {
-          _isLoading = false;
-          _errorMessage = error.toString();
-          notifyListeners();
-        },
-      );
+              _periods = data.where((p) => !p.isDeleted).toList();
+              _isLoading = false;
+              _errorMessage = null;
+              notifyListeners();
+            },
+            onError: (error) {
+              _isLoading = false;
+              _errorMessage = error.toString();
+              notifyListeners();
+            },
+          );
     } catch (e) {
       _isLoading = false;
       _errorMessage = e.toString();
@@ -110,7 +113,7 @@ class PeriodController extends ChangeNotifier {
   /// Clears endDate on reactivation so period appears as running again.
   Future<void> activatePeriod(String periodId) async {
     final period = _periods.firstWhere(
-          (p) => p.id == periodId,
+      (p) => p.id == periodId,
       orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
@@ -120,7 +123,9 @@ class PeriodController extends ChangeNotifier {
 
     final hasActive = _periods.any((p) => p.isActive);
     if (hasActive) {
-      throw Exception('Tidak dapat mengaktifkan: Ada periode lain yang sedang berjalan. Silakan tutup panen periode aktif terlebih dahulu.');
+      throw Exception(
+        'Tidak dapat mengaktifkan: Ada periode lain yang sedang berjalan. Silakan tutup panen periode aktif terlebih dahulu.',
+      );
     }
 
     // Clear endDate so it no longer appears as closed
@@ -144,16 +149,19 @@ class PeriodController extends ChangeNotifier {
     );
 
     if (!period.isActive) {
-      throw Exception('Tidak dapat mencatat panen: Periode tidak sedang aktif.');
+      throw Exception(
+        'Tidak dapat mencatat panen: Periode tidak sedang aktif.',
+      );
     }
 
     final recordings = await _firebaseService.getRecordingsOnce(periodId);
     final totalMortality = recordings.fold(0, (sum, r) => sum + r.mortality);
     final existingPartialChicks =
         period.summary?.totalPartialHarvestChicks ?? 0;
-    final remainingLiveChicks =
-        (period.initialCapacity - totalMortality - existingPartialChicks)
-            .clamp(0, period.initialCapacity);
+    final remainingLiveChicks = (period.initialCapacity -
+            totalMortality -
+            existingPartialChicks)
+        .clamp(0, period.initialCapacity);
 
     if (harvest.chicks > remainingLiveChicks) {
       throw Exception(
@@ -161,8 +169,9 @@ class PeriodController extends ChangeNotifier {
       );
     }
 
-    final currentHarvests =
-        List<HarvestRecord>.from(period.summary?.harvests ?? const []);
+    final currentHarvests = List<HarvestRecord>.from(
+      period.summary?.harvests ?? const [],
+    );
     currentHarvests.add(harvest);
 
     final updatedSummary = (period.summary ?? const PeriodSummary()).copyWith(
@@ -218,8 +227,10 @@ class PeriodController extends ChangeNotifier {
       harvestedWeightKg: harvestedWeightKg,
       harvests: period.summary?.harvests,
     );
-    final insights =
-        _insightGenerator.execute(snapshot, period.initialCapacity);
+    final insights = _insightGenerator.execute(
+      snapshot,
+      period.initialCapacity,
+    );
 
     // Susun PeriodSummary dari snapshot
     final summary = PeriodSummary(
@@ -251,7 +262,7 @@ class PeriodController extends ChangeNotifier {
   /// without recordings can be deleted.
   Future<void> deletePeriod(String periodId) async {
     final period = _periods.firstWhere(
-          (p) => p.id == periodId,
+      (p) => p.id == periodId,
       orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
@@ -259,10 +270,14 @@ class PeriodController extends ChangeNotifier {
 
     if (!isDraft) {
       final recordingsStream = _firebaseService.getRecordingsStream(periodId);
-      final hasRecordings = await recordingsStream.first.then((list) => list.isNotEmpty);
+      final hasRecordings = await recordingsStream.first.then(
+        (list) => list.isNotEmpty,
+      );
 
       if (hasRecordings) {
-        throw Exception('Tidak dapat menghapus periode: Periode sudah memiliki rekaman harian.');
+        throw Exception(
+          'Tidak dapat menghapus periode: Periode sudah memiliki rekaman harian.',
+        );
       }
     }
 
@@ -276,20 +291,23 @@ class PeriodController extends ChangeNotifier {
 
   /// Update Period Details: Diizinkan untuk periode draft atau periode aktif (sebelum ditutup panen).
   /// Periode yang sudah selesai panen (endDate != null) terkunci demi integritas laporan.
-  Future<void> updatePeriodDetails(String periodId, PeriodData updatedData) async {
+  Future<void> updatePeriodDetails(
+    String periodId,
+    PeriodData updatedData,
+  ) async {
     final period = _periods.firstWhere(
-          (p) => p.id == periodId,
-          orElse: () => throw Exception('Periode tidak ditemukan'),
+      (p) => p.id == periodId,
+      orElse: () => throw Exception('Periode tidak ditemukan'),
     );
 
     final isClosed = !period.isActive && period.endDate != null;
     if (isClosed) {
-      throw Exception('Tidak dapat mengubah data: Periode ini sudah selesai panen.');
+      throw Exception(
+        'Tidak dapat mengubah data: Periode ini sudah selesai panen.',
+      );
     }
 
-    final newPeriodData = updatedData.copyWith(
-      isActive: period.isActive,
-    );
+    final newPeriodData = updatedData.copyWith(isActive: period.isActive);
 
     await _firebaseService.updatePeriod(periodId, newPeriodData);
   }

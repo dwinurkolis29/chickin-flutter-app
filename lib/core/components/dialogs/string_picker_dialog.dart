@@ -67,23 +67,29 @@ class StringPickerDialog extends StatelessWidget {
         child: ListView.separated(
           shrinkWrap: true,
           itemCount: options.length,
-          separatorBuilder: (_, __) => Divider(
-            height: 1,
-            color: cs.outlineVariant.withValues(alpha: 0.3),
-          ),
+          separatorBuilder:
+              (_, __) => Divider(
+                height: 1,
+                color: cs.outlineVariant.withValues(alpha: 0.3),
+              ),
           itemBuilder: (context, index) {
             final option = options[index];
             final isSelected = option == selectedOption;
 
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 2,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
               ),
               selected: isSelected,
               selectedTileColor: cs.secondaryContainer.withValues(alpha: 0.5),
               leading: Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
                 color: isSelected ? cs.primary : cs.outline,
               ),
               title: Text(

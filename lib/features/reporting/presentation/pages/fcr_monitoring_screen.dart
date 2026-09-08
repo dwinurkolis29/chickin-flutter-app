@@ -31,9 +31,7 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppHeader(
-        title: 'Monitoring FCR',
-      ),
+      appBar: const AppHeader(title: 'Monitoring FCR'),
       body: SafeArea(
         bottom: false,
         child: Consumer<HomeController>(
@@ -46,12 +44,14 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
               return AppEmptyState(
                 icon: Icons.calendar_today_outlined,
                 message: 'Tidak Ada Periode Aktif',
-                subtitle: 'Buat atau pilih periode pemeliharaan terlebih dahulu untuk mulai memantau efisiensi pakan (FCR).',
+                subtitle:
+                    'Buat atau pilih periode pemeliharaan terlebih dahulu untuk mulai memantau efisiensi pakan (FCR).',
                 actionLabel: 'Mulai Periode Baru',
-                onAction: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FormPeriod()),
-                ),
+                onAction:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FormPeriod()),
+                    ),
               );
             }
 
@@ -59,7 +59,8 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
               stream: controller.recordingsStream,
               initialData: controller.cachedRecordings,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
                   return const TableSkeleton();
                 }
 
@@ -76,7 +77,8 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
                   return AppEmptyState(
                     icon: Icons.analytics_outlined,
                     message: 'Belum Ada Data Recording',
-                    subtitle: 'Tambahkan data konsumsi pakan dan bobot harian untuk melihat kalkulasi nilai FCR.',
+                    subtitle:
+                        'Tambahkan data konsumsi pakan dan bobot harian untuk melihat kalkulasi nilai FCR.',
                     actionLabel: 'Kembali ke Dashboard',
                     actionIcon: Icons.arrow_back_rounded,
                     onAction: () => Navigator.pop(context),
@@ -86,17 +88,29 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
                 final weeklyFcrList = controller.calculateWeeklyFCR(recordings);
                 final dailyFcrList = controller.calculateDailyFCR(recordings);
 
-                final latestFcr = dailyFcrList.isNotEmpty ? dailyFcrList.last.fcr : 0.0;
-                final latestAge = recordings.isNotEmpty ? recordings.last.day : 0;
-                final totalFeedKg = dailyFcrList.isNotEmpty ? dailyFcrList.last.cumulativeFeedKg : 0.0;
-                final totalBiomassKg = dailyFcrList.isNotEmpty ? dailyFcrList.last.totalBiomassKg : 0.0;
-                final remainingChickens = dailyFcrList.isNotEmpty ? dailyFcrList.last.sisaAyam : 0;
+                final latestFcr =
+                    dailyFcrList.isNotEmpty ? dailyFcrList.last.fcr : 0.0;
+                final latestAge =
+                    recordings.isNotEmpty ? recordings.last.day : 0;
+                final totalFeedKg =
+                    dailyFcrList.isNotEmpty
+                        ? dailyFcrList.last.cumulativeFeedKg
+                        : 0.0;
+                final totalBiomassKg =
+                    dailyFcrList.isNotEmpty
+                        ? dailyFcrList.last.totalBiomassKg
+                        : 0.0;
+                final remainingChickens =
+                    dailyFcrList.isNotEmpty ? dailyFcrList.last.sisaAyam : 0;
 
                 return Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 720),
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -108,7 +122,8 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
                             totalFeedKg: totalFeedKg,
                             totalBiomassKg: totalBiomassKg,
                             remainingChickens: remainingChickens,
-                            periodName: controller.activePeriodName ?? 'Periode Aktif',
+                            periodName:
+                                controller.activePeriodName ?? 'Periode Aktif',
                           ),
                           const SizedBox(height: 16),
 
@@ -128,24 +143,33 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
                           FilledButton.icon(
                             style: FilledButton.styleFrom(
                               minimumSize: const Size.fromHeight(50),
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.pillRadius,
+                                ),
                               ),
                             ),
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const QuickCalculatorScreen(initialIndex: 0),
+                                  builder:
+                                      (_) => const QuickCalculatorScreen(
+                                        initialIndex: 0,
+                                      ),
                                 ),
                               );
                             },
                             icon: const Icon(Icons.calculate_outlined),
                             label: Text(
                               'Kalkulator Cepat (FCR)',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelLarge?.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -222,7 +246,10 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -301,7 +328,11 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline_rounded, size: 16, color: statusColor),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: statusColor,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -427,14 +458,15 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: _selectedTab == 0 ? cs.primary : Colors.transparent,
+                  color: _selectedTab == 0 ? cs.primary : AppColors.transparent,
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '1. FCR Harian',
                   style: tt.labelMedium?.copyWith(
-                    color: _selectedTab == 0 ? cs.onPrimary : cs.onSurfaceVariant,
+                    color:
+                        _selectedTab == 0 ? cs.onPrimary : cs.onSurfaceVariant,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -448,14 +480,15 @@ class _FCRMonitoringScreenState extends State<FCRMonitoringScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: _selectedTab == 1 ? cs.primary : Colors.transparent,
+                  color: _selectedTab == 1 ? cs.primary : AppColors.transparent,
                   borderRadius: BorderRadius.circular(AppTheme.pillRadius),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '2. FCR Mingguan',
                   style: tt.labelMedium?.copyWith(
-                    color: _selectedTab == 1 ? cs.onPrimary : cs.onSurfaceVariant,
+                    color:
+                        _selectedTab == 1 ? cs.onPrimary : cs.onSurfaceVariant,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -607,21 +640,29 @@ class _DailyFCRCard extends StatelessWidget {
     final fmt = NumberFormat.decimalPattern('id_ID');
     final dateFmt = DateFormat('d MMM yyyy', 'id_ID');
 
-    final status = data.fcr <= 1.80
-        ? _FCRStatusType.good
-        : (data.fcr <= 2.20 ? _FCRStatusType.warn : _FCRStatusType.bad);
+    final status =
+        data.fcr <= 1.80
+            ? _FCRStatusType.good
+            : (data.fcr <= 2.20 ? _FCRStatusType.warn : _FCRStatusType.bad);
 
-    final statusColor = status == _FCRStatusType.good
-        ? AppColors.fcrGoodText
-        : (status == _FCRStatusType.warn ? AppColors.fcrWarnText : AppColors.fcrBadText);
+    final statusColor =
+        status == _FCRStatusType.good
+            ? AppColors.fcrGoodText
+            : (status == _FCRStatusType.warn
+                ? AppColors.fcrWarnText
+                : AppColors.fcrBadText);
 
-    final statusBg = status == _FCRStatusType.good
-        ? AppColors.fcrGoodBg
-        : (status == _FCRStatusType.warn ? AppColors.fcrWarnBg : AppColors.fcrBadBg);
+    final statusBg =
+        status == _FCRStatusType.good
+            ? AppColors.fcrGoodBg
+            : (status == _FCRStatusType.warn
+                ? AppColors.fcrWarnBg
+                : AppColors.fcrBadBg);
 
-    final statusLabel = status == _FCRStatusType.good
-        ? 'Efisien'
-        : (status == _FCRStatusType.warn ? 'Cukup' : 'Boros');
+    final statusLabel =
+        status == _FCRStatusType.good
+            ? 'Efisien'
+            : (status == _FCRStatusType.warn ? 'Cukup' : 'Boros');
 
     final dateStr = dateFmt.format(data.date);
 
@@ -657,7 +698,10 @@ class _DailyFCRCard extends StatelessWidget {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: statusBg,
                       borderRadius: BorderRadius.circular(AppTheme.pillRadius),
@@ -687,7 +731,8 @@ class _DailyFCRCard extends StatelessWidget {
                       child: _buildMiniMetric(
                         label: 'Pakan Hari Ini',
                         value: '${fmt.format(data.dailyFeedKg)} kg',
-                        sub: '${(data.dailyFeedKg / 50).toStringAsFixed(1)} sak',
+                        sub:
+                            '${(data.dailyFeedKg / 50).toStringAsFixed(1)} sak',
                         tt: tt,
                         cs: cs,
                       ),

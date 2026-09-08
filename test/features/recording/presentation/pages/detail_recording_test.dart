@@ -17,10 +17,9 @@ void main() {
     bool readOnly = false,
     RecordingController? controller,
   }) {
-    final defaultController = controller ??
-        RecordingController(
-          firebaseService: _FakeFirebaseService(),
-        );
+    final defaultController =
+        controller ??
+        RecordingController(firebaseService: _FakeFirebaseService());
 
     return MultiProvider(
       providers: [
@@ -30,16 +29,15 @@ void main() {
       ],
       child: MaterialApp(
         theme: AppTheme.build(AppThemeOption.light),
-        home: DetailRecording(
-          recordings: recordings,
-          readOnly: readOnly,
-        ),
+        home: DetailRecording(recordings: recordings, readOnly: readOnly),
       ),
     );
   }
 
   group('DetailRecording Widget Tests', () {
-    testWidgets('menampilkan AppEmptyState jika list recording kosong', (tester) async {
+    testWidgets('menampilkan AppEmptyState jika list recording kosong', (
+      tester,
+    ) async {
       await tester.pumpWidget(createWidgetUnderTest(recordings: []));
       await tester.pump();
 
@@ -47,56 +45,63 @@ void main() {
       expect(find.text('Belum Ada Data Recording'), findsOneWidget);
     });
 
-    testWidgets('menampilkan daftar kartu recording harian dengan metrik yang jelas', (tester) async {
-      final sampleRecordings = [
-        RecordingData(
-          id: 'rec_1',
-          day: 1,
-          avgWeightGram: 45,
-          feedSack: 1,
-          mortality: 0,
-          createdAt: DateTime(2026, 1, 1),
-        ),
-        RecordingData(
-          id: 'rec_2',
-          day: 8,
-          avgWeightGram: 220,
-          feedSack: 2,
-          mortality: 3,
-          createdAt: DateTime(2026, 1, 8),
-        ),
-      ];
+    testWidgets(
+      'menampilkan daftar kartu recording harian dengan metrik yang jelas',
+      (tester) async {
+        final sampleRecordings = [
+          RecordingData(
+            id: 'rec_1',
+            day: 1,
+            avgWeightGram: 45,
+            feedSack: 1,
+            mortality: 0,
+            createdAt: DateTime(2026, 1, 1),
+          ),
+          RecordingData(
+            id: 'rec_2',
+            day: 8,
+            avgWeightGram: 220,
+            feedSack: 2,
+            mortality: 3,
+            createdAt: DateTime(2026, 1, 8),
+          ),
+        ];
 
-      await tester.pumpWidget(createWidgetUnderTest(recordings: sampleRecordings));
-      await tester.pump();
+        await tester.pumpWidget(
+          createWidgetUnderTest(recordings: sampleRecordings),
+        );
+        await tester.pump();
 
-      // Header AppBar
-      expect(find.text('Semua Recording'), findsOneWidget);
+        // Header AppBar
+        expect(find.text('Semua Recording'), findsOneWidget);
 
-      // Search bar & Filter Chips
-      expect(find.text('Semua'), findsOneWidget);
-      expect(find.text('Minggu 1 (H1-7)'), findsOneWidget);
-      expect(find.text('Minggu 2 (H8-14)'), findsOneWidget);
+        // Search bar & Filter Chips
+        expect(find.text('Semua'), findsOneWidget);
+        expect(find.text('Minggu 1 (H1-7)'), findsOneWidget);
+        expect(find.text('Minggu 2 (H8-14)'), findsOneWidget);
 
-      // Kartu Hari 1 & Hari 8
-      expect(find.text('Hari 1'), findsOneWidget);
-      expect(find.text('Hari 8'), findsOneWidget);
-      expect(find.text('Minggu ke-1'), findsOneWidget);
-      expect(find.text('Minggu ke-2'), findsOneWidget);
+        // Kartu Hari 1 & Hari 8
+        expect(find.text('Hari 1'), findsOneWidget);
+        expect(find.text('Hari 8'), findsOneWidget);
+        expect(find.text('Minggu ke-1'), findsOneWidget);
+        expect(find.text('Minggu ke-2'), findsOneWidget);
 
-      // Metrik
-      expect(find.text('45 g'), findsOneWidget);
-      expect(find.text('220 g'), findsOneWidget);
-      expect(find.text('1 sak'), findsOneWidget);
-      expect(find.text('2 sak'), findsOneWidget);
-      expect(find.text('0 ekor'), findsOneWidget);
-      expect(find.text('3 ekor'), findsOneWidget);
+        // Metrik
+        expect(find.text('45 g'), findsOneWidget);
+        expect(find.text('220 g'), findsOneWidget);
+        expect(find.text('1 sak'), findsOneWidget);
+        expect(find.text('2 sak'), findsOneWidget);
+        expect(find.text('0 ekor'), findsOneWidget);
+        expect(find.text('3 ekor'), findsOneWidget);
 
-      // Tombol Edit
-      expect(find.text('Edit'), findsNWidgets(2));
-    });
+        // Tombol Edit
+        expect(find.text('Edit'), findsNWidgets(2));
+      },
+    );
 
-    testWidgets('dapat memfilter data berdasarkan search umur/hari', (tester) async {
+    testWidgets('dapat memfilter data berdasarkan search umur/hari', (
+      tester,
+    ) async {
       final sampleRecordings = [
         RecordingData(
           id: 'rec_1',
@@ -116,7 +121,9 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(createWidgetUnderTest(recordings: sampleRecordings));
+      await tester.pumpWidget(
+        createWidgetUnderTest(recordings: sampleRecordings),
+      );
       await tester.pump();
 
       expect(find.text('Hari 1'), findsOneWidget);
@@ -131,7 +138,9 @@ void main() {
       expect(find.text('Menampilkan 1 dari 2 hari'), findsOneWidget);
     });
 
-    testWidgets('dapat memfilter data berdasarkan filter chip Minggu', (tester) async {
+    testWidgets('dapat memfilter data berdasarkan filter chip Minggu', (
+      tester,
+    ) async {
       final sampleRecordings = [
         RecordingData(
           id: 'rec_1',
@@ -151,7 +160,9 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(createWidgetUnderTest(recordings: sampleRecordings));
+      await tester.pumpWidget(
+        createWidgetUnderTest(recordings: sampleRecordings),
+      );
       await tester.pump();
 
       // Pilih chip 'Minggu 1 (H1-7)'
@@ -161,17 +172,19 @@ void main() {
       expect(find.text('Hari 3'), findsOneWidget);
       expect(find.text('Hari 10'), findsNothing);
 
-      // Pilih chip 'Ada Kematian ⚠️'
-      await tester.ensureVisible(find.text('Ada Kematian ⚠️'));
+      // Pilih chip 'Ada Kematian'
+      await tester.ensureVisible(find.text('Ada Kematian'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ada Kematian ⚠️'));
+      await tester.tap(find.text('Ada Kematian'));
       await tester.pump();
 
       expect(find.text('Hari 10'), findsOneWidget);
       expect(find.text('Hari 3'), findsNothing);
     });
 
-    testWidgets('dapat membuka bottom sheet edit saat tombol Edit ditekan', (tester) async {
+    testWidgets('dapat membuka bottom sheet edit saat tombol Edit ditekan', (
+      tester,
+    ) async {
       final sampleRecordings = [
         RecordingData(
           id: 'rec_1',
@@ -183,7 +196,9 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(createWidgetUnderTest(recordings: sampleRecordings));
+      await tester.pumpWidget(
+        createWidgetUnderTest(recordings: sampleRecordings),
+      );
       await tester.pump();
 
       // Tap tombol Edit
@@ -197,7 +212,9 @@ void main() {
       expect(find.text('Pakan Terpakai (Sak)'), findsOneWidget);
     });
 
-    testWidgets('tidak menampilkan tombol edit saat readOnly true', (tester) async {
+    testWidgets('tidak menampilkan tombol edit saat readOnly true', (
+      tester,
+    ) async {
       final sampleRecordings = [
         RecordingData(
           id: 'rec_1',
@@ -209,10 +226,9 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        recordings: sampleRecordings,
-        readOnly: true,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(recordings: sampleRecordings, readOnly: true),
+      );
       await tester.pump();
 
       expect(find.text('Laporan Recording'), findsOneWidget);
@@ -220,16 +236,18 @@ void main() {
       expect(find.text('Tambah Recording'), findsNothing);
     });
 
-    testWidgets('menampilkan floating action button Tambah Recording saat readOnly false', (tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        recordings: [],
-        readOnly: false,
-      ));
-      await tester.pump();
+    testWidgets(
+      'menampilkan floating action button Tambah Recording saat readOnly false',
+      (tester) async {
+        await tester.pumpWidget(
+          createWidgetUnderTest(recordings: [], readOnly: false),
+        );
+        await tester.pump();
 
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.text('Tambah Recording'), findsOneWidget);
-      expect(find.byIcon(Icons.add_rounded), findsOneWidget);
-    });
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.text('Tambah Recording'), findsOneWidget);
+        expect(find.byIcon(Icons.add_rounded), findsOneWidget);
+      },
+    );
   });
 }

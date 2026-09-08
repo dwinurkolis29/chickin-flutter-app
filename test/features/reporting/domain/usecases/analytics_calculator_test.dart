@@ -77,7 +77,10 @@ void main() {
 
       test('mortalityRate + survivalRate ≈ 100%', () {
         final result = calculator.execute(snap, 1000);
-        expect(result.mortalityRate + result.survivalRate, closeTo(100.0, 0.01));
+        expect(
+          result.mortalityRate + result.survivalRate,
+          closeTo(100.0, 0.01),
+        );
       });
     });
 
@@ -104,7 +107,11 @@ void main() {
 
     group('zero finalPopulation — semua mati', () {
       test('finalPopulation = 0 → feedPerBird = 0.0', () {
-        final s = snapshot(totalFeedKg: 3000.0, finalPopulation: 0, totalMortality: 500);
+        final s = snapshot(
+          totalFeedKg: 3000.0,
+          finalPopulation: 0,
+          totalMortality: 500,
+        );
         final result = calculator.execute(s, 500);
         expect(result.feedPerBird, 0.0);
       });
@@ -133,7 +140,11 @@ void main() {
 
     group('boundary — 1 ekor sisa', () {
       test('1 ekor sisa dari 1000 — feedPerBird = totalFeedKg', () {
-        final s = snapshot(totalFeedKg: 5000.0, finalPopulation: 1, totalMortality: 999);
+        final s = snapshot(
+          totalFeedKg: 5000.0,
+          finalPopulation: 1,
+          totalMortality: 999,
+        );
         final result = calculator.execute(s, 1000);
         expect(result.feedPerBird, 5000.0);
         expect(result.mortalityRate, closeTo(99.9, 0.01));

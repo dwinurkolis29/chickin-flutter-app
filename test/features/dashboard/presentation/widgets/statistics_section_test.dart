@@ -58,14 +58,12 @@ void main() {
   }
 
   group('StatisticsSection Widget Tests', () {
-    testWidgets('menampilkan nilai Umur Ayam dan FCR dengan benar', (tester) async {
+    testWidgets('menampilkan nilai Umur Ayam dan FCR dengan benar', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createWidgetUnderTest(
-          const StatisticsSection(
-            fcr: 1.45,
-            umur: 21,
-            weightStream: null,
-          ),
+          const StatisticsSection(fcr: 1.45, umur: 21, weightStream: null),
         ),
       );
       await tester.pumpAndSettle();
@@ -77,14 +75,12 @@ void main() {
       expect(find.text('FCR'), findsOneWidget);
     });
 
-    testWidgets('mengetuk kartu FCR membuka FCRMonitoringScreen', (tester) async {
+    testWidgets('mengetuk kartu FCR membuka FCRMonitoringScreen', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createWidgetUnderTest(
-          const StatisticsSection(
-            fcr: 1.45,
-            umur: 21,
-            weightStream: null,
-          ),
+          const StatisticsSection(fcr: 1.45, umur: 21, weightStream: null),
         ),
       );
       await tester.pumpAndSettle();
@@ -95,22 +91,21 @@ void main() {
       expect(find.byType(FCRMonitoringScreen), findsOneWidget);
     });
 
-    testWidgets('kartu Umur Ayam tidak membuka layar baru saat diketuk (non-navigable)', (tester) async {
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          const StatisticsSection(
-            fcr: 1.45,
-            umur: 21,
-            weightStream: null,
+    testWidgets(
+      'kartu Umur Ayam tidak membuka layar baru saat diketuk (non-navigable)',
+      (tester) async {
+        await tester.pumpWidget(
+          createWidgetUnderTest(
+            const StatisticsSection(fcr: 1.45, umur: 21, weightStream: null),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Umur\nAyam'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Umur\nAyam'));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(ChickenWeightScreen), findsNothing);
-    });
+        expect(find.byType(ChickenWeightScreen), findsNothing);
+      },
+    );
   });
 }

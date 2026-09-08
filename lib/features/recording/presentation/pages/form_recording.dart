@@ -40,7 +40,9 @@ class _FormRecordingState extends State<FormRecording> {
 
   final TextEditingController _controllerUmur = TextEditingController();
   final TextEditingController _controllerHabisPakan = TextEditingController();
-  final TextEditingController _controllerMatiAyam = TextEditingController(text: '0');
+  final TextEditingController _controllerMatiAyam = TextEditingController(
+    text: '0',
+  );
   final TextEditingController _controllerBeratAyam = TextEditingController();
 
   late final FirebaseService _firebaseService;
@@ -96,7 +98,9 @@ class _FormRecordingState extends State<FormRecording> {
             // Kg -> Sak (50 Kg = 1 Sak)
             final sacks = val / 50.0;
             _controllerHabisPakan.text =
-                sacks % 1 == 0 ? sacks.toInt().toString() : sacks.toStringAsFixed(2);
+                sacks % 1 == 0
+                    ? sacks.toInt().toString()
+                    : sacks.toStringAsFixed(2);
           }
         }
       }
@@ -115,7 +119,12 @@ class _FormRecordingState extends State<FormRecording> {
             // Gram -> Kg
             final kg = val / 1000.0;
             _controllerBeratAyam.text =
-                kg % 1 == 0 ? kg.toInt().toString() : kg.toStringAsFixed(3).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+                kg % 1 == 0
+                    ? kg.toInt().toString()
+                    : kg
+                        .toStringAsFixed(3)
+                        .replaceAll(RegExp(r'0+$'), '')
+                        .replaceAll(RegExp(r'\.$'), '');
           } else {
             // Kg -> Gram
             final grams = (val * 1000).round();
@@ -192,8 +201,9 @@ class _FormRecordingState extends State<FormRecording> {
       final inputDay = int.tryParse(_controllerUmur.text.trim()) ?? 0;
 
       // Validasi duplikat hari
-      final existingRecordings =
-          await _firebaseService.getRecordingsOnce(activePeriod.id);
+      final existingRecordings = await _firebaseService.getRecordingsOnce(
+        activePeriod.id,
+      );
       final isDuplicate = existingRecordings.any((r) => r.day == inputDay);
 
       if (isDuplicate) {
@@ -203,8 +213,8 @@ class _FormRecordingState extends State<FormRecording> {
             context,
             'Hari Sudah Ada',
             'Recording untuk hari ke-$inputDay sudah pernah diinput. '
-            'Setiap hari hanya boleh ada satu catatan. '
-            'Gunakan tombol Edit pada menu Semua Recording jika ingin mengubah data yang sudah ada.',
+                'Setiap hari hanya boleh ada satu catatan. '
+                'Gunakan tombol Edit pada menu Semua Recording jika ingin mengubah data yang sudah ada.',
           );
         }
         return;
@@ -230,11 +240,7 @@ class _FormRecordingState extends State<FormRecording> {
         if (anomaly.isBlocking) {
           if (mounted) {
             setState(() => _isLoading = false);
-            DialogHelper.showError(
-              context,
-              anomaly.title,
-              anomaly.message,
-            );
+            DialogHelper.showError(context, anomaly.title, anomaly.message);
           }
           return;
         }
@@ -467,9 +473,10 @@ class _FormRecordingState extends State<FormRecording> {
         AppTextFormField(
           controller: _controllerHabisPakan,
           focusNode: _focusNodeHabisPakan,
-          keyboardType: _feedUnit == 'Sak'
-              ? TextInputType.number
-              : const TextInputType.numberWithOptions(decimal: true),
+          keyboardType:
+              _feedUnit == 'Sak'
+                  ? TextInputType.number
+                  : const TextInputType.numberWithOptions(decimal: true),
           labelText: 'Habis Pakan ($_feedUnit)',
           hintText: _feedUnit == 'Sak' ? 'Contoh: 3' : 'Contoh: 150',
           prefixIcon: Icons.inventory_2_outlined,
@@ -521,9 +528,10 @@ class _FormRecordingState extends State<FormRecording> {
         AppTextFormField(
           controller: _controllerBeratAyam,
           focusNode: _focusNodeBeratAyam,
-          keyboardType: _weightUnit == 'Gram'
-              ? TextInputType.number
-              : const TextInputType.numberWithOptions(decimal: true),
+          keyboardType:
+              _weightUnit == 'Gram'
+                  ? TextInputType.number
+                  : const TextInputType.numberWithOptions(decimal: true),
           labelText: 'Berat Rata-rata ($_weightUnit)',
           hintText: _weightUnit == 'Gram' ? 'Contoh: 1250' : 'Contoh: 1.25',
           prefixIcon: Icons.scale_outlined,
@@ -533,7 +541,8 @@ class _FormRecordingState extends State<FormRecording> {
             onChanged: _onWeightUnitChanged,
           ),
           onChanged: (_) => setState(() {}),
-          validator: (v) => RecordingValidator.validateWeightInput(v, _weightUnit),
+          validator:
+              (v) => RecordingValidator.validateWeightInput(v, _weightUnit),
         ),
         if (helperText != null) ...[
           const SizedBox(height: 4),
@@ -565,40 +574,47 @@ class _FormRecordingState extends State<FormRecording> {
       padding: const EdgeInsets.only(right: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: units.map((unit) {
-          final isSelected = currentUnit == unit;
-          return GestureDetector(
-            onTap: () => onChanged(unit),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? cs.primary
-                    : cs.surfaceContainerHighest.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.25),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Text(
-                unit,
-                style: tt.labelSmall?.copyWith(
-                  color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 12,
+        children:
+            units.map((unit) {
+              final isSelected = currentUnit == unit;
+              return GestureDetector(
+                onTap: () => onChanged(unit),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? cs.primary
+                            : cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                    boxShadow:
+                        isSelected
+                            ? [
+                              BoxShadow(
+                                color: cs.primary.withValues(alpha: 0.25),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                            : null,
+                  ),
+                  child: Text(
+                    unit,
+                    style: tt.labelSmall?.copyWith(
+                      color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
@@ -607,10 +623,17 @@ class _FormRecordingState extends State<FormRecording> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final day = _controllerUmur.text.trim().isEmpty ? '-' : 'Hari ke-${_controllerUmur.text.trim()}';
-    final mortality = _controllerMatiAyam.text.trim().isEmpty ? '0 Ekor' : '${_controllerMatiAyam.text.trim()} Ekor';
+    final day =
+        _controllerUmur.text.trim().isEmpty
+            ? '-'
+            : 'Hari ke-${_controllerUmur.text.trim()}';
+    final mortality =
+        _controllerMatiAyam.text.trim().isEmpty
+            ? '0 Ekor'
+            : '${_controllerMatiAyam.text.trim()} Ekor';
     final feed = '$_parsedFeedSack Sak (${_parsedFeedSack * 50} kg)';
-    final weight = '$_parsedWeightGram g (${(_parsedWeightGram / 1000).toStringAsFixed(2)} kg)';
+    final weight =
+        '$_parsedWeightGram g (${(_parsedWeightGram / 1000).toStringAsFixed(2)} kg)';
 
     return AppCard(
       child: Padding(
@@ -621,7 +644,11 @@ class _FormRecordingState extends State<FormRecording> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle_outline_rounded, size: 18, color: cs.primary),
+                Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 18,
+                  color: cs.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Data Siap Disimpan (Standar Database)',
@@ -693,7 +720,9 @@ class _FormRecordingState extends State<FormRecording> {
                       label: 'Kematian',
                       value: mortality,
                       icon: Icons.heart_broken_outlined,
-                      isAlert: (int.tryParse(_controllerMatiAyam.text.trim()) ?? 0) > 0,
+                      isAlert:
+                          (int.tryParse(_controllerMatiAyam.text.trim()) ?? 0) >
+                          0,
                     ),
                   ),
                 ],
@@ -721,9 +750,10 @@ class _FormRecordingState extends State<FormRecording> {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: isAlert
-                ? AppColors.warning.withValues(alpha: 0.12)
-                : cs.primary.withValues(alpha: 0.12),
+            color:
+                isAlert
+                    ? AppColors.warning.withValues(alpha: 0.12)
+                    : cs.primary.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -761,8 +791,8 @@ class _FormRecordingState extends State<FormRecording> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
+    return FilledButton(
+      style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
         backgroundColor: cs.primary,
         foregroundColor: cs.onPrimary,
@@ -772,23 +802,24 @@ class _FormRecordingState extends State<FormRecording> {
         elevation: 0,
       ),
       onPressed: _isLoading ? null : _addRecord,
-      child: _isLoading
-          ? SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+      child:
+          _isLoading
+              ? SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(cs.onPrimary),
+                ),
+              )
+              : Text(
+                'Simpan Data Recording',
+                style: tt.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cs.onPrimary,
+                  fontSize: 15,
+                ),
               ),
-            )
-          : Text(
-              'Simpan Data Recording',
-              style: tt.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: cs.onPrimary,
-                fontSize: 15,
-              ),
-            ),
     );
   }
 

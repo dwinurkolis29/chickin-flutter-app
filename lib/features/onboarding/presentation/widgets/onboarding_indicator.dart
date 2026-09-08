@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recording_app/core/theme/app_theme.dart';
 
 class OnboardingIndicator extends StatelessWidget {
   final int count;
@@ -25,10 +26,9 @@ class OnboardingIndicator extends StatelessWidget {
           width: isActive ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isActive
-                ? primaryColor
-                : primaryColor.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(100),
+            color:
+                isActive ? primaryColor : primaryColor.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
           ),
         );
       }),

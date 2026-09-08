@@ -19,12 +19,15 @@ class BuildRealtimeReportUseCase {
   BuildRealtimeReportUseCase({
     SummaryCalculator? summaryCalculator,
     AnalyticsCalculator? analyticsCalculator,
-  })  : _summaryCalculator = summaryCalculator ?? SummaryCalculator(),
-        _analyticsCalculator = analyticsCalculator ?? AnalyticsCalculator();
+  }) : _summaryCalculator = summaryCalculator ?? SummaryCalculator(),
+       _analyticsCalculator = analyticsCalculator ?? AnalyticsCalculator();
 
   PeriodReport execute(PeriodData period, List<RecordingData> recordings) {
     final snapshot = _summaryCalculator.execute(period, recordings);
-    final analytics = _analyticsCalculator.execute(snapshot, period.initialCapacity);
+    final analytics = _analyticsCalculator.execute(
+      snapshot,
+      period.initialCapacity,
+    );
 
     return PeriodReport(
       period: period,
@@ -36,7 +39,8 @@ class BuildRealtimeReportUseCase {
       totalFeedKg: snapshot.totalFeedKg,
       finalAvgWeightGram: snapshot.finalAvgWeightGram,
       totalBiomassKg: snapshot.finalBiomassKg,
-      weightGainKg: (snapshot.finalBiomassKg - period.initialCapacity * period.initialWeight)
+      weightGainKg: (snapshot.finalBiomassKg -
+              period.initialCapacity * period.initialWeight)
           .clamp(0.0, double.infinity),
       fcr: snapshot.finalFCR,
       avgDailyGainGram: snapshot.avgDailyGain,

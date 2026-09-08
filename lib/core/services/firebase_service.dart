@@ -52,7 +52,11 @@ class FirebaseService {
   }
 
   /// Create user document saat signup
-  Future<void> createUserDocument(String uid, UserProfile profile, CageData cage) async {
+  Future<void> createUserDocument(
+    String uid,
+    UserProfile profile,
+    CageData cage,
+  ) async {
     try {
       await _firestore.collection('users').doc(uid).set({
         'profile': profile.toJson(),
@@ -169,13 +173,14 @@ class FirebaseService {
   Future<PeriodData?> getActivePeriod([String? uid]) async {
     try {
       final userId = uid ?? _currentUid;
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('periods')
-          .where('isActive', isEqualTo: true)
-          .limit(1)
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('periods')
+              .where('isActive', isEqualTo: true)
+              .limit(1)
+              .get();
 
       if (snapshot.docs.isEmpty) return null;
 
@@ -196,9 +201,14 @@ class FirebaseService {
           .collection('periods')
           .orderBy('startDate', descending: true)
           .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => PeriodData.fromJson(doc.data(), docId: doc.id))
-              .toList());
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map(
+                      (doc) => PeriodData.fromJson(doc.data(), docId: doc.id),
+                    )
+                    .toList(),
+          );
     } catch (e) {
       throw Exception('Failed to get periods stream: $e');
     }
@@ -208,12 +218,13 @@ class FirebaseService {
   Future<PeriodData?> getPeriod(String periodId, [String? uid]) async {
     try {
       final userId = uid ?? _currentUid;
-      final doc = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('periods')
-          .doc(periodId)
-          .get();
+      final doc =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('periods')
+              .doc(periodId)
+              .get();
 
       if (!doc.exists) return null;
       return PeriodData.fromJson(doc.data(), docId: doc.id);
@@ -223,7 +234,11 @@ class FirebaseService {
   }
 
   /// Close period with summary
-  Future<void> closePeriod(String periodId, PeriodSummary summary, [String? uid]) async {
+  Future<void> closePeriod(
+    String periodId,
+    PeriodSummary summary, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       await _firestore
@@ -232,22 +247,27 @@ class FirebaseService {
           .collection('periods')
           .doc(periodId)
           .update({
-        'isActive': false,
-        'endDate': FieldValue.serverTimestamp(),
-        'summary': summary.toJson(),
-      });
+            'isActive': false,
+            'endDate': FieldValue.serverTimestamp(),
+            'summary': summary.toJson(),
+          });
     } catch (e) {
       throw Exception('Failed to close period: $e');
     }
   }
 
   /// Update period
-  Future<void> updatePeriod(String periodId, PeriodData period, [String? uid]) async {
+  Future<void> updatePeriod(
+    String periodId,
+    PeriodData period, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       final data = period.toJson();
       data.remove('createdAt');
-      data['id'] = FieldValue.delete(); // Delete legacy 'id' field from document body to satisfy security rules
+      data['id'] =
+          FieldValue.delete(); // Delete legacy 'id' field from document body to satisfy security rules
       await _firestore
           .collection('users')
           .doc(userId)
@@ -279,7 +299,11 @@ class FirebaseService {
   // ============================================================================
 
   /// Add recording to specific period
-  Future<void> addRecording(String periodId, RecordingData recording, [String? uid]) async {
+  Future<void> addRecording(
+    String periodId,
+    RecordingData recording, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       await _firestore
@@ -295,7 +319,10 @@ class FirebaseService {
   }
 
   /// Get recordings stream for specific period
-  Stream<List<RecordingData>> getRecordingsStream(String periodId, [String? uid]) {
+  Stream<List<RecordingData>> getRecordingsStream(
+    String periodId, [
+    String? uid,
+  ]) {
     try {
       final userId = uid ?? _currentUid;
       return _firestore
@@ -306,26 +333,36 @@ class FirebaseService {
           .collection('recordings')
           .orderBy('day')
           .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => RecordingData.fromJson(doc.data(), docId: doc.id))
-              .toList());
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map(
+                      (doc) =>
+                          RecordingData.fromJson(doc.data(), docId: doc.id),
+                    )
+                    .toList(),
+          );
     } catch (e) {
       throw Exception('Failed to get recordings stream: $e');
     }
   }
 
   /// One-shot fetch recordings for a period (used at close time, not for UI streaming).
-  Future<List<RecordingData>> getRecordingsOnce(String periodId, [String? uid]) async {
+  Future<List<RecordingData>> getRecordingsOnce(
+    String periodId, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('periods')
-          .doc(periodId)
-          .collection('recordings')
-          .orderBy('day')
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('periods')
+              .doc(periodId)
+              .collection('recordings')
+              .orderBy('day')
+              .get();
       return snapshot.docs
           .map((doc) => RecordingData.fromJson(doc.data(), docId: doc.id))
           .toList();
@@ -333,7 +370,6 @@ class FirebaseService {
       throw Exception('Failed to get recordings: $e');
     }
   }
-
 
   /// Get weight data stream for chart (FlSpot)
   Stream<List<FlSpot>> getWeightStream(String periodId, [String? uid]) {
@@ -347,20 +383,32 @@ class FirebaseService {
           .collection('recordings')
           .orderBy('day')
           .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => RecordingData.fromJson(doc.data(), docId: doc.id))
-              .map((recording) => FlSpot(
-                    recording.day.toDouble(),
-                    recording.avgWeightGram.toDouble(),
-                  ))
-              .toList());
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map(
+                      (doc) =>
+                          RecordingData.fromJson(doc.data(), docId: doc.id),
+                    )
+                    .map(
+                      (recording) => FlSpot(
+                        recording.day.toDouble(),
+                        recording.avgWeightGram.toDouble(),
+                      ),
+                    )
+                    .toList(),
+          );
     } catch (e) {
       throw Exception('Failed to get weight stream: $e');
     }
   }
 
   /// Delete recording
-  Future<void> deleteRecording(String periodId, String recordingId, [String? uid]) async {
+  Future<void> deleteRecording(
+    String periodId,
+    String recordingId, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       await _firestore
@@ -377,11 +425,17 @@ class FirebaseService {
   }
 
   /// Update recording
-  Future<void> updateRecording(String periodId, String recordingId, RecordingData recording, [String? uid]) async {
+  Future<void> updateRecording(
+    String periodId,
+    String recordingId,
+    RecordingData recording, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       final data = recording.toJson();
-      data['id'] = FieldValue.delete(); // Delete legacy 'id' field from document body to satisfy security rules
+      data['id'] =
+          FieldValue.delete(); // Delete legacy 'id' field from document body to satisfy security rules
       await _firestore
           .collection('users')
           .doc(userId)
@@ -400,7 +454,10 @@ class FirebaseService {
   // ============================================================================
 
   /// Create new finance transaction in users/{uid}/periods/{periodId}/transactions
-  Future<String> createFinanceTransaction(FinanceTransaction transaction, [String? uid]) async {
+  Future<String> createFinanceTransaction(
+    FinanceTransaction transaction, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       final docRef = await _firestore
@@ -417,7 +474,10 @@ class FirebaseService {
   }
 
   /// Get finance transactions stream for a period
-  Stream<List<FinanceTransaction>> getFinanceTransactionsStream(String periodId, [String? uid]) {
+  Stream<List<FinanceTransaction>> getFinanceTransactionsStream(
+    String periodId, [
+    String? uid,
+  ]) {
     try {
       final userId = uid ?? _currentUid;
       return _firestore
@@ -428,26 +488,38 @@ class FirebaseService {
           .collection('transactions')
           .orderBy('date', descending: true)
           .snapshots()
-          .map((snapshot) => snapshot.docs
-              .map((doc) => FinanceTransaction.fromJson(doc.data(), docId: doc.id))
-              .toList());
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map(
+                      (doc) => FinanceTransaction.fromJson(
+                        doc.data(),
+                        docId: doc.id,
+                      ),
+                    )
+                    .toList(),
+          );
     } catch (e) {
       throw Exception('Failed to get finance transactions stream: $e');
     }
   }
 
   /// Get finance transactions list for a period
-  Future<List<FinanceTransaction>> getFinanceTransactions(String periodId, [String? uid]) async {
+  Future<List<FinanceTransaction>> getFinanceTransactions(
+    String periodId, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('periods')
-          .doc(periodId)
-          .collection('transactions')
-          .orderBy('date', descending: true)
-          .get();
+      final snapshot =
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('periods')
+              .doc(periodId)
+              .collection('transactions')
+              .orderBy('date', descending: true)
+              .get();
 
       return snapshot.docs
           .map((doc) => FinanceTransaction.fromJson(doc.data(), docId: doc.id))
@@ -458,7 +530,11 @@ class FirebaseService {
   }
 
   /// Delete finance transaction
-  Future<void> deleteFinanceTransaction(String periodId, String transactionId, [String? uid]) async {
+  Future<void> deleteFinanceTransaction(
+    String periodId,
+    String transactionId, [
+    String? uid,
+  ]) async {
     try {
       final userId = uid ?? _currentUid;
       await _firestore
@@ -473,5 +549,27 @@ class FirebaseService {
       throw Exception('Failed to delete finance transaction: $e');
     }
   }
-}
 
+  /// Update existing finance transaction
+  Future<void> updateFinanceTransaction(
+    FinanceTransaction transaction, [
+    String? uid,
+  ]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      if (transaction.id == null || transaction.id!.isEmpty) {
+        throw Exception('Transaction ID is required for update');
+      }
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(transaction.periodId)
+          .collection('transactions')
+          .doc(transaction.id)
+          .update(transaction.toJson());
+    } catch (e) {
+      throw Exception('Failed to update finance transaction: $e');
+    }
+  }
+}

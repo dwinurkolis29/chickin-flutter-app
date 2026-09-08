@@ -10,9 +10,7 @@ void main() {
     return MaterialApp(
       theme: AppTheme.build(AppThemeOption.light),
       home: Scaffold(
-        body: SingleChildScrollView(
-          child: FCRDataCard(fcrData: fcrData),
-        ),
+        body: SingleChildScrollView(child: FCRDataCard(fcrData: fcrData)),
       ),
     );
   }
@@ -20,10 +18,15 @@ void main() {
   group('FCRDataCard Widget Tests', () {
     testWidgets('menampilkan pesan kosong jika fcrData kosong', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest([]));
-      expect(find.text('Belum ada data FCR mingguan untuk ditampilkan.'), findsOneWidget);
+      expect(
+        find.text('Belum ada data FCR mingguan untuk ditampilkan.'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('menampilkan kartu FCR mingguan dan dapat di-expand', (tester) async {
+    testWidgets('menampilkan kartu FCR mingguan dan dapat di-expand', (
+      tester,
+    ) async {
       final sampleFCR = [
         FCRData(
           mingguKe: 1,
@@ -61,41 +64,47 @@ void main() {
       expect(find.text('Total Pakan Dikonsumsi'), findsNWidgets(2));
       expect(find.text('Total Bobot Ayam Hidup'), findsNWidgets(2));
       expect(find.text('Sisa Ayam Hidup'), findsNWidgets(2));
-      expect(find.text('Rumus: Total Pakan (kg) ÷ Total Bobot (kg) = FCR'), findsNWidgets(2));
+      expect(
+        find.text('Rumus: Total Pakan (kg) ÷ Total Bobot (kg) = FCR'),
+        findsNWidgets(2),
+      );
     });
 
-    testWidgets('menampilkan tombol Lihat semua FCR jika showViewAllLink true', (tester) async {
-      bool viewAllCalled = false;
-      final sampleFCR = [
-        FCRData(
-          mingguKe: 1,
-          fcr: 1.65,
-          totalPakan: 500,
-          beratAyam: 303,
-          sisaAyam: 2980,
-        ),
-      ];
+    testWidgets(
+      'menampilkan tombol Lihat semua FCR jika showViewAllLink true',
+      (tester) async {
+        bool viewAllCalled = false;
+        final sampleFCR = [
+          FCRData(
+            mingguKe: 1,
+            fcr: 1.65,
+            totalPakan: 500,
+            beratAyam: 303,
+            sisaAyam: 2980,
+          ),
+        ];
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.build(AppThemeOption.light),
-          home: Scaffold(
-            body: FCRDataCard(
-              fcrData: sampleFCR,
-              showViewAllLink: true,
-              onViewAll: () => viewAllCalled = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.build(AppThemeOption.light),
+            home: Scaffold(
+              body: FCRDataCard(
+                fcrData: sampleFCR,
+                showViewAllLink: true,
+                onViewAll: () => viewAllCalled = true,
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Lihat semua FCR'), findsOneWidget);
+        expect(find.text('Lihat semua FCR'), findsOneWidget);
 
-      await tester.tap(find.text('Lihat semua FCR'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Lihat semua FCR'));
+        await tester.pumpAndSettle();
 
-      expect(viewAllCalled, isTrue);
-    });
+        expect(viewAllCalled, isTrue);
+      },
+    );
   });
 }

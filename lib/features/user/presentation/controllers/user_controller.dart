@@ -21,9 +21,9 @@ class UserController extends ChangeNotifier {
     required FirebaseService firebaseService,
     required StorageService storageService,
     required AuthService authService,
-  })  : _firebaseService = firebaseService,
-        _storageService = storageService,
-        _authService = authService;
+  }) : _firebaseService = firebaseService,
+       _storageService = storageService,
+       _authService = authService;
 
   UserProfile? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
@@ -50,13 +50,15 @@ class UserController extends ChangeNotifier {
       notifyListeners();
 
       // Sinkronisasi FCM device token ke Firestore
-      NotificationService().getFcmToken().then((token) {
-        if (token != null && token.isNotEmpty) {
-          _firebaseService.updateFcmToken(token, user.uid);
-        }
-      }).catchError((_) {});
+      NotificationService()
+          .getFcmToken()
+          .then((token) {
+            if (token != null && token.isNotEmpty) {
+              _firebaseService.updateFcmToken(token, user.uid);
+            }
+          })
+          .catchError((_) {});
     } catch (e) {
-
       _errorMessage = 'Gagal memuat data pengguna: $e';
       _isLoading = false;
       notifyListeners();
@@ -67,7 +69,7 @@ class UserController extends ChangeNotifier {
     try {
       final user = _authService.currentUser;
       if (user == null) return;
-      
+
       final File? imageFile = await ImagePickerHelper.pickImage(source);
       if (imageFile == null) return; // User canceled
 
@@ -87,7 +89,10 @@ class UserController extends ChangeNotifier {
       final pathPrefix = 'users/${user.uid}/profile/avatar';
 
       // Upload and get URL
-      final downloadUrl = await _storageService.uploadImage(croppedFile, pathPrefix);
+      final downloadUrl = await _storageService.uploadImage(
+        croppedFile,
+        pathPrefix,
+      );
 
       // Save to Firestore
       await _firebaseService.updateProfileAvatarUrl(downloadUrl);
@@ -97,8 +102,10 @@ class UserController extends ChangeNotifier {
       _isUploadingAvatar = false;
       notifyListeners();
     } catch (e) {
-
-      final cleanMsg = e.toString().replaceAll('Exception: ', '').replaceAll('Exception', '');
+      final cleanMsg = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('Exception', '');
       _errorMessage = 'Gagal mengunggah foto profil: $cleanMsg';
       _isUploadingAvatar = false;
       notifyListeners();

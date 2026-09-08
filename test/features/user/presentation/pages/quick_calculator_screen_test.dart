@@ -13,7 +13,9 @@ void main() {
   }
 
   group('QuickCalculatorScreen Widget Tests', () {
-    testWidgets('menampilkan header, tab bar, dan kalkulator FCR default', (tester) async {
+    testWidgets('menampilkan header, tab bar, dan kalkulator FCR default', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -32,7 +34,9 @@ void main() {
       expect(find.text('Efisien (Standar Baik)'), findsOneWidget);
     });
 
-    testWidgets('menghitung simulasi FCR secara real-time saat nilai diubah', (tester) async {
+    testWidgets('menghitung simulasi FCR secara real-time saat nilai diubah', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -50,7 +54,9 @@ void main() {
       expect(find.text('Sangat Efisien'), findsOneWidget);
     });
 
-    testWidgets('mendukung input pakan dalam satuan Sak (50 Kg) dan Kg', (tester) async {
+    testWidgets('mendukung input pakan dalam satuan Sak (50 Kg) dan Kg', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -87,7 +93,9 @@ void main() {
       expect(find.text('1.50'), findsOneWidget);
     });
 
-    testWidgets('menghitung simulasi IP / EPEF di tab Hitung IP', (tester) async {
+    testWidgets('menghitung simulasi IP / EPEF di tab Hitung IP', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -134,7 +142,10 @@ void main() {
       // Default: Rp 95.000.000 / 5000 kg = Rp 19.000 / kg
       expect(find.text('Rp 19.000 / kg'), findsOneWidget);
       expect(find.text('Normal / Kompetitif Pasar'), findsOneWidget);
-      expect(find.text('Estimasi Margin Untung: +Rp 2.000 / kg'), findsOneWidget);
+      expect(
+        find.text('Estimasi Margin Untung: +Rp 2.000 / kg'),
+        findsOneWidget,
+      );
 
       // Ubah biaya produksi ke 80000000
       final costField = find.widgetWithText(TextFormField, '95000000');
@@ -144,18 +155,25 @@ void main() {
       // Rp 80.000.000 / 5000 kg = Rp 16.000 / kg
       expect(find.text('Rp 16.000 / kg'), findsOneWidget);
       expect(find.text('Sangat Hemat / Efisiensi Tinggi'), findsOneWidget);
-      expect(find.text('Estimasi Margin Untung: +Rp 5.000 / kg'), findsOneWidget);
+      expect(
+        find.text('Estimasi Margin Untung: +Rp 5.000 / kg'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('dapat membuka tab IP secara langsung dengan initialIndex 1', (tester) async {
+    testWidgets('dapat membuka tab IP secara langsung dengan initialIndex 1', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(MaterialApp(
-        theme: AppTheme.build(AppThemeOption.light),
-        home: const QuickCalculatorScreen(initialIndex: 1),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.build(AppThemeOption.light),
+          home: const QuickCalculatorScreen(initialIndex: 1),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('INDEKS PERFORMA (IP / EPEF)'), findsOneWidget);

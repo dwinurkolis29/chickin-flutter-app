@@ -28,13 +28,16 @@ void main() {
   });
 
   group('ThemeController Unit Tests', () {
-    test('default theme mode adalah ThemeMode.light dengan nama Tema Terang', () {
-      final controller = ThemeController();
+    test(
+      'default theme mode adalah ThemeMode.light dengan nama Tema Terang',
+      () {
+        final controller = ThemeController();
 
-      expect(controller.themeMode, equals(ThemeMode.light));
-      expect(controller.currentThemeKey, equals('light'));
-      expect(controller.themeModeName, equals('Tema Terang'));
-    });
+        expect(controller.themeMode, equals(ThemeMode.light));
+        expect(controller.currentThemeKey, equals('light'));
+        expect(controller.themeModeName, equals('Tema Terang'));
+      },
+    );
 
     test('setThemeMode("dark") mengubah mode ke ThemeMode.dark', () async {
       final controller = ThemeController();
@@ -65,24 +68,30 @@ void main() {
       expect(controller.themeModeName, equals('Sesuai Sistem'));
     });
 
-    test('setThemeMode("Sesuai Sistem") mengubah mode ke ThemeMode.system', () async {
-      final controller = ThemeController();
+    test(
+      'setThemeMode("Sesuai Sistem") mengubah mode ke ThemeMode.system',
+      () async {
+        final controller = ThemeController();
 
-      await controller.setThemeMode('Sesuai Sistem');
+        await controller.setThemeMode('Sesuai Sistem');
 
-      expect(controller.themeMode, equals(ThemeMode.system));
-      expect(controller.themeModeName, equals('Sesuai Sistem'));
-    });
+        expect(controller.themeMode, equals(ThemeMode.system));
+        expect(controller.themeModeName, equals('Sesuai Sistem'));
+      },
+    );
 
-    test('setThemeMode("Terang") mengembalikan mode ke ThemeMode.light', () async {
-      final controller = ThemeController();
+    test(
+      'setThemeMode("Terang") mengembalikan mode ke ThemeMode.light',
+      () async {
+        final controller = ThemeController();
 
-      await controller.setThemeMode('dark');
-      expect(controller.themeMode, equals(ThemeMode.dark));
+        await controller.setThemeMode('dark');
+        expect(controller.themeMode, equals(ThemeMode.dark));
 
-      await controller.setThemeMode('Terang');
-      expect(controller.themeMode, equals(ThemeMode.light));
-      expect(controller.themeModeName, equals('Tema Terang'));
-    });
+        await controller.setThemeMode('Terang');
+        expect(controller.themeMode, equals(ThemeMode.light));
+        expect(controller.themeModeName, equals('Tema Terang'));
+      },
+    );
   });
 }
