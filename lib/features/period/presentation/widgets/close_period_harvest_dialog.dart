@@ -20,16 +20,19 @@ class ClosePeriodHarvestResult {
 /// Bottom Sheet interaktif penutupan periode panen untuk menanyakan data ayam dipanen dan total bobot.
 class ClosePeriodHarvestDialog extends StatefulWidget {
   final PeriodData period;
+  final int? estimatedRemainingChicks;
 
   const ClosePeriodHarvestDialog({
     super.key,
     required this.period,
+    this.estimatedRemainingChicks,
   });
 
   /// Helper untuk memunculkan bottom sheet tutup panen
   static Future<ClosePeriodHarvestResult?> show({
     required BuildContext context,
     required PeriodData period,
+    int? estimatedRemainingChicks,
   }) {
     return AppFormBottomSheet.show<ClosePeriodHarvestResult>(
       context: context,
@@ -38,7 +41,10 @@ class ClosePeriodHarvestDialog extends StatefulWidget {
           'Apakah periode "${period.name}" sudah selesai dipanen? Masukkan data hasil panen akhir jika tersedia:',
       icon: Icons.inventory_2_outlined,
       builder: (sheetContext, setModalState) {
-        return ClosePeriodHarvestDialog(period: period);
+        return ClosePeriodHarvestDialog(
+          period: period,
+          estimatedRemainingChicks: estimatedRemainingChicks,
+        );
       },
     );
   }
@@ -50,7 +56,7 @@ class ClosePeriodHarvestDialog extends StatefulWidget {
 
 class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _chicksController = TextEditingController();
+  late final TextEditingController _chicksController;
   final _weightController = TextEditingController();
 
   double? _calculatedAvgWeight;
@@ -58,6 +64,12 @@ class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
   @override
   void initState() {
     super.initState();
+    final initialChicks = widget.estimatedRemainingChicks != null &&
+            widget.estimatedRemainingChicks! > 0
+        ? widget.estimatedRemainingChicks.toString()
+        : '';
+    _chicksController = TextEditingController(text: initialChicks);
+
     _chicksController.addListener(_recalculateAvg);
     _weightController.addListener(_recalculateAvg);
   }
@@ -114,12 +126,68 @@ class _ClosePeriodHarvestDialogState extends State<ClosePeriodHarvestDialog> {
     final tt = Theme.of(context).textTheme;
     final numFmt = NumberFormat.decimalPattern('id_ID');
 
+    final hasPartial =
+        widget.period.summary?.partialHarvests.isNotEmpty == true;
+    final totalPartialChicks =
+        widget.period.summary?.totalPartialHarvestChicks ?? 0;
+    final totalPartialWeight =
+        widget.period.summary?.totalPartialHarvestWeightKg ?? 0.0;
+
     return Form(
       key: _formKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (hasPartial) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.secondaryContainer.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                border: Border.all(color: cs.outlineVariant),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.history_rounded,
+                      size: 16,
+                      color: cs.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Riwayat Panen Parsial (Penjarangan)',
+                          style: tt.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.primary,
+                          ),
+                        ),
+                        Text(
+                          '${numFmt.format(totalPartialChicks)} ekor (${totalPartialWeight.toStringAsFixed(1)} kg) telah dipanen bertahap.',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           // Field 1: Ayam Dipanen
           AppTextFormField(
             controller: _chicksController,

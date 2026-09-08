@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/models/safe_convert.dart';
 
-/// Kategori transaksi keuangan broiler
+/// Kategori transaksi keuangan broiler bawaan
 enum FinanceCategory {
   // Pengeluaran
   feed('Pakan', 'feed'),
@@ -32,10 +33,29 @@ enum FinanceCategory {
 
 /// Model transaksi keuangan (pemasukan / pengeluaran) per periode
 class FinanceTransaction {
+  /// Rekomendasi kategori pengeluaran manual populer
+  static const List<String> popularExpenseCategories = [
+    'Sekam',
+    'Gaji / Upah ABK',
+    'Listrik & Air',
+    'Disinfektan & Sanitasi',
+    'Peralatan Kandang',
+    'Gas / Pemanas Brooding',
+    'Sewa Lahan / Bangunan',
+  ];
+
+  /// Rekomendasi kategori pemasukan manual populer
+  static const List<String> popularIncomeCategories = [
+    'Penjualan Pupuk / Kohe',
+    'Penjualan Karung Bekas',
+    'Bonus Kemitraan',
+    'Lain-lain',
+  ];
+
   final String id;
   final String periodId;
   final String type; // 'income' | 'expense'
-  final String category; // feed, doc, ovk, operational, main_harvest, reject
+  final String category; // feed, doc, ovk, operational, main_harvest, reject, atau custom string
   final double amount; // Nominal Rp
   final DateTime date;
   final String notes;
@@ -57,6 +77,37 @@ class FinanceTransaction {
   });
 
   FinanceCategory get categoryEnum => FinanceCategory.fromCode(category);
+
+  /// Label kategori yang aman ditampilkan di UI (termasuk jika kategori manual kustom)
+  String get displayCategory {
+    for (final cat in FinanceCategory.values) {
+      if (cat.code == category) return cat.label;
+    }
+    return category.isNotEmpty ? category : 'Lainnya';
+  }
+
+  /// Ikon representasi flat Material 3 sesuai kategori
+  IconData get categoryIcon {
+    switch (category) {
+      case 'feed':
+        return Icons.restaurant_rounded;
+      case 'doc':
+        return Icons.pets_rounded;
+      case 'ovk':
+        return Icons.medication_liquid_rounded;
+      case 'operational':
+        return Icons.engineering_rounded;
+      case 'main_harvest':
+        return Icons.scale_rounded;
+      case 'reject':
+        return Icons.warning_amber_rounded;
+      default:
+        return isIncome
+            ? Icons.monetization_on_outlined
+            : Icons.receipt_long_rounded;
+    }
+  }
+
   bool get isIncome => type == 'income';
   bool get isExpense => type == 'expense';
 

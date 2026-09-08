@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/finance/data/models/finance_transaction.dart';
+import 'package:recording_app/features/period/data/models/harvest_record.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/reporting/domain/usecases/insight_generator.dart';
 import 'package:recording_app/features/reporting/domain/usecases/summary_calculator.dart';
@@ -130,6 +132,65 @@ class PeriodController extends ChangeNotifier {
     await _firebaseService.updatePeriod(periodId, updatedPeriod);
   }
 
+  /// Tambah Panen Parsial (Penjarangan) ke periode aktif
+  Future<void> addPartialHarvest(
+    String periodId,
+    HarvestRecord harvest, {
+    bool createIncomeTransaction = false,
+  }) async {
+    final period = _periods.firstWhere(
+      (p) => p.id == periodId,
+      orElse: () => throw Exception('Periode tidak ditemukan'),
+    );
+
+    if (!period.isActive) {
+      throw Exception('Tidak dapat mencatat panen: Periode tidak sedang aktif.');
+    }
+
+    final recordings = await _firebaseService.getRecordingsOnce(periodId);
+    final totalMortality = recordings.fold(0, (sum, r) => sum + r.mortality);
+    final existingPartialChicks =
+        period.summary?.totalPartialHarvestChicks ?? 0;
+    final remainingLiveChicks =
+        (period.initialCapacity - totalMortality - existingPartialChicks)
+            .clamp(0, period.initialCapacity);
+
+    if (harvest.chicks > remainingLiveChicks) {
+      throw Exception(
+        'Jumlah ayam panen (${harvest.chicks} ekor) melebihi sisa ayam hidup ($remainingLiveChicks ekor).',
+      );
+    }
+
+    final currentHarvests =
+        List<HarvestRecord>.from(period.summary?.harvests ?? const []);
+    currentHarvests.add(harvest);
+
+    final updatedSummary = (period.summary ?? const PeriodSummary()).copyWith(
+      harvests: currentHarvests,
+    );
+    final updatedPeriod = period.copyWith(summary: updatedSummary);
+    await _firebaseService.updatePeriod(periodId, updatedPeriod);
+
+    // Otomatis buat transaksi kas masuk jika diminta
+    if (createIncomeTransaction &&
+        harvest.totalRevenue != null &&
+        harvest.totalRevenue! > 0) {
+      final tx = FinanceTransaction(
+        periodId: periodId,
+        type: 'income',
+        category: 'main_harvest',
+        amount: harvest.totalRevenue!,
+        date: harvest.date,
+        notes:
+            'Penjualan Panen Parsial (Umur ${harvest.day} hari, ${harvest.chicks} ekor, ${harvest.weightKg.toStringAsFixed(1)} kg)${harvest.notes != null && harvest.notes!.trim().isNotEmpty ? " - ${harvest.notes!.trim()}" : ""}',
+        birdCount: harvest.chicks,
+        weightKg: harvest.weightKg,
+        createdAt: DateTime.now(),
+      );
+      await _firebaseService.createFinanceTransaction(tx);
+    }
+  }
+
   /// Close Period: ambil recordings, kalkulasi summary + weeklyFCR + insights + panen riil, simpan ke Firebase.
   Future<void> closePeriod(
     String periodId, {
@@ -155,8 +216,10 @@ class PeriodController extends ChangeNotifier {
       recordings,
       harvestedChicks: harvestedChicks,
       harvestedWeightKg: harvestedWeightKg,
+      harvests: period.summary?.harvests,
     );
-    final insights = _insightGenerator.execute(snapshot, period.initialCapacity);
+    final insights =
+        _insightGenerator.execute(snapshot, period.initialCapacity);
 
     // Susun PeriodSummary dari snapshot
     final summary = PeriodSummary(
@@ -172,6 +235,8 @@ class PeriodController extends ChangeNotifier {
       harvestedWeightKg: snapshot.harvestedWeightKg,
       avgHarvestWeightKg: snapshot.avgHarvestWeightKg,
       ipScore: snapshot.ipScore,
+      harvests: snapshot.harvests,
+      weightedHarvestAgeDays: snapshot.weightedHarvestAgeDays,
     );
 
     final updatedPeriod = period.copyWith(

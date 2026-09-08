@@ -121,3 +121,36 @@
   - **Profil Kandang (`cage_profile.dart`)**: Berfokus pada aset fisik dan kapasitas fasilitas (Cover foto landscape 190dp tampak kandang + Hero Card Kapasitas Maksimal 32sp bold + kartu spesifikasi konstruksi Closed/Open House & lokasi + tombol Ubah Spesifikasi).
 - **Aksesibilitas Peternak Senior**:
   - Font ukuran terbaca, kontras warna tinggi, teks bahasa Indonesia yang jelas dan tidak teknis, serta tombol pill besar (min 48–52dp) sehingga mudah ditekan tanpa perlu mencari icon kecil.
+
+## 14. Panen Parsial (Penjarangan) & Mitigasi Risiko Operasional
+
+- **Definisi & Tujuan**:
+  - Penjarangan dilakukan saat kepadatan kandang mencapai batas kritis (hari ke 28–32) untuk mengurangi *stocking density* atau memenuhi permintaan pasar bertahap.
+- **Konsistensi Populasi & Kuota**:
+  - Input jumlah ayam dipanen parsial **DILARANG** melebihi sisa ayam hidup aktual ($\text{initialCapacity} - \text{mortalitas} - \text{panen parsial sebelumnya}$).
+  - Sisa populasi hidup otomatis terpotong secara reaktif setelah panen parsial dicatat.
+- **SOP Biosekuriti & Penyekatan Wajib**:
+  - Dialog panen parsial wajib menyertakan verifikasi 4 langkah mitigasi risiko:
+    1. Desinfeksi armada truk & keranjang ayam luar.
+    2. Tim tangkap mencuci tangan dan memakai sepatu boot bersih.
+    3. Kandang disekat agar ayam sisa tidak panik/menumpuk (*pile-up mortality*).
+    4. Pemuasaan pakan 6–8 jam sebelum tangkap (air minum tetap mengalir).
+- **Banner Pemulihan Stres Pasca-Panen (48–72 Jam)**:
+  - Dashboard wajib menampilkan banner peringatan edukatif selama 72 jam pasca-penjarangan terakhir untuk mengawal sisa ayam: pemberian vitamin anti-stres/elektrolit, pemantauan *Feed Intake*, penyesuaian tirai/suhu malam hari, dan penyemprotan disinfektan ringan.
+- **Integrasi Penutupan Panen Akhir**:
+  - Dialog Tutup Panen Akhir otomatis menampilkan rekapitulasi total ekor & kg panen parsial yang telah keluar, serta melakukan *pre-fill* sisa ayam hidup ke form panen akhir.
+
+## 15. Modul Keuangan Siklus & Fleksibilitas Kategori Manual
+
+- **Prinsip Arus Kas Peternakan**:
+  - Tampilan Laba/Rugi dinamis: Gunakan badge hijau `"ESTIMASI UNTUNG"` jika laba positif dan badge oranye/merah `"BELUM IMPAS"` jika pengeluaran masih lebih besar dari pemasukan.
+  - Sub-kartu terpisah untuk Pemasukan (kas masuk) dan Pengeluaran (kas keluar).
+  - Visual struktur biaya operasional: Tampilkan segmented progress bar multi-warna (Pakan, DOC, OVK, Operasional) agar peternak senior langsung memahami pos biaya dominan.
+  - Timeline tanggal terkelompok (*Hari Ini*, *Kemarin*, *dd MMMM yyyy*).
+- **Kategori Manual (Kustom)**:
+  - Form transaksi wajib mendukung kategori bawaan serta tombol chip `+ Kategori Lain` yang membuka field input manual.
+  - Model transaksi wajib menyediakan getter `displayCategory` yang mengembalikan string manual asli tanpa ter-override menjadi `'Operasional'`.
+  - Sediakan tombol bantu cepat nominal (+100rb, +500rb, +1jt, +5jt, +10jt) untuk mempermudah peternak senior menginput angka besar tanpa mengetik banyak angka nol.
+  - Live preview harga jual per kg ($\text{Rp} \div \text{kg}$) saat mencatat penjualan panen.
+
+

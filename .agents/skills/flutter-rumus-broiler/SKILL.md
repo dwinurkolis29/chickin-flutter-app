@@ -270,7 +270,43 @@ UniformityResult calculateUniformity(List<double> sampleWeightsKg) {
 
 ---
 
-### 3.8 Formula Analisis Ekonomi & Finansial
+### 3.8 Panen Parsial (Penjarangan) & Umur Panen Rata-rata Tertimbang
+
+Jika peternak melakukan panen bertahap (penjarangan pada umur muda lalu panen akhir di umur tua):
+
+1. **Biomassa Campuran untuk FCR Berjalan**:
+   Sebelum panen akhir, FCR berjalan tetap harus memperhitungkan daging yang sudah dikeluarkan:
+   $$\text{Sisa Ayam Hidup} = \text{Initial Capacity} - \text{Total Mati} - \text{Total Ekor Parsial}$$
+   $$\text{Total Biomass (kg)} = \left(\frac{\text{Sisa Ayam Hidup} \times \text{Bobot Rata-rata Hari Ini (g)}}{1000}\right) + \text{Total Kg Panen Parsial}$$
+   $$\text{FCR Berjalan} = \frac{\text{Total Pakan Dikonsumsi (kg)}}{\text{Total Biomass (kg)}}$$
+
+2. **Umur Panen Rata-rata Tertimbang (Weighted Average Harvest Age)**:
+   Karena ayam dipanen pada hari/umur yang berbeda-beda, umur panen final tidak boleh hanya memakai hari panen terakhir.
+   $$\text{Weighted Harvest Age (Hari)} = \frac{\sum_{i=1}^{n} (\text{Ekor Panen}_i \times \text{Umur Panen}_i)}{\sum_{i=1}^{n} \text{Ekor Panen}_i}$$
+
+3. **Indeks Performa (IP / EPEF) Panen Agregat**:
+   $$\text{IP Final} = \frac{\text{Livability (\%)} \times \text{Rata-rata Bobot Panen Total (kg)} \times 100}{\text{Weighted Harvest Age (Hari)} \times \text{FCR Panen Final}}$$
+   Di mana:
+   - $\text{Total Ekor Panen} = \sum \text{Ekor Panen}_i$
+   - $\text{Total Bobot Panen (kg)} = \sum \text{Bobot Panen}_i\text{ (kg)}$
+   - $\text{Rata-rata Bobot Panen Total (kg)} = \frac{\text{Total Bobot Panen}}{\text{Total Ekor Panen}}$
+
+```dart
+double calculateWeightedHarvestAge(List<HarvestRecord> harvests) {
+  if (harvests.isEmpty) return 0.0;
+  final totalChicks = harvests.fold<int>(0, (acc, h) => acc + h.chicks);
+  if (totalChicks <= 0) return 0.0;
+  final totalChickDays = harvests.fold<double>(
+    0.0,
+    (acc, h) => acc + (h.chicks * h.day),
+  );
+  return totalChickDays / totalChicks;
+}
+```
+
+---
+
+### 3.9 Formula Analisis Ekonomi & Finansial
 
 1. **Feed Cost per kg Gain**:
    $$\text{Feed Cost per kg Gain} = \text{FCR} \times \text{Harga Pakan per kg}$$
@@ -320,7 +356,7 @@ class FinancialKPI {
 
 ---
 
-### 3.9 Lingkungan & Auxiliary
+### 3.10 Lingkungan & Auxiliary
 
 1. **Water-to-Feed Ratio**:
    $$\text{Water / Feed Ratio} = \frac{\text{Total Konsumsi Air (Liter)}}{\text{Total Konsumsi Pakan (kg)}}$$

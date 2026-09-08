@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/finance/data/models/finance_transaction.dart';
+import 'package:recording_app/features/period/data/models/harvest_record.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/controllers/period_controller.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
@@ -7,6 +9,7 @@ import 'package:recording_app/features/recording/data/models/recording_data.dart
 class _FakeFirebaseService extends Fake implements FirebaseService {
   final List<PeriodData> createdPeriods = [];
   final List<PeriodData> updatedPeriods = [];
+  final List<FinanceTransaction> createdTransactions = [];
 
   @override
   Stream<List<PeriodData>> getPeriodsStream([String? uid]) {
@@ -27,6 +30,12 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
   @override
   Future<List<RecordingData>> getRecordingsOnce(String periodId, [String? uid]) async {
     return [];
+  }
+
+  @override
+  Future<String> createFinanceTransaction(FinanceTransaction transaction, [String? uid]) async {
+    createdTransactions.add(transaction);
+    return 'tx-new-id';
   }
 }
 
@@ -199,6 +208,99 @@ void main() {
       expect(updated.summary!.harvestedChicks, equals(9700));
       expect(updated.summary!.harvestedWeightKg, equals(17460.0));
       expect(updated.summary!.avgHarvestWeightKg, closeTo(1.80, 0.01));
+    });
+  });
+
+  group('PeriodController.addPartialHarvest', () {
+    test('berhasil menambah panen parsial dan mencatat transaksi kas masuk jika diaktifkan', () async {
+      final fakeFirebase = _FakeFirebaseService();
+      final controller = PeriodController(firebaseService: fakeFirebase);
+
+      final activePeriod = PeriodData(
+        id: 'active-1',
+        name: 'Batch Aktif 10k',
+        initialCapacity: 10000,
+        initialWeight: 0.04,
+        startDate: DateTime.now().subtract(const Duration(days: 30)),
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+        isActive: true,
+      );
+      controller.periods.add(activePeriod);
+
+      final harvest = HarvestRecord(
+        id: 'h-part-1',
+        type: HarvestType.partial,
+        date: DateTime.now(),
+        day: 30,
+        chicks: 2500,
+        weightKg: 3750.0,
+        avgWeightKg: 1.5,
+        pricePerKg: 21000.0,
+        totalRevenue: 78750000.0,
+        notes: 'PT Mitra Utama',
+        createdAt: DateTime.now(),
+      );
+
+      await controller.addPartialHarvest(
+        'active-1',
+        harvest,
+        createIncomeTransaction: true,
+      );
+
+      // Verifikasi update period
+      expect(fakeFirebase.updatedPeriods.length, 1);
+      final updated = fakeFirebase.updatedPeriods.first;
+      expect(updated.summary, isNotNull);
+      expect(updated.summary!.harvests.length, 1);
+      expect(updated.summary!.harvests.first.chicks, 2500);
+      expect(updated.summary!.totalPartialHarvestChicks, 2500);
+      expect(updated.summary!.totalPartialHarvestWeightKg, 3750.0);
+
+      // Verifikasi pembuatan transaksi kas masuk
+      expect(fakeFirebase.createdTransactions.length, 1);
+      final tx = fakeFirebase.createdTransactions.first;
+      expect(tx.periodId, 'active-1');
+      expect(tx.type, 'income');
+      expect(tx.category, 'main_harvest');
+      expect(tx.amount, 78750000.0);
+      expect(tx.birdCount, 2500);
+      expect(tx.weightKg, 3750.0);
+    });
+
+    test('gagal menambah panen parsial jika jumlah ekor melebihi sisa ayam hidup', () async {
+      final fakeFirebase = _FakeFirebaseService();
+      final controller = PeriodController(firebaseService: fakeFirebase);
+
+      final activePeriod = PeriodData(
+        id: 'active-1',
+        name: 'Batch Kecil',
+        initialCapacity: 1000,
+        initialWeight: 0.04,
+        startDate: DateTime.now().subtract(const Duration(days: 28)),
+        createdAt: DateTime.now().subtract(const Duration(days: 28)),
+        isActive: true,
+      );
+      controller.periods.add(activePeriod);
+
+      final harvestExcessive = HarvestRecord(
+        id: 'h-too-many',
+        type: HarvestType.partial,
+        date: DateTime.now(),
+        day: 28,
+        chicks: 1500, // Melebihi kapasitas 1000
+        weightKg: 2100.0,
+        avgWeightKg: 1.4,
+        createdAt: DateTime.now(),
+      );
+
+      expect(
+        () => controller.addPartialHarvest('active-1', harvestExcessive),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('melebihi sisa ayam hidup'),
+        )),
+      );
     });
   });
 }

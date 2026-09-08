@@ -10,6 +10,7 @@ import 'image_source_picker_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/widgets/close_period_harvest_dialog.dart';
+import 'package:recording_app/features/period/presentation/widgets/partial_harvest_dialog.dart';
 
 /// Helper terpusat untuk menampilkan dialog dan modal dengan standar visual aplikasi.
 class DialogHelper {
@@ -143,14 +144,29 @@ class DialogHelper {
     );
   }
 
+  /// Menampilkan dialog interaktif Panen Parsial (Penjarangan)
+  static Future<PartialHarvestResult?> showPartialHarvest(
+    BuildContext context, {
+    required PeriodData period,
+    required int currentLiveChicks,
+  }) {
+    return PartialHarvestDialog.show(
+      context: context,
+      period: period,
+      currentLiveChicks: currentLiveChicks,
+    );
+  }
+
   /// Menampilkan dialog interaktif Tutup Panen Periode
   static Future<ClosePeriodHarvestResult?> showClosePeriodHarvest(
     BuildContext context,
-    PeriodData period,
-  ) {
+    PeriodData period, {
+    int? estimatedRemainingChicks,
+  }) {
     return ClosePeriodHarvestDialog.show(
       context: context,
       period: period,
+      estimatedRemainingChicks: estimatedRemainingChicks,
     );
   }
 

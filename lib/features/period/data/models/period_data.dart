@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/safe_convert.dart';
+import 'harvest_record.dart';
 
 /// Sentinel untuk membedakan "tidak dipass" vs "sengaja diset null"
 class _Undefined {
@@ -122,6 +123,8 @@ class PeriodSummary {
   final double? harvestedWeightKg;
   final double? avgHarvestWeightKg;
   final double? ipScore;
+  final List<HarvestRecord> harvests;
+  final double? weightedHarvestAgeDays;
 
   const PeriodSummary({
     this.totalFeedKg = 0.0,
@@ -136,7 +139,33 @@ class PeriodSummary {
     this.harvestedWeightKg,
     this.avgHarvestWeightKg,
     this.ipScore,
+    this.harvests = const [],
+    this.weightedHarvestAgeDays,
   });
+
+  /// Total ekor dari semua panen parsial (penjarangan) yang sudah dicatat
+  int get totalPartialHarvestChicks => harvests
+      .where((h) => h.type == HarvestType.partial)
+      .fold(0, (acc, h) => acc + h.chicks);
+
+  /// Total bobot kg dari semua panen parsial
+  double get totalPartialHarvestWeightKg => harvests
+      .where((h) => h.type == HarvestType.partial)
+      .fold(0.0, (acc, h) => acc + h.weightKg);
+
+  /// Total ekor seluruh panen (parsial + akhir)
+  int get totalAllHarvestChicks => harvests.isNotEmpty
+      ? harvests.fold(0, (acc, h) => acc + h.chicks)
+      : (harvestedChicks ?? 0);
+
+  /// Total bobot kg seluruh panen (parsial + akhir)
+  double get totalAllHarvestWeightKg => harvests.isNotEmpty
+      ? harvests.fold(0.0, (acc, h) => acc + h.weightKg)
+      : (harvestedWeightKg ?? 0.0);
+
+  /// Daftar panen parsial saja
+  List<HarvestRecord> get partialHarvests =>
+      harvests.where((h) => h.type == HarvestType.partial).toList();
 
   factory PeriodSummary.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
@@ -162,6 +191,11 @@ class PeriodSummary {
       harvestedWeightKg: asDoubleOrNull(json, 'harvestedWeightKg'),
       avgHarvestWeightKg: asDoubleOrNull(json, 'avgHarvestWeightKg'),
       ipScore: asDoubleOrNull(json, 'ipScore'),
+      harvests: (json['harvests'] as List<dynamic>?)
+          ?.map((e) => HarvestRecord.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+          const [],
+      weightedHarvestAgeDays: asDoubleOrNull(json, 'weightedHarvestAgeDays'),
     );
   }
 
@@ -178,6 +212,10 @@ class PeriodSummary {
     if (harvestedWeightKg != null) 'harvestedWeightKg': harvestedWeightKg,
     if (avgHarvestWeightKg != null) 'avgHarvestWeightKg': avgHarvestWeightKg,
     if (ipScore != null) 'ipScore': ipScore,
+    if (harvests.isNotEmpty)
+      'harvests': harvests.map((e) => e.toJson()).toList(),
+    if (weightedHarvestAgeDays != null)
+      'weightedHarvestAgeDays': weightedHarvestAgeDays,
   };
 
   PeriodSummary copyWith({
@@ -193,6 +231,8 @@ class PeriodSummary {
     double? harvestedWeightKg,
     double? avgHarvestWeightKg,
     double? ipScore,
+    List<HarvestRecord>? harvests,
+    double? weightedHarvestAgeDays,
   }) {
     return PeriodSummary(
       totalFeedKg: totalFeedKg ?? this.totalFeedKg,
@@ -207,6 +247,9 @@ class PeriodSummary {
       harvestedWeightKg: harvestedWeightKg ?? this.harvestedWeightKg,
       avgHarvestWeightKg: avgHarvestWeightKg ?? this.avgHarvestWeightKg,
       ipScore: ipScore ?? this.ipScore,
+      harvests: harvests ?? this.harvests,
+      weightedHarvestAgeDays:
+          weightedHarvestAgeDays ?? this.weightedHarvestAgeDays,
     );
   }
 }

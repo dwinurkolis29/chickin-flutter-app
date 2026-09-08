@@ -119,14 +119,22 @@ class HomeController extends ChangeNotifier {
     if (recordings.isEmpty || initialPopulation == 0) {
       return <FCRData>[];
     }
-    return _calculateFCRUseCase.execute(recordings, initialPopulation);
+    return _calculateFCRUseCase.execute(
+      recordings,
+      initialPopulation,
+      harvests: _activePeriod?.summary?.harvests,
+    );
   }
 
   List<DailyFCRData> calculateDailyFCR(List<RecordingData> recordings) {
     if (recordings.isEmpty || initialPopulation == 0) {
       return <DailyFCRData>[];
     }
-    return _calculateFCRUseCase.executeDaily(recordings, initialPopulation);
+    return _calculateFCRUseCase.executeDaily(
+      recordings,
+      initialPopulation,
+      harvests: _activePeriod?.summary?.harvests,
+    );
   }
 
   List<DailyADGData> calculateDailyADG(List<RecordingData> recordings, [double initialWeightKg = 0.04]) {

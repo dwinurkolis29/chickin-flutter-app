@@ -1,3 +1,4 @@
+import 'package:recording_app/features/period/data/models/harvest_record.dart';
 import 'package:recording_app/features/recording/data/models/daily_fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
@@ -17,7 +18,11 @@ class CalculateFCR {
   /// [initialCapacity] - Initial chicken population from period data
   ///
   /// Returns cumulative FCR data per week
-  List<FCRData> execute(List<RecordingData> recordings, int initialCapacity) {
+  List<FCRData> execute(
+    List<RecordingData> recordings,
+    int initialCapacity, {
+    List<HarvestRecord>? harvests,
+  }) {
     if (recordings.isEmpty || initialCapacity == 0) return [];
 
     // Sort by day (treat input as immutable - create new list)
@@ -59,26 +64,39 @@ class CalculateFCR {
       cumulativeFeedKg += weekFeedSacks * 50; // 1 sack = 50 kg
       cumulativeDeaths += weekDeaths;
 
-      // Calculate remaining chickens
-      final remainingChickens = initialCapacity - cumulativeDeaths;
-      if (remainingChickens <= 0) continue;
+      // Perhitungkan panen parsial hingga akhir minggu ini
+      final lastDayInWeek = weekRecordings.last.day;
+      final harvestedChicksUpToWeek = harvests
+              ?.where((h) => h.day <= lastDayInWeek)
+              .fold(0, (sum, h) => sum + h.chicks) ??
+          0;
+      final harvestedWeightUpToWeek = harvests
+              ?.where((h) => h.day <= lastDayInWeek)
+              .fold(0.0, (sum, h) => sum + h.weightKg) ??
+          0.0;
+
+      // Sisa ayam di kandang
+      final remainingChickens =
+          (initialCapacity - cumulativeDeaths - harvestedChicksUpToWeek)
+              .clamp(0, initialCapacity);
+      if (remainingChickens <= 0 && harvestedChicksUpToWeek == 0) continue;
 
       // Get last day recording for current average weight
       final lastDayRecording = weekRecordings.last;
       final currentAvgWeightKg = lastDayRecording.avgWeightGram / 1000;
 
-      // Calculate total weight / final biomass (kg)
-      // Total berat ayam hidup = sisa ayam × berat rata-rata
-      final finalBiomass = remainingChickens * currentAvgWeightKg;
+      // Biomassa di kandang + biomassa daging yang sudah dipanen
+      final inHouseBiomass = remainingChickens * currentAvgWeightKg;
+      final totalBiomass = inHouseBiomass + harvestedWeightUpToWeek;
 
-      // Calculate FCR: total pakan / total berat ayam hidup
-      final fcr = finalBiomass > 0 ? cumulativeFeedKg / finalBiomass : 0;
+      // Calculate FCR: total pakan / total biomassa kumulatif
+      final fcr = totalBiomass > 0 ? cumulativeFeedKg / totalBiomass : 0.0;
 
       weeklyFCR.add(FCRData(
         mingguKe: week,
         totalPakan: double.parse(cumulativeFeedKg.toStringAsFixed(2)),
         sisaAyam: remainingChickens,
-        beratAyam: double.parse(finalBiomass.toStringAsFixed(2)),
+        beratAyam: double.parse(totalBiomass.toStringAsFixed(2)),
         fcr: double.parse(fcr.toStringAsFixed(2)),
       ));
     }
@@ -90,9 +108,14 @@ class CalculateFCR {
   ///
   /// [recordings] - List of recording data (treated as immutable)
   /// [initialCapacity] - Initial chicken population from period data
+  /// [harvests] - Opsional: daftar panen parsial untuk mengurangi sisa ayam
   ///
   /// Returns cumulative FCR metrics per recording day
-  List<DailyFCRData> executeDaily(List<RecordingData> recordings, int initialCapacity) {
+  List<DailyFCRData> executeDaily(
+    List<RecordingData> recordings,
+    int initialCapacity, {
+    List<HarvestRecord>? harvests,
+  }) {
     if (recordings.isEmpty || initialCapacity == 0) return [];
 
     final sortedRecordings = List<RecordingData>.from(recordings)
@@ -107,9 +130,21 @@ class CalculateFCR {
       cumulativeFeedKg += dailyFeedKg;
       cumulativeDeaths += rec.mortality;
 
-      final remainingChickens = (initialCapacity - cumulativeDeaths).clamp(0, initialCapacity);
+      final harvestedChicksUpToDay = harvests
+              ?.where((h) => h.day <= rec.day)
+              .fold(0, (sum, h) => sum + h.chicks) ??
+          0;
+      final harvestedWeightUpToDay = harvests
+              ?.where((h) => h.day <= rec.day)
+              .fold(0.0, (sum, h) => sum + h.weightKg) ??
+          0.0;
+
+      final remainingChickens =
+          (initialCapacity - cumulativeDeaths - harvestedChicksUpToDay)
+              .clamp(0, initialCapacity);
       final avgWeightKg = rec.avgWeightGram / 1000.0;
-      final totalBiomassKg = remainingChickens * avgWeightKg;
+      final inHouseBiomassKg = remainingChickens * avgWeightKg;
+      final totalBiomassKg = inHouseBiomassKg + harvestedWeightUpToDay;
       final fcr = totalBiomassKg > 0 ? cumulativeFeedKg / totalBiomassKg : 0.0;
 
       dailyList.add(DailyFCRData(

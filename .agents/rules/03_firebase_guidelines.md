@@ -24,3 +24,12 @@
 
 - **Never** hit live/production Firestore during automated tests.
 - Always use `mocktail` or inject fake service implementations into controllers when writing unit tests.
+
+## 5. Firestore Document Schema & Allowlist Constraints
+
+- `firestore.rules` menerapkan fungsi validator ketat seperti `isValidPeriodData(data)` menggunakan `.keys().hasOnly([...])`:
+  - Allowlist top-level `PeriodData`: `['name', 'initialCapacity', 'initialWeight', 'startDate', 'endDate', 'isActive', 'isDeleted', 'createdAt', 'summary']`.
+- **Ekstensi Data Siklus**:
+  - Setiap penambahan atribut baru untuk periode (seperti histori panen `harvests`, umur panen tertimbang `weightedHarvestAgeDays`, dsb.) **WAJIB** disimpan di dalam map `summary` (`data['summary']['harvests']`).
+  - DILARANG menambahkan field baru di root document periode tanpa memperbarui dan mendeploy `firestore.rules` terlebih dahulu, karena akan memicu `PERMISSION_DENIED` pada Firestore client.
+

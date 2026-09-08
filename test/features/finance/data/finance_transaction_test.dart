@@ -69,5 +69,30 @@ void main() {
       expect(updated.category, 'feed');
       expect(updated.id, 'tx-1');
     });
+
+    test('displayCategory and categoryIcon handle custom categories correctly', () {
+      final now = DateTime.now();
+      final customExpense = FinanceTransaction(
+        periodId: 'p-1',
+        type: 'expense',
+        category: 'Sekam',
+        amount: 500000.0,
+        date: now,
+        createdAt: now,
+      );
+
+      expect(customExpense.displayCategory, 'Sekam');
+      expect(customExpense.categoryIcon, isNotNull);
+
+      final standardFeed = FinanceTransaction(
+        periodId: 'p-1',
+        type: 'expense',
+        category: 'feed',
+        amount: 15000000.0,
+        date: now,
+        createdAt: now,
+      );
+      expect(standardFeed.displayCategory, 'Pakan');
+    });
   });
 }

@@ -110,6 +110,7 @@ void main() {
       expect(find.text('Batch Broiler 1'), findsWidgets);
       expect(find.text('Berjalan'), findsWidgets);
       expect(find.text('Kelola Siklus'), findsOneWidget);
+      expect(find.text('Panen Parsial'), findsOneWidget);
       expect(find.text('Tutup Panen'), findsOneWidget);
 
       // Section history

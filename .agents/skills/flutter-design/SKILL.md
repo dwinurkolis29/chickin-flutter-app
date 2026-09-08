@@ -274,3 +274,35 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
 ### 17. Shimmer Skeleton Loading Redesign Standards
 - Skeleton loader wajib merefleksikan layout M3 terbaru dari screen tujuan (`DashboardSkeleton`, `ReportSkeleton`, `PeriodCardSkeleton`, `TableSkeleton`) dengan kartu `AppTheme.cardRadius = 24.0`, badge bulat, dan warna tema `surfaceContainerHighest` / `surfaceContainerHigh`.
 
+### 18. Alert Banners & Header Row Layout Guards (Anti Pixel Overflow)
+- Pada header alert banner atau card header di mana teks judul disandingkan dengan pill badge status/waktu dalam satu baris (`Row`):
+  - **Judul WAJIB dibungkus `Expanded`** dengan `maxLines: 1` dan `overflow: TextOverflow.ellipsis`:
+    ```dart
+    Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Judul Banner',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: tt.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppColors.warning.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+          ),
+          child: Text(timeAgoText, style: tt.labelSmall?.copyWith(fontSize: 10)),
+        ),
+      ],
+    )
+    ```
+  - **DILARANG** meletakkan `Text` judul dan `Container` badge secara berdampingan tanpa pembatas fleksibilitas di dalam `Row`, karena rentan memicu *right overflow error* saat string teks panjang atau resolusi layar sempit (<400px).
+  - **Format Waktu Alami Ringkas**:
+    - Waktu `< 1 jam` gunakan `"Baru saja"` (DILARANG menggunakan format kaku `"0 jam yang lalu"`).
+    - Format jam/hari disederhanakan: `"X jam lalu"`, `"X hari lalu"` untuk menghemat ruang horizontal.
+
+

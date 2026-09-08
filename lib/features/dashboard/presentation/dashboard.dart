@@ -25,6 +25,8 @@ import 'package:recording_app/features/reporting/presentation/pages/period_repor
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'widgets/fcr_datacard.dart';
 import 'widgets/dashboard_greeting.dart';
+import 'widgets/post_thinning_stress_alert.dart';
+import 'package:recording_app/features/period/data/models/harvest_record.dart';
 import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
@@ -382,7 +384,7 @@ class _DashboardContentState extends State<DashboardContent>
                           builder: (context) => const FormPeriod(),
                         ),
                       );
-                      if (mounted) {
+                      if (context.mounted) {
                         context.read<HomeController>().loadActivePeriod();
                       }
                     },
@@ -457,9 +459,35 @@ class _DashboardContentState extends State<DashboardContent>
                     final umur =
                         recordings.isNotEmpty ? recordings.last.day : 0;
 
+                    // Deteksi panen parsial dalam 72 jam terakhir untuk alert pemulihan stres
+                    final activePeriod = controller.activePeriod;
+                    HarvestRecord? recentPartialHarvest;
+                    if (activePeriod?.summary?.partialHarvests.isNotEmpty ==
+                        true) {
+                      final partials = activePeriod!.summary!.partialHarvests;
+                      final latest = partials.reduce(
+                        (a, b) => a.date.isAfter(b.date) ? a : b,
+                      );
+                      final diffHours =
+                          DateTime.now().difference(latest.date).inHours;
+                      if (diffHours <= 72) {
+                        recentPartialHarvest = latest;
+                      }
+                    }
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        if (recentPartialHarvest != null)
+                          Center(
+                            child: ConstrainedBox(
+                              constraints:
+                                  const BoxConstraints(maxWidth: 720),
+                              child: PostThinningStressAlert(
+                                lastPartialHarvest: recentPartialHarvest,
+                              ),
+                            ),
+                          ),
                         PopulationSection(
                           populationRemain: populationRemain,
                           capacity: controller.initialPopulation,

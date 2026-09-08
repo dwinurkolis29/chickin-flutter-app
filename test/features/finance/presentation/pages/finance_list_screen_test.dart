@@ -155,8 +155,43 @@ void main() {
 
       // Verifikasi Filter Chips & Hero metrics
       expect(find.text('Semua (2)'), findsOneWidget);
-      expect(find.text('Pengeluaran'), findsNWidgets(2));
-      expect(find.text('Pemasukan'), findsOneWidget);
+      expect(find.text('Pengeluaran (1)'), findsOneWidget);
+      expect(find.text('Pemasukan (1)'), findsOneWidget);
+      expect(find.text('ESTIMASI UNTUNG'), findsOneWidget);
+    });
+
+    testWidgets('menampilkan transaksi kategori manual kustom dengan benar', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final sampleTx = [
+        FinanceTransaction(
+          id: 'tx-custom-1',
+          periodId: 'period-1',
+          type: 'expense',
+          category: 'Sekam',
+          amount: 1200000,
+          date: DateTime(2026, 1, 15),
+          notes: 'Sekam 2 truk',
+          createdAt: DateTime(2026, 1, 15),
+        ),
+      ];
+
+      final ctrl = _MockFinanceController(
+        transactions: sampleTx,
+        summary: const FinanceSummary(
+          totalExpense: 1200000,
+          netProfit: -1200000,
+        ),
+      );
+
+      await tester.pumpWidget(createWidgetUnderTest(ctrl));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sekam'), findsOneWidget);
+      expect(find.text('-Rp 1.200.000'), findsNWidgets(2)); // Muncul di Hero Net Profit dan Kartu Transaksi
+      expect(find.text('BELUM IMPAS'), findsOneWidget);
     });
   });
 }

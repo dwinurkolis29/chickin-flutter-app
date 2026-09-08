@@ -10,10 +10,14 @@ import '../../../../core/components/snackbars/app_snackbar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../period/data/models/period_data.dart';
+import '../../data/models/finance_summary.dart';
 import '../../data/models/finance_transaction.dart';
 import '../controllers/finance_controller.dart';
 import '../widgets/form_finance_bottom_sheet.dart';
 
+/// Screen manajemen dan visualisasi Keuangan Periode Broiler
+/// Dirancang ramah bagi peternak senior dengan hierarki visual Laba/Rugi,
+/// struktur biaya operasional, serta timeline transaksi yang jelas.
 class FinanceListScreen extends StatefulWidget {
   final PeriodData period;
 
@@ -42,7 +46,10 @@ class _FinanceListScreenState extends State<FinanceListScreen> {
         try {
           await context.read<FinanceController>().addTransaction(tx);
           if (context.mounted) {
-            AppSnackbar.showSuccess(context, 'Transaksi keuangan berhasil dicatat');
+            AppSnackbar.showSuccess(
+              context,
+              'Transaksi keuangan berhasil dicatat',
+            );
           }
         } catch (e) {
           if (context.mounted) {
@@ -57,10 +64,16 @@ class _FinanceListScreenState extends State<FinanceListScreen> {
     BuildContext context,
     FinanceTransaction tx,
   ) async {
+    final currencyFmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
     final confirmed = await DialogHelper.showConfirm(
       context,
       'Hapus Transaksi',
-      'Apakah Anda yakin ingin menghapus transaksi "${tx.categoryEnum.label}" sebesar ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(tx.amount)}?',
+      'Apakah Anda yakin ingin menghapus transaksi "${tx.displayCategory}" sebesar ${currencyFmt.format(tx.amount)}?',
       confirmText: 'Hapus',
       cancelText: 'Batal',
       isDestructive: true,
@@ -80,23 +93,54 @@ class _FinanceListScreenState extends State<FinanceListScreen> {
     }
   }
 
+  /// Mengelompokkan transaksi berdasarkan tanggal (YYYY-MM-DD)
+  Map<String, List<FinanceTransaction>> _groupTransactionsByDate(
+    List<FinanceTransaction> transactions,
+  ) {
+    final Map<String, List<FinanceTransaction>> groups = {};
+    for (final tx in transactions) {
+      final key = DateFormat('yyyy-MM-dd').format(tx.date);
+      if (!groups.containsKey(key)) {
+        groups[key] = [];
+      }
+      groups[key]!.add(tx);
+    }
+    return groups;
+  }
+
+  String _formatDateHeader(String dateKey) {
+    final date = DateTime.tryParse(dateKey) ?? DateTime.now();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final checkDate = DateTime(date.year, date.month, date.day);
+
+    if (checkDate == today) {
+      return 'Hari Ini • ${DateFormat('dd MMMM yyyy', 'id_ID').format(date)}';
+    } else if (checkDate == yesterday) {
+      return 'Kemarin • ${DateFormat('dd MMMM yyyy', 'id_ID').format(date)}';
+    } else {
+      return DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(date);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<FinanceController>();
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final currencyFmt = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-
     final summary = controller.summary;
-    final filteredTx = controller.transactions.where((tx) {
+
+    final allTx = controller.transactions;
+    final expenseCount = allTx.where((tx) => tx.isExpense).length;
+    final incomeCount = allTx.where((tx) => tx.isIncome).length;
+
+    final filteredTx = allTx.where((tx) {
       if (_filter == 'expense') return tx.isExpense;
       if (_filter == 'income') return tx.isIncome;
       return true;
     }).toList();
+
+    final groupedTx = _groupTransactionsByDate(filteredTx);
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -125,130 +169,43 @@ class _FinanceListScreenState extends State<FinanceListScreen> {
               )
             : CustomScrollView(
                 slivers: [
-                  // 1. Hero Summary Card
+                  // ── 1. Hero Ringkasan Laba / Rugi & Arus Kas ─────────────
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Container(
-                        padding: const EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              cs.primary,
-                              cs.primary.withValues(alpha: 0.85),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                          boxShadow: [
-                            BoxShadow(
-                              color: cs.primary.withValues(alpha: 0.25),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'LABA BERSIH PERIODE',
-                              style: tt.labelSmall?.copyWith(
-                                color: cs.onPrimary.withValues(alpha: 0.75),
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              currencyFmt.format(summary.netProfit),
-                              style: tt.headlineMedium?.copyWith(
-                                color: cs.onPrimary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Divider(color: Colors.white24, height: 1),
-                            const SizedBox(height: 14),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Pendapatan',
-                                        style: tt.labelSmall?.copyWith(
-                                          color: cs.onPrimary.withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        currencyFmt.format(summary.totalRevenue),
-                                        style: tt.titleSmall?.copyWith(
-                                          color: cs.onPrimary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 28,
-                                  color: Colors.white24,
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Pengeluaran',
-                                        style: tt.labelSmall?.copyWith(
-                                          color: cs.onPrimary.withValues(alpha: 0.7),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        currencyFmt.format(summary.totalExpense),
-                                        style: tt.titleSmall?.copyWith(
-                                          color: cs.onPrimary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                      child: _HeroCashflowCard(summary: summary),
                     ),
                   ),
 
-                  // 2. Filter Pills
+                  // ── 2. Struktur Biaya Operasional (Cost Breakdown) ───────
+                  if (summary.totalExpense > 0)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: _CostBreakdownCard(summary: summary),
+                      ),
+                    ),
+
+                  // ── 3. Filter Chips (Semua, Pengeluaran, Pemasukan) ──────
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                       child: Row(
                         children: [
                           _FilterChip(
-                            label: 'Semua (${controller.transactions.length})',
+                            label: 'Semua (${allTx.length})',
                             isSelected: _filter == 'all',
                             onTap: () => setState(() => _filter = 'all'),
                           ),
                           const SizedBox(width: 8),
                           _FilterChip(
-                            label: 'Pengeluaran',
+                            label: 'Pengeluaran ($expenseCount)',
                             isSelected: _filter == 'expense',
                             onTap: () => setState(() => _filter = 'expense'),
                           ),
                           const SizedBox(width: 8),
                           _FilterChip(
-                            label: 'Pemasukan',
+                            label: 'Pemasukan ($incomeCount)',
                             isSelected: _filter == 'income',
                             onTap: () => setState(() => _filter = 'income'),
                           ),
@@ -256,126 +213,644 @@ class _FinanceListScreenState extends State<FinanceListScreen> {
                       ),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-                  // 3. Transactions List / Empty State
+                  // ── 4. Daftar Transaksi / Empty State ────────────────────
                   if (filteredTx.isEmpty)
-                    const SliverFillRemaining(
+                    SliverFillRemaining(
                       hasScrollBody: false,
                       child: AppEmptyState(
                         icon: Icons.receipt_long_outlined,
                         message: 'Belum Ada Transaksi',
-                        subtitle:
-                            'Catat biaya pakan, bibit DOC, OVK, dan hasil penjualan ayam untuk kalkulasi laba bersih & HPP otomatis.',
+                        subtitle: _filter == 'all'
+                            ? 'Catat biaya pakan, bibit DOC, OVK, dan hasil penjualan ayam untuk memantau arus kas & laba bersih.'
+                            : (_filter == 'expense'
+                                ? 'Belum ada pengeluaran operasional yang dicatat pada periode ini.'
+                                : 'Belum ada pemasukan penjualan yang dicatat pada periode ini.'),
+                        actionLabel: 'Catat Transaksi Sekarang',
+                        onAction: () => _openAddTransaction(context),
                       ),
                     )
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 84),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final tx = filteredTx[index];
-                            final dateStr = DateFormat('dd MMM yyyy', 'id_ID').format(tx.date);
+                            final dateKey = groupedTx.keys.elementAt(index);
+                            final items = groupedTx[dateKey]!;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: AppCard(
-                                margin: EdgeInsets.zero,
-                                padding: const EdgeInsets.all(14),
-                                child: Row(
-                                  children: [
-                                    // Icon Badge
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: tx.isIncome
-                                            ? AppColors.success.withValues(alpha: 0.12)
-                                            : AppColors.error.withValues(alpha: 0.12),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        tx.isIncome
-                                            ? Icons.arrow_downward_rounded
-                                            : Icons.arrow_upward_rounded,
-                                        color: tx.isIncome ? AppColors.success : AppColors.error,
-                                        size: 20,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-
-                                    // Label & Subtitle
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            tx.categoryEnum.label,
-                                            style: tt.titleSmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: cs.onSurface,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            [
-                                              dateStr,
-                                              if (tx.birdCount != null && tx.birdCount! > 0)
-                                                '${tx.birdCount} ekor',
-                                              if (tx.weightKg != null && tx.weightKg! > 0)
-                                                '${tx.weightKg!.toStringAsFixed(1)} kg',
-                                              if (tx.notes.isNotEmpty) tx.notes,
-                                            ].join(' • '),
-                                            style: tt.bodySmall?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                              fontSize: 11,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-
-                                    // Nominal & Action
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '${tx.isIncome ? '+' : '-'}${currencyFmt.format(tx.amount)}',
-                                          style: tt.labelLarge?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: tx.isIncome ? AppColors.success : AppColors.error,
-                                          ),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Date Header
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 4,
+                                    top: 10,
+                                    bottom: 6,
+                                  ),
+                                  child: Text(
+                                    _formatDateHeader(dateKey),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: cs.onSurfaceVariant,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
                                         ),
-                                        const SizedBox(width: 4),
-                                        IconButton(
-                                          visualDensity: VisualDensity.compact,
-                                          padding: const EdgeInsets.all(4),
-                                          constraints: const BoxConstraints(),
-                                          icon: Icon(
-                                            Icons.delete_outline_rounded,
-                                            size: 18,
-                                            color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                                          ),
-                                          tooltip: 'Hapus Transaksi',
-                                          onPressed: () => _confirmDelete(context, tx),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+
+                                // Transaction items on this date
+                                ...items.map((tx) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: _TransactionCard(
+                                      transaction: tx,
+                                      onDelete: () =>
+                                          _confirmDelete(context, tx),
+                                    ),
+                                  );
+                                }),
+                              ],
                             );
                           },
-                          childCount: filteredTx.length,
+                          childCount: groupedTx.keys.length,
                         ),
                       ),
                     ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// Hero Card Laba Bersih & Arus Kas Transparan
+class _HeroCashflowCard extends StatelessWidget {
+  final FinanceSummary summary;
+
+  const _HeroCashflowCard({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final currencyFmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+
+    final bool isProfit = summary.netProfit > 0;
+    final bool isLoss = summary.netProfit < 0;
+    final bool hasData = summary.hasTransactions;
+
+    Color badgeBg;
+    Color badgeText;
+    String statusLabel;
+
+    if (!hasData) {
+      badgeBg = cs.secondaryContainer;
+      badgeText = cs.onSurfaceVariant;
+      statusLabel = 'BELUM ADA TRANSAKSI';
+    } else if (isProfit) {
+      badgeBg = AppColors.success.withValues(alpha: 0.15);
+      badgeText = AppColors.success;
+      statusLabel = 'ESTIMASI UNTUNG';
+    } else if (isLoss) {
+      badgeBg = AppColors.warning.withValues(alpha: 0.2);
+      badgeText = AppColors.warning;
+      statusLabel = 'BELUM IMPAS';
+    } else {
+      badgeBg = cs.secondaryContainer;
+      badgeText = cs.primary;
+      statusLabel = 'IMPAS (BEP)';
+    }
+
+    return AppCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Status Badge & Title
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'HASIL KAS BERSIH',
+                style: tt.labelSmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: badgeBg,
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: tt.labelSmall?.copyWith(
+                    color: badgeText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // Nilai Laba Bersih
+          Text(
+            currencyFmt.format(summary.netProfit),
+            style: tt.headlineMedium?.copyWith(
+              color: isProfit
+                  ? AppColors.success
+                  : (isLoss ? AppColors.warning : cs.onSurface),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Sub-kartu: Pemasukan vs Pengeluaran
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                    border: Border.all(
+                      color: AppColors.success.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 14,
+                              color: AppColors.success,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Pemasukan',
+                            style: tt.labelSmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        currencyFmt.format(summary.totalRevenue),
+                        style: tt.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                    border: Border.all(
+                      color: AppColors.error.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 14,
+                              color: AppColors.error,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Pengeluaran',
+                            style: tt.labelSmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        currencyFmt.format(summary.totalExpense),
+                        style: tt.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Business KPI Mini Strip (HPP & Penjualan)
+          if (summary.hppPerKg > 0 || summary.totalHarvestWeightKg > 0) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                border: Border.all(color: cs.outlineVariant),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  if (summary.hppPerKg > 0) ...[
+                    Column(
+                      children: [
+                        Text(
+                          'HPP Riil per Kg',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                        Text(
+                          '${currencyFmt.format(summary.hppPerKg)}/kg',
+                          style: tt.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (summary.totalHarvestWeightKg > 0) ...[
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: cs.outlineVariant,
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          'Daging Terjual',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                        Text(
+                          '${numFmt.format(summary.totalHarvestWeightKg)} kg',
+                          style: tt.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (summary.totalChicksSold > 0) ...[
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: cs.outlineVariant,
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          'Ayam Terjual',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                        Text(
+                          '${numFmt.format(summary.totalChicksSold)} ekor',
+                          style: tt.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Visual Progress Struktur Biaya Operasional (Pakan, DOC, OVK, Operasional)
+class _CostBreakdownCard extends StatelessWidget {
+  final FinanceSummary summary;
+
+  const _CostBreakdownCard({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final currencyFmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    return AppCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'STRUKTUR BIAYA OPERASIONAL',
+                style: tt.labelSmall?.copyWith(
+                  color: cs.primary,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              Text(
+                currencyFmt.format(summary.totalExpense),
+                style: tt.labelSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cs.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Multi-color Segmented Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+            child: SizedBox(
+              height: 10,
+              child: Row(
+                children: [
+                  if (summary.feedExpensePct > 0)
+                    Expanded(
+                      flex: (summary.feedExpensePct * 10).round().clamp(1, 1000),
+                      child: Container(color: cs.primary),
+                    ),
+                  if (summary.docExpensePct > 0)
+                    Expanded(
+                      flex: (summary.docExpensePct * 10).round().clamp(1, 1000),
+                      child: Container(color: AppColors.warning),
+                    ),
+                  if (summary.ovkExpensePct > 0)
+                    Expanded(
+                      flex: (summary.ovkExpensePct * 10).round().clamp(1, 1000),
+                      child: Container(color: AppColors.success),
+                    ),
+                  if (summary.operationalExpensePct > 0)
+                    Expanded(
+                      flex: (summary.operationalExpensePct * 10)
+                          .round()
+                          .clamp(1, 1000),
+                      child: Container(color: cs.outline),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Legend Items
+          Wrap(
+            spacing: 12,
+            runSpacing: 6,
+            children: [
+              _CostLegendItem(
+                color: cs.primary,
+                label: 'Pakan: ${summary.feedExpensePct.toStringAsFixed(1)}%',
+              ),
+              _CostLegendItem(
+                color: AppColors.warning,
+                label: 'DOC: ${summary.docExpensePct.toStringAsFixed(1)}%',
+              ),
+              _CostLegendItem(
+                color: AppColors.success,
+                label: 'OVK: ${summary.ovkExpensePct.toStringAsFixed(1)}%',
+              ),
+              _CostLegendItem(
+                color: cs.outline,
+                label:
+                    'Lainnya: ${summary.operationalExpensePct.toStringAsFixed(1)}%',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CostLegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _CostLegendItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Kartu Item Transaksi yang Informatif & Rapi
+class _TransactionCard extends StatelessWidget {
+  final FinanceTransaction transaction;
+  final VoidCallback onDelete;
+
+  const _TransactionCard({
+    required this.transaction,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final currencyFmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+
+    final isIncome = transaction.isIncome;
+    final txColor = isIncome ? AppColors.success : AppColors.error;
+
+    // Keterangan pendukung (ekor, kg, catatan)
+    final metaParts = <String>[];
+    if (transaction.birdCount != null && transaction.birdCount! > 0) {
+      metaParts.add('${numFmt.format(transaction.birdCount)} ekor');
+    }
+    if (transaction.weightKg != null && transaction.weightKg! > 0) {
+      metaParts.add('${transaction.weightKg!.toStringAsFixed(1)} kg');
+    }
+    if (transaction.notes.isNotEmpty) {
+      metaParts.add(transaction.notes);
+    }
+
+    return AppCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          // Icon Kategori Melingkar
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: isIncome
+                  ? AppColors.success.withValues(alpha: 0.12)
+                  : cs.secondaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              transaction.categoryIcon,
+              color: isIncome ? AppColors.success : cs.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Detail Kategori & Metadata
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.displayCategory,
+                  style: tt.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: cs.onSurface,
+                  ),
+                ),
+                if (metaParts.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    metaParts.join(' • '),
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Nominal & Tombol Hapus
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${isIncome ? '+' : '-'}${currencyFmt.format(transaction.amount)}',
+                style: tt.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: txColor,
+                ),
+              ),
+              const SizedBox(height: 2),
+              InkWell(
+                onTap: onDelete,
+                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.delete_outline_rounded,
+                        size: 15,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        'Hapus',
+                        style: tt.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

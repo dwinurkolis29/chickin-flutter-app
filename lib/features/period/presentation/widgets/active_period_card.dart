@@ -214,7 +214,7 @@ class _ActivePeriodContentCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Baris 3: Live Stats Stream (Sisa Ayam, FCR, Pakan)
+            // Baris 3 & 4: Live Stats Stream & Action Buttons
             StreamBuilder<List<RecordingData>>(
               stream: _resolveStream(),
               builder: (context, snapshot) {
@@ -226,7 +226,11 @@ class _ActivePeriodContentCard extends StatelessWidget {
                   final recordings = snapshot.data!;
 
                   final fcrUseCase = CalculateFCR();
-                  final weeklyFCRs = fcrUseCase.execute(recordings, period.initialCapacity);
+                  final weeklyFCRs = fcrUseCase.execute(
+                    recordings,
+                    period.initialCapacity,
+                    harvests: period.summary?.harvests,
+                  );
                   if (weeklyFCRs.isNotEmpty) {
                     final lastWeek = weeklyFCRs.last;
                     livePopulasi = lastWeek.sisaAyam;
@@ -239,108 +243,147 @@ class _ActivePeriodContentCard extends StatelessWidget {
                   liveTotalPakan = period.summary!.totalFeedKg;
                 }
 
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(AppTheme.rowRadius),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _StatMiniTile(
-                          label: 'Sisa Ayam',
-                          value: '${numFmt.format(livePopulasi)} ekor',
-                          sub: 'DOC: ${numFmt.format(period.initialCapacity)}',
-                        ),
+                return Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainer,
+                        borderRadius: BorderRadius.circular(AppTheme.rowRadius),
                       ),
-                      Container(width: 1, height: 36, color: cs.outlineVariant),
-                      Expanded(
-                        child: _StatMiniTile(
-                          label: 'FCR Terkini',
-                          value: liveFcr > 0 ? numFmt.format(liveFcr) : '-',
-                          sub: liveFcr <= 1.80 ? 'Efisien' : (liveFcr <= 2.20 ? 'Cukup' : 'Perhatian'),
-                        ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _StatMiniTile(
+                              label: 'Sisa Ayam',
+                              value: '${numFmt.format(livePopulasi)} ekor',
+                              sub:
+                                  'DOC: ${numFmt.format(period.initialCapacity)}',
+                            ),
+                          ),
+                          Container(
+                              width: 1, height: 36, color: cs.outlineVariant),
+                          Expanded(
+                            child: _StatMiniTile(
+                              label: 'FCR Terkini',
+                              value: liveFcr > 0 ? numFmt.format(liveFcr) : '-',
+                              sub: liveFcr <= 1.80
+                                  ? 'Efisien'
+                                  : (liveFcr <= 2.20 ? 'Cukup' : 'Perhatian'),
+                            ),
+                          ),
+                          Container(
+                              width: 1, height: 36, color: cs.outlineVariant),
+                          Expanded(
+                            child: _StatMiniTile(
+                              label: 'Total Pakan',
+                              value: '${numFmt.format(liveTotalPakan)} kg',
+                              sub:
+                                  '${(liveTotalPakan / 50).toStringAsFixed(1)} sak',
+                            ),
+                          ),
+                        ],
                       ),
-                      Container(width: 1, height: 36, color: cs.outlineVariant),
-                      Expanded(
-                        child: _StatMiniTile(
-                          label: 'Total Pakan',
-                          value: '${numFmt.format(liveTotalPakan)} kg',
-                          sub: '${(liveTotalPakan / 50).toStringAsFixed(1)} sak',
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 16),
 
-            // Baris 4: Quick Action Buttons
-            FilledButton.tonalIcon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => FinanceListScreen(period: period),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
-              label: const Text('Catat & Kelola Keuangan'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(42),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      if (onManageTap != null) {
-                        onManageTap!();
-                      } else {
+                    // Quick Action 1: Keuangan
+                    FilledButton.tonalIcon(
+                      onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => FormPeriod(period: period)),
+                          MaterialPageRoute(
+                            builder: (_) => FinanceListScreen(period: period),
+                          ),
                         );
-                      }
-                    },
-                    icon: const Icon(Icons.edit_note_rounded, size: 18),
-                    label: const Text('Kelola Siklus'),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                      },
+                      icon: const Icon(Icons.account_balance_wallet_outlined,
+                          size: 18),
+                      label: const Text('Catat & Kelola Keuangan'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(42),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.pillRadius),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _confirmClosePeriod(context),
-                    icon: Icon(Icons.check_box_outlined, size: 18, color: cs.error),
-                    label: Text(
-                      'Tutup Panen',
-                      style: tt.bodyMedium?.copyWith(
-                        color: cs.error,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 8),
+
+                    // Quick Action 2: Kelola Siklus & Panen Parsial
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              if (onManageTap != null) {
+                                onManageTap!();
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FormPeriod(period: period),
+                                  ),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.edit_note_rounded, size: 18),
+                            label: const Text('Kelola Siklus'),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppTheme.pillRadius),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () =>
+                                _openPartialHarvest(context, livePopulasi),
+                            icon: const Icon(Icons.scale_rounded, size: 18),
+                            label: const Text('Panen Parsial'),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppTheme.pillRadius),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Quick Action 3: Tutup Panen Akhir
+                    OutlinedButton.icon(
+                      onPressed: () => _confirmClosePeriod(
+                        context,
+                        estimatedRemainingChicks: livePopulasi,
+                      ),
+                      icon: Icon(Icons.check_box_outlined,
+                          size: 18, color: cs.error),
+                      label: Text(
+                        'Tutup Panen',
+                        style: tt.bodyMedium?.copyWith(
+                          color: cs.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(42),
+                        side: BorderSide(
+                            color: cs.error.withValues(alpha: 0.6)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppTheme.pillRadius),
+                        ),
                       ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: cs.error.withValues(alpha: 0.6)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -348,23 +391,68 @@ class _ActivePeriodContentCard extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmClosePeriod(BuildContext context) async {
-    final result = await DialogHelper.showClosePeriodHarvest(context, period);
+  Future<void> _openPartialHarvest(
+      BuildContext context, int livePopulasi) async {
+    final result = await DialogHelper.showPartialHarvest(
+      context,
+      period: period,
+      currentLiveChicks: livePopulasi,
+    );
+    if (result == null) return;
+
+    if (!context.mounted) return;
+    try {
+      await context.read<PeriodController>().addPartialHarvest(
+            period.id,
+            result.harvest,
+            createIncomeTransaction: result.createIncomeTransaction,
+          );
+      if (context.mounted) {
+        AppSnackbar.showSuccess(
+          context,
+          'Panen parsial ${result.harvest.chicks} ekor berhasil dicatat',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.showError(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmClosePeriod(
+    BuildContext context, {
+    int? estimatedRemainingChicks,
+  }) async {
+    final result = await DialogHelper.showClosePeriodHarvest(
+      context,
+      period,
+      estimatedRemainingChicks: estimatedRemainingChicks,
+    );
     if (result == null) return;
 
     if (!context.mounted) return;
     try {
       await context.read<PeriodController>().closePeriod(
-        period.id,
-        harvestedChicks: result.harvestedChicks,
-        harvestedWeightKg: result.harvestedWeightKg,
-      );
+            period.id,
+            harvestedChicks: result.harvestedChicks,
+            harvestedWeightKg: result.harvestedWeightKg,
+          );
       if (context.mounted) {
-        AppSnackbar.showSuccess(context, 'Periode berhasil ditutup & laporan panen siap');
+        AppSnackbar.showSuccess(
+          context,
+          'Periode berhasil ditutup & laporan panen siap',
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        AppSnackbar.showError(context, e.toString().replaceAll('Exception: ', ''));
+        AppSnackbar.showError(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+        );
       }
     }
   }

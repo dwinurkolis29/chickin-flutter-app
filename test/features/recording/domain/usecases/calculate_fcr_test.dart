@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recording_app/features/period/data/models/harvest_record.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
 
@@ -272,6 +273,81 @@ void main() {
       expect(result[1].cumulativeFeedKg, 100.0);
       expect(result[1].sisaAyam, 995);
       expect(result[1].fcr, 0.46);
+    });
+
+    group('panen parsial (thinning)', () {
+      test('execute memperhitungkan pengurangan sisa ayam dan akumulasi biomassa panen parsial', () {
+        final recordings = [
+          rec(day: 21, avgWeightGram: 1000, feedSack: 20, mortality: 10),
+          rec(day: 28, avgWeightGram: 1400, feedSack: 20, mortality: 10),
+          rec(day: 35, avgWeightGram: 1900, feedSack: 20, mortality: 10),
+        ];
+
+        final partialHarvest = HarvestRecord(
+          id: 'h1',
+          type: HarvestType.partial,
+          date: DateTime(2026, 3, 28),
+          day: 28,
+          chicks: 300,
+          weightKg: 420.0,
+          avgWeightKg: 1.4,
+          createdAt: DateTime(2026, 3, 28),
+        );
+
+        final result = useCase.execute(
+          recordings,
+          1000,
+          harvests: [partialHarvest],
+        );
+
+        // Minggu 3 (hari 21): belum ada panen parsial. Sisa = 1000 - 10 = 990
+        expect(result.first.sisaAyam, 990);
+
+        // Minggu 4 (hari 28): sudah ada panen parsial 300 ekor. Sisa = 1000 - 20 - 300 = 680
+        expect(result[1].sisaAyam, 680);
+        // Biomassa minggu 4 = (680 * 1.4) + 420 = 952 + 420 = 1372 kg
+        expect(result[1].beratAyam, closeTo(1372.0, 0.1));
+
+        // Minggu 5 (hari 35): sisa ayam tetap terpotong panen parsial. Sisa = 1000 - 30 - 300 = 670
+        expect(result.last.sisaAyam, 670);
+      });
+
+      test('executeDaily memperhitungkan panen parsial pada hari terjadinya dan hari setelahnya', () {
+        final recordings = [
+          rec(day: 27, avgWeightGram: 1350, feedSack: 5, mortality: 2),
+          rec(day: 28, avgWeightGram: 1400, feedSack: 5, mortality: 3),
+          rec(day: 29, avgWeightGram: 1450, feedSack: 5, mortality: 1),
+        ];
+
+        final partialHarvest = HarvestRecord(
+          id: 'h1',
+          type: HarvestType.partial,
+          date: DateTime(2026, 3, 28),
+          day: 28,
+          chicks: 250,
+          weightKg: 350.0,
+          avgWeightKg: 1.4,
+          createdAt: DateTime(2026, 3, 28),
+        );
+
+        final result = useCase.executeDaily(
+          recordings,
+          1000,
+          harvests: [partialHarvest],
+        );
+
+        // Hari 27: belum panen parsial -> sisa = 1000 - 2 = 998
+        expect(result[0].day, 27);
+        expect(result[0].sisaAyam, 998);
+
+        // Hari 28: panen parsial 250 ekor -> sisa = 1000 - 5 - 250 = 745
+        expect(result[1].day, 28);
+        expect(result[1].sisaAyam, 745);
+
+        // Hari 29: sisa = 1000 - 6 - 250 = 744
+        expect(result[2].day, 29);
+        expect(result[2].sisaAyam, 744);
+      });
     });
   });
 }
