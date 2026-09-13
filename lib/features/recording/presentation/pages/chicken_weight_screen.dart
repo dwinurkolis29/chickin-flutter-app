@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/components/buttons/action_pill_button.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
@@ -139,30 +140,19 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
           const SizedBox(height: 24),
 
           // ── 4. Tombol Navigasi ke Kalkulator Cepat ───────────────────────
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(50),
-              backgroundColor: cs.primary,
-              foregroundColor: cs.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-              ),
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const QuickCalculatorScreen(initialIndex: 1),
-                ),
-              );
-            },
-            icon: const Icon(Icons.calculate_outlined),
-            label: Text(
-              'Kalkulator Cepat (IP / ADG)',
-              style: tt.labelLarge?.copyWith(
-                color: cs.onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
+          Center(
+            child: ActionPillButton(
+              label: 'Kalkulator Cepat (IP / ADG)',
+              icon: Icons.calculate_outlined,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => const QuickCalculatorScreen(initialIndex: 1),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 32),

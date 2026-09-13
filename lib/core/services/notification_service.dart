@@ -33,6 +33,26 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   FirebaseMessaging? _messaging;
 
+  DateTime? _lastScheduledDate;
+  int? _lastScheduledAgeDays;
+  String? _lastScheduledPeriodId;
+  int? _lastScheduledHour;
+  int? _lastScheduledMinute;
+
+  @visibleForTesting
+  DateTime? get lastScheduledDate => _lastScheduledDate;
+
+  @visibleForTesting
+  int? get lastScheduledAgeDays => _lastScheduledAgeDays;
+
+  void _resetScheduledCache() {
+    _lastScheduledDate = null;
+    _lastScheduledAgeDays = null;
+    _lastScheduledPeriodId = null;
+    _lastScheduledHour = null;
+    _lastScheduledMinute = null;
+  }
+
   // Initialize notification service
   Future<void> initialize() async {
     // Initialize timezone
@@ -223,6 +243,9 @@ class NotificationService {
 
   // Cancel a specific notification
   Future<void> cancelNotification(int id) async {
+    if (id == dailyRecordingReminderId) {
+      _resetScheduledCache();
+    }
     try {
       await _notifications.cancel(id);
     } catch (_) {}
@@ -230,6 +253,7 @@ class NotificationService {
 
   // Cancel all notifications
   Future<void> cancelAllNotifications() async {
+    _resetScheduledCache();
     try {
       await _notifications.cancelAll();
     } catch (_) {}
@@ -348,10 +372,18 @@ class NotificationService {
 
       // 3. Periksa apakah recording hari ini sudah terisi
       final bool isTodayRecorded = recordings.any(
-        (rec) => rec.day == currentAgeDays,
+        (rec) => rec.day >= currentAgeDays,
       );
 
-      // 4. Tentukan target jadwal pengingat
+      // 4. Tentukan target jadwal pengingat (Maksimal 1 kali per hari)
+      final todayReminderTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        reminderHour,
+        reminderMinute,
+      );
+
       DateTime scheduledDateTime;
       int targetAgeDays;
 
@@ -367,39 +399,47 @@ class NotificationService {
         );
         targetAgeDays = currentAgeDays + 1;
       } else {
-        // Jika hari ini belum terisi, target adalah hari ini pukul reminderHour:reminderMinute
-        scheduledDateTime = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          reminderHour,
-          reminderMinute,
-        );
-        targetAgeDays = currentAgeDays;
-
-        // Jika waktu hari ini sudah lewat (misal sekarang 20:00)
-        if (scheduledDateTime.isBefore(now)) {
-          // Jika belum larut malam (< 22:00), jadwalkan 15 detik dari sekarang untuk pengingat malam ini
-          if (now.hour < 22) {
-            scheduledDateTime = now.add(const Duration(seconds: 15));
-          } else {
-            // Jika sudah larut malam, jadwalkan besok
-            final tomorrow = now.add(const Duration(days: 1));
-            scheduledDateTime = DateTime(
-              tomorrow.year,
-              tomorrow.month,
-              tomorrow.day,
-              reminderHour,
-              reminderMinute,
-            );
-            targetAgeDays = currentAgeDays + 1;
-          }
+        if (now.isBefore(todayReminderTime)) {
+          // Waktu pengingat hari ini belum tiba (misal: masih pagi/siang sebelum jam 19:00).
+          // Jadwalkan tepat 1 kali pada jam pengingat hari ini.
+          scheduledDateTime = todayReminderTime;
+          targetAgeDays = currentAgeDays;
+        } else {
+          // Waktu pengingat hari ini sudah lewat (>= jam 19:00).
+          // JANGAN menjadwalkan ulang untuk hari ini (hindari spam notifikasi berulang).
+          // Langsung jadwalkan untuk besok hari pada jam pengingat.
+          final tomorrow = now.add(const Duration(days: 1));
+          scheduledDateTime = DateTime(
+            tomorrow.year,
+            tomorrow.month,
+            tomorrow.day,
+            reminderHour,
+            reminderMinute,
+          );
+          targetAgeDays = currentAgeDays + 1;
         }
+      }
+
+      // 5. Cek apakah jadwal ini sudah sama persis dengan yang sedang aktif dijadwalkan
+      if (_lastScheduledDate == scheduledDateTime &&
+          _lastScheduledAgeDays == targetAgeDays &&
+          _lastScheduledPeriodId == activePeriod.id &&
+          _lastScheduledHour == reminderHour &&
+          _lastScheduledMinute == reminderMinute) {
+        return;
       }
 
       final title = 'Waktunya Catat Recording Harian 🐔';
       final body =
           'Siklus ${activePeriod.name} hari ke-$targetAgeDays belum diisi. Yuk catat pakan & bobot ayam hari ini!';
+
+      // Pastikan timezone terinisialisasi jika dipanggil sebelum initialize() / di test
+      try {
+        tz.local;
+      } catch (_) {
+        tz.initializeTimeZones();
+        tz.setLocalLocation(tz.getLocation('UTC'));
+      }
 
       // Convert DateTime to TZDateTime
       final tz.TZDateTime scheduledTZDate = tz.TZDateTime.from(
@@ -433,6 +473,12 @@ class NotificationService {
 
       // Batalkan jadwal sebelumnya terlebih dahulu
       await cancelNotification(dailyRecordingReminderId);
+
+      _lastScheduledDate = scheduledDateTime;
+      _lastScheduledAgeDays = targetAgeDays;
+      _lastScheduledPeriodId = activePeriod.id;
+      _lastScheduledHour = reminderHour;
+      _lastScheduledMinute = reminderMinute;
 
       // Jadwalkan notifikasi baru
       final tzNow = tz.TZDateTime.now(tz.local);

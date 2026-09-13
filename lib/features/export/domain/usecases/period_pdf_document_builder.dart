@@ -8,17 +8,12 @@ import 'package:recording_app/features/finance/data/models/finance_summary.dart'
 import 'package:recording_app/features/reporting/domain/usecases/generate_period_report.dart';
 import 'package:recording_app/features/reporting/domain/usecases/period_comparison_calculator.dart';
 
-/// Builder untuk menghasilkan dokumen Laporan Periode PDF A4 1 Halaman
-/// sesuai format wireframe Chickin (BroilerKu).
+/// Builder untuk menghasilkan dokumen Laporan Resmi Periode PDF A4 (Gaya Dokumen Kertas Resmi).
+/// Format dokumen formal tanpa pembungkus card mobile UI.
 class PeriodPdfDocumentBuilder {
-  static const PdfColor _primaryColor = PdfColor.fromInt(0xFF1A47E5);
-  static const PdfColor _textPrimary = PdfColor.fromInt(0xFF0A1128);
-  static const PdfColor _textSecondary = PdfColor.fromInt(0xFF5A6680);
-  static const PdfColor _cardBg = PdfColor.fromInt(0xFFF5F7FF);
-  static const PdfColor _cardBorder = PdfColor.fromInt(0xFFCDD5EE);
-  static const PdfColor _dividerColor = PdfColor.fromInt(0xFFE8ECFB);
-  static const PdfColor _successGreen = PdfColor.fromInt(0xFF16A34A);
-  static const PdfColor _warningAmber = PdfColor.fromInt(0xFFD97706);
+  static const PdfColor _black = PdfColors.black;
+  static const PdfColor _tableBorder = PdfColor.fromInt(0xFFCBD5E1);
+  static const PdfColor _tableHeaderBg = PdfColor.fromInt(0xFFF8FAFC);
 
   String _clean(String text) {
     return text
@@ -32,481 +27,643 @@ class PeriodPdfDocumentBuilder {
         .replaceAll('→', '->');
   }
 
+  String _evalFcr(double fcr) {
+    if (fcr <= 0) return '-';
+    if (fcr <= 1.65) return 'Istimewa';
+    if (fcr <= 1.75) return 'Sangat Baik';
+    if (fcr <= 1.85) return 'Baik / Standar';
+    return 'Perlu Evaluasi';
+  }
+
+  String _evalIp(double? ip) {
+    if (ip == null || ip <= 0) return '-';
+    if (ip >= 400) return 'Istimewa';
+    if (ip >= 350) return 'Sangat Baik';
+    if (ip >= 300) return 'Baik / Standar';
+    return 'Perlu Evaluasi';
+  }
+
+  String _formatRupiah(double amount) {
+    final fmt = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return fmt.format(amount.round());
+  }
+
   Future<Uint8List> buildPdf({
     required PeriodReport report,
     required FinanceSummary finance,
     required PeriodDeltaComparison comparison,
     required CageData cage,
+    String? farmerName,
   }) async {
     await initializeDateFormatting('id_ID', null);
     final pdf = pw.Document();
 
-    final dateFmt = DateFormat('d MMM yyyy', 'id_ID');
+    final resolvedFarmerName =
+        (farmerName != null && farmerName.trim().isNotEmpty)
+            ? farmerName.trim()
+            : 'Peternak';
+
+    final dateFmt = DateFormat('d MMMM yyyy', 'id_ID');
     final startDateStr = dateFmt.format(report.period.startDate);
     final endDateStr =
         report.period.endDate != null
             ? dateFmt.format(report.period.endDate!)
-            : 'Aktif';
-    final dateRangeStr =
-        '$startDateStr - $endDateStr - ${report.durationDays} hari';
+            : 'Masih Berjalan';
 
     final numFmt = NumberFormat.decimalPattern('id_ID');
 
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 28),
         build: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // ── 1. HEADER SECTION ──────────────────────────────────────────
-              pw.Container(
-                padding: const pw.EdgeInsets.all(14),
-                decoration: pw.BoxDecoration(
-                  color: _primaryColor,
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(10),
-                  ),
-                ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
-                  children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          report.period.name.toUpperCase(),
-                          style: pw.TextStyle(
-                            color: PdfColors.white,
-                            fontSize: 16,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                        pw.SizedBox(height: 3),
-                        pw.Text(
-                          cage.name.isNotEmpty ? cage.name : 'Kandang Utama',
-                          style: pw.TextStyle(
-                            color: PdfColors.white,
-                            fontSize: 12,
-                            fontWeight: pw.FontWeight.normal,
-                          ),
-                        ),
-                        pw.SizedBox(height: 2),
-                        pw.Text(
-                          dateRangeStr,
-                          style: const pw.TextStyle(
-                            color: PdfColor.fromInt(0xFFD0DCFF),
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: const PdfColor.fromInt(0xFF2855F0),
-                        borderRadius: const pw.BorderRadius.all(
-                          pw.Radius.circular(8),
-                        ),
-                      ),
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.end,
-                        children: [
-                          pw.Text(
-                            'CHICKIN REPORT',
-                            style: pw.TextStyle(
-                              color: PdfColors.white,
-                              fontSize: 9,
-                              fontWeight: pw.FontWeight.bold,
-                            ),
-                          ),
-                          pw.Text(
-                            'BroilerKu Farm Management',
-                            style: const pw.TextStyle(
-                              color: PdfColor.fromInt(0xFFD0DCFF),
-                              fontSize: 8,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 10),
-
-              // ── 2. ROW 1 KPI (LABA, MORTALITAS, BOBOT) ─────────────────────
-              pw.Container(
-                padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                decoration: pw.BoxDecoration(
-                  color: _cardBg,
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(8),
-                  ),
-                  border: pw.Border.all(color: _cardBorder, width: 0.8),
-                ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-                  children: [
-                    // Col 1: Laba
-                    _buildKpiColumn(
-                      value: _clean(comparison.netProfitText),
-                      label: 'LABA',
-                      delta: _clean(comparison.netProfitDeltaText),
-                      deltaColor:
-                          comparison.isProfitImproved
-                              ? _successGreen
-                              : _warningAmber,
-                    ),
-                    _buildVerticalDivider(),
-                    // Col 2: Mortalitas
-                    _buildKpiColumn(
-                      value: _clean(comparison.mortalityText),
-                      label: 'MORTALITAS',
-                      delta: _clean(comparison.mortalityDeltaText),
-                      deltaColor:
-                          comparison.isMortalityImproved
-                              ? _successGreen
-                              : _warningAmber,
-                    ),
-                    _buildVerticalDivider(),
-                    // Col 3: Bobot
-                    _buildKpiColumn(
-                      value: _clean(comparison.weightText),
-                      label: 'BOBOT',
-                      delta: _clean(comparison.weightDeltaText),
-                      deltaColor:
-                          comparison.isWeightImproved
-                              ? _successGreen
-                              : _warningAmber,
-                    ),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 6),
-
-              // ── 3. ROW 2 KPI (FCR & HPP) ───────────────────────────────────
-              pw.Container(
-                padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: pw.BoxDecoration(
-                  color: _cardBg,
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(8),
-                  ),
-                  border: pw.Border.all(color: _cardBorder, width: 0.8),
-                ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildMiniKpi(
-                      title: 'FCR ${_clean(comparison.fcrText)}',
-                      subtitle: _clean(comparison.fcrDeltaText),
-                      deltaColor:
-                          comparison.isFcrImproved
-                              ? _successGreen
-                              : _warningAmber,
-                    ),
-                    _buildVerticalDivider(),
-                    _buildMiniKpi(
-                      title: _clean(comparison.hppText),
-                      subtitle: _clean(comparison.hppComparisonLabel),
-                      deltaColor: _textSecondary,
-                    ),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 10),
-
-              // ── 4. INSIGHT PERIODE ─────────────────────────────────────────
-              pw.Container(
-                padding: const pw.EdgeInsets.all(10),
-                decoration: pw.BoxDecoration(
-                  color: const PdfColor.fromInt(0xFFF0F4FF),
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(8),
-                  ),
-                  border: pw.Border.all(
-                    color: const PdfColor.fromInt(0xFFD2DEFF),
-                    width: 0.8,
-                  ),
-                ),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Row(
-                      children: [
-                        pw.Text(
-                          'INSIGHT PERIODE',
-                          style: pw.TextStyle(
-                            color: _primaryColor,
-                            fontSize: 10,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    pw.SizedBox(height: 6),
-                    ...comparison.periodInsights.map(
-                      (insight) => pw.Padding(
-                        padding: const pw.EdgeInsets.only(bottom: 3),
-                        child: pw.Text(
-                          _clean(insight),
-                          style: pw.TextStyle(
-                            color: _textPrimary,
-                            fontSize: 9,
-                            fontWeight: pw.FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 10),
-
-              // ── 5. HASIL PANEN & KEUANGAN (TWO COLUMNS) ─────────────────────
+              // ── 1. KOP DOKUMEN RESMI (LETTERHEAD) ──────────────────────────
               pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  // SISI KIRI: HASIL PANEN
-                  pw.Expanded(
-                    child: pw.Container(
-                      padding: const pw.EdgeInsets.all(10),
-                      decoration: pw.BoxDecoration(
-                        color: _cardBg,
-                        borderRadius: const pw.BorderRadius.all(
-                          pw.Radius.circular(8),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'BroileKu',
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 16,
+                          fontWeight: pw.FontWeight.bold,
+                          letterSpacing: 0.5,
                         ),
-                        border: pw.Border.all(color: _cardBorder, width: 0.8),
                       ),
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text(
-                            'HASIL PANEN',
-                            style: pw.TextStyle(
-                              color: _primaryColor,
-                              fontSize: 10,
-                              fontWeight: pw.FontWeight.bold,
-                            ),
-                          ),
-                          pw.SizedBox(height: 4),
-                          pw.Text(
-                            '${numFmt.format(report.initialPopulation)} DOC -> ${numFmt.format(report.finalPopulation)} panen',
-                            style: const pw.TextStyle(
-                              color: _textSecondary,
-                              fontSize: 9,
-                            ),
-                          ),
-                          pw.SizedBox(height: 8),
-                          _buildDataRow(
-                            'Total berat',
-                            '${report.totalBiomassKg.toStringAsFixed(0)} kg',
-                          ),
-                          _buildDataRow(
-                            'Penjualan utama',
-                            finance.mainHarvestRevenue > 0
-                                ? formatCompactRupiah(
-                                  finance.mainHarvestRevenue,
-                                )
-                                : 'Rp0',
-                          ),
-                          _buildDataRow(
-                            'Afkir / reject',
-                            finance.rejectRevenue > 0
-                                ? formatCompactRupiah(finance.rejectRevenue)
-                                : 'Rp0',
-                          ),
-                          pw.Divider(color: _dividerColor, height: 10),
-                          _buildDataRow(
-                            'Total pendapatan',
-                            finance.totalRevenue > 0
-                                ? formatCompactRupiah(finance.totalRevenue)
-                                : 'Rp0',
-                            isBold: true,
-                          ),
-                        ],
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        'LAPORAN PERFORMA DAN REKAPITULASI HASIL PANEN',
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 12,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      pw.SizedBox(height: 3),
+                      pw.Text(
+                        'Peternak: $resolvedFarmerName',
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 8.5,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 1),
+                      pw.Text(
+                        'Kandang: ${cage.name.isNotEmpty ? cage.name : 'Kandang Utama'} (${cage.type.isNotEmpty ? cage.type : 'Closed House'}) | Lokasi: ${cage.location.isNotEmpty ? cage.location : '-'}',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  pw.SizedBox(width: 10),
-
-                  // SISI KANAN: KEUANGAN
-                  pw.Expanded(
-                    child: pw.Container(
-                      padding: const pw.EdgeInsets.all(10),
-                      decoration: pw.BoxDecoration(
-                        color: _cardBg,
-                        borderRadius: const pw.BorderRadius.all(
-                          pw.Radius.circular(8),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        report.period.name.toUpperCase(),
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 11,
+                          fontWeight: pw.FontWeight.bold,
                         ),
-                        border: pw.Border.all(color: _cardBorder, width: 0.8),
                       ),
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text(
-                            'KEUANGAN',
-                            style: pw.TextStyle(
-                              color: _primaryColor,
-                              fontSize: 10,
-                              fontWeight: pw.FontWeight.bold,
-                            ),
-                          ),
-                          pw.SizedBox(height: 8),
-                          _buildDataRow(
-                            'Pendapatan',
-                            finance.totalRevenue > 0
-                                ? formatCompactRupiah(finance.totalRevenue)
-                                : 'Rp0',
-                          ),
-                          _buildDataRow(
-                            'Pengeluaran',
-                            finance.totalExpense > 0
-                                ? formatCompactRupiah(finance.totalExpense)
-                                : 'Rp0',
-                          ),
-                          pw.Divider(color: _dividerColor, height: 8),
-                          _buildDataRow(
-                            'LABA BERSIH',
-                            finance.hasTransactions
-                                ? formatCompactRupiah(finance.netProfit)
-                                : 'Rp0',
-                            isBold: true,
-                            valueColor:
-                                finance.netProfit >= 0
-                                    ? _successGreen
-                                    : _warningAmber,
-                          ),
-                          pw.SizedBox(height: 8),
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        'Durasi: ${report.durationDays} Hari',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8.5,
+                        ),
+                      ),
+                      pw.SizedBox(height: 1),
+                      pw.Text(
+                        '$startDateStr - $endDateStr',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 8),
 
-                          // Visual Breakdown Bar (Pakan, DOC, OVK, Operasional)
-                          _buildCostBar(
-                            label: 'Pakan',
-                            pct: finance.feedExpensePct,
-                            barColor: _primaryColor,
-                          ),
-                          _buildCostBar(
-                            label: 'DOC',
-                            pct: finance.docExpensePct,
-                            barColor: const PdfColor.fromInt(0xFF3B82F6),
-                          ),
-                          _buildCostBar(
-                            label: 'OVK',
-                            pct: finance.ovkExpensePct,
-                            barColor: const PdfColor.fromInt(0xFF10B981),
-                          ),
-                          _buildCostBar(
-                            label: 'Oper.',
-                            pct: finance.operationalExpensePct,
-                            barColor: const PdfColor.fromInt(0xFF8B5CF6),
-                          ),
-                        ],
+              // Double Horizontal Rule (Khas Surat / Dokumen Resmi)
+              pw.Container(height: 1.5, color: _black),
+              pw.SizedBox(height: 1.5),
+              pw.Container(height: 0.5, color: _black),
+              pw.SizedBox(height: 10),
+
+              // ── 2. SEKSI 1: DATA PRODUKSI DAN POPULASI ─────────────────────
+              _buildSectionTitle('1. DATA PRODUKSI DAN POPULASI AYAM'),
+              pw.SizedBox(height: 4),
+              pw.Table(
+                border: pw.TableBorder.all(color: _tableBorder, width: 0.5),
+                children: [
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Populasi Awal DOC', isLabel: true),
+                      _buildTableCell(
+                        '${numFmt.format(report.initialPopulation)} ekor',
+                        isBold: true,
                       ),
-                    ),
+                      _buildTableCell('Total Bobot Daging Panen', isLabel: true),
+                      _buildTableCell(
+                        '${numFmt.format(report.totalBiomassKg.round())} kg',
+                        isBold: true,
+                      ),
+                    ],
+                  ),
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Mortalitas (Kematian)', isLabel: true),
+                      _buildTableCell(
+                        '${numFmt.format(report.totalMortality)} ekor (${report.mortalityRate.toStringAsFixed(1).replaceAll('.', ',')}%)',
+                      ),
+                      _buildTableCell('Rata-rata Bobot Panen', isLabel: true),
+                      _buildTableCell(
+                        '${(report.finalAvgWeightGram / 1000.0).toStringAsFixed(2).replaceAll('.', ',')} kg (${report.finalAvgWeightGram} g)',
+                      ),
+                    ],
+                  ),
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Ayam Dipanen Hidup', isLabel: true),
+                      _buildTableCell(
+                        '${numFmt.format(report.finalPopulation)} ekor (${report.survivalRate.toStringAsFixed(1).replaceAll('.', ',')}%)',
+                      ),
+                      _buildTableCell('Total Konsumsi Pakan', isLabel: true),
+                      _buildTableCell(
+                        '${numFmt.format(report.totalFeedKg.round())} kg (${(report.totalFeedKg / 50.0).toStringAsFixed(1).replaceAll('.', ',')} sak)',
+                      ),
+                    ],
                   ),
                 ],
               ),
               pw.SizedBox(height: 10),
 
-              // ── 6. TREN 3 PERIODE ──────────────────────────────────────────
+              // ── 3. SEKSI 2: INDIKATOR PERFORMA TEKNIS (KPI BROILER) ────────
+              _buildSectionTitle('2. INDIKATOR PERFORMA TEKNIS (KPI BROILER)'),
+              pw.SizedBox(height: 4),
+              pw.Table(
+                border: pw.TableBorder.all(color: _tableBorder, width: 0.5),
+                columnWidths: const {
+                  0: pw.FlexColumnWidth(3.5),
+                  1: pw.FlexColumnWidth(2.0),
+                  2: pw.FlexColumnWidth(2.0),
+                  3: pw.FlexColumnWidth(2.5),
+                },
+                children: [
+                  // Table Header
+                  pw.TableRow(
+                    decoration: const pw.BoxDecoration(color: _tableHeaderBg),
+                    children: [
+                      _buildTableHeaderCell('Parameter Evaluasi'),
+                      _buildTableHeaderCell(
+                        'Nilai Aktual',
+                        align: pw.TextAlign.center,
+                      ),
+                      _buildTableHeaderCell(
+                        'Standar Acuan',
+                        align: pw.TextAlign.center,
+                      ),
+                      _buildTableHeaderCell(
+                        'Predikat Mutu',
+                        align: pw.TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  // Baris FCR
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('FCR (Feed Conversion Ratio)'),
+                      _buildTableCell(
+                        report.fcr > 0
+                            ? report.fcr.toStringAsFixed(2).replaceAll('.', ',')
+                            : '-',
+                        align: pw.TextAlign.center,
+                        isBold: true,
+                      ),
+                      _buildTableCell('<= 1.70', align: pw.TextAlign.center),
+                      _buildTableCell(
+                        _evalFcr(report.fcr),
+                        align: pw.TextAlign.center,
+                        isBold: true,
+                      ),
+                    ],
+                  ),
+                  // Baris IP
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Indeks Performa (IP / EPEF)'),
+                      _buildTableCell(
+                        report.ipScore != null && report.ipScore! > 0
+                            ? report.ipScore!.toStringAsFixed(0)
+                            : '-',
+                        align: pw.TextAlign.center,
+                        isBold: true,
+                      ),
+                      _buildTableCell('>= 350', align: pw.TextAlign.center),
+                      _buildTableCell(
+                        _evalIp(report.ipScore),
+                        align: pw.TextAlign.center,
+                        isBold: true,
+                      ),
+                    ],
+                  ),
+                  // Baris Daya Hidup
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Daya Hidup (Livability)'),
+                      _buildTableCell(
+                        '${report.survivalRate.toStringAsFixed(1).replaceAll('.', ',')}%',
+                        align: pw.TextAlign.center,
+                        isBold: true,
+                      ),
+                      _buildTableCell('>= 95,0%', align: pw.TextAlign.center),
+                      _buildTableCell(
+                        report.survivalRate >= 95
+                            ? 'Optimal'
+                            : 'Perlu Evaluasi',
+                        align: pw.TextAlign.center,
+                        isBold: true,
+                      ),
+                    ],
+                  ),
+                  // Baris ADG
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Average Daily Gain (ADG)'),
+                      _buildTableCell(
+                        '${report.avgDailyGainGram.toStringAsFixed(1).replaceAll('.', ',')} g/hari',
+                        align: pw.TextAlign.center,
+                      ),
+                      _buildTableCell(
+                        '48 - 52 g/hari',
+                        align: pw.TextAlign.center,
+                      ),
+                      _buildTableCell(
+                        'Sesuai Standar',
+                        align: pw.TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  // Baris Pakan per Ekor
+                  pw.TableRow(
+                    children: [
+                      _buildTableCell('Konsumsi Pakan per Ekor'),
+                      _buildTableCell(
+                        '${report.feedPerBird.toStringAsFixed(2).replaceAll('.', ',')} kg',
+                        align: pw.TextAlign.center,
+                      ),
+                      _buildTableCell('<= 3,10 kg', align: pw.TextAlign.center),
+                      _buildTableCell('Efisien', align: pw.TextAlign.center),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 10),
+
+              // ── 4. SEKSI 3: REKAPITULASI KEUANGAN DAN HASIL USAHA ───────────
+              _buildSectionTitle('3. REKAPITULASI KEUANGAN DAN HASIL USAHA'),
+              pw.SizedBox(height: 4),
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  // Tabel Kiri: Penerimaan
+                  pw.Expanded(
+                    child: pw.Table(
+                      border: pw.TableBorder.all(
+                        color: _tableBorder,
+                        width: 0.5,
+                      ),
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(
+                            color: _tableHeaderBg,
+                          ),
+                          children: [
+                            _buildTableHeaderCell('PENERIMAAN (HASIL PANEN)'),
+                            _buildTableHeaderCell(
+                              'JUMLAH (RP)',
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          children: [
+                            _buildTableCell('Penjualan Ayam Utama'),
+                            _buildTableCell(
+                              _formatRupiah(finance.mainHarvestRevenue),
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          children: [
+                            _buildTableCell('Penjualan Afkir / Reject'),
+                            _buildTableCell(
+                              _formatRupiah(finance.rejectRevenue),
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(
+                            color: _tableHeaderBg,
+                          ),
+                          children: [
+                            _buildTableCell('TOTAL PENDAPATAN', isBold: true),
+                            _buildTableCell(
+                              _formatRupiah(finance.totalRevenue),
+                              align: pw.TextAlign.right,
+                              isBold: true,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(width: 8),
+                  // Tabel Kanan: Pengeluaran
+                  pw.Expanded(
+                    child: pw.Table(
+                      border: pw.TableBorder.all(
+                        color: _tableBorder,
+                        width: 0.5,
+                      ),
+                      children: [
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(
+                            color: _tableHeaderBg,
+                          ),
+                          children: [
+                            _buildTableHeaderCell('PENGELUARAN (BIAYA)'),
+                            _buildTableHeaderCell(
+                              'JUMLAH (RP)',
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          children: [
+                            _buildTableCell(
+                              'Biaya Pakan (${finance.feedExpensePct.toStringAsFixed(1)}%)',
+                            ),
+                            _buildTableCell(
+                              _formatRupiah(finance.feedExpense),
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          children: [
+                            _buildTableCell(
+                              'Biaya DOC (${finance.docExpensePct.toStringAsFixed(1)}%)',
+                            ),
+                            _buildTableCell(
+                              _formatRupiah(finance.docExpense),
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          children: [
+                            _buildTableCell(
+                              'Biaya OVK / Medis (${finance.ovkExpensePct.toStringAsFixed(1)}%)',
+                            ),
+                            _buildTableCell(
+                              _formatRupiah(finance.ovkExpense),
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          children: [
+                            _buildTableCell(
+                              'Operasional (${finance.operationalExpensePct.toStringAsFixed(1)}%)',
+                            ),
+                            _buildTableCell(
+                              _formatRupiah(finance.operationalExpense),
+                              align: pw.TextAlign.right,
+                            ),
+                          ],
+                        ),
+                        pw.TableRow(
+                          decoration: const pw.BoxDecoration(
+                            color: _tableHeaderBg,
+                          ),
+                          children: [
+                            _buildTableCell('TOTAL PENGELUARAN', isBold: true),
+                            _buildTableCell(
+                              _formatRupiah(finance.totalExpense),
+                              align: pw.TextAlign.right,
+                              isBold: true,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 5),
+
+              // Rangkuman Laba Bersih & HPP Bergaris Resmi
               pw.Container(
                 padding: const pw.EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+                  horizontal: 10,
+                  vertical: 5,
                 ),
                 decoration: pw.BoxDecoration(
-                  color: _cardBg,
-                  borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(8),
-                  ),
-                  border: pw.Border.all(color: _cardBorder, width: 0.8),
+                  border: pw.Border.all(color: _tableBorder, width: 0.8),
+                  color: _tableHeaderBg,
                 ),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'TREN 3 PERIODE',
-                          style: pw.TextStyle(
-                            color: _primaryColor,
-                            fontSize: 10,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                        pw.SizedBox(height: 3),
-                        pw.Text(
-                          _clean(comparison.threePeriodSequence),
-                          style: pw.TextStyle(
-                            color: _textPrimary,
-                            fontSize: 10,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    pw.Text(
+                      'ESTIMASI LABA BERSIH: ${_formatRupiah(finance.netProfit)}',
+                      style: pw.TextStyle(
+                        color: _black,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
                     ),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: const PdfColor.fromInt(0xFFEBF0FF),
-                        borderRadius: const pw.BorderRadius.all(
-                          pw.Radius.circular(6),
-                        ),
-                      ),
-                      child: pw.Text(
-                        _clean(comparison.threePeriodTrendSummary),
-                        style: pw.TextStyle(
-                          color: _primaryColor,
-                          fontSize: 9.5,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
+                    pw.Text(
+                      'HPP: ${_formatRupiah(finance.hppPerKg)} / kg bobot hidup',
+                      style: pw.TextStyle(
+                        color: _black,
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
               pw.SizedBox(height: 10),
+
+              // ── 5. SEKSI 4: CATATAN EVALUASI & REKOMENDASI SIKLUS ────────────
+              _buildSectionTitle('4. CATATAN EVALUASI DAN REKOMENDASI TEKNIS'),
+              pw.SizedBox(height: 4),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 5,
+                ),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: _tableBorder, width: 0.5),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (comparison.periodInsights.isNotEmpty)
+                      ...comparison.periodInsights
+                          .take(3)
+                          .map(
+                            (insight) => pw.Padding(
+                              padding: const pw.EdgeInsets.only(bottom: 2),
+                              child: pw.Row(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: [
+                                  pw.Text(
+                                    '- ',
+                                    style: pw.TextStyle(
+                                      color: _black,
+                                      fontSize: 8,
+                                    ),
+                                  ),
+                                  pw.Expanded(
+                                    child: pw.Text(
+                                      _clean(insight),
+                                      style: const pw.TextStyle(
+                                        color: _black,
+                                        fontSize: 8,
+                                        lineSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                    else
+                      pw.Text(
+                        '- Siklus pemeliharaan berjalan dengan baik dan seluruh parameter target produksi tercapai.',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 12),
+
+              // ── 6. SEKSI 5: PENGESAHAN DOKUMEN (TANDA TANGAN RESMI) ─────────
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  // Kolom Kiri: PPL / Pengawas
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Text(
+                        'Mengetahui / Diverifikasi:',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                        ),
+                      ),
+                      pw.Text(
+                        'Pengawas Lapangan (PPL) / Kemitraan',
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 36), // Ruang tanda tangan
+                      pw.Text(
+                        '( ............................................................ )',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Kolom Kanan: Peternak
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Text(
+                        '${cage.location.isNotEmpty ? cage.location : 'Tempat'}, ${DateFormat('d MMMM yyyy', 'id_ID').format(DateTime.now())}',
+                        style: const pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                        ),
+                      ),
+                      pw.Text(
+                        'Peternak / Penanggung Jawab Kandang',
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 36), // Ruang tanda tangan
+                      pw.Text(
+                        '( $resolvedFarmerName )',
+                        style: pw.TextStyle(
+                          color: _black,
+                          fontSize: 8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               pw.Spacer(),
 
-              // ── 7. FOOTER ──────────────────────────────────────────────────
+              // ── 7. FOOTER FORMAL DOKUMEN ───────────────────────────────────
               pw.Container(
-                padding: const pw.EdgeInsets.only(top: 8),
+                padding: const pw.EdgeInsets.only(top: 4),
                 decoration: const pw.BoxDecoration(
                   border: pw.Border(
-                    top: pw.BorderSide(color: _cardBorder, width: 0.5),
+                    top: pw.BorderSide(color: _tableBorder, width: 0.5),
                   ),
                 ),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(
-                      'DETAIL PANEN & BIAYA',
+                      'Dicetak melalui Sistem Manajemen Peternakan BroileKu pada ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
                       style: const pw.TextStyle(
-                        color: _textSecondary,
-                        fontSize: 8.5,
+                        color: _black,
+                        fontSize: 7.5,
                       ),
                     ),
                     pw.Text(
-                      'Dicetak pada ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())} | Chickin BroilerKu',
+                      'Halaman 1 dari 1',
                       style: const pw.TextStyle(
-                        color: _textSecondary,
-                        fontSize: 8,
+                        color: _black,
+                        fontSize: 7.5,
                       ),
                     ),
                   ],
@@ -521,158 +678,52 @@ class PeriodPdfDocumentBuilder {
     return pdf.save();
   }
 
-  // ── Helper Widgets ─────────────────────────────────────────────────────────
-
-  static pw.Widget _buildKpiColumn({
-    required String value,
-    required String label,
-    required String delta,
-    required PdfColor deltaColor,
-  }) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        pw.Text(
-          value,
-          style: pw.TextStyle(
-            color: _textPrimary,
-            fontSize: 14,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-        pw.SizedBox(height: 2),
-        pw.Text(
-          label,
-          style: const pw.TextStyle(color: _textSecondary, fontSize: 8.5),
-        ),
-        pw.SizedBox(height: 2),
-        pw.Text(
-          delta,
-          style: pw.TextStyle(
-            color: deltaColor,
-            fontSize: 9,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  static pw.Widget _buildMiniKpi({
-    required String title,
-    required String subtitle,
-    required PdfColor deltaColor,
-  }) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        pw.Text(
-          title,
-          style: pw.TextStyle(
-            color: _textPrimary,
-            fontSize: 11,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-        pw.SizedBox(height: 2),
-        pw.Text(
-          subtitle,
-          style: pw.TextStyle(color: deltaColor, fontSize: 8.5),
-        ),
-      ],
-    );
-  }
-
-  static pw.Widget _buildVerticalDivider() {
-    return pw.Container(width: 0.8, height: 32, color: _dividerColor);
-  }
-
-  static pw.Widget _buildDataRow(
-    String label,
-    String value, {
-    bool isBold = false,
-    PdfColor? valueColor,
-  }) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2.5),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(
-            label,
-            style: pw.TextStyle(
-              color: isBold ? _textPrimary : _textSecondary,
-              fontSize: 9,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
-            ),
-          ),
-          pw.Text(
-            value,
-            style: pw.TextStyle(
-              color: valueColor ?? _textPrimary,
-              fontSize: 9,
-              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
-            ),
-          ),
-        ],
+  static pw.Widget _buildSectionTitle(String title) {
+    return pw.Text(
+      title,
+      style: pw.TextStyle(
+        color: _black,
+        fontSize: 9,
+        fontWeight: pw.FontWeight.bold,
+        letterSpacing: 0.3,
       ),
     );
   }
 
-  static pw.Widget _buildCostBar({
-    required String label,
-    required double pct,
-    required PdfColor barColor,
+  static pw.Widget _buildTableHeaderCell(
+    String text, {
+    pw.TextAlign align = pw.TextAlign.left,
   }) {
-    final clampedPct = pct.clamp(0.0, 100.0);
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-      child: pw.Row(
-        children: [
-          pw.SizedBox(
-            width: 32,
-            child: pw.Text(
-              label,
-              style: const pw.TextStyle(color: _textSecondary, fontSize: 8),
-            ),
-          ),
-          pw.Expanded(
-            child: pw.Container(
-              height: 7,
-              decoration: const pw.BoxDecoration(
-                color: PdfColor.fromInt(0xFFE2E8F0),
-                borderRadius: pw.BorderRadius.all(pw.Radius.circular(3)),
-              ),
-              child: pw.Row(
-                children: [
-                  pw.Container(
-                    width: (clampedPct / 100.0) * 120.0,
-                    height: 7,
-                    decoration: pw.BoxDecoration(
-                      color: barColor,
-                      borderRadius: const pw.BorderRadius.all(
-                        pw.Radius.circular(3),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          pw.SizedBox(width: 6),
-          pw.SizedBox(
-            width: 28,
-            child: pw.Text(
-              '${clampedPct.toStringAsFixed(1).replaceAll('.', ',')}%',
-              textAlign: pw.TextAlign.right,
-              style: pw.TextStyle(
-                color: _textPrimary,
-                fontSize: 8,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
+      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
+      child: pw.Text(
+        text,
+        textAlign: align,
+        style: pw.TextStyle(
+          color: _black,
+          fontSize: 7.5,
+          fontWeight: pw.FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  static pw.Widget _buildTableCell(
+    String text, {
+    bool isLabel = false,
+    bool isBold = false,
+    pw.TextAlign align = pw.TextAlign.left,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      child: pw.Text(
+        text,
+        textAlign: align,
+        style: pw.TextStyle(
+          color: _black,
+          fontSize: 7.5,
+          fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
       ),
     );
   }

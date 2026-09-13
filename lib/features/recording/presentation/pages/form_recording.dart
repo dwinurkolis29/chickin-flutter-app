@@ -8,6 +8,7 @@ import 'package:recording_app/core/components/forms/app_text_form_field.dart';
 import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
@@ -279,6 +280,10 @@ class _FormRecordingState extends State<FormRecording> {
   Future<void> _saveData(String periodId, RecordingData recording) async {
     try {
       await _firebaseService.addRecording(periodId, recording);
+      // Batalkan reminder hari ini seketika data berhasil dicatat
+      await NotificationService().cancelNotification(
+        NotificationService.dailyRecordingReminderId,
+      );
       if (mounted) {
         AppSnackbar.showSuccess(
           context,

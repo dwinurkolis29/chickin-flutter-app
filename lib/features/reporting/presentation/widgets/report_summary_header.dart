@@ -177,15 +177,6 @@ class ReportSummaryHeader extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (showPeriodSelector &&
-                                  onPeriodSelectorTap != null) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color: cs.onPrimary,
-                                  size: 24,
-                                ),
-                              ],
                             ],
                           ),
                         ),

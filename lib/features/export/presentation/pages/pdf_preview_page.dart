@@ -1,11 +1,14 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:printing/printing.dart';
+import '../../../../core/auth/auth_service.dart';
 import '../../../../core/components/header/app_header.dart';
 import '../../../cage/data/models/cage_data.dart';
 import '../../../finance/data/models/finance_summary.dart';
 import '../../../reporting/domain/usecases/generate_period_report.dart';
 import '../../../reporting/domain/usecases/period_comparison_calculator.dart';
+import '../../../user/presentation/controllers/user_controller.dart';
 import '../../domain/usecases/period_pdf_document_builder.dart';
 
 /// Halaman Pratinjau Dokumen PDF Laporan Periode
@@ -15,6 +18,7 @@ class PdfPreviewPage extends StatelessWidget {
   final FinanceSummary finance;
   final PeriodDeltaComparison comparison;
   final CageData cage;
+  final String? farmerName;
 
   const PdfPreviewPage({
     super.key,
@@ -22,14 +26,38 @@ class PdfPreviewPage extends StatelessWidget {
     required this.finance,
     required this.comparison,
     required this.cage,
+    this.farmerName,
   });
 
-  Future<Uint8List> _generatePdf() {
+  String _resolveFarmerName(BuildContext context) {
+    if (farmerName != null && farmerName!.trim().isNotEmpty) {
+      return farmerName!.trim();
+    }
+    try {
+      final userProfile =
+          Provider.of<UserController>(context, listen: false).userProfile;
+      if (userProfile != null && userProfile.name.trim().isNotEmpty) {
+        return userProfile.name.trim();
+      }
+    } catch (_) {}
+    try {
+      final authUser =
+          Provider.of<AuthService>(context, listen: false).currentUser;
+      if (authUser?.displayName != null &&
+          authUser!.displayName!.trim().isNotEmpty) {
+        return authUser.displayName!.trim();
+      }
+    } catch (_) {}
+    return 'Peternak';
+  }
+
+  Future<Uint8List> _generatePdf(BuildContext context) {
     return PeriodPdfDocumentBuilder().buildPdf(
       report: report,
       finance: finance,
       comparison: comparison,
       cage: cage,
+      farmerName: _resolveFarmerName(context),
     );
   }
 
@@ -44,7 +72,7 @@ class PdfPreviewPage extends StatelessWidget {
       appBar: const AppHeader(title: 'Pratinjau Laporan PDF'),
       body: SafeArea(
         child: PdfPreview(
-          build: (format) => _generatePdf(),
+          build: (format) => _generatePdf(context),
           canChangeOrientation: false,
           canChangePageFormat: false,
           allowPrinting: true,

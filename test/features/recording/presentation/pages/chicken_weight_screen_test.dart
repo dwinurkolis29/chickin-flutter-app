@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/components/buttons/action_pill_button.dart';
 import 'package:recording_app/core/components/empty/app_empty_state.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
@@ -109,9 +110,11 @@ void main() {
         expect(find.text('Kenaikan Bobot'), findsWidgets);
         expect(find.text('Bobot Timbang'), findsWidgets);
 
-        // Memastikan tombol navigasi Kalkulator Cepat tampil di paling bawah
+        // Memastikan tombol navigasi Kalkulator Cepat tampil di paling bawah berbentuk ActionPillButton
+        expect(find.byType(ActionPillButton), findsOneWidget);
         expect(find.text('Kalkulator Cepat (IP / ADG)'), findsOneWidget);
         expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
       },
     );
   });

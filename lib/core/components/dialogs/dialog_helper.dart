@@ -9,8 +9,8 @@ import 'string_picker_dialog.dart';
 import 'image_source_picker_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
+import 'package:recording_app/features/period/presentation/screens/partial_harvest_screen.dart';
 import 'package:recording_app/features/period/presentation/widgets/close_period_harvest_dialog.dart';
-import 'package:recording_app/features/period/presentation/widgets/partial_harvest_dialog.dart';
 
 /// Helper terpusat untuk menampilkan dialog dan modal dengan standar visual aplikasi.
 class DialogHelper {
@@ -145,16 +145,19 @@ class DialogHelper {
     );
   }
 
-  /// Menampilkan dialog interaktif Panen Parsial (Penjarangan)
+  /// Menampilkan screen interaktif Panen Parsial (Penjarangan)
   static Future<PartialHarvestResult?> showPartialHarvest(
     BuildContext context, {
     required PeriodData period,
     required int currentLiveChicks,
   }) {
-    return PartialHarvestDialog.show(
-      context: context,
-      period: period,
-      currentLiveChicks: currentLiveChicks,
+    return Navigator.of(context).push<PartialHarvestResult>(
+      MaterialPageRoute(
+        builder: (_) => PartialHarvestScreen(
+          period: period,
+          currentLiveChicks: currentLiveChicks,
+        ),
+      ),
     );
   }
 

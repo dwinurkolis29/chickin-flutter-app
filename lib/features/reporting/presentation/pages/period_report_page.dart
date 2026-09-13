@@ -64,18 +64,6 @@ class _PeriodReportPageView extends StatelessWidget {
               }
             },
           ),
-          if (controller.closedPeriods.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.calendar_month_outlined),
-              tooltip: 'Pilih Periode',
-              onPressed:
-                  () => DialogHelper.showPeriodPicker(
-                    context,
-                    periods: controller.closedPeriods,
-                    selectedPeriodId: controller.selectedPeriodId,
-                    onSelected: controller.selectPeriod,
-                  ),
-            ),
         ],
       ),
       body: SafeArea(child: _buildBody(context, controller)),

@@ -278,8 +278,6 @@ class _FinanceListScreenState extends State<FinanceListScreen> {
                                   : (_filter == 'expense'
                                       ? 'Belum ada pengeluaran operasional yang dicatat pada periode ini.'
                                       : 'Belum ada pemasukan penjualan yang dicatat pada periode ini.'),
-                          actionLabel: 'Catat Transaksi Sekarang',
-                          onAction: () => _openAddTransaction(context),
                         ),
                       )
                     else

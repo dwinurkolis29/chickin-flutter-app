@@ -101,6 +101,8 @@ void main() {
       expect(find.text('Belum Ada Transaksi'), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsOneWidget);
       expect(find.text('Catat Transaksi'), findsOneWidget);
+      // Memastikan tidak ada button duplikat dari AppEmptyState
+      expect(find.text('Catat Transaksi Sekarang'), findsNothing);
     });
 
     testWidgets(

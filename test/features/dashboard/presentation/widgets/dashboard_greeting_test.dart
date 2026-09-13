@@ -126,8 +126,8 @@ void main() {
       expect(find.text('B'), findsOneWidget);
       // Badge periode aktif
       expect(find.text('Siklus 1'), findsOneWidget);
-      // Icon kalender
-      expect(find.byIcon(Icons.calendar_today_rounded), findsOneWidget);
+      // Icon kalender tidak tampil di greeting
+      expect(find.byIcon(Icons.calendar_today_rounded), findsNothing);
     });
 
     testWidgets(

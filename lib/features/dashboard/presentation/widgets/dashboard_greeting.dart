@@ -91,12 +91,6 @@ class DashboardGreeting extends StatelessWidget {
           // ── Header Bar: Tanggal Hari Ini & Badge Periode Aktif ───────────────
           Row(
             children: [
-              Icon(
-                Icons.calendar_today_rounded,
-                size: 13,
-                color: cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: 6),
               Text(
                 dateStr,
                 style: tt.bodySmall?.copyWith(

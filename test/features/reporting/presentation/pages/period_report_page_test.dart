@@ -302,5 +302,56 @@ void main() {
       expect(find.byIcon(Icons.account_balance_wallet_outlined), findsWidgets);
       expect(find.text('Buku Keuangan & Hasil Panen'), findsOneWidget);
     });
+
+    testWidgets(
+      'tidak menampilkan icon kalender di AppBar dan tidak ada icon panah bawah di header periode aktif',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 2000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        final closedPeriod = PeriodData(
+          id: 'p1',
+          name: 'Batch Icon Test',
+          initialCapacity: 5000,
+          startDate: DateTime(2026, 1, 1),
+          endDate: DateTime(2026, 2, 5),
+          createdAt: DateTime(2026, 1, 1),
+          isActive: false,
+        );
+
+        final mockReport = PeriodReport(
+          period: closedPeriod,
+          recordings: const [],
+          initialPopulation: 5000,
+          totalMortality: 150,
+          finalPopulation: 4850,
+          mortalityRate: 3.0,
+          totalFeedKg: 14000,
+          finalAvgWeightGram: 1800,
+          totalBiomassKg: 8730,
+          weightGainKg: 8530,
+          fcr: 1.60,
+          avgDailyGainGram: 50.0,
+          feedPerBird: 2.89,
+          survivalRate: 97.0,
+          durationDays: 35,
+        );
+
+        final ctrl = _MockReportingController(
+          closedPeriods: [closedPeriod],
+          report: mockReport,
+        );
+
+        await tester.pumpWidget(createTestWidget(ctrl));
+        await tester.pumpAndSettle();
+
+        // Icon kalender tidak boleh ada di AppBar
+        expect(find.byIcon(Icons.calendar_month_outlined), findsNothing);
+
+        // Icon panah bawah tidak boleh ada di card aktif
+        expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsNothing);
+      },
+    );
   });
 }

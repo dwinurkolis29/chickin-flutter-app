@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:recording_app/core/components/buttons/action_pill_button.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/core/theme/app_theme_option.dart';
@@ -156,8 +157,10 @@ void main() {
 
       await tester.ensureVisible(find.text('Kalkulator Cepat (FCR)'));
       await tester.pumpAndSettle();
+      expect(find.byType(ActionPillButton), findsOneWidget);
       expect(find.text('Kalkulator Cepat (FCR)'), findsOneWidget);
       expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
     });
 
     testWidgets('beralih ke tab mingguan saat tab 2 diklik', (tester) async {
