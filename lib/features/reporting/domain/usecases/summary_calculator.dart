@@ -141,7 +141,7 @@ class SummaryCalculator {
       ..sort((a, b) => a.day.compareTo(b.day));
 
     int totalMortality = 0;
-    int totalFeedSacks = 0;
+    double totalFeedSacks = 0.0;
     for (final r in sorted) {
       totalMortality += r.mortality;
       totalFeedSacks += r.feedSack;

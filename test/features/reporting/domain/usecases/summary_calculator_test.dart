@@ -9,13 +9,13 @@ import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.d
 RecordingData rec({
   required int day,
   required int avgWeightGram,
-  required int feedSack,
+  required num feedSack,
   int mortality = 0,
 }) {
   return RecordingData(
     day: day,
     avgWeightGram: avgWeightGram,
-    feedSack: feedSack,
+    feedSack: feedSack.toDouble(),
     mortality: mortality,
     createdAt: DateTime(2025, 3, day.clamp(1, 28)),
   );

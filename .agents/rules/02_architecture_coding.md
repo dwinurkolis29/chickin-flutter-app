@@ -28,6 +28,8 @@
 - **Colors**: Rely on `AppColors` (`lib/core/theme/app_colors.dart`) or `Theme.of(context).colorScheme`.
 - **Text Styling**: Use `Theme.of(context).textTheme` with explicit semantic colors for Dark Mode support.
 - **Web Density**: Maintain `visualDensity: VisualDensity.standard` in ThemeData to prevent flattened buttons on Flutter Web.
+- **Scaffold Canvas & Contrast**: DILARANG menuliskan `backgroundColor: cs.surface` pada `Scaffold`. Biarkan `Scaffold` mewarisi `scaffoldBackgroundColor` (`AppColors.background` = `#F5FAFC`, biru muda) agar terjadi kontras yang bersih dengan `AppHeader` (putih) dan `AppCard` (putih).
+- **Dashboard Quick Actions Carousel**: Seluruh tombol pintasan fitur cepat di Beranda (termasuk Pencatatan Keuangan) wajib dirancang sebagai satu baris horizontal (*Single Horizontal Scroll Carousel*) yang dapat digeser kanan dan kiri bersama-sama. Dilarang membagi tampilan menjadi kartu statis di kiri dan list vertikal mini di kanan yang membatasi kenyamanan geser (*touch gesture*).
 
 ## 5. Coding Principles
 

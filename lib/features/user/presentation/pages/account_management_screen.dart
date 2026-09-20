@@ -284,7 +284,6 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     final uid = user?.uid ?? '-';
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Kelola Akun'),
       body: SafeArea(
         child: Center(

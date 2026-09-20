@@ -41,7 +41,7 @@ service cloud.firestore {
       return data.keys().hasOnly(['day', 'avgWeightGram', 'feedSack', 'mortality', 'createdAt'])
         && 'day' in data && data.day is int && data.day > 0
         && 'avgWeightGram' in data && data.avgWeightGram is int && data.avgWeightGram >= 0
-        && 'feedSack' in data && data.feedSack is int && data.feedSack >= 0
+        && 'feedSack' in data && (data.feedSack is int || data.feedSack is float) && data.feedSack >= 0
         && 'mortality' in data && data.mortality is int && data.mortality >= 0;
     }
 

@@ -9,6 +9,7 @@ import 'string_picker_dialog.dart';
 import 'image_source_picker_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
+import 'package:recording_app/features/period/presentation/screens/partial_harvest_history_screen.dart';
 import 'package:recording_app/features/period/presentation/screens/partial_harvest_screen.dart';
 import 'package:recording_app/features/period/presentation/widgets/close_period_harvest_dialog.dart';
 
@@ -154,6 +155,22 @@ class DialogHelper {
     return Navigator.of(context).push<PartialHarvestResult>(
       MaterialPageRoute(
         builder: (_) => PartialHarvestScreen(
+          period: period,
+          currentLiveChicks: currentLiveChicks,
+        ),
+      ),
+    );
+  }
+
+  /// Menampilkan screen Riwayat Histori Panen Parsial
+  static Future<void> showPartialHarvestHistory(
+    BuildContext context, {
+    required PeriodData period,
+    int? currentLiveChicks,
+  }) {
+    return Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PartialHarvestHistoryScreen(
           period: period,
           currentLiveChicks: currentLiveChicks,
         ),

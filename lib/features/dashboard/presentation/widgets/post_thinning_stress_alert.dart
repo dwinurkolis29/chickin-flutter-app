@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:recording_app/core/components/dialogs/dialog_helper.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/period/data/models/harvest_record.dart';
+import 'package:recording_app/features/period/data/models/period_data.dart';
 
 /// Banner alert di Dashboard untuk memantau sisa ayam pasca-penjarangan (panen parsial).
 /// Otomatis muncul selama 72 jam pertama setelah panen parsial terakhir.
 class PostThinningStressAlert extends StatefulWidget {
   final HarvestRecord lastPartialHarvest;
+  final PeriodData? period;
 
-  const PostThinningStressAlert({super.key, required this.lastPartialHarvest});
+  const PostThinningStressAlert({
+    super.key,
+    required this.lastPartialHarvest,
+    this.period,
+  });
 
   @override
   State<PostThinningStressAlert> createState() =>
@@ -173,6 +180,25 @@ class _PostThinningStressAlertState extends State<PostThinningStressAlert> {
                     desc:
                         'Semprot disinfektan ringan di lorong depan dan area yang sempat dilalui tim tangkap untuk mencegah masuknya bibit penyakit.',
                   ),
+                  if (widget.period != null) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => DialogHelper.showPartialHarvestHistory(
+                        context,
+                        period: widget.period!,
+                      ),
+                      icon: const Icon(Icons.history_rounded, size: 16),
+                      label: const Text('Buka Riwayat Panen Parsial'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(38),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

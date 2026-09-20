@@ -63,12 +63,10 @@ class PdfPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final sanitizedFileName =
         'Laporan_${report.period.name.replaceAll(RegExp(r'\s+'), '_')}.pdf';
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Pratinjau Laporan PDF'),
       body: SafeArea(
         child: PdfPreview(

@@ -194,10 +194,79 @@ class PeriodController extends ChangeNotifier {
             'Penjualan Panen Parsial (Umur ${harvest.day} hari, ${harvest.chicks} ekor, ${harvest.weightKg.toStringAsFixed(1)} kg)${harvest.notes != null && harvest.notes!.trim().isNotEmpty ? " - ${harvest.notes!.trim()}" : ""}',
         birdCount: harvest.chicks,
         weightKg: harvest.weightKg,
+        harvestId: harvest.id,
         createdAt: DateTime.now(),
       );
       await _firebaseService.createFinanceTransaction(tx);
     }
+    notifyListeners();
+  }
+
+  /// Hapus Panen Parsial (Penjarangan) dari periode aktif
+  /// Otomatis memulihkan sisa ayam hidup dan menghapus transaksi kas terkait jika ada.
+  Future<void> deletePartialHarvest(
+    String periodId,
+    String harvestId,
+  ) async {
+    final period = _periods.firstWhere(
+      (p) => p.id == periodId,
+      orElse: () => throw Exception('Periode tidak ditemukan'),
+    );
+
+    if (!period.isActive) {
+      throw Exception(
+        'Tidak dapat menghapus panen: Periode sudah selesai panen / tidak aktif.',
+      );
+    }
+
+    final currentHarvests = List<HarvestRecord>.from(
+      period.summary?.harvests ?? const [],
+    );
+    final targetIndex = currentHarvests.indexWhere((h) => h.id == harvestId);
+    if (targetIndex == -1) {
+      throw Exception('Catatan panen parsial tidak ditemukan.');
+    }
+
+    final removedHarvest = currentHarvests.removeAt(targetIndex);
+
+    final updatedSummary = (period.summary ?? const PeriodSummary()).copyWith(
+      harvests: currentHarvests,
+    );
+    final updatedPeriod = period.copyWith(summary: updatedSummary);
+    final periodIdx = _periods.indexWhere((p) => p.id == periodId);
+    if (periodIdx != -1) {
+      _periods[periodIdx] = updatedPeriod;
+    }
+    await _firebaseService.updatePeriod(periodId, updatedPeriod);
+
+    // Cari dan hapus transaksi kas yang terkait dengan panen parsial ini
+    try {
+      final transactions =
+          await _firebaseService.getFinanceTransactions(periodId);
+      final relatedTransactions = transactions.where((tx) {
+        if (tx.harvestId != null && tx.harvestId == harvestId) {
+          return true;
+        }
+        // Fallback matching: jika harvestId belum tersimpan pada transaksi lama
+        return tx.isIncome &&
+            tx.birdCount == removedHarvest.chicks &&
+            (tx.weightKg != null &&
+                (tx.weightKg! - removedHarvest.weightKg).abs() < 0.01) &&
+            tx.date.year == removedHarvest.date.year &&
+            tx.date.month == removedHarvest.date.month &&
+            tx.date.day == removedHarvest.date.day;
+      }).toList();
+
+      for (final tx in relatedTransactions) {
+        if (tx.id.isNotEmpty) {
+          await _firebaseService.deleteFinanceTransaction(periodId, tx.id);
+        }
+      }
+    } catch (e) {
+      debugPrint('Catatan: gagal memproses rollback transaksi kas: $e');
+    }
+
+    notifyListeners();
   }
 
   /// Close Period: ambil recordings, kalkulasi summary + weeklyFCR + insights + panen riil, simpan ke Firebase.

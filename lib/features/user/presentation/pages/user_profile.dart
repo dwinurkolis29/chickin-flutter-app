@@ -70,7 +70,6 @@ class _UserState extends State<User> {
     final userEmail = authService.currentUser?.email ?? '';
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Profil Saya'),
       body:
           isLoading

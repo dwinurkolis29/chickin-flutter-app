@@ -11,6 +11,7 @@ import 'package:recording_app/core/services/firebase_service.dart';
 import 'package:recording_app/core/services/notification_service.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/recording_validator.dart';
@@ -29,6 +30,8 @@ class _FormRecordingState extends State<FormRecording> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
+  PeriodData? _activePeriod;
+  int _cumulativeDeathsSoFar = 0;
 
   // Satuan yang dipilih pengguna pada UI
   String _feedUnit = 'Sak'; // 'Sak' | 'Kg'
@@ -58,6 +61,11 @@ class _FormRecordingState extends State<FormRecording> {
   Future<void> _loadLastRecordingDay() async {
     try {
       final activePeriod = await _firebaseService.getActivePeriod();
+      if (mounted) {
+        setState(() {
+          _activePeriod = activePeriod;
+        });
+      }
       if (activePeriod != null) {
         final recordings =
             await _firebaseService.getRecordingsStream(activePeriod.id).first;
@@ -65,7 +73,14 @@ class _FormRecordingState extends State<FormRecording> {
         if (recordings.isNotEmpty) {
           recordings.sort((a, b) => b.day.compareTo(a.day));
           final lastDay = recordings.first.day;
+          final totalDeaths = recordings.fold<int>(
+            0,
+            (sum, r) => sum + r.mortality,
+          );
           if (mounted) {
+            setState(() {
+              _cumulativeDeathsSoFar = totalDeaths;
+            });
             _controllerUmur.text = (lastDay + 1).toString();
           }
         } else {
@@ -101,7 +116,10 @@ class _FormRecordingState extends State<FormRecording> {
             _controllerHabisPakan.text =
                 sacks % 1 == 0
                     ? sacks.toInt().toString()
-                    : sacks.toStringAsFixed(2);
+                    : sacks
+                        .toStringAsFixed(2)
+                        .replaceAll(RegExp(r'0+$'), '')
+                        .replaceAll(RegExp(r'\.$'), '');
           }
         }
       }
@@ -138,14 +156,14 @@ class _FormRecordingState extends State<FormRecording> {
   }
 
   /// Menghitung nilai habis pakan final dalam satuan SAK untuk disimpan
-  int get _parsedFeedSack {
+  double get _parsedFeedSack {
     final raw = _controllerHabisPakan.text.trim().replaceAll(',', '.');
-    if (raw.isEmpty) return 0;
+    if (raw.isEmpty) return 0.0;
     final val = double.tryParse(raw) ?? 0.0;
     if (_feedUnit == 'Sak') {
-      return val.round();
+      return val;
     } else {
-      return (val / 50.0).round();
+      return val / 50.0;
     }
   }
 
@@ -308,7 +326,6 @@ class _FormRecordingState extends State<FormRecording> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Tambah Recording'),
       body: SafeArea(
         child: Center(
@@ -465,7 +482,10 @@ class _FormRecordingState extends State<FormRecording> {
 
     if (val != null && val > 0) {
       if (_feedUnit == 'Sak') {
-        helperText = 'Setara ≈ ${(val * 50).toInt()} Kg (1 sak = 50 kg)';
+        final kg = val * 50.0;
+        final kgStr =
+            kg % 1 == 0 ? kg.toInt().toString() : kg.toStringAsFixed(1);
+        helperText = 'Setara ≈ $kgStr Kg (1 sak = 50 kg)';
       } else {
         final sacks = (val / 50.0).toStringAsFixed(2);
         helperText = 'Setara ≈ $sacks Sak pakan';
@@ -478,12 +498,9 @@ class _FormRecordingState extends State<FormRecording> {
         AppTextFormField(
           controller: _controllerHabisPakan,
           focusNode: _focusNodeHabisPakan,
-          keyboardType:
-              _feedUnit == 'Sak'
-                  ? TextInputType.number
-                  : const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           labelText: 'Habis Pakan ($_feedUnit)',
-          hintText: _feedUnit == 'Sak' ? 'Contoh: 3' : 'Contoh: 150',
+          hintText: _feedUnit == 'Sak' ? 'Contoh: 3.5' : 'Contoh: 150',
           prefixIcon: Icons.inventory_2_outlined,
           suffixIcon: _buildUnitSelector(
             currentUnit: _feedUnit,
@@ -636,9 +653,35 @@ class _FormRecordingState extends State<FormRecording> {
         _controllerMatiAyam.text.trim().isEmpty
             ? '0 Ekor'
             : '${_controllerMatiAyam.text.trim()} Ekor';
-    final feed = '$_parsedFeedSack Sak (${_parsedFeedSack * 50} kg)';
+
+    final feedSack = _parsedFeedSack;
+    final feedSackStr =
+        feedSack % 1 == 0
+            ? feedSack.toInt().toString()
+            : feedSack
+                .toStringAsFixed(2)
+                .replaceAll(RegExp(r'0+$'), '')
+                .replaceAll(RegExp(r'\.$'), '');
+    final feedKg = feedSack * 50.0;
+    final feedKgStr =
+        feedKg % 1 == 0 ? feedKg.toInt().toString() : feedKg.toStringAsFixed(1);
+    final feed = '$feedSackStr Sak ($feedKgStr kg)';
+
     final weight =
         '$_parsedWeightGram g (${(_parsedWeightGram / 1000).toStringAsFixed(2)} kg)';
+
+    final todayMortality = int.tryParse(_controllerMatiAyam.text.trim()) ?? 0;
+    final harvestBirds =
+        _activePeriod?.summary?.harvests.fold<int>(0, (s, h) => s + h.chicks) ??
+        0;
+    final liveChicks =
+        ((_activePeriod?.initialCapacity ?? 0) -
+                _cumulativeDeathsSoFar -
+                todayMortality -
+                harvestBirds)
+            .clamp(0, 999999);
+    final estDailyFI =
+        (liveChicks > 0 && feedKg > 0) ? (feedKg * 1000.0) / liveChicks : 0.0;
 
     return AppCard(
       child: Padding(
@@ -733,6 +776,50 @@ class _FormRecordingState extends State<FormRecording> {
                 ],
               ),
             ),
+            if (estDailyFI > 0) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.secondaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                  border: Border.all(
+                    color: cs.primary.withValues(alpha: 0.2),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.restaurant_rounded,
+                      size: 15,
+                      color: cs.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Estimasi Feed Intake (FI): ',
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${estDailyFI.round()} g/ekor/hari',
+                      style: tt.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:recording_app/core/components/header/app_header.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/period/data/models/harvest_record.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
+import 'package:recording_app/features/period/presentation/screens/partial_harvest_history_screen.dart';
 
 /// Hasil dari pengisian form panen parsial
 class PartialHarvestResult {
@@ -200,8 +201,26 @@ class _PartialHarvestScreenState extends State<PartialHarvestScreen> {
         _sopFeedWithdrawal;
 
     return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: const AppHeader(title: 'Panen Parsial (Penjarangan)'),
+      appBar: AppHeader(
+        title: 'Panen Parsial (Penjarangan)',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded),
+            tooltip: 'Riwayat Panen Parsial',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PartialHarvestHistoryScreen(
+                    period: widget.period,
+                    currentLiveChicks: widget.currentLiveChicks,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

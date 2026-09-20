@@ -150,7 +150,6 @@ class _QuickCalculatorScreenState extends State<QuickCalculatorScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Kalkulator Cepat'),
       body: SafeArea(
         child: Center(

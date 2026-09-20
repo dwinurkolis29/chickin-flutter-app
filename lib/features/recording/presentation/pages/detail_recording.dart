@@ -13,19 +13,32 @@ import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 import 'package:recording_app/core/components/snackbars/app_snackbar.dart';
 import 'package:recording_app/core/theme/app_colors.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
+import 'package:recording_app/features/period/data/models/harvest_record.dart';
+import 'package:recording_app/features/period/data/models/hospital_pen_data.dart';
 import 'package:recording_app/features/period/presentation/screens/form_period.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
+import 'package:recording_app/features/recording/domain/usecases/calculate_feed_intake.dart';
+import 'package:recording_app/features/recording/domain/usecases/calculate_separated_flock.dart';
 import 'package:recording_app/features/recording/domain/usecases/recording_validator.dart';
 import 'package:recording_app/features/recording/presentation/controllers/recording_controller.dart';
 import 'package:recording_app/features/recording/presentation/pages/form_recording.dart';
+import 'package:recording_app/features/recording/presentation/pages/sekat_seleksian_screen.dart';
 
 /// Halaman yang menampilkan daftar lengkap catatan recording harian.
 /// Didesain mobile-first dengan kartu interaktif yang mudah dibaca dan diedit oleh peternak.
 class DetailRecording extends StatefulWidget {
   final List<RecordingData>? recordings;
   final bool readOnly;
+  final int? initialCapacity;
+  final List<HarvestRecord>? harvests;
 
-  const DetailRecording({super.key, this.recordings, this.readOnly = false});
+  const DetailRecording({
+    super.key,
+    this.recordings,
+    this.readOnly = false,
+    this.initialCapacity,
+    this.harvests,
+  });
 
   @override
   State<DetailRecording> createState() => _DetailRecordingState();
@@ -49,6 +62,21 @@ class _DetailRecordingState extends State<DetailRecording> {
     return Scaffold(
       appBar: AppHeader(
         title: widget.readOnly ? 'Laporan Recording' : 'Semua Recording',
+        actions: [
+          if (!widget.readOnly)
+            IconButton(
+              icon: const Icon(Icons.fence_outlined, size: 22),
+              tooltip: 'Sekat Seleksian',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SekatSeleksianScreen(),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
       floatingActionButton:
           widget.readOnly
@@ -88,6 +116,8 @@ class _DetailRecordingState extends State<DetailRecording> {
                 recordings: widget.recordings!,
                 controller: controller,
                 readOnly: widget.readOnly,
+                initialCapacity: widget.initialCapacity,
+                harvests: widget.harvests,
               );
             }
 
@@ -150,6 +180,8 @@ class _DetailRecordingState extends State<DetailRecording> {
                   recordings: recordings,
                   controller: controller,
                   readOnly: widget.readOnly,
+                  initialCapacity: widget.initialCapacity,
+                  harvests: widget.harvests,
                 );
               },
             );
@@ -169,11 +201,15 @@ class _RecordingListView extends StatefulWidget {
     required this.recordings,
     required this.controller,
     this.readOnly = false,
+    this.initialCapacity,
+    this.harvests,
   });
 
   final List<RecordingData> recordings;
   final RecordingController controller;
   final bool readOnly;
+  final int? initialCapacity;
+  final List<HarvestRecord>? harvests;
 
   @override
   State<_RecordingListView> createState() => _RecordingListViewState();
@@ -275,6 +311,20 @@ class _RecordingListViewState extends State<_RecordingListView> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final filtered = _filteredRecordings;
+
+    final initialCap = widget.initialCapacity ??
+        (widget.controller.initialPopulation > 0
+            ? widget.controller.initialPopulation
+            : 1000);
+    final harvestList = widget.harvests ??
+        widget.controller.activePeriod?.summary?.harvests ??
+        const <HarvestRecord>[];
+
+    final feedIntakeMap = const CalculateFeedIntake().execute(
+      recordings: widget.recordings,
+      initialCapacity: initialCap,
+      harvests: harvestList,
+    );
 
     return Center(
       child: ConstrainedBox(
@@ -440,6 +490,21 @@ class _RecordingListViewState extends State<_RecordingListView> {
               ),
             ),
 
+            // ── Sekat Seleksian Banner (Jika Terisi) ──────────────────────────
+            if (widget.controller.hospitalPen != null &&
+                widget.controller.hospitalPen!.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: _buildHospitalPenBanner(
+                    context: context,
+                    hospitalPen: widget.controller.hospitalPen!,
+                    initialCapacity: initialCap,
+                    readOnly: widget.readOnly,
+                  ),
+                ),
+              ),
+
             // ── List Catatan Harian ───────────────────────────────────────────
             if (filtered.isEmpty)
               SliverFillRemaining(
@@ -488,6 +553,10 @@ class _RecordingListViewState extends State<_RecordingListView> {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _RecordingDayCard(
                         recording: rec,
+                        feedIntake: feedIntakeMap[rec.day],
+                        hospitalPen: widget.controller.hospitalPen,
+                        initialCapacity: initialCap,
+                        allRecordings: widget.recordings,
                         readOnly: widget.readOnly,
                         onEdit: () => _showEditSheet(context, rec),
                       ),
@@ -542,6 +611,148 @@ class _RecordingListViewState extends State<_RecordingListView> {
       },
     );
   }
+
+  Widget _buildHospitalPenBanner({
+    required BuildContext context,
+    required HospitalPenData hospitalPen,
+    required int initialCapacity,
+    required bool readOnly,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+
+    final totalMortality = widget.recordings.fold<int>(
+      0,
+      (sum, r) => sum + r.mortality,
+    );
+    final totalHarvested =
+        widget.controller.activePeriod?.summary?.harvestedChicks ?? 0;
+    final currentLive = (initialCapacity - totalMortality - totalHarvested)
+        .clamp(0, initialCapacity);
+
+    final summary = const CalculateSeparatedFlock().execute(
+      totalLiveBirds: currentLive,
+      regularAvgWeightGram: 0,
+      hospitalPen: hospitalPen,
+    );
+
+    final Color statusColor;
+    final Color statusBg;
+    switch (summary.status) {
+      case SeparatedFlockStatus.normal:
+        statusColor = AppColors.success;
+        statusBg = AppColors.success.withValues(alpha: 0.12);
+        break;
+      case SeparatedFlockStatus.warning:
+        statusColor = AppColors.warning;
+        statusBg = AppColors.warning.withValues(alpha: 0.12);
+        break;
+      case SeparatedFlockStatus.danger:
+        statusColor = AppColors.error;
+        statusBg = AppColors.error.withValues(alpha: 0.12);
+        break;
+    }
+
+    return AppCard(
+      child: InkWell(
+        onTap: readOnly
+            ? null
+            : () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SekatSeleksianScreen(),
+                  ),
+                );
+              },
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cs.secondaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.health_and_safety_outlined,
+                  size: 20,
+                  color: cs.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Sekat: ${hospitalPen.count} ekor (${numFmt.format(hospitalPen.avgWeightGram)} g)',
+                            style: tt.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: cs.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusBg,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            summary.statusLabel,
+                            style: tt.labelSmall?.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${summary.sekatPercentage.toStringAsFixed(1)}% populasi • Hari ke-${hospitalPen.day}${hospitalPen.conditions.isNotEmpty ? ' (${hospitalPen.conditions.join(', ')})' : ''}',
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              if (!readOnly) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: cs.onSurfaceVariant,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -551,11 +762,19 @@ class _RecordingListViewState extends State<_RecordingListView> {
 class _RecordingDayCard extends StatelessWidget {
   const _RecordingDayCard({
     required this.recording,
+    this.feedIntake,
+    this.hospitalPen,
+    this.initialCapacity,
+    this.allRecordings,
     required this.readOnly,
     required this.onEdit,
   });
 
   final RecordingData recording;
+  final DailyFeedIntake? feedIntake;
+  final HospitalPenData? hospitalPen;
+  final int? initialCapacity;
+  final List<RecordingData>? allRecordings;
   final bool readOnly;
   final VoidCallback onEdit;
 
@@ -568,6 +787,14 @@ class _RecordingDayCard extends StatelessWidget {
 
     final weekNum = ((recording.day - 1) ~/ 7) + 1;
     final hasMortality = recording.mortality > 0;
+
+    final feedSackText = recording.feedSack % 1 == 0
+        ? '${recording.feedSack.toInt()} sak'
+        : '${recording.feedSack.toStringAsFixed(2).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')} sak';
+    final feedKg = recording.feedSack * 50.0;
+    final feedKgText = feedKg % 1 == 0
+        ? '~${feedKg.toInt()} kg'
+        : '~${feedKg.toStringAsFixed(1)} kg';
 
     return AppCard(
       child: InkWell(
@@ -690,8 +917,8 @@ class _RecordingDayCard extends StatelessWidget {
                       iconBgColor: cs.secondaryContainer,
                       iconColor: cs.primary,
                       label: 'Pakan',
-                      value: '${recording.feedSack} sak',
-                      subtitle: '~${recording.feedSack * 50} kg',
+                      value: feedSackText,
+                      subtitle: feedKgText,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -718,9 +945,286 @@ class _RecordingDayCard extends StatelessWidget {
                   ),
                 ],
               ),
+
+              // ── Sekat Seleksian Sub-Info (Khusus Hari Sekat) ────────────────
+              if (hospitalPen != null &&
+                  hospitalPen!.day == recording.day &&
+                  hospitalPen!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _buildHospitalPenStrip(context),
+              ],
+
+              // ── 4. Feed Intake (FI) Sub-Card ───────────────────────────────
+              const SizedBox(height: 12),
+              _buildFeedIntakeCard(context),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHospitalPenStrip(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+    final hp = hospitalPen!;
+
+    // Hitung estimasi populasi hidup di hari recording ini
+    int cumulativeMortality = 0;
+    for (final r in (allRecordings ?? [recording])) {
+      if (r.day <= recording.day) {
+        cumulativeMortality += r.mortality;
+      }
+    }
+    final liveTotal = ((initialCapacity ?? 1000) - cumulativeMortality)
+        .clamp(0, initialCapacity ?? 1000);
+
+    final summary = const CalculateSeparatedFlock().execute(
+      totalLiveBirds: liveTotal,
+      regularAvgWeightGram: recording.avgWeightGram,
+      hospitalPen: hp,
+    );
+
+    final Color statusColor;
+    final Color statusBg;
+    switch (summary.status) {
+      case SeparatedFlockStatus.normal:
+        statusColor = AppColors.success;
+        statusBg = AppColors.success.withValues(alpha: 0.12);
+        break;
+      case SeparatedFlockStatus.warning:
+        statusColor = AppColors.warning;
+        statusBg = AppColors.warning.withValues(alpha: 0.12);
+        break;
+      case SeparatedFlockStatus.danger:
+        statusColor = AppColors.error;
+        statusBg = AppColors.error.withValues(alpha: 0.12);
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.4),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: cs.secondaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.fence_outlined,
+              size: 18,
+              color: cs.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Sekat Seleksian',
+                      style: tt.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                      ),
+                      child: Text(
+                        summary.statusLabel,
+                        style: tt.labelSmall?.copyWith(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${hp.count} ekor (${numFmt.format(hp.avgWeightGram)} g)  •  Rata-rata riil: ${numFmt.format(summary.weightedAvgWeightGram)} g',
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeedIntakeCard(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final numFmt = NumberFormat.decimalPattern('id_ID');
+    final fi = feedIntake;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.4),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Icon Badge (Circular secondaryContainer)
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: cs.secondaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.restaurant_rounded,
+              size: 18,
+              color: cs.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header bar: Label & Warning Chip (if drop)
+                Row(
+                  children: [
+                    Text(
+                      'Konsumsi Pakan (FI)',
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                    if (fi != null && fi.isDrop) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.warning.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.pillRadius,
+                            ),
+                            border: Border.all(
+                              color: AppColors.warning.withValues(alpha: 0.3),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.trending_down_rounded,
+                                size: 12,
+                                color: AppColors.warning,
+                              ),
+                              const SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  'Nafsu makan turun (-${fi.dropPercentage.toStringAsFixed(0)}%)',
+                                  style: tt.labelSmall?.copyWith(
+                                    color: AppColors.warning,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+
+                // Value Text: Harian & Kumulatif
+                if (fi != null && fi.dailyGrams > 0)
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${numFmt.format(fi.dailyGrams.round())} g',
+                          style: tt.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '/ekor/hari  •  Kumulatif: ',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '${numFmt.format(fi.cumulativeGrams.round())} g',
+                          style: tt.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '/ekor',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Text(
+                    'Belum ada konsumsi pakan dicatat',
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                      fontSize: 12,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -844,7 +1348,10 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
     _ctrlWeight = TextEditingController(
       text: '${widget.recording.avgWeightGram}',
     );
-    _ctrlFeed = TextEditingController(text: '${widget.recording.feedSack}');
+    final feedVal = widget.recording.feedSack;
+    final feedStr =
+        feedVal % 1 == 0 ? feedVal.toInt().toString() : feedVal.toString();
+    _ctrlFeed = TextEditingController(text: feedStr);
     _ctrlMortality = TextEditingController(
       text: '${widget.recording.mortality}',
     );
@@ -875,7 +1382,10 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
             _ctrlFeed.text =
                 sacks % 1 == 0
                     ? sacks.toInt().toString()
-                    : sacks.toStringAsFixed(2);
+                    : sacks
+                        .toStringAsFixed(2)
+                        .replaceAll(RegExp(r'0+$'), '')
+                        .replaceAll(RegExp(r'\.$'), '');
           }
         }
       }
@@ -909,14 +1419,14 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
     });
   }
 
-  int get _parsedFeedSack {
+  double get _parsedFeedSack {
     final raw = _ctrlFeed.text.trim().replaceAll(',', '.');
-    if (raw.isEmpty) return 0;
+    if (raw.isEmpty) return 0.0;
     final val = double.tryParse(raw) ?? 0.0;
     if (_feedUnit == 'Sak') {
-      return val.round();
+      return val;
     } else {
-      return (val / 50.0).round();
+      return val / 50.0;
     }
   }
 
@@ -1031,9 +1541,7 @@ class _EditRecordingSheetState extends State<_EditRecordingSheet> {
           AppTextFormField(
             controller: _ctrlFeed,
             keyboardType:
-                _feedUnit == 'Sak'
-                    ? TextInputType.number
-                    : const TextInputType.numberWithOptions(decimal: true),
+                const TextInputType.numberWithOptions(decimal: true),
             labelText: 'Pakan Terpakai ($_feedUnit)',
             prefixIcon: Icons.inventory_2_outlined,
             suffixIcon: _buildUnitToggle(

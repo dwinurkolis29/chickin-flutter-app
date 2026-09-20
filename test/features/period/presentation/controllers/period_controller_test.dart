@@ -39,13 +39,36 @@ class _FakeFirebaseService extends Fake implements FirebaseService {
     return [];
   }
 
+  final List<String> deletedTransactionIds = [];
+
   @override
   Future<String> createFinanceTransaction(
     FinanceTransaction transaction, [
     String? uid,
   ]) async {
-    createdTransactions.add(transaction);
-    return 'tx-new-id';
+    final assigned = transaction.id.isEmpty
+        ? transaction.copyWith(id: 'tx-new-${createdTransactions.length + 1}')
+        : transaction;
+    createdTransactions.add(assigned);
+    return assigned.id;
+  }
+
+  @override
+  Future<List<FinanceTransaction>> getFinanceTransactions(
+    String periodId, [
+    String? uid,
+  ]) async {
+    return createdTransactions.where((t) => t.periodId == periodId).toList();
+  }
+
+  @override
+  Future<void> deleteFinanceTransaction(
+    String periodId,
+    String transactionId, [
+    String? uid,
+  ]) async {
+    deletedTransactionIds.add(transactionId);
+    createdTransactions.removeWhere((t) => t.id == transactionId);
   }
 }
 
@@ -301,6 +324,7 @@ void main() {
         expect(tx.amount, 78750000.0);
         expect(tx.birdCount, 2500);
         expect(tx.weightKg, 3750.0);
+        expect(tx.harvestId, 'h-part-1');
       },
     );
 
@@ -339,6 +363,95 @@ void main() {
               (e) => e.toString(),
               'message',
               contains('melebihi sisa ayam hidup'),
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'berhasil menghapus panen parsial dan merollback transaksi kas terkait',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
+
+        final harvest = HarvestRecord(
+          id: 'h-to-delete',
+          type: HarvestType.partial,
+          date: DateTime.now(),
+          day: 30,
+          chicks: 2000,
+          weightKg: 3200.0,
+          avgWeightKg: 1.6,
+          totalRevenue: 64000000.0,
+          createdAt: DateTime.now(),
+        );
+
+        final activePeriod = PeriodData(
+          id: 'active-1',
+          name: 'Batch Uji Hapus',
+          initialCapacity: 8000,
+          initialWeight: 0.04,
+          startDate: DateTime.now().subtract(const Duration(days: 30)),
+          createdAt: DateTime.now().subtract(const Duration(days: 30)),
+          isActive: true,
+          summary: PeriodSummary(harvests: [harvest]),
+        );
+        controller.periods.add(activePeriod);
+
+        // Tambahkan transaksi kas terkait
+        final relatedTx = FinanceTransaction(
+          id: 'tx-harvest-1',
+          periodId: 'active-1',
+          type: 'income',
+          category: 'main_harvest',
+          amount: 64000000.0,
+          date: harvest.date,
+          harvestId: 'h-to-delete',
+          createdAt: DateTime.now(),
+        );
+        fakeFirebase.createdTransactions.add(relatedTx);
+
+        // Act: Hapus panen parsial
+        await controller.deletePartialHarvest('active-1', 'h-to-delete');
+
+        // Assert: Panen parsial terhapus dari summary
+        expect(fakeFirebase.updatedPeriods.length, 1);
+        final updated = fakeFirebase.updatedPeriods.first;
+        expect(updated.summary!.harvests.isEmpty, isTrue);
+        expect(updated.summary!.totalPartialHarvestChicks, 0);
+
+        // Assert: Transaksi kas terkait ikut terhapus
+        expect(fakeFirebase.deletedTransactionIds, contains('tx-harvest-1'));
+        expect(fakeFirebase.createdTransactions.isEmpty, isTrue);
+      },
+    );
+
+    test(
+      'gagal menghapus panen parsial jika periode sudah selesai/tidak aktif',
+      () async {
+        final fakeFirebase = _FakeFirebaseService();
+        final controller = PeriodController(firebaseService: fakeFirebase);
+
+        final closedPeriod = PeriodData(
+          id: 'closed-1',
+          name: 'Batch Selesai',
+          initialCapacity: 5000,
+          initialWeight: 0.04,
+          startDate: DateTime.now().subtract(const Duration(days: 40)),
+          endDate: DateTime.now().subtract(const Duration(days: 5)),
+          createdAt: DateTime.now().subtract(const Duration(days: 40)),
+          isActive: false,
+        );
+        controller.periods.add(closedPeriod);
+
+        expect(
+          () => controller.deletePartialHarvest('closed-1', 'any-id'),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('sudah selesai panen / tidak aktif'),
             ),
           ),
         );

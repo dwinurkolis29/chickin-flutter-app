@@ -1,6 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:recording_app/core/services/firebase_service.dart';
+import 'package:recording_app/features/period/data/models/hospital_pen_data.dart';
+import 'package:recording_app/features/period/data/models/period_data.dart';
 import 'package:recording_app/features/recording/data/models/fcr_data.dart';
 import 'package:recording_app/features/recording/data/models/recording_data.dart';
 import 'package:recording_app/features/recording/domain/usecases/calculate_fcr.dart';
@@ -15,21 +17,25 @@ class RecordingController extends ChangeNotifier {
   }) : _firebaseService = firebaseService,
        _calculateFCR = calculateFCR ?? CalculateFCR();
 
+  PeriodData? _activePeriod;
   String? _activePeriodId;
   bool _isLoadingPeriod = false;
   int _initialPopulation = 0;
   Stream<List<RecordingData>>? _recordingsStream;
   Stream<List<FlSpot>>? _weightStream;
 
+  PeriodData? get activePeriod => _activePeriod;
   String? get activePeriodId => _activePeriodId;
   bool get isLoadingPeriod => _isLoadingPeriod;
   int get initialPopulation => _initialPopulation;
+  HospitalPenData? get hospitalPen => _activePeriod?.hospitalPen;
   Stream<List<RecordingData>>? get recordingsStream => _recordingsStream;
   Stream<List<FlSpot>>? get weightStream => _weightStream;
 
   Future<void> loadActivePeriod([String? uid]) async {
     try {
       final activePeriod = await _firebaseService.getActivePeriod(uid);
+      _activePeriod = activePeriod;
       _activePeriodId = activePeriod?.id;
 
       if (_activePeriodId != null) {
@@ -73,11 +79,26 @@ class RecordingController extends ChangeNotifier {
     );
   }
 
+  /// Simpan atau hapus data sekat seleksian (hospital pen) pada periode aktif
+  Future<void> saveHospitalPen(HospitalPenData? data) async {
+    if (_activePeriodId == null || _activePeriod == null) return;
+    await _firebaseService.updateHospitalPen(_activePeriodId!, data);
+
+    final currentSummary = _activePeriod!.summary;
+    final updatedSummary = currentSummary != null
+        ? currentSummary.copyWith(hospitalPen: data)
+        : PeriodSummary(hospitalPen: data);
+
+    _activePeriod = _activePeriod!.copyWith(summary: updatedSummary);
+    notifyListeners();
+  }
+
   /// Dipanggil oleh ProxyProvider.update() setiap kali auth state berubah.
   void onAuthChanged(String? uid) {
     if (uid == null) {
       clear();
     } else {
+      _activePeriod = null;
       _activePeriodId = null;
       _initialPopulation = 0;
       _recordingsStream = null;
@@ -90,6 +111,7 @@ class RecordingController extends ChangeNotifier {
 
   /// Bersihkan data tanpa load ulang. Dipanggil saat logout.
   void clear() {
+    _activePeriod = null;
     _activePeriodId = null;
     _initialPopulation = 0;
     _recordingsStream = null;

@@ -123,7 +123,6 @@ class _FormUserState extends State<FormUser> {
     final userEmail = context.watch<AuthService>().currentUser?.email ?? '';
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Edit Profil Peternak'),
       body: SafeArea(
         child:

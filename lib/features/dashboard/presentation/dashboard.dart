@@ -31,6 +31,10 @@ import 'package:recording_app/core/components/loading/shimmer_loading.dart';
 import 'package:recording_app/core/components/cards/app_card.dart';
 import 'package:recording_app/core/theme/app_theme.dart';
 import 'package:recording_app/features/finance/presentation/pages/finance_list_screen.dart';
+import 'package:recording_app/features/recording/presentation/pages/sekat_seleksian_screen.dart';
+import 'package:recording_app/features/recording/presentation/pages/chicken_weight_screen.dart';
+import 'package:recording_app/features/reporting/presentation/pages/fcr_monitoring_screen.dart';
+import 'package:recording_app/features/user/presentation/pages/quick_calculator_screen.dart';
 
 // ── Nav index constants ───────────────────────────────────────────────────────
 const int _kHome = 0;
@@ -268,12 +272,15 @@ class DashboardContent extends StatefulWidget {
 
 class _DashboardContentState extends State<DashboardContent>
     with AutomaticKeepAliveClientMixin {
+  late final ScrollController _quickActionsScrollController;
+
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    _quickActionsScrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final ctrl = context.read<HomeController>();
@@ -282,6 +289,12 @@ class _DashboardContentState extends State<DashboardContent>
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _quickActionsScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _navigateToAddRecord() async {
@@ -428,7 +441,7 @@ class _DashboardContentState extends State<DashboardContent>
                       return Column(
                         children: [
                           if (controller.activePeriod != null) ...[
-                            _buildFinanceQuickCard(context, controller),
+                            _buildQuickActionsRow(context, controller),
                             const SizedBox(height: 16),
                           ],
                           AppEmptyState(
@@ -478,6 +491,7 @@ class _DashboardContentState extends State<DashboardContent>
                               constraints: const BoxConstraints(maxWidth: 720),
                               child: PostThinningStressAlert(
                                 lastPartialHarvest: recentPartialHarvest,
+                                period: activePeriod,
                               ),
                             ),
                           ),
@@ -492,7 +506,7 @@ class _DashboardContentState extends State<DashboardContent>
                           weightStream: controller.weightStream,
                         ),
                         const SizedBox(height: 10),
-                        _buildFinanceQuickCard(context, controller),
+                        _buildQuickActionsRow(context, controller),
                         const SizedBox(height: 10),
                         Center(
                           child: ConstrainedBox(
@@ -524,71 +538,185 @@ class _DashboardContentState extends State<DashboardContent>
     );
   }
 
-  Widget _buildFinanceQuickCard(
+  Widget _buildQuickActionsRow(
     BuildContext context,
     HomeController controller,
   ) {
     final activePeriod = controller.activePeriod;
     if (activePeriod == null) return const SizedBox.shrink();
 
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 720),
+        child: SizedBox(
+          height: 108,
+          child: SingleChildScrollView(
+            controller: _quickActionsScrollController,
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                _buildPintasanCard(
+                  context: context,
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Pencatatan\nKeuangan',
+                  subtitle: 'Biaya & panen',
+                  semanticsLabel: 'Pencatatan Keuangan',
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FinanceListScreen(period: activePeriod),
+                      ),
+                    );
+                    if (context.mounted) {
+                      controller.loadActivePeriod();
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+                _buildPintasanCard(
+                  context: context,
+                  icon: Icons.fence_outlined,
+                  label: 'Sekat\nSeleksian',
+                  subtitle: 'Hospital pen',
+                  semanticsLabel: 'Sekat Seleksian',
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => const SekatSeleksianScreen(),
+                      ),
+                    );
+                    if (context.mounted) {
+                      controller.loadActivePeriod();
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+                _buildPintasanCard(
+                  context: context,
+                  icon: Icons.analytics_outlined,
+                  label: 'Monitor\nFCR',
+                  subtitle: 'Efisiensi pakan',
+                  semanticsLabel: 'Monitor FCR',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FCRMonitoringScreen(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildPintasanCard(
+                  context: context,
+                  icon: Icons.show_chart_rounded,
+                  label: 'Pertumbuhan\nBobot',
+                  subtitle: 'Kurva & ADG',
+                  semanticsLabel: 'Pertumbuhan Bobot Ayam',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ChickenWeightScreen(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _buildPintasanCard(
+                  context: context,
+                  icon: Icons.calculate_outlined,
+                  label: 'Kalkulator\nCepat',
+                  subtitle: 'Simulasi panen',
+                  semanticsLabel: 'Kalkulator Cepat',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const QuickCalculatorScreen(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPintasanCard({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required String semanticsLabel,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Semantics(
+      label: semanticsLabel,
+      button: true,
+      child: SizedBox(
+        width: 106,
         child: AppCard(
           child: InkWell(
             borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => FinanceListScreen(period: activePeriod),
-                ),
-              );
-            },
+            onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: cs.secondaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: cs.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pencatatan Keuangan',
-                          style: tt.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: cs.secondaryContainer,
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Kelola biaya pakan, DOC, OVK, dan hasil panen',
-                          style: tt.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
+                        child: Icon(
+                          icon,
+                          color: cs.primary,
+                          size: 18,
                         ),
-                      ],
-                    ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 14,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                      ),
+                    ],
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: cs.onSurfaceVariant,
-                    size: 20,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: tt.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11.5,
+                          height: 1.2,
+                          color: cs.onSurface,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: tt.bodySmall?.copyWith(
+                          fontSize: 9.5,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -598,4 +726,7 @@ class _DashboardContentState extends State<DashboardContent>
       ),
     );
   }
+
+
+
 }

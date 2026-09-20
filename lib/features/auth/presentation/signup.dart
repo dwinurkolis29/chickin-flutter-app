@@ -95,7 +95,6 @@ class _SignupState extends State<Signup> {
     final bool busy = _isLoading;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Daftar Akun Peternak'),
       body: SafeArea(
         child: Center(

@@ -20,6 +20,7 @@ Gunakan panduan ini sebagai standar visual utama saat membuat atau memodifikasi 
 - **DILARANG** menggunakan `AppTextTheme` — sudah deprecated. Gunakan `AppTypography` atau `Theme.of(context).textTheme`.
 - **DILARANG** menggunakan `AppColors.info` — token ini sudah dihapus. Gunakan `AppColors.primary` atau `colorScheme.primary`.
 - **DILARANG** menggunakan `AppColors.secondary`, `AppColors.secondaryContainer`, atau token `*OnPrimary` — semua sudah dihapus.
+- **DILARANG KERAS** menuliskan `backgroundColor: cs.surface` pada `Scaffold`. Biarkan `Scaffold` secara alami mewarisi `scaffoldBackgroundColor` dari tema (`AppColors.background` = `#F5FAFC`, biru muda). `AppHeader` sudah otomatis berlatar putih (`cs.surface`). Memaksa `Scaffold` menjadi `cs.surface` akan menghilangkan kontras antara latar layar dengan kartu `AppCard` yang juga berlatar `cs.surface`.
 
 ---
 
@@ -305,4 +306,56 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
     - Waktu `< 1 jam` gunakan `"Baru saja"` (DILARANG menggunakan format kaku `"0 jam yang lalu"`).
     - Format jam/hari disederhanakan: `"X jam lalu"`, `"X hari lalu"` untuk menghemat ruang horizontal.
 
+### 19. Screen Background & Header Contrast Standards (Recording Concept)
+- **Scaffold Canvas**: Wajib menggunakan default tema (`AppColors.background` = `#F5FAFC`, biru muda lembut). Dilarang meng-override `backgroundColor` Scaffold kecuali halaman auth (seperti login).
+- **Top Bar (`AppHeader`)**: Wajib berlatar putih (`cs.surface`).
+- **Kartu Konten (`AppCard`)**: Berlatar putih (`cs.surface`) dengan border halus (`outlineVariant`), sehingga timbul dengan jelas di atas latar biru muda.
+- **Pinned Bottom Navigation Bar**: Jika screen memiliki bottom action button tetap (seperti `PartialHarvestHistoryScreen`), bungkus tombol dengan:
+  ```dart
+  bottomNavigationBar: Container(
+    decoration: BoxDecoration(
+      color: cs.surface,
+      border: Border(
+        top: BorderSide(
+          color: cs.outlineVariant.withValues(alpha: 0.4),
+        ),
+      ),
+    ),
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: FilledButton.icon(...),
+      ),
+    ),
+  )
+  ```
 
+### 20. Recording & History Card Anatomy (Konsistensi Format Kartu)
+Seluruh kartu pencatatan harian maupun riwayat penjarangan/panen parsial wajib mengikuti pola kartu pada `detail_recording.dart`:
+1. **Container Utama**: Gunakan `AppCard(child: Padding(padding: const EdgeInsets.all(16), child: Column(...)))`.
+2. **Baris Header Kartu**:
+   - **Kiri**: Badge hari (`Container` warna `secondaryContainer`, border radius `AppTheme.cardRadius`, teks tebal `Hari X` warna `primary`).
+   - **Tengah**: Judul entri (`Umur X Hari`), badge pill nomor (`#N`), dan tanggal kejadian (11pt `onSurfaceVariant`).
+   - **Kanan**: Tombol aksi berbentuk outlined pill button (`OutlinedButton.icon` dengan radius `AppTheme.pillRadius` dan border tipis).
+3. **Pemisah**: `Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4))`.
+4. **3 Grid Metrik Terpusat (Row)**: Menggunakan widget pembantu `_buildMetricTile`:
+   - Latar: `cs.surfaceContainer.withValues(alpha: 0.5)` dengan border `outlineVariant.withValues(alpha: 0.4)`.
+   - Icon melingkar di tengah (`secondaryContainer`), teks label di tengah (11pt), nilai metrik tebal di tengah (`bodyLarge`), dan subtitle penjelas di bawahnya.
+5. **Sub-Card Tambahan**: Untuk rincian keuangan atau catatan bakul, bungkus dalam kontainer berbingkai halus dengan icon melingkar.
+
+### 21. Dashboard Quick Action Carousel Standards (Pintasan Cepat Beranda)
+Ketika menampilkan deret pintasan cepat fitur di Beranda:
+1. **Wajib Single Horizontal Scrollable**:
+   - Gunakan `SingleChildScrollView(scrollDirection: Axis.horizontal, physics: const BouncingScrollPhysics())` di dalam kontainer berbatas tinggi (~104–108dp).
+   - **DILARANG** memecah layar menjadi split view di mana sisi kiri kartu beku dan sisi kanan list vertikal mini.
+   - Tombol pencatatan utama (misal: *Pencatatan Keuangan*) **wajib diikutsertakan di posisi pertama** pada deret horizontal yang sama agar dapat digeser bersama-sama.
+2. **Anatomi Kartu Pintasan Seragam (*Uniform Card Structure*)**:
+   - **Lebar & Tinggi**: Lebar tetap ~104–106dp, tinggi tetap ~104–108dp.
+   - **Bungkus Kartu**: Gunakan `AppCard` (`borderRadius: AppTheme.cardRadius` 24dp, `colorScheme.surface`, tanpa elevasi buatan).
+   - **Header Baris Kartu**:
+     - Kiri: Icon melingkar (`secondaryContainer` background, padding 7dp, icon `primary` size 18).
+     - Kanan: Chevron navigasi halus (`Icons.chevron_right_rounded`, size 14, `onSurfaceVariant` alpha 0.5).
+   - **Body Bawah Kartu**:
+     - Judul: Teks tebal 2 baris (`tt.labelSmall`, 11.5sp, `FontWeight.bold`, line height 1.2).
+     - Subtitle: Teks penjelas 1 baris (`tt.bodySmall`, 9.5sp, warna `cs.onSurfaceVariant`, `ellipsis`).
+3. **Aksesibilitas**: Seluruh kartu wajib dibungkus `Semantics(label: '...', button: true)` untuk screen reader.

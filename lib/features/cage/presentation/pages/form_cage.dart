@@ -113,7 +113,6 @@ class _FormCageState extends State<FormCage> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: AppHeader(
         title: isEditing ? 'Edit Spesifikasi Kandang' : 'Tambah Data Kandang',
       ),

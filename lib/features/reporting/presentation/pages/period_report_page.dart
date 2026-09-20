@@ -37,14 +37,12 @@ class _PeriodReportPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<ReportingController>();
-    final cs = Theme.of(context).colorScheme;
 
     if (isTab) {
       return SafeArea(child: _buildBody(context, controller));
     }
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: AppHeader(
         title: 'Laporan',
         actions: [
@@ -314,31 +312,59 @@ class _SummaryContent extends StatelessWidget {
             const SizedBox(height: 20),
 
             // 6. TOMBOL BUKU KEUANGAN PERIODE
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.pillRadius),
-                ),
-              ),
-              onPressed: () {
-                final targetPeriod =
-                    controller.selectedPeriod ?? controller.report?.period;
-                if (targetPeriod != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FinanceListScreen(period: targetPeriod),
+            () {
+              final targetPeriod =
+                  controller.selectedPeriod ?? controller.report?.period;
+              return Column(
+                children: [
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                      ),
                     ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              label: const Text(
-                'Buku Keuangan & Hasil Panen',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
+                    onPressed: () {
+                      if (targetPeriod != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FinanceListScreen(period: targetPeriod),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.account_balance_wallet_outlined),
+                    label: const Text(
+                      'Buku Keuangan & Hasil Panen',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  if (targetPeriod?.summary?.partialHarvests.isNotEmpty == true) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppTheme.pillRadius),
+                        ),
+                      ),
+                      onPressed: () {
+                        DialogHelper.showPartialHarvestHistory(
+                          context,
+                          period: targetPeriod,
+                        );
+                      },
+                      icon: const Icon(Icons.scale_rounded),
+                      label: Text(
+                        'Riwayat Panen Parsial (${targetPeriod!.summary!.partialHarvests.length}x Penjarangan)',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            }(),
             const SizedBox(height: 12),
 
             // 7. TOMBOL UTAMA PRATINJAU & CETAK LAPORAN PDF

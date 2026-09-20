@@ -6,7 +6,7 @@ class RecordingData {
   final String id;
   final int day;
   final int avgWeightGram;
-  final int feedSack;
+  final double feedSack;
   final int mortality;
   final DateTime createdAt;
 
@@ -14,7 +14,7 @@ class RecordingData {
     this.id = '',
     this.day = 0,
     this.avgWeightGram = 0,
-    this.feedSack = 0,
+    this.feedSack = 0.0,
     this.mortality = 0,
     required this.createdAt,
   });
@@ -28,7 +28,7 @@ class RecordingData {
       id: docId ?? asString(json, 'id'),
       day: asInt(json, 'day'),
       avgWeightGram: asInt(json, 'avgWeightGram'),
-      feedSack: asInt(json, 'feedSack'),
+      feedSack: asDouble(json, 'feedSack'),
       mortality: asInt(json, 'mortality'),
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -39,7 +39,7 @@ class RecordingData {
     // Including it violates the isValidRecordingData hasOnly security rules.
     'day': day,
     'avgWeightGram': avgWeightGram,
-    'feedSack': feedSack,
+    'feedSack': feedSack % 1 == 0 ? feedSack.toInt() : feedSack,
     'mortality': mortality,
     'createdAt': Timestamp.fromDate(createdAt),
   };
@@ -48,7 +48,7 @@ class RecordingData {
     String? id,
     int? day,
     int? avgWeightGram,
-    int? feedSack,
+    double? feedSack,
     int? mortality,
     DateTime? createdAt,
   }) {

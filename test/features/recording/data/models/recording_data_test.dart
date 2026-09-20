@@ -157,6 +157,11 @@ void main() {
         expect(result.avgWeightGram, 0);
       });
 
+      test('json dengan decimal feedSack (misal 10.5)', () {
+        final result = RecordingData.fromJson({'day': 28, 'feedSack': 10.5});
+        expect(result.feedSack, 10.5);
+      });
+
       test('docId override id', () {
         final result = RecordingData.fromJson({'day': 1}, docId: 'override-id');
         expect(result.id, 'override-id');
@@ -170,6 +175,30 @@ void main() {
       test('string numeric day → parsed', () {
         final result = RecordingData.fromJson({'day': '14'});
         expect(result.day, 14);
+      });
+    });
+
+    group('toJson', () {
+      test('feedSack bilangan bulat diserialisasi sebagai int', () {
+        final r = RecordingData(
+          day: 14,
+          feedSack: 5.0,
+          createdAt: baseDate,
+        );
+        final json = r.toJson();
+        expect(json['feedSack'], 5);
+        expect(json['feedSack'] is int, isTrue);
+      });
+
+      test('feedSack pecahan diserialisasi sebagai double', () {
+        final r = RecordingData(
+          day: 14,
+          feedSack: 5.5,
+          createdAt: baseDate,
+        );
+        final json = r.toJson();
+        expect(json['feedSack'], 5.5);
+        expect(json['feedSack'] is double, isTrue);
       });
     });
 

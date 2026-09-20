@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:recording_app/features/cage/data/models/cage_data.dart';
 import 'package:recording_app/features/finance/data/models/finance_transaction.dart';
+import 'package:recording_app/features/period/data/models/hospital_pen_data.dart';
 import 'package:recording_app/features/period/data/models/period_data.dart';
 import '../../features/recording/data/models/recording_data.dart';
 import '../../features/user/data/models/user_data.dart';
@@ -294,6 +295,30 @@ class FirebaseService {
     }
   }
 
+  /// Update data sekat seleksian (hospital pen) pada periode aktif
+  Future<void> updateHospitalPen(
+    String periodId,
+    HospitalPenData? hospitalPen, [
+    String? uid,
+  ]) async {
+    try {
+      final userId = uid ?? _currentUid;
+      final docRef = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('periods')
+          .doc(periodId);
+
+      if (hospitalPen == null || hospitalPen.isEmpty) {
+        await docRef.update({'summary.hospitalPen': FieldValue.delete()});
+      } else {
+        await docRef.update({'summary.hospitalPen': hospitalPen.toJson()});
+      }
+    } catch (e) {
+      throw Exception('Failed to update hospital pen: $e');
+    }
+  }
+
   // ============================================================================
   // RECORDING METHODS (nested in periods)
   // ============================================================================
@@ -557,7 +582,7 @@ class FirebaseService {
   ]) async {
     try {
       final userId = uid ?? _currentUid;
-      if (transaction.id == null || transaction.id!.isEmpty) {
+      if (transaction.id.isEmpty) {
         throw Exception('Transaction ID is required for update');
       }
       await _firestore

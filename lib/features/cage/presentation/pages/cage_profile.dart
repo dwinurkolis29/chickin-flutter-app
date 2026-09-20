@@ -51,7 +51,6 @@ class _CageProfileState extends State<CageProfile> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
       appBar: const AppHeader(title: 'Profil Kandang'),
       body: SafeArea(
         child: Consumer<CageController>(

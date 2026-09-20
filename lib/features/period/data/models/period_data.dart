@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/safe_convert.dart';
 import 'harvest_record.dart';
+import 'hospital_pen_data.dart';
 
 /// Sentinel untuk membedakan "tidak dipass" vs "sengaja diset null"
 class _Undefined {
@@ -110,6 +111,9 @@ class PeriodData {
   /// Total bobot kg hasil panen akhir dari summary
   double? get harvestedWeightKg => summary?.harvestedWeightKg;
 
+  /// Data status sekat seleksian aktif dari summary
+  HospitalPenData? get hospitalPen => summary?.hospitalPen;
+
   @override
   String toString() {
     return 'PeriodData(id: $id, name: $name, isActive: $isActive, isDeleted: $isDeleted, initialCapacity: $initialCapacity, endDate: $endDate)';
@@ -132,6 +136,7 @@ class PeriodSummary {
   final double? ipScore;
   final List<HarvestRecord> harvests;
   final double? weightedHarvestAgeDays;
+  final HospitalPenData? hospitalPen;
 
   const PeriodSummary({
     this.totalFeedKg = 0.0,
@@ -148,6 +153,7 @@ class PeriodSummary {
     this.ipScore,
     this.harvests = const [],
     this.weightedHarvestAgeDays,
+    this.hospitalPen,
   });
 
   /// Total ekor dari semua panen parsial (penjarangan) yang sudah dicatat
@@ -208,6 +214,12 @@ class PeriodSummary {
               .toList() ??
           const [],
       weightedHarvestAgeDays: asDoubleOrNull(json, 'weightedHarvestAgeDays'),
+      hospitalPen:
+          json['hospitalPen'] != null
+              ? HospitalPenData.fromJson(
+                json['hospitalPen'] as Map<String, dynamic>,
+              )
+              : null,
     );
   }
 
@@ -228,6 +240,7 @@ class PeriodSummary {
       'harvests': harvests.map((e) => e.toJson()).toList(),
     if (weightedHarvestAgeDays != null)
       'weightedHarvestAgeDays': weightedHarvestAgeDays,
+    if (hospitalPen != null) 'hospitalPen': hospitalPen!.toJson(),
   };
 
   PeriodSummary copyWith({
@@ -245,6 +258,7 @@ class PeriodSummary {
     double? ipScore,
     List<HarvestRecord>? harvests,
     double? weightedHarvestAgeDays,
+    Object? hospitalPen = _undefined,
   }) {
     return PeriodSummary(
       totalFeedKg: totalFeedKg ?? this.totalFeedKg,
@@ -262,6 +276,10 @@ class PeriodSummary {
       harvests: harvests ?? this.harvests,
       weightedHarvestAgeDays:
           weightedHarvestAgeDays ?? this.weightedHarvestAgeDays,
+      hospitalPen:
+          hospitalPen is _Undefined
+              ? this.hospitalPen
+              : hospitalPen as HospitalPenData?,
     );
   }
 }

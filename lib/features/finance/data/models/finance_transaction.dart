@@ -62,6 +62,7 @@ class FinanceTransaction {
   final String notes;
   final int? birdCount; // Opsional: ekor ayam terjual
   final double? weightKg; // Opsional: total kg terjual
+  final String? harvestId; // Opsional: ID panen parsial terkait
   final DateTime createdAt;
 
   const FinanceTransaction({
@@ -74,6 +75,7 @@ class FinanceTransaction {
     this.notes = '',
     this.birdCount,
     this.weightKg,
+    this.harvestId,
     required this.createdAt,
   });
 
@@ -137,6 +139,7 @@ class FinanceTransaction {
       notes: asString(json, 'notes'),
       birdCount: asIntOrNull(json, 'birdCount'),
       weightKg: asDoubleOrNull(json, 'weightKg'),
+      harvestId: json['harvestId']?.toString(),
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -150,6 +153,7 @@ class FinanceTransaction {
     'notes': notes,
     if (birdCount != null) 'birdCount': birdCount,
     if (weightKg != null) 'weightKg': weightKg,
+    if (harvestId != null) 'harvestId': harvestId,
     'createdAt': Timestamp.fromDate(createdAt),
   };
 
@@ -163,6 +167,7 @@ class FinanceTransaction {
     String? notes,
     int? birdCount,
     double? weightKg,
+    String? harvestId,
     DateTime? createdAt,
   }) {
     return FinanceTransaction(
@@ -175,6 +180,7 @@ class FinanceTransaction {
       notes: notes ?? this.notes,
       birdCount: birdCount ?? this.birdCount,
       weightKg: weightKg ?? this.weightKg,
+      harvestId: harvestId ?? this.harvestId,
       createdAt: createdAt ?? this.createdAt,
     );
   }

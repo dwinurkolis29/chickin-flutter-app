@@ -16,6 +16,7 @@ void main() {
         notes: 'Penjualan ke bakul A',
         birdCount: 2000,
         weightKg: 3800.5,
+        harvestId: 'harvest-001',
         createdAt: now,
       );
 
@@ -26,6 +27,7 @@ void main() {
       expect(json['amount'], 50000000.0);
       expect(json['birdCount'], 2000);
       expect(json['weightKg'], 3800.5);
+      expect(json['harvestId'], 'harvest-001');
       expect(json['notes'], 'Penjualan ke bakul A');
       expect(json['date'], isA<Timestamp>());
 
@@ -37,6 +39,7 @@ void main() {
       expect(parsed.amount, 50000000.0);
       expect(parsed.birdCount, 2000);
       expect(parsed.weightKg, 3800.5);
+      expect(parsed.harvestId, 'harvest-001');
       expect(parsed.notes, 'Penjualan ke bakul A');
       expect(parsed.isIncome, true);
       expect(parsed.isExpense, false);

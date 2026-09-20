@@ -300,6 +300,77 @@ class _ActivePeriodContentCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
+                    // Penjarangan Info Tile jika sudah ada panen parsial
+                    if (period.summary?.partialHarvests.isNotEmpty == true) ...[
+                      InkWell(
+                        onTap: () => DialogHelper.showPartialHarvestHistory(
+                          context,
+                          period: period,
+                          currentLiveChicks: livePopulasi,
+                        ),
+                        borderRadius: BorderRadius.circular(AppTheme.rowRadius),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: cs.secondaryContainer.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.rowRadius,
+                            ),
+                            border: Border.all(
+                              color: cs.primary.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: cs.primary.withValues(alpha: 0.12),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.scale_rounded,
+                                  size: 16,
+                                  color: cs.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${period.summary!.partialHarvests.length}x Penjarangan (${numFmt.format(period.summary!.totalPartialHarvestChicks)} ekor)',
+                                      style: tt.labelMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: cs.primary,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${numFmt.format(period.summary!.totalPartialHarvestWeightKg)} kg keluar • Ketuk lihat riwayat',
+                                      style: tt.bodySmall?.copyWith(
+                                        color: cs.onSurfaceVariant,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 18,
+                                color: cs.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
                     // Quick Action 1: Keuangan
                     FilledButton.tonalIcon(
                       onPressed: () {
