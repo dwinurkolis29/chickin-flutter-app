@@ -83,15 +83,19 @@ class _ActionPillButtonState extends State<ActionPillButton> {
                   ),
                   const SizedBox(width: 8),
                 ],
-                Text(
-                  widget.label,
-                  style: tt.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color:
-                        _isHovered
-                            ? cs.primary
-                            : cs.primary.withValues(alpha: 0.9),
-                    letterSpacing: 0.2,
+                Flexible(
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.labelMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color:
+                          _isHovered
+                              ? cs.primary
+                              : cs.primary.withValues(alpha: 0.9),
+                      letterSpacing: 0.2,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),

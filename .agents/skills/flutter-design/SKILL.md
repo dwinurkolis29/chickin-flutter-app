@@ -183,7 +183,19 @@ Gunakan `Theme.of(context).textTheme` — warna sudah resolved dari ColorScheme.
 
 ### 7. Charts & Growth Lists
 - **Label Sumbu Y**: Selalu tampilkan satuan gram yang jelas dan terformat (misal `1,000 g`), dengan `reservedSize: 56` agar angka tidak terpotong.
+- **Sticky Y-Axis & Dynamic Horizontal Scroll**:
+  - Pisahkan sumbu Y sebagai kolom tetap di sisi kiri (`SizedBox(width: 56, height: 220, child: LineChart(...))`) dengan garis grafik transparan dan `reservedSize: 28` pada sumbu bawah kosong agar grid horizontal sejajar sempurna dengan area plot.
+  - Area plot dibungkus `Expanded` -> `SingleChildScrollView(controller: _chartScrollController, scrollDirection: Axis.horizontal, physics: const BouncingScrollPhysics())` dengan lebar minimal `(maxX * 28.0) + 24.0`.
+- **Auto-Scroll ke Data Terbaru**:
+  - Gunakan `_scrollToEnd()` di dalam `WidgetsBinding.instance.addPostFrameCallback` untuk `jumpTo(maxScrollExtent)` saat data pertama kali dimuat sehingga peternak langsung melihat perkembangan hari terkini tanpa harus menggeser manual dari hari awal.
+  - Kunci status auto-scroll setelah trigger pertama agar tooltip / touch interaction tidak mengembalikan posisi scroll ke kanan secara mendadak.
+- **Indikator Geser Edukatif**:
+  - Tampilkan pill badge bertema `"Geser"` (`Icons.swap_horiz_rounded`) di header kartu saat mode scrollable aktif.
 - **Urutan Riwayat Harian**: Tampilkan data riwayat penimbangan harian secara **ascending** (Hari 1 / DOC teratas, bertambah ke bawah hingga hari terakhir), disertai badge pertambahan bobot harian (`+X g`).
+- **Layout Guard Anti-Overflow**:
+  - Semua teks judul dan tanggal pada baris riwayat harian wajib dibungkus `Expanded` / `Flexible` dengan `TextOverflow.ellipsis`.
+  - Teks metrik kenaikan bobot harian wajib dibungkus `Flexible(child: FittedBox(fit: BoxFit.scaleDown))` agar tidak overflow pada layar sempit ($\le 390\text{px}$).
+  - Label pada `ActionPillButton` wajib dibungkus `Flexible(child: Text(..., maxLines: 1, overflow: TextOverflow.ellipsis))`.
 
 ### 8. Icon Badges & Circular Wrappers
 - Semua pembungkus icon pendukung (pada header card, list tile, riwayat recording, info card) **WAJIB** menggunakan bentuk lingkaran:

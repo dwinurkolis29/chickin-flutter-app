@@ -50,10 +50,143 @@ void main() {
       expect(find.text('Belum Ada Data Penimbangan'), findsOneWidget);
     });
 
+    testWidgets('menampilkan metrik pertumbuhan dan kurva grafik jika ada data', (
+      tester,
+    ) async {
+      final sampleRecordings = [
+        RecordingData(
+          id: 'rec_1',
+          day: 1,
+          avgWeightGram: 45,
+          feedSack: 1,
+          mortality: 0,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+        RecordingData(
+          id: 'rec_2',
+          day: 7,
+          avgWeightGram: 180,
+          feedSack: 2,
+          mortality: 1,
+          createdAt: DateTime(2026, 1, 7),
+        ),
+        RecordingData(
+          id: 'rec_3',
+          day: 14,
+          avgWeightGram: 450,
+          feedSack: 3,
+          mortality: 0,
+          createdAt: DateTime(2026, 1, 14),
+        ),
+      ];
+
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        createWidgetUnderTest(recordings: sampleRecordings),
+      );
+      await tester.pumpAndSettle();
+
+      // Memastikan judul AppHeader tampil
+      expect(find.text('Pertumbuhan Bobot Ayam'), findsOneWidget);
+
+      // Memastikan kartu metrik ringkasan tampil
+      expect(find.text('Bobot Terakhir'), findsOneWidget);
+      expect(find.text('450'), findsOneWidget);
+      expect(find.text('Hari ke-14 (0.45 Kg)'), findsOneWidget);
+
+      // Memastikan kartu grafik tampil
+      expect(find.text('Kurva Pertumbuhan Bobot'), findsOneWidget);
+      expect(find.text('Umur 1 s.d. 14 Hari (Satuan Gram)'), findsOneWidget);
+
+      // Memastikan riwayat penimbangan harian tampil
+      expect(find.text('RIWAYAT KENAIKAN BOBOT'), findsOneWidget);
+      expect(find.text('3 Hari Catatan'), findsOneWidget);
+      expect(find.text('HARI 14'), findsOneWidget);
+      expect(find.text('HARI 7'), findsOneWidget);
+      expect(find.text('HARI 1'), findsOneWidget);
+      expect(find.text('Kenaikan Bobot'), findsWidgets);
+      expect(find.text('Bobot Timbang'), findsWidgets);
+
+      // Memastikan tombol navigasi Kalkulator Cepat tampil di paling bawah berbentuk ActionPillButton
+      expect(find.byType(ActionPillButton), findsOneWidget);
+      expect(find.text('Kalkulator Cepat (IP / ADG)'), findsOneWidget);
+      expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+    });
+
     testWidgets(
-      'menampilkan metrik pertumbuhan dan kurva grafik jika ada data',
+      'grafik mendukung horizontal scrolling dan menampilkan badge Geser ketika data > 25 hari',
       (tester) async {
-        final sampleRecordings = [
+        // Simulasi data pemeliharaan 35 hari (> 25 hari)
+        final longRecordings = List.generate(35, (index) {
+          final day = index + 1;
+          return RecordingData(
+            id: 'rec_$day',
+            day: day,
+            avgWeightGram:
+                45 + (day * 55), // Pertumbuhan bertahap hingga ~1970g
+            feedSack: 2,
+            mortality: 0,
+            createdAt: DateTime(2026, 1, day),
+          );
+        });
+
+        // Ukuran layar mobile umum (width 390, height 844)
+        tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(
+          createWidgetUnderTest(recordings: longRecordings),
+        );
+        await tester.pumpAndSettle();
+
+        // 1. Memastikan badge indikator "Geser" muncul di header grafik
+        expect(find.text('Geser'), findsOneWidget);
+        expect(find.byIcon(Icons.swap_horiz_rounded), findsOneWidget);
+
+        // 2. Memastikan terdapat SingleChildScrollView dengan scrollDirection horizontal
+        final horizontalScrollViewFinder = find.byWidgetPredicate(
+          (widget) =>
+              widget is SingleChildScrollView &&
+              widget.scrollDirection == Axis.horizontal,
+        );
+        expect(horizontalScrollViewFinder, findsOneWidget);
+
+        // 3. Memastikan grafik otomatis geser ke data paling kanan (maxScrollExtent) saat dibuka
+        final scrollWidget = tester.widget<SingleChildScrollView>(
+          horizontalScrollViewFinder,
+        );
+        final scrollController = scrollWidget.controller!;
+        expect(
+          scrollController.offset,
+          equals(scrollController.position.maxScrollExtent),
+        );
+        expect(scrollController.offset, greaterThan(0));
+
+        // 4. Memastikan Sumbu Y tetap menampilkan label bobot (Sticky)
+        expect(find.text('1,000 g'), findsWidgets);
+
+        // 5. Lakukan drag horizontal ke kanan (scroll kembali ke hari-hari awal)
+        await tester.drag(horizontalScrollViewFinder, const Offset(300, 0));
+        await tester.pumpAndSettle();
+
+        // Verifikasi scroll offset berkurang setelah digeser ke kiri/hari awal
+        expect(
+          scrollController.offset,
+          lessThan(scrollController.position.maxScrollExtent),
+        );
+        expect(find.text('Geser'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'grafik tidak menampilkan badge Geser jika data sedikit (<= 7 hari)',
+      (tester) async {
+        final shortRecordings = [
           RecordingData(
             id: 'rec_1',
             day: 1,
@@ -63,58 +196,26 @@ void main() {
             createdAt: DateTime(2026, 1, 1),
           ),
           RecordingData(
-            id: 'rec_2',
+            id: 'rec_7',
             day: 7,
-            avgWeightGram: 180,
-            feedSack: 2,
-            mortality: 1,
-            createdAt: DateTime(2026, 1, 7),
-          ),
-          RecordingData(
-            id: 'rec_3',
-            day: 14,
-            avgWeightGram: 450,
-            feedSack: 3,
+            avgWeightGram: 190,
+            feedSack: 1,
             mortality: 0,
-            createdAt: DateTime(2026, 1, 14),
+            createdAt: DateTime(2026, 1, 7),
           ),
         ];
 
-        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.physicalSize = const Size(390 * 2, 844 * 2);
         tester.view.devicePixelRatio = 2.0;
         addTearDown(tester.view.resetPhysicalSize);
 
         await tester.pumpWidget(
-          createWidgetUnderTest(recordings: sampleRecordings),
+          createWidgetUnderTest(recordings: shortRecordings),
         );
         await tester.pumpAndSettle();
 
-        // Memastikan judul AppHeader tampil
-        expect(find.text('Pertumbuhan Bobot Ayam'), findsOneWidget);
-
-        // Memastikan kartu metrik ringkasan tampil
-        expect(find.text('Bobot Terakhir'), findsOneWidget);
-        expect(find.text('450'), findsOneWidget);
-        expect(find.text('Hari ke-14 (0.45 Kg)'), findsOneWidget);
-
-        // Memastikan kartu grafik tampil
-        expect(find.text('Kurva Pertumbuhan Bobot'), findsOneWidget);
-        expect(find.text('Umur 1 s.d. 14 Hari (Satuan Gram)'), findsOneWidget);
-
-        // Memastikan riwayat penimbangan harian tampil
-        expect(find.text('RIWAYAT KENAIKAN BOBOT'), findsOneWidget);
-        expect(find.text('3 Hari Catatan'), findsOneWidget);
-        expect(find.text('HARI 14'), findsOneWidget);
-        expect(find.text('HARI 7'), findsOneWidget);
-        expect(find.text('HARI 1'), findsOneWidget);
-        expect(find.text('Kenaikan Bobot'), findsWidgets);
-        expect(find.text('Bobot Timbang'), findsWidgets);
-
-        // Memastikan tombol navigasi Kalkulator Cepat tampil di paling bawah berbentuk ActionPillButton
-        expect(find.byType(ActionPillButton), findsOneWidget);
-        expect(find.text('Kalkulator Cepat (IP / ADG)'), findsOneWidget);
-        expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
-        expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
+        // Memastikan badge "Geser" TIDAK muncul karena muat di layar
+        expect(find.text('Geser'), findsNothing);
       },
     );
   });

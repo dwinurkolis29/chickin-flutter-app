@@ -155,4 +155,17 @@
   - Sediakan tombol bantu cepat nominal (+100rb, +500rb, +1jt, +5jt, +10jt) untuk mempermudah peternak senior menginput angka besar tanpa mengetik banyak angka nol.
   - Live preview harga jual per kg ($\text{Rp} \div \text{kg}$) saat mencatat penjualan panen.
 
+## 16. Standar Grafik Timeline Panjang & Auto-Scroll
+
+- **Sticky Y-Axis untuk Grafik Harian**:
+  - Pada grafik pertumbuhan deret waktu (seperti kurva bobot ayam harian), sumbu Y (skala gram/satuan) **WAJIB** dibuat tetap (*sticky*) di sisi kiri kartu selebar `56.0dp`.
+  - Dilarang membiarkan sumbu Y ikut tergeser keluar layar saat grafik di-scroll.
+- **Dynamic Horizontal Scroll**:
+  - Alokasikan ruang minimal $\ge 28.0\text{dp}$ per hari.
+  - Data sedikit ($\le 7$ hari): Grafik otomatis memenuhi lebar kartu (*full width*).
+  - Data panjang ($> 15$–$25$ hari): Area plot memanjang dinamis dan dibungkus `SingleChildScrollView(scrollDirection: Axis.horizontal, physics: const BouncingScrollPhysics())`.
+- **Auto-Scroll ke Data Paling Kanan**:
+  - Saat layar grafik pertama kali dibuka dengan data panjang, grafik **WAJIB** otomatis bergeser langsung ke data paling kanan (`maxScrollExtent`) via `WidgetsBinding.instance.addPostFrameCallback`.
+  - Kunci status auto-scroll setelah trigger pertama agar interaksi titik kurva (tooltip) tidak mengembalikan posisi scroll ke kanan secara mendadak.
+
 

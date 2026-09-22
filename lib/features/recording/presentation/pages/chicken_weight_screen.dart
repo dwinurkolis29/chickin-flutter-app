@@ -25,6 +25,10 @@ class ChickenWeightScreen extends StatefulWidget {
 }
 
 class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
+  final ScrollController _chartScrollController = ScrollController();
+  bool _hasAutoScrolled = false;
+  int _lastRecordingsCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +37,29 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
         context.read<RecordingController>().loadActivePeriod();
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _chartScrollController.dispose();
+    super.dispose();
+  }
+
+  /// Otomatis geser grafik ke data paling kanan (hari terbaru) saat screen pertama kali dibuka.
+  void _scrollToEnd(int currentCount) {
+    if (currentCount != _lastRecordingsCount) {
+      _hasAutoScrolled = false;
+      _lastRecordingsCount = currentCount;
+    }
+    if (_hasAutoScrolled) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_chartScrollController.hasClients) return;
+      final maxScroll = _chartScrollController.position.maxScrollExtent;
+      if (maxScroll > 0) {
+        _chartScrollController.jumpTo(maxScroll);
+        _hasAutoScrolled = true;
+      }
+    });
   }
 
   @override
@@ -82,6 +109,8 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
         onAction: () => Navigator.pop(context),
       );
     }
+
+    _scrollToEnd(validRecordings.length);
 
     // Perhitungan statistik pertumbuhan
     final firstRecording = validRecordings.first;
@@ -324,7 +353,7 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
     );
   }
 
-  /// Kartu grafik lengkap dengan styling FlChart Material 3 Vivid Blue.
+  /// Kartu grafik lengkap dengan styling FlChart Material 3 Vivid Blue dan dukungan horizontal scroll.
   Widget _buildChartCard({
     required BuildContext context,
     required ColorScheme cs,
@@ -335,190 +364,316 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
     required List<RecordingData> validRecordings,
   }) {
     final numberFmt = NumberFormat('#,###');
-
-    // Interval title sumbu X (Hari)
-    final double xInterval = maxX <= 7 ? 1.0 : (maxX <= 21 ? 3.0 : 7.0);
+    final double yInterval = maxY > 1000 ? 500 : 200;
+    const double yAxisWidth = 56.0;
 
     return AppCard(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableWidth = constraints.maxWidth;
+          final availablePlotWidth = (availableWidth - yAxisWidth).clamp(
+            100.0,
+            double.infinity,
+          );
+
+          // Berikan ruang minimal ~28dp per hari agar titik penimbangan tidak bertumpuk/menyempit
+          const double dayWidth = 28.0;
+          final double calculatedPlotWidth = (maxX * dayWidth) + 24.0;
+          final bool isScrollable = calculatedPlotWidth > availablePlotWidth;
+          final double plotWidth =
+              isScrollable ? calculatedPlotWidth : availablePlotWidth;
+
+          // Interval title sumbu X (Hari)
+          final double xInterval =
+              !isScrollable
+                  ? (maxX <= 7 ? 1.0 : (maxX <= 21 ? 3.0 : 7.0))
+                  : (maxX <= 14 ? 1.0 : 2.0);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: cs.secondaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.show_chart_rounded,
-                  size: 20,
-                  color: cs.primary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Kurva Pertumbuhan Bobot',
-                      style: tt.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.secondaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.show_chart_rounded,
+                      size: 20,
+                      color: cs.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Kurva Pertumbuhan Bobot',
+                          style: tt.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Umur 1 s.d. ${validRecordings.last.day} Hari (Satuan Gram)',
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isScrollable) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.secondaryContainer.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.pillRadius,
+                        ),
+                        border: Border.all(
+                          color: cs.primary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.swap_horiz_rounded,
+                            size: 14,
+                            color: cs.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Geser',
+                            style: tt.labelSmall?.copyWith(
+                              color: cs.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Umur 1 s.d. ${validRecordings.last.day} Hari (Satuan Gram)',
-                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Area LineChart dengan Sticky Sumbu Y dan Scrollable Plot
+              SizedBox(
+                height: 220,
+                child: Row(
+                  children: [
+                    // Sumbu Y Tetap (Sticky Y-Axis) di sisi kiri
+                    SizedBox(
+                      width: yAxisWidth,
+                      height: 220,
+                      child: LineChart(
+                        LineChartData(
+                          minX: 0,
+                          maxX: 1,
+                          minY: 0,
+                          maxY: maxY,
+                          gridData: const FlGridData(show: false),
+                          borderData: FlBorderData(show: false),
+                          titlesData: FlTitlesData(
+                            show: true,
+                            topTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            bottomTitles: const AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                                reservedSize: 28,
+                              ),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: yAxisWidth,
+                                interval: yInterval,
+                                getTitlesWidget: (value, meta) {
+                                  if (value == 0) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Text(
+                                    '${numberFmt.format(value.toInt())} g',
+                                    style: tt.bodySmall?.copyWith(
+                                      fontSize: 10,
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          lineBarsData: const [],
+                          lineTouchData: const LineTouchData(enabled: false),
+                        ),
+                      ),
+                    ),
+
+                    // Area Plot Grafik yang dapat digeser secara horizontal
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: _chartScrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: SizedBox(
+                          width: plotWidth,
+                          height: 220,
+                          child: LineChart(
+                            LineChartData(
+                              minX: 1,
+                              maxX: maxX,
+                              minY: 0,
+                              maxY: maxY,
+                              gridData: FlGridData(
+                                show: true,
+                                drawVerticalLine: false,
+                                horizontalInterval: yInterval,
+                                getDrawingHorizontalLine:
+                                    (value) => FlLine(
+                                      color: cs.outlineVariant.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      strokeWidth: 1,
+                                      dashArray: [4, 4],
+                                    ),
+                              ),
+                              titlesData: FlTitlesData(
+                                show: true,
+                                topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                rightTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                leftTitles: const AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: false,
+                                    reservedSize: 8,
+                                  ),
+                                ),
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 28,
+                                    interval: xInterval,
+                                    getTitlesWidget: (value, meta) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 6),
+                                        child: Text(
+                                          'H${value.toInt()}',
+                                          style: tt.bodySmall?.copyWith(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              borderData: FlBorderData(show: false),
+                              lineTouchData: LineTouchData(
+                                enabled: true,
+                                touchTooltipData: LineTouchTooltipData(
+                                  getTooltipColor: (_) => cs.inverseSurface,
+                                  tooltipPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  getTooltipItems: (touchedSpots) {
+                                    return touchedSpots.map((barSpot) {
+                                      return LineTooltipItem(
+                                        'Hari ${barSpot.x.toInt()}\n',
+                                        tt.bodySmall?.copyWith(
+                                              color: cs.onInverseSurface
+                                                  .withValues(alpha: 0.8),
+                                              fontSize: 11,
+                                            ) ??
+                                            const TextStyle(),
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                '${numberFmt.format(barSpot.y.toInt())} Gram',
+                                            style: tt.titleSmall?.copyWith(
+                                              color: cs.onInverseSurface,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                              ),
+                              lineBarsData: [
+                                LineChartBarData(
+                                  spots: spots,
+                                  isCurved: true,
+                                  curveSmoothness: 0.3,
+                                  color: cs.primary,
+                                  barWidth: 3.5,
+                                  isStrokeCapRound: true,
+                                  dotData: FlDotData(
+                                    show: true,
+                                    getDotPainter: (
+                                      spot,
+                                      percent,
+                                      barData,
+                                      index,
+                                    ) {
+                                      return FlDotCirclePainter(
+                                        radius: 4.0,
+                                        color: cs.surface,
+                                        strokeWidth: 2.5,
+                                        strokeColor: cs.primary,
+                                      );
+                                    },
+                                  ),
+                                  belowBarData: BarAreaData(
+                                    show: true,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        cs.primary.withValues(alpha: 0.25),
+                                        cs.primary.withValues(alpha: 0.0),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 24),
-
-          // Area LineChart
-          SizedBox(
-            height: 220,
-            child: LineChart(
-              LineChartData(
-                minX: 1,
-                maxX: maxX,
-                minY: 0,
-                maxY: maxY,
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: maxY > 1000 ? 500 : 200,
-                  getDrawingHorizontalLine:
-                      (value) => FlLine(
-                        color: cs.outlineVariant.withValues(alpha: 0.5),
-                        strokeWidth: 1,
-                        dashArray: [4, 4],
-                      ),
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 56,
-                      interval: maxY > 1000 ? 500 : 200,
-                      getTitlesWidget: (value, meta) {
-                        if (value == 0) return const SizedBox.shrink();
-                        return Text(
-                          '${numberFmt.format(value.toInt())} g',
-                          style: tt.bodySmall?.copyWith(
-                            fontSize: 10,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 28,
-                      interval: xInterval,
-                      getTitlesWidget: (value, meta) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(
-                            'H${value.toInt()}',
-                            style: tt.bodySmall?.copyWith(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                lineTouchData: LineTouchData(
-                  enabled: true,
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => cs.inverseSurface,
-                    tooltipPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((barSpot) {
-                        return LineTooltipItem(
-                          'Hari ${barSpot.x.toInt()}\n',
-                          tt.bodySmall?.copyWith(
-                                color: cs.onInverseSurface.withValues(
-                                  alpha: 0.8,
-                                ),
-                                fontSize: 11,
-                              ) ??
-                              const TextStyle(),
-                          children: [
-                            TextSpan(
-                              text:
-                                  '${numberFmt.format(barSpot.y.toInt())} Gram',
-                              style: tt.titleSmall?.copyWith(
-                                color: cs.onInverseSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList();
-                    },
-                  ),
-                ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    curveSmoothness: 0.3,
-                    color: cs.primary,
-                    barWidth: 3.5,
-                    isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: 4.0,
-                          color: cs.surface,
-                          strokeWidth: 2.5,
-                          strokeColor: cs.primary,
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          cs.primary.withValues(alpha: 0.25),
-                          cs.primary.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -539,14 +694,19 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'RIWAYAT KENAIKAN BOBOT',
-              style: tt.labelMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
-                color: cs.primary,
+            Expanded(
+              child: Text(
+                'RIWAYAT KENAIKAN BOBOT',
+                style: tt.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                  color: cs.primary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               '${dailyAdgList.length} Hari Catatan',
               style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
@@ -602,38 +762,45 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(
-                          AppTheme.pillRadius,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.pillRadius,
+                          ),
+                        ),
+                        child: Text(
+                          'HARI ${item.day}',
+                          style: tt.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        'HARI ${item.day}',
-                        style: tt.labelSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: cs.onSurface,
-                          letterSpacing: 0.5,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          dateFmt.format(item.date),
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      dateFmt.format(item.date),
-                      style: tt.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -678,12 +845,17 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                             color: statusColor,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            '+${item.dailyGainGram.toStringAsFixed(0)} g/hari',
-                            style: tt.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: statusColor,
-                              fontSize: 18,
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '+${item.dailyGainGram.toStringAsFixed(0)} g/hari',
+                                style: tt.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  color: statusColor,
+                                  fontSize: 18,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -703,12 +875,15 @@ class _ChickenWeightScreenState extends State<ChickenWeightScreen> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        '${numFmt.format(item.weightGram)} gram',
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: cs.onSurface,
-                          fontSize: 16,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${numFmt.format(item.weightGram)} gram',
+                          style: tt.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurface,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
